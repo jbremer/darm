@@ -1,0 +1,413 @@
+ADC (immediate)
+ADC (register)
+ADC (register-shifted register)
+ADD (immediate, Thumb)
+ADD (immediate, ARM)
+ADD (register)
+ADD (register-shifted register)
+ADD (SP plus immediate)
+ADD (SP plus register)
+ADR
+AND (immediate)
+AND (register)
+AND (register-shifted register)
+ASR (immediate)
+ASR (register)
+B
+BFC
+BFI
+BIC (immediate)
+BIC (register)
+BIC (register-shifted register)
+BKPT
+BL, BLX (immediate)
+BLX (register)
+BX
+BXJ
+CBNZ, CBZ
+CDP, CDP2
+CHKA
+CLREX
+CLZ
+CMN (immediate)
+CMN (register)
+CMN (register-shifted register)
+CMP (immediate)
+CMP (register)
+CMP (register-shifted register)
+CPS
+CPY
+DBG
+DMB
+DSB
+ENTERX
+EOR (immediate)
+EOR (register)
+EOR (register-shifted register)
+F* (former VFP instruction mnemonics)
+HB, HBL, HBLP, HBP
+ISB
+IT
+LDC, LDC2 (immediate)
+LDC, LDC2 (literal)
+LDM / LDMIA / LDMFD
+LDMDA / LDMFA
+LDMDB / LDMEA
+LDMIB / LDMED
+LDR (immediate, Thumb)
+LDR (immediate, ARM)
+LDR (literal)
+LDR (register)
+LDRB (immediate, Thumb)
+LDRB (immediate, ARM)
+LDRB (literal)
+LDRB (register)
+LDRBT
+LDRD (immediate)
+LDRD (literal)
+LDRD (register)
+LDREX
+LDREXB
+LDREXD
+LDREXH
+LDRH (immediate, Thumb)
+LDRH (immediate, ARM)
+LDRH (literal)
+LDRH (register)
+LDRHT
+LDRSB (immediate)
+LDRSB (literal)
+LDRSB (register)
+LDRSBT
+LDRSH (immediate)
+LDRSH (literal)
+LDRSH (register)
+LDRSHT
+LDRT
+LEAVEX
+LSL (immediate)
+LSL (register)
+LSR (immediate)
+LSR (register)
+MCR, MCR2
+MCRR, MCRR2
+MLA
+MLS
+MOV (immediate)
+MOV (register)
+MOV (shifted register)
+MOVT
+MRC, MRC2
+MRRC, MRRC2
+MRS
+MSR (immediate)
+MSR (register)
+MUL
+MVN (immediate)
+MVN (register)
+MVN (register-shifted register)
+NEG
+NOP
+ORN (immediate)
+ORN (register)
+ORR (immediate)
+ORR (register)
+ORR (register-shifted register)
+PKH
+PLD, PLDW (immediate)
+PLD (literal)
+PLD, PLDW (register)
+PLI (immediate, literal)
+PLI (register)
+POP
+PUSH
+QADD
+QADD16
+QADD8
+QASX
+QDADD
+QDSUB
+QSAX
+QSUB
+QSUB16
+QSUB8
+RBIT
+REV
+REV16
+REVSH
+RFE
+ROR (immediate)
+ROR (register)
+RRX
+RSB (immediate)
+RSB (register)
+RSB (register-shifted register)
+RSC (immediate)
+RSC (register)
+RSC (register-shifted register)
+SADD16
+SADD8
+SASX
+SBC (immediate)
+SBC (register)
+SBC (register-shifted register)
+SBFX
+SDIV
+SEL
+SETEND
+SEV
+SHADD16
+SHADD8
+SHASX
+SHSAX
+SHSUB16
+SHSUB8
+SMC (previously SMI)
+SMLABB, SMLABT, SMLATB, SMLATT
+SMLAD
+SMLAL
+SMLALBB, SMLALBT, SMLALTB, SMLALTT
+SMLALD
+SMLAWB, SMLAWT
+SMLSD
+SMLSLD
+SMMLA
+SMMLS
+SMMUL
+SMUAD
+SMULBB, SMULBT, SMULTB, SMULTT
+SMULL
+SMULWB, SMULWT
+SMUSD
+SRS
+SSAT
+SSAT16
+SSAX
+SSUB16
+SSUB8
+STC, STC2
+STM / STMIA / STMEA
+STMDA / STMED
+STMDB / STMFD
+STMIB / STMFA
+STR (immediate, Thumb)
+STR (immediate, ARM)
+STR (register)
+STRB (immediate, Thumb)
+STRB (immediate, ARM)
+STRB (register)
+STRBT
+STRD (immediate)
+STRD (register)
+STREX
+STREXB
+STREXD
+STREXH
+STRH (immediate, Thumb)
+STRH (immediate, ARM)
+STRH (register)
+STRHT
+STRT
+SUB (immediate, Thumb)
+SUB (immediate, ARM)
+SUB (register)
+SUB (register-shifted register)
+SUB (SP minus immediate)
+SUB (SP minus register)
+SUBS PC, LR and related instructions
+SVC (previously SWI)
+SWP, SWPB
+SXTAB
+SXTAB16
+SXTAH
+SXTB
+SXTB16
+SXTH
+TBB, TBH
+TEQ (immediate)
+TEQ (register)
+TEQ (register-shifted register)
+TST (immediate)
+TST (register)
+TST (register-shifted register)
+UADD16
+UADD8
+UASX
+UBFX
+UDIV
+UHADD16
+UHADD8
+UHASX
+UHSAX
+UHSUB16
+UHSUB8
+UMAAL
+UMLAL
+UMULL
+UQADD16
+UQADD8
+UQASX
+UQSAX
+UQSUB16
+UQSUB8
+USAD8
+USADA8
+USAT
+USAT16
+USAX
+USUB16
+USUB8
+UXTAB
+UXTAB16
+UXTAH
+UXTB
+UXTB16
+UXTH
+VABA, VABAL
+VABD, VABDL (integer)
+VABD (floating-point)
+VABS
+VACGE, VACGT, VACLE,VACLT
+VADD (integer)
+VADD (floating-point)
+VADDHN
+VADDL, VADDW
+VAND (immediate)
+VAND (register)
+VBIC (immediate)
+VBIC (register)
+VBIF, VBIT, VBSL
+VCEQ (register)
+VCEQ (immediate #0)
+VCGE (register)
+VCGE (immediate #0)
+VCGT (register)
+VCGT (immediate #0)
+VCLE (register)
+VCLE (immediate #0)
+VCLS
+VCLT (register)
+VCLT (immediate #0)
+VCLZ
+VCMP, VCMPE
+VCNT
+VCVT (between floating-point and integer, Advanced SIMD)
+VCVT, VCVTR (between floating-point and integer, VFP)
+VCVT (between floating-point and fixed-point, Advanced SIMD)
+VCVT (between floating-point and fixed-point, VFP)
+VCVT (between double-precision and single-precision)
+VCVT (between half-precision and single-precision, Advanced SIMD)
+VCVTB, VCVTT (between half-precision and single-precision, VFP)
+VDIV
+VDUP (scalar)
+VDUP (ARM core register)
+VEOR
+VEXT
+VHADD, VHSUB
+VLD1 (multiple single elements)
+VLD1 (single element to one lane)
+VLD1 (single element to all lanes)
+VLD2 (multiple 2-element structures)
+VLD2 (single 2-element structure to one lane)
+VLD2 (single 2-element structure to all lanes)
+VLD3 (multiple 3-element structures)
+VLD3 (single 3-element structure to one lane)
+VLD3 (single 3-element structure to all lanes)
+VLD4 (multiple 4-element structures)
+VLD4 (single 4-element structure to one lane)
+VLD4 (single 4-element structure to all lanes)
+VLDM
+VLDR
+VMAX, VMIN (integer)
+VMAX, VMIN (floating-point)
+VMLA, VMLAL, VMLS, VMLSL (integer)
+VMLA, VMLS (floating-point)
+VMLA, VMLAL, VMLS, VMLSL (by scalar)
+VMOV (immediate)
+VMOV (register)
+VMOV (ARM core register to scalar)
+VMOV (scalar to ARM core register)
+VMOV (between ARM core register and single-precision register)
+VMOV (between two ARM core registers and two single-precision registers)
+VMOV (between two ARM core registers and a doubleword extension register)
+VMOVL
+VMOVN
+VMRS
+VMSR
+VMUL, VMULL (integer and polynomial)
+VMUL (floating-point)
+VMUL, VMULL (by scalar)
+VMVN (immediate)
+VMVN (register)
+VNEG
+VNMLA, VNMLS, VNMUL
+VORN (immediate)
+VORN (register)
+VORR (immediate)
+VORR (register)
+VPADAL
+VPADD (integer)
+VPADD (floating-point)
+VPADDL
+VPMAX, VPMIN (integer)
+VPMAX, VPMIN (floating-point)
+VPOP
+VPUSH
+VQABS
+VQADD
+VQDMLAL, VQDMLSL
+VQDMULH
+VQDMULL
+VQMOVN, VQMOVUN
+VQNEG
+VQRDMULH
+VQRSHL
+VQRSHRN, VQRSHRUN
+VQSHL (register)
+VQSHL, VQSHLU (immediate)
+VQSHRN, VQSHRUN
+VQSUB
+VRADDHN
+VRECPE
+VRECPS
+VREV16, VREV32, VREV64
+VRHADD
+VRSHL
+VRSHR
+VRSHRN
+VRSQRTE
+VRSQRTS
+VRSRA
+VRSUBHN
+VSHL (immediate)
+VSHL (register)
+VSHLL
+VSHR
+VSHRN
+VSLI
+VSQRT
+VSRA
+VSRI
+VST1 (multiple single elements)
+VST1 (single element from one lane)
+VST2 (multiple 2-element structures)
+VST2 (single 2-element structure from one lane)
+VST3 (multiple 3-element structures)
+VST3 (single 3-element structure from one lane)
+VST4 (multiple 4-element structures)
+VST4 (single 4-element structure from one lane)
+VSTM
+VSTR
+VSUB (integer)
+VSUB (floating-point)
+VSUBHN
+VSUBL, VSUBW
+VSWP
+VTBL, VTBX
+VTRN
+VTST
+VUZP
+VZIP
+WFE
+WFI
+YIELD
