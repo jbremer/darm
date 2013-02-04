@@ -41,8 +41,9 @@ N = Immediate('N', 1, 'High 16bits for Rn')
 RdHi = Immediate('RdHi', 4, 'High 32bits for Rd')
 RdLo = Immediate('RdLo', 4, 'Low 32bits for Rd')
 R = Immediate('R', 1, 'Round Integer')
-sat_imm = Immediate('sat_imm', 5, 'Saturate Immediate')
-sh = Immediate('sh', 2, 'Immediate Shift')
+sat_imm4 = Immediate('sat_imm4', 4, 'Saturate Immediate')
+sat_imm5 = Immediate('sat_imm5', 5, 'Saturate Immediate')
+sh = Immediate('sh', 1, 'Immediate Shift Value')
 
 imm4 = Immediate('imm4', 4, 'Immediate')
 imm5 = Immediate('imm5', 5, 'Immediate')
@@ -86,12 +87,12 @@ ARMv7 = [
     ('CMP<c> <Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 1, 0, 1, 0, 1, Rn, (0), (0), (0), (0), imm5, type_, 0, Rm),
     ('CMP<c> <Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 1, 0, 1, 0, 1, Rn, (0), (0), (0), (0), Rs, 0, type_, 1, Rm),
     ('DBG<c> #<option>', cond, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 1, 1, 1, 1, option),
-    ('DMB #<option>', 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 1, 0, 1),
-    ('DSB #<option>', 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 1, 0, 0),
+    ('DMB #<option>', 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 1, 0, 1, option),
+    ('DSB #<option>', 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 1, 0, 0, option),
     ('EOR{S}<c> <Rd>,<Rn>,#<const>', cond, 0, 0, 1, 0, 0, 0, 1, S, Rn, Rd, imm12),
     ('EOR{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 0, 0, 1, S, Rn, Rd, imm5, type_, 0, Rm),
     ('EOR{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 0, 0, 0, 1, S, Rn, Rd, Rs, 0, type_, 1, Rm),
-    ('ISB #<option>', 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 1, 1, 0),
+    ('ISB #<option>', 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 1, 1, 0, option),
     ('LDM<c> <Rn>{!},<registers>', cond, 1, 0, 0, 0, 1, 0, W, 1, Rn, register_list),
     ('LDMDA<c> <Rn>{!},<registers>', cond, 1, 0, 0, 0, 0, 0, W, 1, Rn, register_list),
     ('LDMDB<c> <Rn>{!},<registers>', cond, 1, 0, 0, 1, 0, 0, W, 1, Rn, register_list),
@@ -180,8 +181,8 @@ ARMv7 = [
     ('SMULL{S}<c> <RdLo>,<RdHi>,<Rn>,<Rm>', cond, 0, 0, 0, 0, 1, 1, 0, S, RdHi, RdLo, Rm, 1, 0, 0, 1, Rn),
     ('SMULW<y><c> <Rd>,<Rn>,<Rm>', cond, 0, 0, 0, 1, 0, 0, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, M, 1, 0, Rn),
     ('SMUSD{X}<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, 1, 1, 1, 1, Rm, 0, 1, M, 1, Rn),
-    ('SSAT<c> <Rd>,#<imm>,<Rn>{,<shift>}', cond, 0, 1, 1, 0, 1, 0, 1, sat_imm, Rd, imm5, sh, 0, 1, Rn),
-    ('SSAT16<c> <Rd>,#<imm>,<Rn>', cond, 0, 1, 1, 0, 1, 0, 1, 0, sat_imm, Rd, (1), (1), (1), (1), 0, 0, 1, 1, Rn),
+    ('SSAT<c> <Rd>,#<imm>,<Rn>{,<shift>}', cond, 0, 1, 1, 0, 1, 0, 1, sat_imm5, Rd, imm5, sh, 0, 1, Rn),
+    ('SSAT16<c> <Rd>,#<imm>,<Rn>', cond, 0, 1, 1, 0, 1, 0, 1, 0, sat_imm4, Rd, (1), (1), (1), (1), 0, 0, 1, 1, Rn),
     ('SSAX<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 0, 1, Rm),
     ('SSUB16<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 1, 1, Rm),
     ('SSUB8<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 1, 1, 1, 1, Rm),
@@ -234,8 +235,8 @@ ARMv7 = [
     ('UQSUB8<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 1, 1, 0, Rn, Rd, (1), (1), (1), (1), 1, 1, 1, 1, Rm),
     ('USAD8<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 1, 1, 0, 0, 0, Rd, 1, 1, 1, 1, Rm, 0, 0, 0, 1, Rn),
     ('USADA8<c> <Rd>,<Rn>,<Rm>,<Ra>', cond, 0, 1, 1, 1, 1, 0, 0, 0, Rd, Ra, Rm, 0, 0, 0, 1, Rn),
-    ('USAT<c> <Rd>,#<imm5>,<Rn>{,<shift>}', cond, 0, 1, 1, 0, 1, 1, 1, sat_imm, Rd, imm5, sh, 0, 1, Rn),
-    ('USAT16<c> <Rd>,#<imm4>,<Rn>', cond, 0, 1, 1, 0, 1, 1, 1, 0, sat_imm, Rd, (1), (1), (1), (1), 0, 0, 1, 1, Rn),
+    ('USAT<c> <Rd>,#<imm5>,<Rn>{,<shift>}', cond, 0, 1, 1, 0, 1, 1, 1, sat_imm5, Rd, imm5, sh, 0, 1, Rn),
+    ('USAT16<c> <Rd>,#<imm4>,<Rn>', cond, 0, 1, 1, 0, 1, 1, 1, 0, sat_imm4, Rd, (1), (1), (1), (1), 0, 0, 1, 1, Rn),
     ('USAX<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 1, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 0, 1, Rm),
     ('USUB16<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 1, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 1, 1, Rm),
     ('USUB8<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 1, 0, 1, Rn, Rd, (1), (1), (1), (1), 1, 1, 1, 1, Rm),
@@ -251,3 +252,12 @@ ARMv7 = [
     ('MRS<c> <Rd>,<spec_reg>', cond, 0, 0, 0, 1, 0, R, 0, 0, (1), (1), (1), (1), Rd, (0), (0), (0), (0), 0, 0, 0, 0, (0), (0), (0), (0)),
     ('SMC<c> #<imm4>', cond, 0, 0, 0, 1, 0, 1, 1, 0, (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), 0, 1, 1, 1, imm4),
 ]
+
+if __name__ == '__main__':
+    for description in ARMv7:
+        instr = description[0]
+        bits = description[1:]
+
+        bits = [1 if type(x) == int else x.bitsize for x in bits]
+        if sum(bits) != 32:
+            print instr, bits, sum(bits)
