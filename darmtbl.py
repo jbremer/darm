@@ -44,6 +44,16 @@ R = Immediate('R', 1, 'Round Integer')
 sat_imm4 = Immediate('sat_imm4', 4, 'Saturate Immediate')
 sat_imm5 = Immediate('sat_imm5', 5, 'Saturate Immediate')
 sh = Immediate('sh', 1, 'Immediate Shift Value')
+opc1 = Immediate('opc1', 4, 'Coprocessor Undefined #1')
+opc2 = Immediate('opc2', 4, 'Coprocessor Undefined #2')
+CRn = Immediate('CRn', 4, 'Coprocessor Undefined #3')
+CRd = Immediate('CRd', 4, 'Coprocessor Undefined #4')
+coproc = Immediate('coproc', 4, 'Coprocessor Undefined #5')
+CRm = Immediate('CRm', 4, 'Coprocessor Undefined #6')
+U = Immediate('U', 1, 'Addition flag for PLD')
+P = Immediate('P', 1, 'Protected Mode Flag?')
+imm4H = Immediate('imm4H', 4, 'High Word Register')
+imm4L = Immediate('imm4L', 4, 'Low Word Register')
 
 imm4 = Immediate('imm4', 4, 'Immediate')
 imm5 = Immediate('imm5', 5, 'Immediate')
@@ -78,6 +88,8 @@ ARMv7 = [
     ('BLX<c> <Rm>', cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 1, 1, Rm),
     ('BX<c> Rm', cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 0, 1, Rm),
     ('BXJ<c> <Rm>', cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 1, 0, Rm),
+    ('CDP<c> <coproc>,<opc1>,<CRd>,<CRn>,<CRm>,<opc2>', cond, 1, 1, 1, 0, opc1, CRn, CRd, coproc, opc2, 0, CRm),
+    ('CDP2<c> <coproc>,<opc1>,<CRd>,<CRn>,<CRm>,<opc2>', 1, 1, 1, 1, 1, 1, 1, 0, opc1, CRn, CRd, coproc, opc2, 0, CRm),
     ('CLREX', 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 1, (1), (1), (1), (1)),
     ('CLZ<c> <Rd>,<Rm>', cond, 0, 0, 0, 1, 0, 1, 1, 0, (1), (1), (1), (1), Rd, (1), (1), (1), (1), 0, 0, 0, 1, Rm),
     ('CMN<c> <Rn>,#<const>', cond, 0, 0, 1, 1, 0, 1, 1, 1, Rn, (0), (0), (0), (0), imm12),
@@ -93,10 +105,12 @@ ARMv7 = [
     ('EOR{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 0, 0, 1, S, Rn, Rd, imm5, type_, 0, Rm),
     ('EOR{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 0, 0, 0, 1, S, Rn, Rd, Rs, 0, type_, 1, Rm),
     ('ISB #<option>', 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 1, 1, 0, option),
+    # TODO LDC, LDC2
     ('LDM<c> <Rn>{!},<registers>', cond, 1, 0, 0, 0, 1, 0, W, 1, Rn, register_list),
     ('LDMDA<c> <Rn>{!},<registers>', cond, 1, 0, 0, 0, 0, 0, W, 1, Rn, register_list),
     ('LDMDB<c> <Rn>{!},<registers>', cond, 1, 0, 0, 1, 0, 0, W, 1, Rn, register_list),
     ('LDMIB<c> <Rn>{!},<registers>', cond, 1, 0, 0, 1, 1, 0, W, 1, Rn, register_list),
+    # TODO LDR, LDRB, LDRBT, LDRD, LDRH, LDRHT, LDRSB, LDRSBT, LDRSBT, LDRSH, LDRSHT, LDRT
     ('LDREX<c> <Rt>,[<Rn>]', cond, 0, 0, 0, 1, 1, 0, 0, 1, Rn, Rt, (1), (1), (1), (1), 1, 0, 0, 1, (1), (1), (1), (1)),
     ('LDREXB<c> <Rt>, [<Rn>]', cond, 0, 0, 0, 1, 1, 1, 0, 1, Rn, Rt, (1), (1), (1), (1), 1, 0, 0, 1, (1), (1), (1), (1)),
     ('LDREXD<c> <Rt>,<Rt2>,[<Rn>]', cond, 0, 0, 0, 1, 1, 0, 1, 1, Rn, Rt, (1), (1), (1), (1), 1, 0, 0, 1, (1), (1), (1), (1)),
@@ -105,13 +119,21 @@ ARMv7 = [
     ('LSL{S}<c> <Rd>,<Rn>,<Rm>', cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, Rm, 0, 0, 0, 1, Rn),
     ('LSR{S}<c> <Rd>,<Rm>,#<imm>', cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, imm5, 0, 1, 0, Rm),
     ('LSR{S}<c> <Rd>,<Rn>,<Rm>', cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, Rm, 0, 0, 1, 1, Rn),
+    ('MCR<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', cond, 1, 1, 1, 0, opc1, 0, CRn, Rt, coproc, opc2, 1, CRm),
+    ('MCR2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', 1, 1, 1, 1, 1, 1, 1, 0, opc1, 0, CRn, Rt, coproc, opc2, 1, CRm),
+    ('MCRR<c> <coproc>,<opc1>,<Rt>,<Rt2>,<CRm>', cond, 1, 1, 0, 0, 0, 1, 0, 0, Rt2, Rt, coproc, opc1, CRm),
+    ('MCRR2<c> <coproc>,<opc1>,<Rt>,<Rt2>,<CRm>', 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, Rt2, Rt, coproc, opc1, CRm),
     ('MLA{S}<c> <Rd>,<Rn>,<Rm>,<Ra>', cond, 0, 0, 0, 0, 0, 0, 1, S, Rd, Ra, Rm, 1, 0, 0, 1, Rn),
     ('MLS<c> <Rd>,<Rn>,<Rm>,<Ra>', cond, 0, 0, 0, 0, 0, 1, 1, 0, Rd, Ra, Rm, 1, 0, 0, 1, Rn),
     ('MOV{S}<c> <Rd>,#<const>', cond, 0, 0, 1, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, imm12),
     ('MOVW<c> <Rd>,#<imm16>', cond, 0, 0, 1, 1, 0, 0, 0, 0, imm4, Rd, imm12),
     ('MOV{S}<c> <Rd>,<Rm>', cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, 0, 0, 0, 0, 0, 0, 0, 0, Rm),
     ('MOVT<c> <Rd>,#<imm16>', cond, 0, 0, 1, 1, 0, 1, 0, 0, imm4, Rd, imm12),
+    ('MRC<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', cond, 1, 1, 1, 0, opc1, 1, CRn, Rt, coproc, opc2, 1, CRm),
+    ('MRC2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', 1, 1, 1, 1, 1, 1, 1, 0, opc1, 1, CRn, Rt, coproc, opc2, 1, CRm),
+    ('MRRC<c> <coproc>,<opc>,<Rt>,<Rt2>,<CRm>', cond, 1, 1, 0, 0, 0, 1, 0, 1, Rt2, Rt, coproc, opc1, CRm),
     ('MRS<c> <Rd>,<spec_reg>', cond, 0, 0, 0, 1, 0, 0, 0, 0, (1), (1), (1), (1), Rd, (0), (0), (0), (0), 0, 0, 0, 0, (0), (0), (0), (0)),
+    ('MRRC2<c> <coproc>,<opc>,<Rt>,<Rt2>,<CRm>', 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, Rt2, Rt, coproc, opc1, CRm),
     ('MSR<c> <spec_reg>,#<const>', cond, 0, 0, 1, 1, 0, 0, 1, 0, msr, 0, 0, (1), (1), (1), (1), imm12),
     ('MSR<c> <spec_reg>,<Rn>', cond, 0, 0, 0, 1, 0, 0, 1, 0, msr, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, Rn),
     ('MUL{S}<c> <Rd>,<Rn>,<Rm>', cond, 0, 0, 0, 0, 0, 0, 0, S, Rd, (0), (0), (0), (0), Rm, 1, 0, 0, 1, Rn),
@@ -122,6 +144,10 @@ ARMv7 = [
     ('ORR{S}<c> <Rd>,<Rn>,#<const>', cond, 0, 0, 1, 1, 1, 0, 0, S, Rn, Rd, imm12),
     ('ORR{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, imm5, type_, 0, Rm),
     ('ORR{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, Rs, 0, type_, 1, Rm),
+    # TODO PKH
+    ('PLD{W}<c> [<Rn>,#<imm12>]', 1, 1, 1, 1, 0, 1, 0, 1, U, R, 0, 1, Rn, (1), (1), (1), (1), imm12),
+    ('PLD <label> PLD [PC,#-0]', 1, 1, 1, 1, 0, 1, 0, 1, U, (1), 0, 1, 1, 1, 1, 1, (1), (1), (1), (1), imm12),
+    # TODO PLD, PLI
     ('POP<c> <registers>', cond, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, register_list),
     ('POP<c> <registers>', cond, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, Rt, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0),
     ('PUSH<c> <registers>', cond, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, register_list),
@@ -186,14 +212,29 @@ ARMv7 = [
     ('SSAX<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 0, 1, Rm),
     ('SSUB16<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 1, 1, Rm),
     ('SSUB8<c> <Rd>,<Rn>,<Rm>', cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 1, 1, 1, 1, Rm),
+    # TODO STC, STC2
     ('STM<c> <Rn>{!},<registers>', cond, 1, 0, 0, 0, 1, 0, W, 0, Rn, register_list),
     ('STMDA<c> <Rn>{!},<registers>', cond, 1, 0, 0, 0, 0, 0, W, 0, Rn, register_list),
     ('STMDB<c> <Rn>{!},<registers>', cond, 1, 0, 0, 1, 0, 0, W, 0, Rn, register_list),
     ('STMIB<c> <Rn>{!},<registers>', cond, 1, 0, 0, 1, 1, 0, W, 0, Rn, register_list),
+    ('STR<c> <Rt>,[<Rn>,#+/-<imm12>]', cond, 0, 1, 0, P, U, 0, W, 0, Rn, Rt, imm12),
+    ('STR<c> <Rt>,[<Rn>],+/-<Rm>{, <shift>}', cond, 0, 1, 1, P, U, 0, W, 0, Rn, Rt, imm5, type_, 0, Rm),
+    ('STRB<c> <Rt>,[<Rn>,#+/-<imm12>]', cond, 0, 1, 0, P, U, 1, W, 0, Rn, Rt, imm12),
+    ('STRB<c> <Rt>,[<Rn>],+/-<Rm>{, <shift>}', cond, 0, 1, 1, P, U, 1, W, 0, Rn, Rt, imm5, type_, 0, Rm),
+    ('STRBT<c> <Rt>,[<Rn>],#+/-<imm12>', cond, 0, 1, 0, 0, U, 1, 1, 0, Rn, Rt, imm12),
+    ('STRBT<c> <Rt>,[<Rn>],+/-<Rm>{, <shift>}', cond, 0, 1, 1, 0, U, 1, 1, 0, Rn, Rt, imm5, type_, 0, Rm),
+    ('STRD<c> <Rt>,<Rt2>,[<Rn>,#+/-<imm8>]', cond, 0, 0, 0, P, U, 1, W, 0, Rn, Rt, imm4H, 1, 1, 1, 1, imm4L),
+    ('STRD<c> <Rt>,<Rt2>,[<Rn>],+/-<Rm>', cond, 0, 0, 0, P, U, 0, W, 0, Rn, Rt, (0), (0), (0), (0), 1, 1, 1, 1, Rm),
     ('STREX<c> <Rd>,<Rt>,[<Rn>]', cond, 0, 0, 0, 1, 1, 0, 0, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rt),
     ('STREXB<c> <Rd>,<Rt>,[<Rn>]', cond, 0, 0, 0, 1, 1, 1, 0, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rt),
     ('STREXD<c> <Rd>,<Rt>,<Rt2>,[<Rn>]', cond, 0, 0, 0, 1, 1, 0, 1, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rt),
     ('STREXH<c> <Rd>,<Rt>,[<Rn>]', cond, 0, 0, 0, 1, 1, 1, 1, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rt),
+    ('STRH<c> <Rt>,[<Rn>,#+/-<imm8>]', cond, 0, 0, 0, P, U, 1, W, 0, Rn, Rt, imm4H, 1, 0, 1, 1, imm4L),
+    ('STRH<c> <Rt>,[<Rn>],+/-<Rm>', cond, 0, 0, 0, P, U, 0, W, 0, Rn, Rt, (0), (0), (0), (0), 1, 0, 1, 1, Rm),
+    ('STRHT<c> <Rt>,[<Rn>]{,#+/-<imm8>]', cond, 0, 0, 0, 0, U, 1, 1, 0, Rn, Rt, imm4H, 1, 0, 1, 1, imm4L),
+    ('STRHT<c> <Rt>,[<Rn>],+/-<Rm>', cond, 0, 0, 0, 0, U, 0, 1, 0, Rn, Rt, (0), (0), (0), (0), 1, 0, 1, 1, Rm),
+    ('STRT<c> <Rt>,[<Rn>]{,#+/-<imm12>]', cond, 0, 1, 0, 0, U, 0, 1, 0, Rn, Rt, imm12),
+    ('STRT<c> <Rt>,[<Rn>],+/-<Rm>{, <shift>}', cond, 0, 1, 1, 0, U, 0, 1, 0, Rn, Rt, imm5, type_, 0, Rm),
     ('SUB{S}<c> <Rd>,<Rn>,#<const>', cond, 0, 0, 1, 0, 0, 1, 0, S, Rn, Rd, imm12),
     ('SUB{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 0, 1, 0, S, Rn, Rd, imm5, type_, 0, Rm),
     ('SUB{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 0, 0, 1, 0, S, Rn, Rd, Rs, 0, type_, 1, Rm),
