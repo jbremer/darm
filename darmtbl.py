@@ -16,49 +16,50 @@ class Register(Operand):
     pass
 
 
-cond = Immediate('cond', 4, 'Conditional Flags')
-Rd = Register('Rd', 4, 'Destination Register')
-Rs = Register('Rs', 4, 'Source Register')
-Rn = Register('Rn', 4, 'N Register')
-Rm = Register('Rm', 4, 'Shift Register')
-Rt = Register('Rt', 4, 'Ternary Register')
-Rt2 = Immediate('Rt2', 4, 'Second Ternary Register')
-Ra = Register('Ra', 4, 'Accumulate Register')
-S = Register('S', 1, 'Update Conditional Flags')
-type_ = Immediate('type', 2, 'Shift Type')
-msb = Immediate('msb', 5, 'Most Significant Bit')
-lsb = Immediate('lsb', 5, 'Least Significant Bit')
+cond          = Immediate('cond', 4, 'Conditional Flags')
+Rd            = Register('Rd', 4, 'Destination Register')
+Rs            = Register('Rs', 4, 'Source Register')
+Rn            = Register('Rn', 4, 'N Register')
+Rm            = Register('Rm', 4, 'Shift Register')
+Rt            = Register('Rt', 4, 'Ternary Register')
+Rt2           = Immediate('Rt2', 4, 'Second Ternary Register')
+Ra            = Register('Ra', 4, 'Accumulate Register')
+S             = Register('S', 1, 'Update Conditional Flags')
+type_         = Immediate('type', 2, 'Shift Type')
+msb           = Immediate('msb', 5, 'Most Significant Bit')
+lsb           = Immediate('lsb', 5, 'Least Significant Bit')
 register_list = Immediate('register_list', 16, 'Register List')
-E = Immediate('E', 1, 'Endian Specifier')
-msr = Immediate('msr', 2, 'Move to Special Register mask')
-rotate = Immediate('rotate', 2, 'Rotation Type')
-H = Immediate('H', 1, 'Sign Extension Bit for BL(X)')
-option = Immediate('option', 4, 'Option for Debug Hint')
-W = Immediate('W', 1, 'Some Bit for LDM')
-widthm1 = Immediate('widthm1', 5, 'Bit Width Minus One')
-M = Immediate('M', 1, 'High 16bits for Rm')
-N = Immediate('N', 1, 'High 16bits for Rn')
-RdHi = Immediate('RdHi', 4, 'High 32bits for Rd')
-RdLo = Immediate('RdLo', 4, 'Low 32bits for Rd')
-R = Immediate('R', 1, 'Round Integer')
-sat_imm4 = Immediate('sat_imm4', 4, 'Saturate Immediate')
-sat_imm5 = Immediate('sat_imm5', 5, 'Saturate Immediate')
-sh = Immediate('sh', 1, 'Immediate Shift Value')
-opc1 = Immediate('opc1', 4, 'Coprocessor Undefined #1')
-opc2 = Immediate('opc2', 4, 'Coprocessor Undefined #2')
-CRn = Immediate('CRn', 4, 'Coprocessor Undefined #3')
-CRd = Immediate('CRd', 4, 'Coprocessor Undefined #4')
-coproc = Immediate('coproc', 4, 'Coprocessor Undefined #5')
-CRm = Immediate('CRm', 4, 'Coprocessor Undefined #6')
-U = Immediate('U', 1, 'Addition flag for PLD')
-P = Immediate('P', 1, 'Protected Mode Flag?')
-imm4H = Immediate('imm4H', 4, 'High Word Register')
-imm4L = Immediate('imm4L', 4, 'Low Word Register')
+E             = Immediate('E', 1, 'Endian Specifier')
+msr           = Immediate('msr', 2, 'Move to Special Register mask')
+rotate        = Immediate('rotate', 2, 'Rotation Type')
+H             = Immediate('H', 1, 'Sign Extension Bit for BL(X)')
+option        = Immediate('option', 4, 'Option for Debug Hint')
+W             = Immediate('W', 1, 'Some Bit for LDM')
+widthm1       = Immediate('widthm1', 5, 'Bit Width Minus One')
+M             = Immediate('M', 1, 'High 16bits for Rm')
+N             = Immediate('N', 1, 'High 16bits for Rn')
+RdHi          = Immediate('RdHi', 4, 'High 32bits for Rd')
+RdLo          = Immediate('RdLo', 4, 'Low 32bits for Rd')
+R             = Immediate('R', 1, 'Round Integer')
+sat_imm4      = Immediate('sat_imm4', 4, 'Saturate Immediate')
+sat_imm5      = Immediate('sat_imm5', 5, 'Saturate Immediate')
+sh            = Immediate('sh', 1, 'Immediate Shift Value')
+opc1          = Immediate('opc1', 4, 'Coprocessor Operation Code')
+opc2          = Immediate('opc2', 3, 'Coprocessor Information')
+CRn           = Immediate('CRn', 4, 'Coprocessor Operand Register')
+CRd           = Immediate('CRd', 4, 'Coprocessor Destination Register')
+coproc        = Immediate('coproc', 4, 'Coprocessor Number')
+CPOpc         = Immediate('CPOpc', 3, 'Coprocessor Operation Mode')
+CRm           = Immediate('CRm', 4, 'Coprocessor Operand Register')
+U             = Immediate('U', 1, 'Addition flag for PLD')
+P             = Immediate('P', 1, 'Protected Mode Flag?')
+imm4H         = Immediate('imm4H', 4, 'High Word Register')
+imm4L         = Immediate('imm4L', 4, 'Low Word Register')
 
-imm4 = Immediate('imm4', 4, 'Immediate')
-imm5 = Immediate('imm5', 5, 'Immediate')
-imm12 = Immediate('imm12', 12, 'Immediate')
-imm24 = Immediate('imm24', 24, 'Immediate')
+imm4          = Immediate('imm4', 4, 'Immediate')
+imm5          = Immediate('imm5', 5, 'Immediate')
+imm12         = Immediate('imm12', 12, 'Immediate')
+imm24         = Immediate('imm24', 24, 'Immediate')
 
 ARMv7 = [
     ('ADC{S}<c> <Rd>,<Rn>,#<const>', cond, 0, 0, 1, 0, 1, 0, 1, S, Rn, Rd, imm12),
@@ -119,8 +120,8 @@ ARMv7 = [
     ('LSL{S}<c> <Rd>,<Rn>,<Rm>', cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, Rm, 0, 0, 0, 1, Rn),
     ('LSR{S}<c> <Rd>,<Rm>,#<imm>', cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, imm5, 0, 1, 0, Rm),
     ('LSR{S}<c> <Rd>,<Rn>,<Rm>', cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, Rm, 0, 0, 1, 1, Rn),
-    ('MCR<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', cond, 1, 1, 1, 0, opc1, 0, CRn, Rt, coproc, opc2, 1, CRm),
-    ('MCR2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', 1, 1, 1, 1, 1, 1, 1, 0, opc1, 0, CRn, Rt, coproc, opc2, 1, CRm),
+    ('MCR<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', cond, 1, 1, 1, 0, CPOpc, 0, CRn, Rt, coproc, opc2, 1, CRm),
+    ('MCR2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', 1, 1, 1, 1, 1, 1, 1, 0, CPOpc, 0, CRn, Rt, coproc, opc2, 1, CRm),
     ('MCRR<c> <coproc>,<opc1>,<Rt>,<Rt2>,<CRm>', cond, 1, 1, 0, 0, 0, 1, 0, 0, Rt2, Rt, coproc, opc1, CRm),
     ('MCRR2<c> <coproc>,<opc1>,<Rt>,<Rt2>,<CRm>', 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, Rt2, Rt, coproc, opc1, CRm),
     ('MLA{S}<c> <Rd>,<Rn>,<Rm>,<Ra>', cond, 0, 0, 0, 0, 0, 0, 1, S, Rd, Ra, Rm, 1, 0, 0, 1, Rn),
@@ -129,8 +130,8 @@ ARMv7 = [
     ('MOVW<c> <Rd>,#<imm16>', cond, 0, 0, 1, 1, 0, 0, 0, 0, imm4, Rd, imm12),
     ('MOV{S}<c> <Rd>,<Rm>', cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, 0, 0, 0, 0, 0, 0, 0, 0, Rm),
     ('MOVT<c> <Rd>,#<imm16>', cond, 0, 0, 1, 1, 0, 1, 0, 0, imm4, Rd, imm12),
-    ('MRC<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', cond, 1, 1, 1, 0, opc1, 1, CRn, Rt, coproc, opc2, 1, CRm),
-    ('MRC2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', 1, 1, 1, 1, 1, 1, 1, 0, opc1, 1, CRn, Rt, coproc, opc2, 1, CRm),
+    ('MRC<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', cond, 1, 1, 1, 0, CPOpc, 1, CRn, Rt, coproc, opc2, 1, CRm),
+    ('MRC2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', 1, 1, 1, 1, 1, 1, 1, 0, CPOpc, 1, CRn, Rt, coproc, opc2, 1, CRm),
     ('MRRC<c> <coproc>,<opc>,<Rt>,<Rt2>,<CRm>', cond, 1, 1, 0, 0, 0, 1, 0, 1, Rt2, Rt, coproc, opc1, CRm),
     ('MRS<c> <Rd>,<spec_reg>', cond, 0, 0, 0, 1, 0, 0, 0, 0, (1), (1), (1), (1), Rd, (0), (0), (0), (0), 0, 0, 0, 0, (0), (0), (0), (0)),
     ('MRRC2<c> <coproc>,<opc>,<Rt>,<Rt2>,<CRm>', 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, Rt2, Rt, coproc, opc1, CRm),
