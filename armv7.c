@@ -68,3 +68,31 @@ int armv7_condition_index(const char *condition_code)
 
     return -1;
 }
+
+static const char *shift_types[] = {
+    "LSL", "LSR", "ASR", "ROR",
+};
+
+int armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
+{
+    if(d->type == 0 && d->Rs == 0) {
+        *type = NULL, *immediate = 0;
+    }
+    else if(d->type == 0b11 && d->Rs == 0) {
+        *type = "RRX", *immediate = 0;
+    }
+    else {
+        *type = shift_types[d->type];
+        *immediate = d->Rs;
+
+        // 32 is encoded as 0
+        if((d->type == 0b01 || d->type == 0b10) && d->Rs == 0) {
+            *immediate = 32;
+        }
+    }
+}
+
+int armv7_disassemble(darm_t *d, uint32_t w)
+{
+    d->cond = (w >> 28) & 0b1111;
+}
