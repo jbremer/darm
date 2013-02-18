@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "darm.h"
+#include "armv7-tbl.h"
 
 struct {
     const char *mnemonic_extension;
@@ -92,7 +93,50 @@ int armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
     }
 }
 
+static int armv7_disas_cond(darm_t *d, uint32_t w)
+{
+    // the instruction label
+    d->instr = armv7_instr_labels[(w >> 20) & 0xff];
+
+    // do a lookup for the type of instruction
+    switch (armv7_instr_types[(w >> 20) & 0xff]) {
+    case 0:
+        d->S = (w >> 20) & 1;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rn = (w >> 16) & 0b1111;
+        d->Rm = w & 0b1111;
+        d->type = (w >> 5) & 0b11;
+
+        // type == 1, shift with the value of the lower bits of Rs
+        d->shift_reg = (w >> 4) & 1;
+        if(d->shift_reg != 0) {
+            d->Rs = (w >> 8) & 0b1111;
+        }
+        else {
+            d->shift = (w >> 7) & 0b11111;
+        }
+        return 0;
+    }
+    return -1;
+}
+
 int armv7_disassemble(darm_t *d, uint32_t w)
 {
+    int ret = -1;
+
     d->cond = (w >> 28) & 0b1111;
+
+    if(d->cond == 0b1111) {
+        // TODO handle unconditional instructions
+    }
+    else {
+        ret = armv7_disas_cond(d, w);
+    }
+
+    // return error
+    if(ret < 0) return ret;
+
+    // TODO
+
+    return 0;
 }
