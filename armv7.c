@@ -74,7 +74,7 @@ static const char *shift_types[] = {
     "LSL", "LSR", "ASR", "ROR",
 };
 
-int armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
+void armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
 {
     if(d->type == 0 && d->Rs == 0) {
         *type = NULL, *immediate = 0;
