@@ -7,6 +7,9 @@ class Operand:
         self.bitsize = bitsize
         self.comment = comment
 
+    def __repr__(self):
+        return self.name
+
 
 class Immediate(Operand):
     pass
@@ -18,7 +21,7 @@ class Register(Operand):
 
 cond          = Immediate('cond', 4, 'Conditional Flags')
 Rd            = Register('Rd', 4, 'Destination Register')
-Rs            = Register('Rs', 4, 'Source Register')
+Rs            = Immediate('Rs', 4, 'Shift Immediate')
 Rn            = Register('Rn', 4, 'N Register')
 Rm            = Register('Rm', 4, 'Shift Register')
 Rt            = Register('Rt', 4, 'Ternary Register')
