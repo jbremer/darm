@@ -92,7 +92,9 @@ if __name__ == '__main__':
 
     if sys.argv[1][-2:] == '.h':
 
-        # print required imports
+        # print required headers
+        print '#ifndef __ARMV7_TBL__'
+        print '#define __ARMV7_TBL__'
         print '#include <stdint.h>'
         print
 
@@ -103,6 +105,8 @@ if __name__ == '__main__':
 
         # print all instruction labels
         print instruction_names_enum(d.ARMv7)
+        print '#endif'
+        print
 
     elif sys.argv[1][-2:] == '.c':
 
