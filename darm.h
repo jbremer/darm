@@ -34,9 +34,9 @@ typedef struct _darm_t {
     // immediate operand
     uint32_t        op_imm;
 
-    // if op-imm is a label, then this flag specifies whether it's relative
-    // to the current instruction pointer or not
-    uint32_t        is_relative_label;
+    // if op-imm is a label, then this flag specifies whether the immediate
+    // should be added or subtracted from the current instruction pointer
+    uint32_t        add;
 
     // register shift info
     uint32_t        type;

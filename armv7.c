@@ -128,35 +128,14 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
         d->op_imm = w & BITMSK_12;
+
+        // check whether this instruction is in fact an ADR instruction
+        if((d->instr == I_ADD || d->instr == I_SUB) &&
+                d->S == 0 && d->Rn == PC) {
+            d->instr = I_ADR, d->Rn = 0;
+            d->add = (w >> 23) & 1;
+        }
         return 0;
-
-    case 2:
-        // the initial 8 bits of ADR overlap with those of ADD/SUB with the
-        // PC operand, therefore we have to find out which instruction this is
-        // based on another immediate
-        t = (w >> 16) & 0b1111;
-
-        // is this an ADR instruction instead of an ADD/SUB instruction?
-        if(t == 0b1111) {
-            // the table encodes I_ADR as either I_ADD or I_ADR
-            d->instr = I_ADR;
-
-            d->Rd = (w >> 12) & 0b1111;
-            d->op_imm = w & BITMSK_12;
-            d->is_relative_label = (w >> 23) & 1;
-            return 0;
-        }
-        // this is an ADD/SUB instruction
-        else if(t == 0b1101) {
-            // the table initially encodes I_ADD as I_ADR
-            d->instr = (d->instr == I_ADR) ? I_ADD : d->instr;
-            d->S = (w >> 20) & 1;
-            d->Rd = (w >> 12) & 0b1111;
-            d->Rn = SP;
-            d->op_imm = w & BITMSK_12;
-            return 0;
-        }
-        break;
     }
     return -1;
 }

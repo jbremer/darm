@@ -61,7 +61,6 @@ d = darmtbl
 cond_instr_types = [
     lambda x: d.Rn in x and d.Rd in x and x[-3] == d.type_ and x[-1] == d.Rm,
     lambda x: d.Rn in x and d.Rd in x and d.imm12 in x,
-    lambda x: x[-3] == 1 and x[-2] == d.Rd and x[-1] == d.imm12,
 ]
 
 if __name__ == '__main__':
