@@ -8,7 +8,7 @@ GENCODEC = armv7-tbl.c
 GENCODEH = armv7-tbl.h
 GENCODEO = armv7-tbl.o
 
-STUFF = $(GENCODEC) $(GENCODEH) $(OBJ) tests/tests.exe
+STUFF = $(GENCODEC) $(GENCODEH) $(OBJ) tests/tests.exe libdarm.a libdarm.so
 
 default: $(STUFF)
 
@@ -23,6 +23,12 @@ $(GENCODEH):
 
 %.exe: %.c $(OBJ) $(GENCODEO)
 	$(CC) $(CFLAGS) -o $@ $^
+
+%.so: $(OBJ) $(GENCODEO)
+	gcc -shared -o $@ $^
+
+%.a: $(OBJ) $(GENCODEO)
+	ar cr $@ $^
 
 test: $(STUFF)
 	./tests/tests.exe
