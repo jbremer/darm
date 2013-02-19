@@ -31,7 +31,7 @@ struct {
 
 int main(int argc, char *argv[])
 {
-    int ret = 0;
+    int success = 0;
     for (int i = 0; i < ARRAYSIZE(tests); i++) {
         darm_t d = {}; int ret;
 
@@ -45,12 +45,15 @@ int main(int argc, char *argv[])
 
             printf(
                 "ret: %d, instr: %d, instr-type: %d, cond: %d, S: %d\n"
-                "Rd: %d, Rn: %d, Rm: %d, op-imm: %d\n"
+                "Rd: %d, Rn: %d, Rm: %d, op-imm: %d, add: %d\n"
                 "type: %d, shift-is-reg: %d, Rs: %d, shift: %d\n",
                 ret, d.instr, d.instr_type, d.cond, d.S, d.Rd, d.Rn, d.Rm,
-                d.op_imm, d.type, d.shift_is_reg, d.Rs, d.shift);
-            ret = 1;
+                d.op_imm, d.add, d.type, d.shift_is_reg, d.Rs, d.shift);
+            success = 1;
         }
     }
-    return ret;
+    if(success == 0) {
+        printf("[x] unittests were successful\n");
+    }
+    return success;
 }

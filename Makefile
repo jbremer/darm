@@ -6,6 +6,7 @@ OBJ = $(SRC:.c=.o)
 
 GENCODEC = armv7-tbl.c
 GENCODEH = armv7-tbl.h
+GENCODEO = armv7-tbl.o
 
 STUFF = $(GENCODEC) $(GENCODEH) $(OBJ) tests\tests.exe
 
@@ -22,6 +23,9 @@ $(GENCODEH):
 
 %.exe: %.c $(OBJ) $(GENCODEO)
 	$(CC) $(CFLAGS) -o $@ $^
+
+test: $(STUFF)
+	./tests/tests.exe
 
 clean:
 	rm $(STUFF)
