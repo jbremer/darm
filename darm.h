@@ -7,6 +7,12 @@
 #define ARRAYSIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #endif
 
+typedef enum _darm_reg_t {
+    r0, r1, r2, r3, r4, r5, r6, r7,
+    SP = 0b1101,
+    PC = 0b1111,
+} darm_reg_t;
+
 typedef struct _darm_t {
     // the original encoded instruction
     uint32_t        w;
@@ -27,6 +33,10 @@ typedef struct _darm_t {
 
     // immediate operand
     uint32_t        op_imm;
+
+    // if op-imm is a label, then this flag specifies whether it's relative
+    // to the current instruction pointer or not
+    uint32_t        is_relative_label;
 
     // register shift info
     uint32_t        type;
