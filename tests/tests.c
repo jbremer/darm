@@ -16,6 +16,9 @@ struct {
     {0xe257502a, 0, {
         .instr = I_SUB, .instr_type = 1, .cond = 0b1110, .S = 1, .Rd = 5,
         .Rn = 7, .op_imm = 42}},
+    {0xe04d2007, 0, {
+        .instr = I_SUB, .instr_type = 0, .cond = 0b1110, .S = 0, .Rd = 2,
+        .Rn = SP, .Rm = 7}},
     {0xe28d4001, 0, {
         .instr = I_ADD, .instr_type = 1, .cond = 0b1110, .S = 0, .Rd = 4,
         .Rn = SP, .op_imm = 1}},
