@@ -62,16 +62,46 @@ def type_lookup_table(name, *args):
     text = '\n    '.join(textwrap.wrap(table, 74))
     return 'armv7_instr_t %s_instr_lookup[] = {\n    %s\n};\n' % (name, text)
 
+
+def type_encoding_info(enumname, arr):
+    text = []
+    for name, info, encodings, fn in arr:
+        text.append(
+            '    // info:\n' +
+            '    // %s\n    //\n' % info +
+            '    // encodings:\n    // ' +
+            '\n    // '.join(encodings) + '\n' +
+            '    T_%s,' % name)
+
+    return 'typedef enum _%s_t {\n%s\n} %s_t;\n' % (enumname,
+                                                    '\n\n'.join(text),
+                                                    enumname)
+
 d = darmtbl
 
 # we specify various instruction types
 cond_instr_types = [
-    lambda x: d.Rn in x and d.Rd in x and x[-3] == d.type_ and x[-1] == d.Rm,
-    lambda x: d.Rn in x and d.Rd in x and d.imm12 in x,
-    lambda x: x[-1] == d.Rn and x[-6] == d.Rm and x[-7] == d.Rd or
-    x[-1] == d.Rm and x[-5] == d.imm5,
-    lambda x: x[-1] == d.imm24,
-    lambda x: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0),
+    ('ARITH1',
+     'Arithmetic instructions which take a shift for the second source',
+     ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
+      'ins{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>'],
+     lambda x: d.Rn in x and d.Rd in x and x[-3] == d.type_
+     and x[-1] == d.Rm),
+    ('ARITH2',
+     'Arithmetic instructions which take an immediate as second source',
+     ['ins{S}<c> <Rd>,<Rn>,#<const>'],
+     lambda x: d.Rn in x and d.Rd in x and d.imm12 in x),
+    ('SHIFT', 'Shift instructions',
+     ['ins{S}<c> <Rd>,<Rn>,<Rm>', 'ins{S}<c> <Rd>,<Rm>,#<imm>'],
+     lambda x: x[-1] == d.Rn and x[-6] == d.Rm and x[-7] == d.Rd or
+        x[-1] == d.Rm and x[-5] == d.imm5),
+    ('BRNCHSC', 'Branch and System Call instructions',
+     ['B(L)<c> <label>', 'SVC<c> #<imm24>'],
+     lambda x: x[-1] == d.imm24),
+    ('BRNCHMISC', 'Branch and Misc instructions',
+     ['B(L)X(J)<c> <Rm>', 'BKPT #<imm16>', 'MSR<c> <spec_reg>,<Rn>'],
+     lambda x: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0)),
+    #lambda x: x[-1] == d.imm12 and x[-2] == d.Rd,
 ]
 
 if __name__ == '__main__':
@@ -97,7 +127,7 @@ if __name__ == '__main__':
             # for each conditional instruction, check which type of
             # instruction this is
             for instr_idx, y in enumerate(cond_instr_types):
-                if bits[0] == d.cond and y(bits):
+                if bits[0] == d.cond and y[3](bits):
                     cond_table[idx] = instr_idx, instruction_name(instr)
 
     # python magic!
@@ -120,6 +150,9 @@ if __name__ == '__main__':
         print 'armv7_instr_t type3_instr_lookup[4];'
         print 'armv7_instr_t type4_instr_lookup[16];'
         print
+
+        # print type info for each encoding type
+        print type_encoding_info('armv7_enctype', cond_instr_types)
 
         print '#endif'
         print

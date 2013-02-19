@@ -104,7 +104,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     // do a lookup for the type of instruction
     switch (d->instr_type) {
-    case 0:
+    case T_ARITH1:
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
@@ -121,7 +121,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case 1:
+    case T_ARITH2:
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
@@ -135,7 +135,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case 2:
+    case T_SHIFT:
         d->instr = type3_instr_lookup[(w >> 5) & 0b11];
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
@@ -149,7 +149,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case 3:
+    case T_BRNCHSC:
         d->op_imm = w & BITMSK_24;
 
         // if the instruction is B or BL, then we have to sign-extend it and
@@ -166,7 +166,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case 4:
+    case T_BRNCHMISC:
         // first get the real instruction label
         d->instr = type4_instr_lookup[(w >> 4) & 0b1111];
 

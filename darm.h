@@ -18,7 +18,7 @@ typedef struct _darm_t {
 
     // the instruction label
     armv7_instr_t   instr;
-    uint32_t        instr_type;
+    armv7_enctype_t instr_type;
 
     // conditional flags, if any
     uint32_t        cond;
