@@ -53,7 +53,7 @@ def instruction_names_index_table(arr):
     table = ', '.join('I_%s' % str(arr[x][1]) if x in arr else '-1'
                       for x in xrange(256))
     text = '\n    '.join(textwrap.wrap(table, 74))
-    return 'uint8_t armv7_instr_labels[] = {\n    %s\n};\n' % text
+    return 'armv7_instr_t armv7_instr_labels[] = {\n    %s\n};\n' % text
 
 d = darmtbl
 
@@ -99,13 +99,14 @@ if __name__ == '__main__':
         print '#include <stdint.h>'
         print
 
-        # print some required definitions
-        print 'uint8_t armv7_instr_types[256];'
-        print 'uint8_t armv7_instr_labels[256];'
-        print
-
         # print all instruction labels
         print instruction_names_enum(d.ARMv7)
+
+        # print some required definitions
+        print 'uint8_t armv7_instr_types[256];'
+        print 'armv7_instr_t armv7_instr_labels[256];'
+        print
+
         print '#endif'
         print
 

@@ -4,27 +4,28 @@
 
 struct {
     uint32_t w;
+    int r;
     darm_t d;
 } tests[] = {
-    {0xe0a10082, {
+    {0xe0a10082, 0, {
         .instr = I_ADC, .instr_type = 0, .cond = 0b1110, .S = 0, .Rd = 0,
         .Rn = 1, .Rm = 2, .type = 0, .shift_is_reg = 0, .shift = 1}},
-    {0xe2821003, {
+    {0xe2821003, 0, {
         .instr = I_ADD, .instr_type = 1, .cond = 0b1110, .S = 0, .Rd = 1,
         .Rn = 2, .op_imm = 3}},
-    {0xe257502a, {
+    {0xe257502a, 0, {
         .instr = I_SUB, .instr_type = 1, .cond = 0b1110, .S = 1, .Rd = 5,
         .Rn = 7, .op_imm = 42}},
-    {0xe28d4001, {
+    {0xe28d4001, 0, {
         .instr = I_ADD, .instr_type = 1, .cond = 0b1110, .S = 0, .Rd = 4,
         .Rn = SP, .op_imm = 1}},
-    {0xe28f4030, {
+    {0xe28f4030, 0, {
         .instr = I_ADR, .instr_type = 1, .cond = 0b1110, .S = 0, .Rd = 4,
         .op_imm = 48, .add = 1}},
-    {0xe24f3000, {
+    {0xe24f3000, 0, {
         .instr = I_ADR, .instr_type = 1, .cond = 0b1110, .S = 0, .Rd = 3,
         .op_imm = 0, .add = 0}},
-    {0xe24f329a, {
+    {0xe24f329a, 0, {
         .instr = I_ADR, .instr_type = 1, .cond = 0b1110, .S = 0, .Rd = 3,
         .op_imm = 666, .add = 0}},
 };
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
         // so we don't have to hardcode all of these
         tests[i].d.w = d.w;
 
-        if(memcmp(&tests[i].d, &d, sizeof(darm_t))) {
+        if(ret != tests[i].r || memcmp(&tests[i].d, &d, sizeof(darm_t))) {
             printf("incorrect encoding for 0x%08x\n", d.w);
 
             printf(
