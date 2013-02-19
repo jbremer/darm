@@ -8,7 +8,7 @@ GENCODEC = armv7-tbl.c
 GENCODEH = armv7-tbl.h
 GENCODEO = armv7-tbl.o
 
-STUFF = $(GENCODEC) $(GENCODEH) $(OBJ) tests\tests.exe
+STUFF = $(GENCODEC) $(GENCODEH) $(OBJ) tests/tests.exe
 
 default: $(STUFF)
 
