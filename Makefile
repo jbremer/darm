@@ -4,31 +4,27 @@ CFLAGS = -std=c99 -Wall -O2 -s
 SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
-GENCODEC = armv7-tbl.c
-GENCODEH = armv7-tbl.h
-GENCODEO = armv7-tbl.o
+GENCODESRC = armv7-tbl.c armv7-tbl.h
+GENCODEOBJ = armv7-tbl.o
 
-STUFF = $(GENCODEC) $(GENCODEH) $(GENCODEO) $(OBJ) \
+STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
 	tests/tests.exe libdarm.a libdarm.so
 
 default: $(STUFF)
 
-$(GENCODEC):
-	python darmgen.py $@
-
-$(GENCODEH):
+$(GENCODESRC):
 	python darmgen.py $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 
-%.exe: %.c $(OBJ) $(GENCODEO)
+%.exe: %.c $(OBJ) $(GENCODEOBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
-%.so: $(OBJ) $(GENCODEO)
+%.so: $(OBJ) $(GENCODEOBJ)
 	gcc -shared -o $@ $^
 
-%.a: $(OBJ) $(GENCODEO)
+%.a: $(OBJ) $(GENCODEOBJ)
 	ar cr $@ $^
 
 test: $(STUFF)
