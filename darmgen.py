@@ -60,6 +60,7 @@ d = darmtbl
 # we specify various instruction types
 instr_types = [
     lambda x: x[0] == d.cond and d.Rn in x and d.Rd in x and x[-3] == d.type_ and x[-1] == d.Rm,
+    lambda x: x[0] == d.cond and d.Rn in x and d.Rd in x and d.imm12 in x,
 ]
 
 if __name__ == '__main__':

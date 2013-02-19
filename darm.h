@@ -25,6 +25,9 @@ typedef struct _darm_t {
     uint32_t        Rn; // first operand
     uint32_t        Rm; // second operand
 
+    // immediate operand
+    uint32_t        op_imm;
+
     // register shift info
     uint32_t        type;
     uint32_t        shift_is_reg; // shift from register Rs or not?
