@@ -97,9 +97,10 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 {
     // the instruction label
     d->instr = armv7_instr_labels[(w >> 20) & 0xff];
+    d->instr_type = armv7_instr_types[(w >> 20) & 0xff];
 
     // do a lookup for the type of instruction
-    switch (armv7_instr_types[(w >> 20) & 0xff]) {
+    switch (d->instr_type) {
     case 0:
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
@@ -108,8 +109,8 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->type = (w >> 5) & 0b11;
 
         // type == 1, shift with the value of the lower bits of Rs
-        d->shift_reg = (w >> 4) & 1;
-        if(d->shift_reg != 0) {
+        d->shift_is_reg = (w >> 4) & 1;
+        if(d->shift_is_reg != 0) {
             d->Rs = (w >> 8) & 0b1111;
         }
         else {
@@ -125,6 +126,7 @@ int armv7_disassemble(darm_t *d, uint32_t w)
     int ret = -1;
 
     d->cond = (w >> 28) & 0b1111;
+    d->w = w;
 
     if(d->cond == 0b1111) {
         // TODO handle unconditional instructions

@@ -8,8 +8,12 @@
 #endif
 
 typedef struct _darm_t {
+    // the original encoded instruction
+    uint32_t        w;
+
     // the instruction label
     armv7_instr_t   instr;
+    uint32_t        instr_type;
 
     // conditional flags, if any
     uint32_t        cond;
@@ -23,7 +27,7 @@ typedef struct _darm_t {
 
     // register shift info
     uint32_t        type;
-    uint32_t        shift_reg; // shift from register Rs or not?
+    uint32_t        shift_is_reg; // shift from register Rs or not?
     uint32_t        Rs;
     uint32_t        shift;
 } darm_t;
