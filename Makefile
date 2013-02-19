@@ -28,4 +28,4 @@ test: $(STUFF)
 	./tests/tests.exe
 
 clean:
-	rm $(STUFF)
+	rm -f $(STUFF)
