@@ -40,6 +40,10 @@ struct {
         .instr = I_B, .instr_type = 3, .cond = 0b1110, .op_imm = -1024}},
     {0xef000001, 0, {
         .instr = I_SVC, .instr_type = 3, .cond = 0b1110, .op_imm = 1}},
+    {0xe1200071, 0, {
+        .instr = I_BKPT, .instr_type = 4, .cond = 0b1110, .op_imm = 1}},
+    {0xe12fff14, 0, {
+        .instr = I_BX, .instr_type = 4, .cond = 0b1110, .Rm = 4}},
 };
 
 int main(int argc, char *argv[])

@@ -71,6 +71,7 @@ cond_instr_types = [
     lambda x: x[-1] == d.Rn and x[-6] == d.Rm and x[-7] == d.Rd or
     x[-1] == d.Rm and x[-5] == d.imm5,
     lambda x: x[-1] == d.imm24,
+    lambda x: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0),
 ]
 
 if __name__ == '__main__':
@@ -116,6 +117,7 @@ if __name__ == '__main__':
         print 'uint8_t armv7_instr_types[256];'
         print 'armv7_instr_t armv7_instr_labels[256];'
         print 'armv7_instr_t type3_instr_lookup[4];'
+        print 'armv7_instr_t type4_instr_lookup[16];'
         print
 
         print '#endif'
@@ -137,3 +139,7 @@ if __name__ == '__main__':
 
         # print a lookup table for type3
         print type_lookup_table('type3', 'lsl', 'lsr', 'asr', 'ror')
+
+        t4 = 'msr', 'bx', 'bxj', 'blx', None, 'qsub', None, 'bkpt', 'smlaw', \
+            None, 'smulw', None, 'smlaw', None, 'smulw', None
+        print type_lookup_table('type4', *t4)

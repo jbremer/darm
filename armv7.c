@@ -168,6 +168,32 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             }
         }
         return 0;
+
+    case 4:
+        // first get the real instruction label
+        d->instr = type4_instr_lookup[(w >> 4) & 0b1111];
+
+        // now we do a switch statement based on the instruction label,
+        // rather than some magic values
+        switch ((uint32_t) d->instr) {
+        case I_BKPT:
+            d->op_imm = (((w >> 8) & BITMSK_12) << 4) + (w & 0b1111);
+            return 0;
+
+        case I_BX: case I_BXJ: case I_BLX:
+            d->Rm = w & 0b1111;
+            return 0;
+
+        case I_MSR:
+            d->Rn = w & 0b1111;
+            d->op_imm = (w >> 18) & 0b11;
+            return 0;
+
+        case I_QSUB: case I_SMLAW: case I_SMULW: default:
+            // returns -1
+            break;
+        }
+        break;
     }
     return -1;
 }
