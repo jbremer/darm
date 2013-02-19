@@ -98,9 +98,6 @@ void armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
 
 static int armv7_disas_cond(darm_t *d, uint32_t w)
 {
-    // for temporary usage
-    uint32_t t;
-
     // the instruction label
     d->instr = armv7_instr_labels[(w >> 20) & 0xff];
     d->instr_type = armv7_instr_types[(w >> 20) & 0xff];
