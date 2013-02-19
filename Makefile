@@ -8,7 +8,8 @@ GENCODEC = armv7-tbl.c
 GENCODEH = armv7-tbl.h
 GENCODEO = armv7-tbl.o
 
-STUFF = $(GENCODEC) $(GENCODEH) $(OBJ) tests/tests.exe libdarm.a libdarm.so
+STUFF = $(GENCODEC) $(GENCODEH) $(GENCODEO) $(OBJ) \
+	tests/tests.exe libdarm.a libdarm.so
 
 default: $(STUFF)
 
