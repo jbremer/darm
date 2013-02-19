@@ -4,6 +4,8 @@
 #include "darm.h"
 #include "armv7-tbl.h"
 
+#define BITMSK_12 ((1 << 12) - 1)
+
 struct {
     const char *mnemonic_extension;
     const char *meaning_integer;
@@ -125,7 +127,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
-        d->op_imm = w & ((1 << 12) - 1);
+        d->op_imm = w & BITMSK_12;
         return 0;
 
     case 2:
@@ -140,7 +142,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->instr = I_ADR;
 
             d->Rd = (w >> 12) & 0b1111;
-            d->op_imm = w & ((1 << 12) - 1);
+            d->op_imm = w & BITMSK_12;
             d->is_relative_label = (w >> 23) & 1;
             return 0;
         }
@@ -151,7 +153,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->S = (w >> 20) & 1;
             d->Rd = (w >> 12) & 0b1111;
             d->Rn = SP;
-            d->op_imm = w & ((1 << 12) - 1);
+            d->op_imm = w & BITMSK_12;
             return 0;
         }
         break;
