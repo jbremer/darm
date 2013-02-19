@@ -5,6 +5,7 @@
 #include "armv7-tbl.h"
 
 #define BITMSK_12 ((1 << 12) - 1)
+#define BITMSK_24 ((1 << 24) - 1)
 
 struct {
     const char *mnemonic_extension;
@@ -148,6 +149,23 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         else {
             d->Rm = w & 0b1111;
             d->op_imm = (w >> 7) & 0b11111;
+        }
+        return 0;
+
+    case 3:
+        d->op_imm = w & BITMSK_24;
+
+        // if the instruction is B or BL, then we have to sign-extend it and
+        // multiply it with four
+        if(d->instr != I_SVC) {
+            // check if the highest bit of the imm24 is set, if so, we
+            // manually sign-extend the integer
+            if((d->op_imm >> 23) & 1) {
+                d->op_imm = (d->op_imm | 0xff000000) << 2;
+            }
+            else {
+                d->op_imm = d->op_imm << 2;
+            }
         }
         return 0;
     }

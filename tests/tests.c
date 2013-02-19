@@ -34,6 +34,12 @@ struct {
     {0xe1a02f03, 0, {
         .instr = I_LSL, .instr_type = 2, .cond = 0b1110, .S = 0, .Rd = 2,
         .op_imm = 30, .Rm = 3}},
+    {0xeb00014e, 0, {
+        .instr = I_BL, .instr_type = 3, .cond = 0b1110, .op_imm = 1336}},
+    {0xeaffff00, 0, {
+        .instr = I_B, .instr_type = 3, .cond = 0b1110, .op_imm = -1024}},
+    {0xef000001, 0, {
+        .instr = I_SVC, .instr_type = 3, .cond = 0b1110, .op_imm = 1}},
 };
 
 int main(int argc, char *argv[])

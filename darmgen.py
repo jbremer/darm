@@ -63,6 +63,7 @@ cond_instr_types = [
     lambda x: d.Rn in x and d.Rd in x and d.imm12 in x,
     lambda x: x[-1] == d.Rn and x[-6] == d.Rm and x[-7] == d.Rd or
     x[-1] == d.Rm and x[-5] == d.imm5,
+    lambda x: x[-1] == d.imm24,
 ]
 
 if __name__ == '__main__':
