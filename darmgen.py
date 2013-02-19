@@ -55,6 +55,13 @@ def instruction_names_index_table(arr):
     text = '\n    '.join(textwrap.wrap(table, 74))
     return 'armv7_instr_t armv7_instr_labels[] = {\n    %s\n};\n' % text
 
+
+def type_lookup_table(name, *args):
+    """Create a lookup table for a certain instruction type."""
+    table = ', '.join('I_%s' % x.upper() if x else '-1' for x in args)
+    text = '\n    '.join(textwrap.wrap(table, 74))
+    return 'armv7_instr_t %s_instr_lookup[] = {\n    %s\n};\n' % (name, text)
+
 d = darmtbl
 
 # we specify various instruction types
@@ -129,5 +136,4 @@ if __name__ == '__main__':
         print instruction_names_index_table(cond_table)
 
         # print a lookup table for type3
-        print 'armv7_instr_t type3_instr_lookup[] = ' + \
-            '{I_LSL, I_LSR, I_ASR, I_ROR};\n'
+        print type_lookup_table('type3', 'lsl', 'lsr', 'asr', 'ror')
