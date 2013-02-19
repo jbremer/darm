@@ -94,9 +94,10 @@ if __name__ == '__main__':
             idx = sum(identifier[y]*2**(7-y) for y in xrange(len(identifier)))
             idx = int(idx + x)
 
-            # for each instruction, check which type of instruction this is
-            for instr_idx, y in enumerate(instr_types):
-                if y(bits):
+            # for each conditional instruction, check which type of
+            # instruction this is
+            for instr_idx, y in enumerate(cond_instr_types):
+                if bits[0] == d.cond and y(bits):
                     cond_table[idx] = instr_idx, instruction_name(instr)
 
     # python magic!
