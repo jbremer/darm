@@ -28,6 +28,12 @@ struct {
     {0xe24f329a, 0, {
         .instr = I_ADR, .instr_type = 1, .cond = 0b1110, .S = 0, .Rd = 3,
         .op_imm = 666, .add = 0}},
+    {0xe1a02458, 0, {
+        .instr = I_ASR, .instr_type = 2, .cond = 0b1110, .S = 0, .Rd = 2,
+        .Rm = 4, .Rn = 8}},
+    {0xe1a02f03, 0, {
+        .instr = I_LSL, .instr_type = 2, .cond = 0b1110, .S = 0, .Rd = 2,
+        .op_imm = 30, .Rm = 3}},
 };
 
 int main(int argc, char *argv[])

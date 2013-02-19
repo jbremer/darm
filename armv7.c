@@ -136,6 +136,20 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->add = (w >> 23) & 1;
         }
         return 0;
+
+    case 2:
+        d->instr = type3_instr_lookup[(w >> 5) & 0b11];
+        d->S = (w >> 20) & 1;
+        d->Rd = (w >> 12) & 0b1111;
+        if((w >> 4) & 1) {
+            d->Rm = (w >> 8) & 0b1111;
+            d->Rn = w & 0b1111;
+        }
+        else {
+            d->Rm = w & 0b1111;
+            d->op_imm = (w >> 7) & 0b11111;
+        }
+        return 0;
     }
     return -1;
 }

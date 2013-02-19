@@ -61,6 +61,8 @@ d = darmtbl
 cond_instr_types = [
     lambda x: d.Rn in x and d.Rd in x and x[-3] == d.type_ and x[-1] == d.Rm,
     lambda x: d.Rn in x and d.Rd in x and d.imm12 in x,
+    lambda x: x[-1] == d.Rn and x[-6] == d.Rm and x[-7] == d.Rd or
+    x[-1] == d.Rm and x[-5] == d.imm5,
 ]
 
 if __name__ == '__main__':
@@ -105,6 +107,7 @@ if __name__ == '__main__':
         # print some required definitions
         print 'uint8_t armv7_instr_types[256];'
         print 'armv7_instr_t armv7_instr_labels[256];'
+        print 'armv7_instr_t type3_instr_lookup[4];'
         print
 
         print '#endif'
@@ -123,3 +126,7 @@ if __name__ == '__main__':
 
         # print a table containing the instruction label for each entry
         print instruction_names_index_table(cond_table)
+
+        # print a lookup table for type3
+        print 'armv7_instr_t type3_instr_lookup[] = ' + \
+            '{I_LSL, I_LSR, I_ASR, I_ROR};\n'
