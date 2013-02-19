@@ -7,7 +7,9 @@ OBJ = $(SRC:.c=.o)
 GENCODEC = armv7-tbl.c
 GENCODEH = armv7-tbl.h
 
-default: $(GENCODEC) $(GENCODEH) $(OBJ) tests\tests.exe
+STUFF = $(GENCODEC) $(GENCODEH) $(OBJ) tests\tests.exe
+
+default: $(STUFF)
 
 $(GENCODEC):
 	python darmgen.py $@
@@ -18,5 +20,8 @@ $(GENCODEH):
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 
-%.exe: $(OBJ) $(GENCODEO)
+%.exe: %.c $(OBJ) $(GENCODEO)
 	$(CC) $(CFLAGS) -o $@ $^
+
+clean:
+	rm $(STUFF)
