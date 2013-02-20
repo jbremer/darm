@@ -20,12 +20,15 @@ BIC (immediate)
 BIC (register)
 BIC (register-shifted register)
 BKPT
-BL, BLX (immediate)
+BL
+BLX (immediate)
 BLX (register)
 BX
 BXJ
-CBNZ, CBZ
-CDP, CDP2
+CBNZ
+CBZ
+CDP
+CDP2
 CHKA
 CLREX
 CLZ
@@ -45,11 +48,16 @@ EOR (immediate)
 EOR (register)
 EOR (register-shifted register)
 F* (former VFP instruction mnemonics)
-HB, HBL, HBLP, HBP
+HB
+HBL
+HBLP
+HBP
 ISB
 IT
-LDC, LDC2 (immediate)
-LDC, LDC2 (literal)
+LDC
+LDC2 (immediate)
+LDC
+LDC2 (literal)
 LDM / LDMIA / LDMFD
 LDMDA / LDMFA
 LDMDB / LDMEA
@@ -89,16 +97,20 @@ LSL (immediate)
 LSL (register)
 LSR (immediate)
 LSR (register)
-MCR, MCR2
-MCRR, MCRR2
+MCR
+MCR2
+MCRR
+MCRR2
 MLA
 MLS
 MOV (immediate)
 MOV (register)
 MOV (shifted register)
 MOVT
-MRC, MRC2
-MRRC, MRRC2
+MRC
+MRC2
+MRRC
+MRRC2
 MRS
 MSR (immediate)
 MSR (register)
@@ -114,9 +126,11 @@ ORR (immediate)
 ORR (register)
 ORR (register-shifted register)
 PKH
-PLD, PLDW (immediate)
+PLD
+PLDW (immediate)
 PLD (literal)
-PLD, PLDW (register)
+PLD
+PLDW (register)
 PLI (immediate, literal)
 PLI (register)
 POP
@@ -163,21 +177,32 @@ SHSAX
 SHSUB16
 SHSUB8
 SMC (previously SMI)
-SMLABB, SMLABT, SMLATB, SMLATT
+SMLABB
+SMLABT
+SMLATB
+SMLATT
 SMLAD
 SMLAL
-SMLALBB, SMLALBT, SMLALTB, SMLALTT
+SMLALBB
+SMLALBT
+SMLALTB
+SMLALTT
 SMLALD
-SMLAWB, SMLAWT
+SMLAWB
+SMLAWT
 SMLSD
 SMLSLD
 SMMLA
 SMMLS
 SMMUL
 SMUAD
-SMULBB, SMULBT, SMULTB, SMULTT
+SMULBB
+SMULBT
+SMULTB
+SMULTT
 SMULL
-SMULWB, SMULWT
+SMULWB
+SMULWT
 SMUSD
 SRS
 SSAT
@@ -185,7 +210,8 @@ SSAT16
 SSAX
 SSUB16
 SSUB8
-STC, STC2
+STC
+STC2
 STM / STMIA / STMEA
 STMDA / STMED
 STMDB / STMFD
@@ -216,14 +242,16 @@ SUB (SP minus immediate)
 SUB (SP minus register)
 SUBS PC, LR and related instructions
 SVC (previously SWI)
-SWP, SWPB
+SWP
+SWPB
 SXTAB
 SXTAB16
 SXTAH
 SXTB
 SXTB16
 SXTH
-TBB, TBH
+TBB
+TBH
 TEQ (immediate)
 TEQ (register)
 TEQ (register-shifted register)
@@ -263,20 +291,28 @@ UXTAH
 UXTB
 UXTB16
 UXTH
-VABA, VABAL
-VABD, VABDL (integer)
+VABA
+VABAL
+VABD
+VABDL (integer)
 VABD (floating-point)
 VABS
-VACGE, VACGT, VACLE,VACLT
+VACGE
+VACGT
+VACLE
+VACLT
 VADD (integer)
 VADD (floating-point)
 VADDHN
-VADDL, VADDW
+VADDL
+VADDW
 VAND (immediate)
 VAND (register)
 VBIC (immediate)
 VBIC (register)
-VBIF, VBIT, VBSL
+VBIF
+VBIT
+VBSL
 VCEQ (register)
 VCEQ (immediate #0)
 VCGE (register)
@@ -289,21 +325,25 @@ VCLS
 VCLT (register)
 VCLT (immediate #0)
 VCLZ
-VCMP, VCMPE
+VCMP
+VCMPE
 VCNT
 VCVT (between floating-point and integer, Advanced SIMD)
-VCVT, VCVTR (between floating-point and integer, VFP)
+VCVT
+VCVTR (between floating-point and integer, VFP)
 VCVT (between floating-point and fixed-point, Advanced SIMD)
 VCVT (between floating-point and fixed-point, VFP)
 VCVT (between double-precision and single-precision)
 VCVT (between half-precision and single-precision, Advanced SIMD)
-VCVTB, VCVTT (between half-precision and single-precision, VFP)
+VCVTB
+VCVTT (between half-precision and single-precision, VFP)
 VDIV
 VDUP (scalar)
 VDUP (ARM core register)
 VEOR
 VEXT
-VHADD, VHSUB
+VHADD
+VHSUB
 VLD1 (multiple single elements)
 VLD1 (single element to one lane)
 VLD1 (single element to all lanes)
@@ -318,11 +358,20 @@ VLD4 (single 4-element structure to one lane)
 VLD4 (single 4-element structure to all lanes)
 VLDM
 VLDR
-VMAX, VMIN (integer)
-VMAX, VMIN (floating-point)
-VMLA, VMLAL, VMLS, VMLSL (integer)
-VMLA, VMLS (floating-point)
-VMLA, VMLAL, VMLS, VMLSL (by scalar)
+VMAX
+VMIN (integer)
+VMAX
+VMIN (floating-point)
+VMLA
+VMLAL
+VMLS
+VMLSL (integer)
+VMLA
+VMLS (floating-point)
+VMLA
+VMLAL
+VMLS
+VMLSL (by scalar)
 VMOV (immediate)
 VMOV (register)
 VMOV (ARM core register to scalar)
@@ -334,13 +383,17 @@ VMOVL
 VMOVN
 VMRS
 VMSR
-VMUL, VMULL (integer and polynomial)
+VMUL
+VMULL (integer and polynomial)
 VMUL (floating-point)
-VMUL, VMULL (by scalar)
+VMUL
+VMULL (by scalar)
 VMVN (immediate)
 VMVN (register)
 VNEG
-VNMLA, VNMLS, VNMUL
+VNMLA
+VNMLS
+VNMUL
 VORN (immediate)
 VORN (register)
 VORR (immediate)
@@ -349,28 +402,37 @@ VPADAL
 VPADD (integer)
 VPADD (floating-point)
 VPADDL
-VPMAX, VPMIN (integer)
-VPMAX, VPMIN (floating-point)
+VPMAX
+VPMIN (integer)
+VPMAX
+VPMIN (floating-point)
 VPOP
 VPUSH
 VQABS
 VQADD
-VQDMLAL, VQDMLSL
+VQDMLAL
+VQDMLSL
 VQDMULH
 VQDMULL
-VQMOVN, VQMOVUN
+VQMOVN
+VQMOVUN
 VQNEG
 VQRDMULH
 VQRSHL
-VQRSHRN, VQRSHRUN
+VQRSHRN
+VQRSHRUN
 VQSHL (register)
-VQSHL, VQSHLU (immediate)
-VQSHRN, VQSHRUN
+VQSHL
+VQSHLU (immediate)
+VQSHRN
+VQSHRUN
 VQSUB
 VRADDHN
 VRECPE
 VRECPS
-VREV16, VREV32, VREV64
+VREV16
+VREV32
+VREV64
 VRHADD
 VRSHL
 VRSHR
@@ -401,9 +463,11 @@ VSTR
 VSUB (integer)
 VSUB (floating-point)
 VSUBHN
-VSUBL, VSUBW
+VSUBL
+VSUBW
 VSWP
-VTBL, VTBX
+VTBL
+VTBX
 VTRN
 VTST
 VUZP
