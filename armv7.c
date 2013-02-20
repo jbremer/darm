@@ -191,6 +191,20 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             break;
         }
         break;
+
+    case T_MOV_IMM:
+        d->Rd = (w >> 12) & 0b1111;
+        d->imm = w & BITMSK_12;
+
+        // the MOV and MVN instructions have an S bit
+        if(d->instr == I_MOV || d->instr == I_MVN) {
+            d->S = (w >> 20) & 1;
+        }
+        // the MOVW and the MOVT instructions take another 4 bits of immediate
+        else {
+            d->imm |= ((w >> 16) & 0b1111) << 12;
+        }
+        return 0;
     }
     return -1;
 }

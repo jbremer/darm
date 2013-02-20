@@ -47,6 +47,8 @@ struct {
         .instr = I_BKPT, .instr_type = 4, .cond = 0b1110, .imm = 1}},
     {0xe12fff14, 0, {
         .instr = I_BX, .instr_type = 4, .cond = 0b1110, .Rm = 4}},
+    {0xe3e04020, 0, {
+        .instr = I_MVN, .instr_type = 5, .cond = 0b1110, .Rd = 4, .imm = 32}},
 };
 
 int main(int argc, char *argv[])

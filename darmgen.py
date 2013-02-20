@@ -101,7 +101,9 @@ cond_instr_types = [
     ('BRNCHMISC', 'Branch and Misc instructions',
      ['B(L)X(J)<c> <Rm>', 'BKPT #<imm16>', 'MSR<c> <spec_reg>,<Rn>'],
      lambda x: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0)),
-    #lambda x: x[-1] == d.imm12 and x[-2] == d.Rd,
+    ('MOV_IMM', 'Move immediate to a register (possibly negating it)',
+     ['ins{S}<c> <Rd>,#<const>'],
+     lambda x: x[-1] == d.imm12 and x[-2] == d.Rd),
 ]
 
 if __name__ == '__main__':
