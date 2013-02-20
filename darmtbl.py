@@ -65,16 +65,18 @@ imm12         = Immediate('imm12', 12, 'Immediate')
 imm24         = Immediate('imm24', 24, 'Immediate')
 
 ARMv7 = [
+    # commented out instructions include a number representing the type that
+    # implements this particular instruction (edge cases etc.)
     ('ADC{S}<c> <Rd>,<Rn>,#<const>', cond, 0, 0, 1, 0, 1, 0, 1, S, Rn, Rd, imm12),
     ('ADC{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 1, 0, 1, S, Rn, Rd, imm5, type_, 0, Rm),
     ('ADC{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 0, 1, 0, 1, S, Rn, Rd, Rs, 0, type_, 1, Rm),
     ('ADD{S}<c> <Rd>,<Rn>,#<const>', cond, 0, 0, 1, 0, 1, 0, 0, S, Rn, Rd, imm12),
     ('ADD{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 1, 0, 0, S, Rn, Rd, imm5, type_, 0, Rm),
     ('ADD{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 0, 1, 0, 0, S, Rn, Rd, Rs, 0, type_, 1, Rm),
-    ('ADD{S}<c> <Rd>,SP,#<const>', cond, 0, 0, 1, 0, 1, 0, 0, S, 1, 1, 0, 1, Rd, imm12),
-    ('ADD{S}<c> <Rd>,SP,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 1, 0, 0, S, 1, 1, 0, 1, Rd, imm5, type_, 0, Rm),
-    ('ADR<c> <Rd>,<label>', cond, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, Rd, imm12),
-    ('ADR<c> <Rd>,<label>', cond, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, Rd, imm12),
+    #1 ('ADD{S}<c> <Rd>,SP,#<const>', cond, 0, 0, 1, 0, 1, 0, 0, S, 1, 1, 0, 1, Rd, imm12),
+    #0 ('ADD{S}<c> <Rd>,SP,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 1, 0, 0, S, 1, 1, 0, 1, Rd, imm5, type_, 0, Rm),
+    #1 ('ADR<c> <Rd>,<label>', cond, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, Rd, imm12),
+    #1 ('ADR<c> <Rd>,<label>', cond, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, Rd, imm12),
     ('AND{S}<c> <Rd>,<Rn>,#<const>', cond, 0, 0, 1, 0, 0, 0, 0, S, Rn, Rd, imm12),
     ('AND{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 0, 0, 0, S, Rn, Rd, imm5, type_, 0, Rm),
     ('AND{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 0, 0, 0, 0, S, Rn, Rd, Rs, 0, type_, 1, Rm),
@@ -242,8 +244,8 @@ ARMv7 = [
     ('SUB{S}<c> <Rd>,<Rn>,#<const>', cond, 0, 0, 1, 0, 0, 1, 0, S, Rn, Rd, imm12),
     ('SUB{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 0, 1, 0, S, Rn, Rd, imm5, type_, 0, Rm),
     ('SUB{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', cond, 0, 0, 0, 0, 0, 1, 0, S, Rn, Rd, Rs, 0, type_, 1, Rm),
-    ('SUB{S}<c> <Rd>,SP,#<const>', cond, 0, 0, 1, 0, 0, 1, 0, S, 1, 1, 0, 1, Rd, imm12),
-    ('SUB{S}<c> <Rd>,SP,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 0, 1, 0, S, 1, 1, 0, 1, Rd, imm5, type_, 0, Rm),
+    #1 ('SUB{S}<c> <Rd>,SP,#<const>', cond, 0, 0, 1, 0, 0, 1, 0, S, 1, 1, 0, 1, Rd, imm12),
+    #0 ('SUB{S}<c> <Rd>,SP,<Rm>{,<shift>}', cond, 0, 0, 0, 0, 0, 1, 0, S, 1, 1, 0, 1, Rd, imm5, type_, 0, Rm),
     ('SVC<c> #<imm24>', cond, 1, 1, 1, 1, imm24),
     ('SWP<c> <Rt>,<Rt2>,[<Rn>]', cond, 0, 0, 0, 1, 0, 0, 0, 0, Rn, Rt, (0), (0), (0), (0), 1, 0, 0, 1, Rt2),
     ('SWPB<c> <Rt>,<Rt2>,[<Rn>]', cond, 0, 0, 0, 1, 0, 1, 0, 0, Rn, Rt, (0), (0), (0), (0), 1, 0, 0, 1, Rt2),
