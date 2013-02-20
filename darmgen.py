@@ -86,36 +86,36 @@ cond_instr_types = [
      'Arithmetic instructions which take a shift for the second source',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
       'ins{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>'],
-     lambda x: d.Rn in x and d.Rd in x and x[-3] == d.type_
+     lambda x, y, z: d.Rn in x and d.Rd in x and x[-3] == d.type_
      and x[-1] == d.Rm),
     ('ARITH_IMM',
      'Arithmetic instructions which take an immediate as second source',
      ['ins{S}<c> <Rd>,<Rn>,#<const>'],
-     lambda x: d.Rn in x and d.Rd in x and d.imm12 in x),
     ('SHIFT', 'Shift instructions',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>', 'ins{S}<c> <Rd>,<Rm>,#<imm>'],
      lambda x: x[-1] == d.Rn and x[-6] == d.Rm and x[-7] == d.Rd or
         x[-1] == d.Rm and x[-5] == d.imm5),
+     lambda x, y, z: d.Rn in x and d.Rd in x and d.imm12 in x),
     ('BRNCHSC', 'Branch and System Call instructions',
      ['B(L)<c> <label>', 'SVC<c> #<imm24>'],
-     lambda x: x[-1] == d.imm24),
+     lambda x, y, z: x[-1] == d.imm24),
     ('BRNCHMISC', 'Branch and Misc instructions',
      ['B(L)X(J)<c> <Rm>', 'BKPT #<imm16>', 'MSR<c> <spec_reg>,<Rn>'],
-     lambda x: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0)),
+     lambda x, y, z: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0)),
     ('MOV_IMM', 'Move immediate to a register (possibly negating it)',
      ['ins{S}<c> <Rd>,#<const>'],
-     lambda x: x[-1] == d.imm12 and x[-2] == d.Rd),
+     lambda x, y, z: x[-1] == d.imm12 and x[-2] == d.Rd),
     ('CMP_OP', 'Comparison instructions which take two operands',
      ['ins<c> <Rn>,<Rm>{,<shift>}', 'ins<c> <Rn>,<Rm>,<type> <Rs>'],
-     lambda x: x[-1] == d.Rm and x[-3] == d.type_ and
+     lambda x, y, z: x[-1] == d.Rm and x[-3] == d.type_ and
         (x[-4] == d.imm5 and x[-8:-4] == (0, 0, 0, 0) or
          x[-5] == d.Rs and x[-9:-5] == (0, 0, 0, 0))),
     ('CMP_IMM', 'Comparison instructions which take an immediate',
      ['ins<c> <Rn>,#<const>'],
-     lambda x: x[-1] == d.imm12 and x[-6] == d.Rn),
+     lambda x, y, z: x[-1] == d.imm12 and x[-6] == d.Rn),
     ('OPLESS', 'Instructions which don\'t take any operands',
      ['ins<c>'],
-     lambda x: len(x) == 29),
+     lambda x, y, z: len(x) == 29),
 ]
 
 if __name__ == '__main__':
@@ -143,7 +143,7 @@ if __name__ == '__main__':
             # for each conditional instruction, check which type of
             # instruction this is
             for instr_idx, y in enumerate(cond_instr_types):
-                if bits[0] == d.cond and y[3](bits):
+                if bits[0] == d.cond and y[3](bits, instr, idx):
                     cond_table[idx] = instr_idx, instruction_name(instr)
                     break
 
