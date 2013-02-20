@@ -104,6 +104,14 @@ cond_instr_types = [
     ('MOV_IMM', 'Move immediate to a register (possibly negating it)',
      ['ins{S}<c> <Rd>,#<const>'],
      lambda x: x[-1] == d.imm12 and x[-2] == d.Rd),
+    ('CMP_OP', 'Comparison instructions which take two operands',
+     ['ins<c> <Rn>,<Rm>{,<shift>}', 'ins<c> <Rn>,<Rm>,<type> <Rs>'],
+     lambda x: x[-1] == d.Rm and x[-3] == d.type_ and
+        (x[-4] == d.imm5 and x[-8:-4] == (0, 0, 0, 0) or
+         x[-5] == d.Rs and x[-9:-5] == (0, 0, 0, 0))),
+    ('CMP_IMM', 'Comparison instructions which take an immediate',
+     ['ins<c> <Rn>,#<const>'],
+     lambda x: x[-1] == d.imm12 and x[-6] == d.Rn),
 ]
 
 if __name__ == '__main__':

@@ -49,6 +49,15 @@ struct {
         .instr = I_BX, .instr_type = 4, .cond = 0b1110, .Rm = 4}},
     {0xe3e04020, 0, {
         .instr = I_MVN, .instr_type = 5, .cond = 0b1110, .Rd = 4, .imm = 32}},
+    {0xe1140505, 0, {
+        .instr = I_TST, .instr_type = 6, .cond = 0b1110, .Rn = 4, .Rm = 5,
+        .shift_is_reg = 0, .type = 0, .shift = 10}},
+    {0xe15a017b, 0, {
+        .instr = I_CMP, .instr_type = 6, .cond = 0b1110, .Rn = 10, .Rm = 11,
+        .type = 3, .shift_is_reg = 1, .Rs = 1}},
+    {0xe357029a, 0, {
+        .instr = I_CMP, .instr_type = T_CMP_IMM, .cond = 0b1110, .Rn = 7,
+        .imm = 666}},
 };
 
 int main(int argc, char *argv[])

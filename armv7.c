@@ -205,6 +205,26 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->imm |= ((w >> 16) & 0b1111) << 12;
         }
         return 0;
+
+    case T_CMP_OP:
+        d->Rn = (w >> 16) & 0b1111;
+        d->Rm = w & 0b1111;
+        d->type = (w >> 5) & 0b11;
+
+        // type == 1, shift with the value of the lower bits of Rs
+        d->shift_is_reg = (w >> 4) & 1;
+        if(d->shift_is_reg != 0) {
+            d->Rs = (w >> 8) & 0b1111;
+        }
+        else {
+            d->shift = (w >> 7) & 0b11111;
+        }
+        return 0;
+
+    case T_CMP_IMM:
+        d->Rn = (w >> 16) & 0b1111;
+        d->imm = w & BITMSK_12;
+        return 0;
     }
     return -1;
 }
