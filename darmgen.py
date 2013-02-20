@@ -1,4 +1,5 @@
 import darmtbl
+import itertools
 import sys
 import textwrap
 
@@ -128,14 +129,16 @@ if __name__ == '__main__':
         remainder = []
         for x in xrange(1 if bits[0] == darmtbl.cond else 4, len(bits)):
             if isinstance(bits[x], int):
-                identifier.append(bits[x])
-            else:
+                identifier.append(str(bits[x]))
+            elif len(identifier) + bits[x].bitsize > 8:
+                identifier += ['01'] * (8-len(identifier))
                 remainder = bits[x:]
                 break
+            else:
+                identifier += ['01'] * bits[x].bitsize
 
-        for x in xrange(2**max(8-len(identifier), 0)):
-            idx = sum(identifier[y]*2**(7-y) for y in xrange(len(identifier)))
-            idx = int(idx + x)
+        for x in itertools.product(*identifier[:8]):
+            idx = sum(int(x[y])*2**(7-y) for y in xrange(8))
 
             # for each conditional instruction, check which type of
             # instruction this is
