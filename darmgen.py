@@ -142,6 +142,7 @@ if __name__ == '__main__':
             for instr_idx, y in enumerate(cond_instr_types):
                 if bits[0] == d.cond and y[3](bits):
                     cond_table[idx] = instr_idx, instruction_name(instr)
+                    break
 
     # python magic!
     sys.stdout = open(sys.argv[1], 'w')
