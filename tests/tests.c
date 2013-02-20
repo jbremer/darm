@@ -60,6 +60,8 @@ struct {
     {0xe357029a, 0, {
         .instr = I_CMP, .instr_type = T_CMP_IMM, .cond = 0b1110, .Rn = 7,
         .imm = 666}},
+    {0xe320f000, 0, {.instr = I_NOP, .instr_type = T_OPLESS, .cond = 0b1110}},
+    {0xe320f003, 0, {.instr = I_WFI, .instr_type = T_OPLESS, .cond = 0b1110}},
 };
 
 int main(int argc, char *argv[])

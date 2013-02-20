@@ -112,6 +112,9 @@ cond_instr_types = [
     ('CMP_IMM', 'Comparison instructions which take an immediate',
      ['ins<c> <Rn>,#<const>'],
      lambda x: x[-1] == d.imm12 and x[-6] == d.Rn),
+    ('OPLESS', 'Instructions which don\'t take any operands',
+     ['ins<c>'],
+     lambda x: len(x) == 29),
 ]
 
 if __name__ == '__main__':
@@ -160,6 +163,7 @@ if __name__ == '__main__':
         print 'armv7_instr_t armv7_instr_labels[256];'
         print 'armv7_instr_t type3_instr_lookup[4];'
         print 'armv7_instr_t type4_instr_lookup[16];'
+        print 'armv7_instr_t type_opless_instr_lookup[8];'
         print
 
         # print type info for each encoding type
@@ -188,3 +192,6 @@ if __name__ == '__main__':
         t4 = 'msr', 'bx', 'bxj', 'blx', None, 'qsub', None, 'bkpt', 'smlaw', \
             None, 'smulw', None, 'smlaw', None, 'smulw', None
         print type_lookup_table('type4', *t4)
+
+        t_opless = 'nop', 'yield', 'wfe', 'wfi', 'sev', None, None, None
+        print type_lookup_table('type_opless', *t_opless)

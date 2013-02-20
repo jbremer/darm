@@ -225,6 +225,10 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->Rn = (w >> 16) & 0b1111;
         d->imm = w & BITMSK_12;
         return 0;
+
+    case T_OPLESS:
+        d->instr = type_opless_instr_lookup[w & 0b111];
+        return d->instr == -1 ? -1 : 0;
     }
     return -1;
 }
