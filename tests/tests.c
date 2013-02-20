@@ -32,11 +32,11 @@ struct {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
         .Rd = 3, .imm = 666, .add = 0}},
     {0xe1a02458, 0, {
-        .instr = I_ASR, .instr_type = T_SHIFT, .cond = 0b1110, .S = 0,
+        .instr = I_ASR, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 2, .Rm = 4, .Rn = 8}},
     {0xe1a02f03, 0, {
-        .instr = I_LSL, .instr_type = T_SHIFT, .cond = 0b1110, .S = 0,
-        .Rd = 2, .imm = 30, .Rm = 3}},
+        .instr = I_LSL, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
+        .Rd = 2, .shift = 30, .Rm = 3}},
     {0xeb00014e, 0, {
         .instr = I_BL, .instr_type = T_BRNCHSC, .cond = 0b1110, .imm = 1336}},
     {0xeaffff00, 0, {
@@ -62,6 +62,9 @@ struct {
         .imm = 666}},
     {0xe320f000, 0, {.instr = I_NOP, .instr_type = T_OPLESS, .cond = 0b1110}},
     {0xe320f003, 0, {.instr = I_WFI, .instr_type = T_OPLESS, .cond = 0b1110}},
+    {0xe1a0c064, 0, {
+        .instr = I_RRX, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
+        .Rd = 12, .shift = 0, .Rm = 4}},
 };
 
 int main(int argc, char *argv[])

@@ -91,10 +91,6 @@ cond_instr_types = [
     ('ARITH_IMM',
      'Arithmetic instructions which take an immediate as second source',
      ['ins{S}<c> <Rd>,<Rn>,#<const>'],
-    ('SHIFT', 'Shift instructions',
-     ['ins{S}<c> <Rd>,<Rn>,<Rm>', 'ins{S}<c> <Rd>,<Rm>,#<imm>'],
-     lambda x: x[-1] == d.Rn and x[-6] == d.Rm and x[-7] == d.Rd or
-        x[-1] == d.Rm and x[-5] == d.imm5),
      lambda x, y, z: d.Rn in x and d.Rd in x and d.imm12 in x),
     ('BRNCHSC', 'Branch and System Call instructions',
      ['B(L)<c> <label>', 'SVC<c> #<imm24>'],
@@ -116,6 +112,10 @@ cond_instr_types = [
     ('OPLESS', 'Instructions which don\'t take any operands',
      ['ins<c>'],
      lambda x, y, z: len(x) == 29),
+    ('DST_SRC', 'Manipulate and move a register to another register',
+     ['ins{S}<c> <Rd>,<Rm>', 'ins{S}<c> <Rd>,<Rm>,#<imm>',
+     'ins{S}<c> <Rd>,<Rn>,<Rm>'],
+     lambda x, y, z: z == 26 or z == 27),
 ]
 
 if __name__ == '__main__':
@@ -165,7 +165,7 @@ if __name__ == '__main__':
         # print some required definitions
         print 'uint8_t armv7_instr_types[256];'
         print 'armv7_instr_t armv7_instr_labels[256];'
-        print 'armv7_instr_t type3_instr_lookup[4];'
+        print 'armv7_instr_t type_shift_instr_lookup[16];'
         print 'armv7_instr_t type4_instr_lookup[16];'
         print 'armv7_instr_t type_opless_instr_lookup[8];'
         print
@@ -190,8 +190,29 @@ if __name__ == '__main__':
         # print a table containing the instruction label for each entry
         print instruction_names_index_table(cond_table)
 
-        # print a lookup table for type3
-        print type_lookup_table('type3', 'lsl', 'lsr', 'asr', 'ror')
+        # print a lookup table for the shift type (which is a sub-type of
+        # the dst-src type), the None types represent instructions of the
+        # STR family, which we'll handle in the next handler, T_STR.
+        t_shift = {
+            0b0000: 'lsl',
+            0b0001: 'lsl',
+            0b0010: 'lsr',
+            0b0011: 'lsr',
+            0b0100: 'asr',
+            0b0101: 'asr',
+            0b0110: 'ror',
+            0b0111: 'ror',
+            0b1000: 'lsl',
+            0b1001: None,
+            0b1010: 'lsr',
+            0b1011: None,
+            0b1100: 'asr',
+            0b1101: None,
+            0b1110: 'ror',
+            0b1111: None}
+
+        print type_lookup_table('type_shift',
+                                *[t_shift[x] for x in xrange(16)])
 
         t4 = 'msr', 'bx', 'bxj', 'blx', None, 'qsub', None, 'bkpt', 'smlaw', \
             None, 'smulw', None, 'smlaw', None, 'smulw', None
