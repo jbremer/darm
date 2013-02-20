@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
         identifier = []
         remainder = []
-        for x in xrange(1 if bits[0] == darmtbl.cond else 4, len(bits)-1):
+        for x in xrange(1 if bits[0] == darmtbl.cond else 4, len(bits)):
             if isinstance(bits[x], int):
                 identifier.append(bits[x])
             else:
