@@ -47,7 +47,6 @@ ENTERX
 EOR (immediate)
 EOR (register)
 EOR (register-shifted register)
-F* (former VFP instruction mnemonics)
 HB
 HBL
 HBLP
@@ -107,6 +106,7 @@ MOV (immediate)
 MOV (register)
 MOV (shifted register)
 MOVT
+MOVW
 MRC
 MRC2
 MRRC
@@ -188,8 +188,7 @@ SMLALBT
 SMLALTB
 SMLALTT
 SMLALD
-SMLAWB
-SMLAWT
+SMLAW
 SMLSD
 SMLSLD
 SMMLA
@@ -201,8 +200,7 @@ SMULBT
 SMULTB
 SMULTT
 SMULL
-SMULWB
-SMULWT
+SMULW
 SMUSD
 SRS
 SSAT
@@ -240,7 +238,6 @@ SUB (register)
 SUB (register-shifted register)
 SUB (SP minus immediate)
 SUB (SP minus register)
-SUBS PC, LR and related instructions
 SVC (previously SWI)
 SWP
 SWPB

@@ -9,7 +9,7 @@ def instruction_name(x):
 
 def instruction_names(arr):
     """List of all unique instruction names."""
-    return sorted(set(instruction_name(x[0]) for x in arr))
+    return sorted(set(instruction_name(x) for x in arr))
 
 
 def instruction_names_enum(arr):
@@ -142,7 +142,7 @@ if __name__ == '__main__':
         print
 
         # print all instruction labels
-        print instruction_names_enum(d.ARMv7)
+        print instruction_names_enum(open('instructions.txt'))
 
         # print some required definitions
         print 'uint8_t armv7_instr_types[256];'
