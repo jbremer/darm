@@ -140,6 +140,7 @@ if __name__ == '__main__':
         # print required headers
         print '#ifndef __ARMV7_TBL__'
         print '#define __ARMV7_TBL__'
+        print
         print '#include <stdint.h>'
         print
 
