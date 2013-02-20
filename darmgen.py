@@ -81,13 +81,13 @@ d = darmtbl
 
 # we specify various instruction types
 cond_instr_types = [
-    ('ARITH1',
+    ('ARITH_SHIFT',
      'Arithmetic instructions which take a shift for the second source',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
       'ins{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>'],
      lambda x: d.Rn in x and d.Rd in x and x[-3] == d.type_
      and x[-1] == d.Rm),
-    ('ARITH2',
+    ('ARITH_IMM',
      'Arithmetic instructions which take an immediate as second source',
      ['ins{S}<c> <Rd>,<Rn>,#<const>'],
      lambda x: d.Rn in x and d.Rd in x and d.imm12 in x),
