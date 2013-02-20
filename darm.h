@@ -31,7 +31,7 @@ typedef struct _darm_t {
     uint32_t        Rm; // second operand
 
     // immediate operand
-    uint32_t        op_imm;
+    uint32_t        imm;
 
     // if op-imm is a label, then this flag specifies whether the immediate
     // should be added or subtracted from the current instruction pointer

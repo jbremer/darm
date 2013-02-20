@@ -125,7 +125,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
-        d->op_imm = w & BITMSK_12;
+        d->imm = w & BITMSK_12;
 
         // check whether this instruction is in fact an ADR instruction
         if((d->instr == I_ADD || d->instr == I_SUB) &&
@@ -145,23 +145,23 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         else {
             d->Rm = w & 0b1111;
-            d->op_imm = (w >> 7) & 0b11111;
+            d->imm = (w >> 7) & 0b11111;
         }
         return 0;
 
     case T_BRNCHSC:
-        d->op_imm = w & BITMSK_24;
+        d->imm = w & BITMSK_24;
 
         // if the instruction is B or BL, then we have to sign-extend it and
         // multiply it with four
         if(d->instr != I_SVC) {
             // check if the highest bit of the imm24 is set, if so, we
             // manually sign-extend the integer
-            if((d->op_imm >> 23) & 1) {
-                d->op_imm = (d->op_imm | 0xff000000) << 2;
+            if((d->imm >> 23) & 1) {
+                d->imm = (d->imm | 0xff000000) << 2;
             }
             else {
-                d->op_imm = d->op_imm << 2;
+                d->imm = d->imm << 2;
             }
         }
         return 0;
@@ -174,7 +174,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         // rather than some magic values
         switch ((uint32_t) d->instr) {
         case I_BKPT:
-            d->op_imm = (((w >> 8) & BITMSK_12) << 4) + (w & 0b1111);
+            d->imm = (((w >> 8) & BITMSK_12) << 4) + (w & 0b1111);
             return 0;
 
         case I_BX: case I_BXJ: case I_BLX:
@@ -183,7 +183,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
         case I_MSR:
             d->Rn = w & 0b1111;
-            d->op_imm = (w >> 18) & 0b11;
+            d->imm = (w >> 18) & 0b11;
             return 0;
 
         case I_QSUB: case I_SMLAW: case I_SMULW: default:
