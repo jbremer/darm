@@ -10,7 +10,7 @@ def instruction_name(x):
 
 def instruction_names(arr):
     """List of all unique instruction names."""
-    return sorted(set(instruction_name(x) for x in arr))
+    return ['INVLD'] + sorted(set(instruction_name(x) for x in arr))
 
 
 def instruction_names_enum(arr):
@@ -82,6 +82,8 @@ d = darmtbl
 
 # we specify various instruction types
 cond_instr_types = [
+    ('INVLD', 'Invalid or non-existent type',
+     ['I_INVLD'], lambda x, y, z: False),
     ('ARITH_SHIFT',
      'Arithmetic instructions which take a shift for the second source',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',

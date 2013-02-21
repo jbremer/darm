@@ -104,6 +104,9 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     // do a lookup for the type of instruction
     switch (d->instr_type) {
+    case T_INVLD:
+        return -1;
+
     case T_ARITH_SHIFT:
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
@@ -214,7 +217,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     case T_OPLESS:
         d->instr = type_opless_instr_lookup[w & 0b111];
-        return d->instr == -1 ? -1 : 0;
+        return d->instr == I_INVLD ? -1 : 0;
 
     case T_DST_SRC:
         d->instr = type_shift_instr_lookup[(w >> 4) & 0b1111];
