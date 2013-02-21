@@ -36,6 +36,10 @@ typedef struct _darm_t {
     // which take a relative offset to a pointer or to the program counter
     uint32_t        U;
 
+    // the bit for the unconditional BLX instruction which allows one to
+    // branch with link to a 2-byte aligned thumb2 instruction
+    uint32_t        H;
+
     // register operands
     darm_reg_t      Rd; // destination
     darm_reg_t      Rn; // first operand

@@ -147,6 +147,24 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
             d->imm = w & BITMSK_12;
         }
         return 0;
+
+    case 0b101:
+        d->instr = I_BLX;
+        d->H = (w >> 24) & 1;
+        d->imm = w & BITMSK_24;
+
+        // check if the highest bit of the imm24 is set, if so, we
+        // manually sign-extend the integer
+        if((d->imm >> 23) & 1) {
+            d->imm = (d->imm | 0xff000000) << 2;
+        }
+        else {
+            d->imm = d->imm << 2;
+        }
+
+        // add the H bit
+        d->imm |= d->H << 1;
+        return 0;
     }
     return -1;
 }
