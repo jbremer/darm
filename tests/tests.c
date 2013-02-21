@@ -90,11 +90,14 @@ int main()
         if(ret != tests[i].r || memcmp(&tests[i].d, &d, sizeof(darm_t))) {
             printf("incorrect encoding for 0x%08x\n", d.w);
 
+            const char *mnemonic = armv7_mnemonic_by_index(d.instr);
+            const char *enctype = armv7_enctype_by_index(d.instr_type);
+
             printf(
-                "ret: %d, instr: %d, instr-type: %d, cond: %d, S: %d\n"
+                "ret: %d, instr: I_%s, instr-type: T_%s, cond: %d, S: %d\n"
                 "Rd: %d, Rn: %d, Rm: %d, op-imm: %d, add: %d\n"
                 "type: %d, shift-is-reg: %d, Rs: %d, shift: %d\n",
-                ret, d.instr, d.instr_type, d.cond, d.S, d.Rd, d.Rn, d.Rm,
+                ret, mnemonic, enctype, d.cond, d.S, d.Rd, d.Rn, d.Rm,
                 d.imm, d.add, d.type, d.shift_is_reg, d.Rs, d.shift);
             failure = 1;
         }
