@@ -124,8 +124,29 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         }
         // otherwise, if the 21th bit is not set, it's either the PLD or the
         // PLI instruction
-        else {
+        // we fall-through here, as 0b011 also handles the PLD and PLI
+        // instructions
+
+    case 0b011:
+        // if the 24th bit is set, then this is a PLD instruction, otherwise
+        // it's a PLI instruction
+        d->instr = (w >> 24) & 1 ? I_PLD : I_PLI;
+
+        d->Rn = (w >> 16) & 0b1111;
+        d->U = (w >> 23) & 1;
+
+        // if the 25th bit is set, then this instruction takes a shifted
+        // register as offset, otherwise, it takes an immediate as offset
+        if((w >> 25) & 1) {
+            d->Rm = w & 0b1111;
+            d->shift_is_reg = 0;
+            d->type = (w >> 5) & 0b11;
+            d->shift = (w >> 7) & 0b11111;
         }
+        else {
+            d->imm = w & BITMSK_12;
+        }
+        return 0;
     }
     return -1;
 }

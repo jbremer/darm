@@ -80,7 +80,10 @@ struct {
         .instr = I_DSB, .instr_type = T_UNCOND, .cond = 0b1111,
         .option = 12}},
     {0xf1010200, 0, {
-        .instr = I_SETEND, .instr_type = T_UNCOND, .cond = 0b1111, .E = 1}}
+        .instr = I_SETEND, .instr_type = T_UNCOND, .cond = 0b1111, .E = 1}},
+    {0xf4d2f001, 0, {
+        .instr = I_PLI, .instr_type = T_UNCOND, .cond = 0b1111, .U = 1,
+        .Rn = 2, .imm = 1}},
 };
 
 int main()
