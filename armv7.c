@@ -254,6 +254,10 @@ int armv7_disassemble(darm_t *d, uint32_t w)
 {
     int ret = -1;
 
+    // clear the entire darm state, in order to make sure that no members
+    // contain undefined data
+    memset(d, 0, sizeof(darm_t));
+
     d->cond = (w >> 28) & 0b1111;
     d->w = w;
 
