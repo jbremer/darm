@@ -43,7 +43,7 @@ def updates_condition_flags_table(arr):
 
 def instruction_types_table(arr):
     """Lookup table for the types of instructions."""
-    table = ', '.join(str(arr[x][0]) if x in arr else 'T_INVLD'
+    table = ', '.join('T_%s' % arr[x][1][0] if x in arr else 'T_INVLD'
                       for x in xrange(256))
     text = '\n    '.join(textwrap.wrap(table, 74))
     return 'armv7_enctype_t armv7_instr_types[] = {\n    %s\n};\n' % text
@@ -51,7 +51,7 @@ def instruction_types_table(arr):
 
 def instruction_names_index_table(arr):
     """Lookup table for instruction label for each instruction index."""
-    table = ', '.join('I_%s' % str(arr[x][1]) if x in arr else 'I_INVLD'
+    table = ', '.join('I_%s' % arr[x][0] if x in arr else 'I_INVLD'
                       for x in xrange(256))
     text = '\n    '.join(textwrap.wrap(table, 74))
     return 'armv7_instr_t armv7_instr_labels[] = {\n    %s\n};\n' % text
@@ -144,9 +144,9 @@ if __name__ == '__main__':
 
             # for each conditional instruction, check which type of
             # instruction this is
-            for instr_idx, y in enumerate(cond_instr_types):
+            for y in cond_instr_types:
                 if bits[0] == d.cond and y[3](bits, instr, idx):
-                    cond_table[idx] = instr_idx, instruction_name(instr)
+                    cond_table[idx] = instruction_name(instr), y
                     break
 
     # python magic!
