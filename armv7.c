@@ -221,7 +221,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     case T_DST_SRC:
         d->instr = type_shift_instr_lookup[(w >> 4) & 0b1111];
-        if(d->instr != -1) {
+        if(d->instr != I_INVLD) {
             d->S = (w >> 20) & 1;
             d->Rd = (w >> 12) & 0b1111;
             d->type = (w >> 5) & 0b11;

@@ -43,15 +43,15 @@ def updates_condition_flags_table(arr):
 
 def instruction_types_table(arr):
     """Lookup table for the types of instructions."""
-    table = ', '.join(str(arr[x][0]) if x in arr else '-1'
+    table = ', '.join(str(arr[x][0]) if x in arr else 'T_INVLD'
                       for x in xrange(256))
     text = '\n    '.join(textwrap.wrap(table, 74))
-    return 'uint8_t armv7_instr_types[] = {\n    %s\n};\n' % text
+    return 'armv7_enctype_t armv7_instr_types[] = {\n    %s\n};\n' % text
 
 
 def instruction_names_index_table(arr):
     """Lookup table for instruction label for each instruction index."""
-    table = ', '.join('I_%s' % str(arr[x][1]) if x in arr else '-1'
+    table = ', '.join('I_%s' % str(arr[x][1]) if x in arr else 'I_INVLD'
                       for x in xrange(256))
     text = '\n    '.join(textwrap.wrap(table, 74))
     return 'armv7_instr_t armv7_instr_labels[] = {\n    %s\n};\n' % text
@@ -59,7 +59,7 @@ def instruction_names_index_table(arr):
 
 def type_lookup_table(name, *args):
     """Create a lookup table for a certain instruction type."""
-    table = ', '.join('I_%s' % x.upper() if x else '-1' for x in args)
+    table = ', '.join('I_%s' % x.upper() if x else 'I_INVLD' for x in args)
     text = '\n    '.join(textwrap.wrap(table, 74))
     return 'armv7_instr_t %s_instr_lookup[] = {\n    %s\n};\n' % (name, text)
 
@@ -164,16 +164,16 @@ if __name__ == '__main__':
         # print all instruction labels
         print instruction_names_enum(open('instructions.txt'))
 
+        # print type info for each encoding type
+        print type_encoding_info('armv7_enctype', cond_instr_types)
+
         # print some required definitions
-        print 'uint8_t armv7_instr_types[256];'
+        print 'armv7_enctype_t armv7_instr_types[256];'
         print 'armv7_instr_t armv7_instr_labels[256];'
         print 'armv7_instr_t type_shift_instr_lookup[16];'
         print 'armv7_instr_t type4_instr_lookup[16];'
         print 'armv7_instr_t type_opless_instr_lookup[8];'
         print
-
-        # print type info for each encoding type
-        print type_encoding_info('armv7_enctype', cond_instr_types)
 
         print '#endif'
         print
