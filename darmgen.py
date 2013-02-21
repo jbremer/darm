@@ -24,7 +24,7 @@ def instruction_names_table(arr):
     """Table of strings of all instructions."""
     text = ', '.join('"%s"' % x for x in instruction_names(arr))
     text = '\n    '.join(textwrap.wrap(text, 74))
-    return 'const char *armv7_mnemonics[] = {\n    %s\n};' % text
+    return 'const char *armv7_mnemonics[] = {\n    %s\n};\n' % text
 
 
 def updates_condition_flags(arr):
@@ -64,7 +64,7 @@ def type_lookup_table(name, *args):
     return 'armv7_instr_t %s_instr_lookup[] = {\n    %s\n};\n' % (name, text)
 
 
-def type_encoding_info(enumname, arr):
+def type_encoding_enum(enumname, arr):
     text = []
     for name, info, encodings, fn in arr:
         text.append(
@@ -77,6 +77,13 @@ def type_encoding_info(enumname, arr):
     return 'typedef enum _%s_t {\n%s\n} %s_t;\n' % (enumname,
                                                     '\n\n'.join(text),
                                                     enumname)
+
+
+def type_encoding_table(tblname, arr):
+    """Table of strings of all instructions."""
+    text = ', '.join('"%s"' % x[0] for x in arr)
+    text = '\n    '.join(textwrap.wrap(text, 74))
+    return 'const char *%s[] = {\n    %s\n};\n' % (tblname, text)
 
 d = darmtbl
 
@@ -165,7 +172,7 @@ if __name__ == '__main__':
         print instruction_names_enum(open('instructions.txt'))
 
         # print type info for each encoding type
-        print type_encoding_info('armv7_enctype', cond_instr_types)
+        print type_encoding_enum('armv7_enctype', cond_instr_types)
 
         # print some required definitions
         print 'armv7_enctype_t armv7_instr_types[256];'
@@ -173,6 +180,9 @@ if __name__ == '__main__':
         print 'armv7_instr_t type_shift_instr_lookup[16];'
         print 'armv7_instr_t type4_instr_lookup[16];'
         print 'armv7_instr_t type_opless_instr_lookup[8];'
+        count = len(instruction_names(open('instructions.txt')))
+        print 'const char *armv7_mnemonics[%d];' % count
+        print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
         print
 
         print '#endif'
@@ -222,3 +232,6 @@ if __name__ == '__main__':
 
         t_opless = 'nop', 'yield', 'wfe', 'wfi', 'sev', None, None, None
         print type_lookup_table('type_opless', *t_opless)
+
+        print instruction_names_table(open('instructions.txt'))
+        print type_encoding_table('armv7_enctypes', cond_instr_types)

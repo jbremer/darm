@@ -50,4 +50,7 @@ const char *armv7_condition_info(int condition_flag,
 
 int armv7_disassemble(darm_t *d, uint32_t w);
 
+const char *armv7_mnemonic_by_index(armv7_instr_t instr);
+const char *armv7_enctype_by_index(armv7_enctype_t enctype);
+
 #endif

@@ -286,3 +286,15 @@ int armv7_disassemble(darm_t *d, uint32_t w)
 
     return 0;
 }
+
+const char *armv7_mnemonic_by_index(armv7_instr_t instr)
+{
+    return instr < ARRAYSIZE(armv7_mnemonics) ?
+        armv7_mnemonics[instr] : NULL;
+}
+
+const char *armv7_enctype_by_index(armv7_enctype_t enctype)
+{
+    return enctype < ARRAYSIZE(armv7_enctypes) ?
+        armv7_enctypes[enctype] : NULL;
+}
