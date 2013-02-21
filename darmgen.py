@@ -67,12 +67,14 @@ def type_lookup_table(name, *args):
 
 def type_encoding_enum(enumname, arr):
     text = []
-    for name, info, encodings, fn in arr:
+    for name, info, encodings, _, affects in arr:
         text.append(
             '    // info:\n' +
             '    // %s\n    //\n' % info +
             '    // encodings:\n    // ' +
-            '\n    // '.join(encodings) + '\n' +
+            '\n    // '.join(encodings) + '\n    //\n' +
+            '    // affects:\n    // ' +
+            '\n    // '.join(textwrap.wrap(', '.join(affects), 74)) + '\n' +
             '    T_%s,' % name)
 
     return 'typedef enum _%s_t {\n%s\n} %s_t;\n' % (enumname,
@@ -129,6 +131,11 @@ cond_instr_types = [
 if __name__ == '__main__':
     uncond_table = {}
     cond_table = {}
+
+    # the last item (a list) will contain the instructions affected by this
+    # encoding type
+    cond_instr_types = [list(x) + [[]] for x in cond_instr_types]
+
     for description in darmtbl.ARMv7:
         instr = description[0]
         bits = description[1:]
@@ -153,7 +160,13 @@ if __name__ == '__main__':
             for y in cond_instr_types:
                 if bits[0] == d.cond and y[3](bits, instr, idx):
                     cond_table[idx] = instruction_name(instr), y
+                    y[-1].append(instr)
                     break
+
+    # make a list of unique instructions affected by each encoding type,
+    # we remove the first item from the instruction names, as this is I_INVLD
+    cond_instr_types = [x[:4] + [instruction_names(x[4])[1:]]
+                        for x in cond_instr_types]
 
     # python magic!
     sys.stdout = open(sys.argv[1], 'w')
