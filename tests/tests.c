@@ -65,6 +65,12 @@ struct {
     {0xe1a0c064, 0, {
         .instr = I_RRX, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 12, .shift = 0, .Rm = 4, .type = 3}},
+    {0xe3a013e8, 0, {
+        .instr = I_MOV, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
+        .Rd = 1, .imm = 1000}},
+    {0xe3012f40, 0, {
+        .instr = I_MOVW, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
+        .Rd = 2, .imm = 8000}},
     {0xe1a00000, 0, {
         .instr = I_NOP, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 0, .Rm = 0}},
