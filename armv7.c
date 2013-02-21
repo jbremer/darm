@@ -7,6 +7,13 @@
 #define BITMSK_12 ((1 << 12) - 1)
 #define BITMSK_24 ((1 << 24) - 1)
 
+#define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
+
+// the upper four bits define the rotation value, but we have to multiply the
+// rotation value by two, so instead of right shifting by eight, we do a
+// right shift of seven, effectively avoiding the left shift of one
+#define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & 0b11110)
+
 struct {
     const char *mnemonic_extension;
     const char *meaning_integer;
@@ -201,7 +208,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
-        d->imm = w & BITMSK_12;
+        d->imm = ARMExpandImm(w & BITMSK_12);
 
         // check whether this instruction is in fact an ADR instruction
         if((d->instr == I_ADD || d->instr == I_SUB) &&
@@ -261,6 +268,10 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         // the MOV and MVN instructions have an S bit
         if(d->instr == I_MOV || d->instr == I_MVN) {
             d->S = (w >> 20) & 1;
+
+            // the immediate values of the MOV and MVN instructions have to
+            // be decoded
+            d->imm = ARMExpandImm(d->imm);
         }
         // the MOVW and the MOVT instructions take another 4 bits of immediate
         else {
@@ -285,7 +296,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     case T_CMP_IMM:
         d->Rn = (w >> 16) & 0b1111;
-        d->imm = w & BITMSK_12;
+        d->imm = ARMExpandImm(w & BITMSK_12);
         return 0;
 
     case T_OPLESS:
