@@ -311,9 +311,8 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 if(d->instr == I_LSL && d->type == 0 && d->shift == 0) {
                     d->instr = I_MOV;
 
-                    // if Rd and Rm are equal, then this is a NOP instruction
-                    // (although the manual only specifies if both are zero)
-                    if(d->Rd == d->Rm) {
+                    // if Rd and Rm are zero, then this is a NOP instruction
+                    if(d->Rd == 0 && d->Rm == 0) {
                         d->instr = I_NOP;
                     }
                 }
