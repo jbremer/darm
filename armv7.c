@@ -234,11 +234,18 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 // actually a MOV instruction
                 if(d->instr == I_LSL && d->type == 0 && d->shift == 0) {
                     d->instr = I_MOV;
+
+                    // if Rd and Rm are equal, then this is a NOP instruction
+                    // (although the manual only specifies if both are zero)
+                    if(d->Rd == d->Rm) {
+                        d->instr = I_NOP;
+                    }
                 }
 
                 // if this is a ROR instruction with a zero shift, then it's
                 // actually a RRX instruction
-                else if(((w >> 5) & 0b11) == 0b11 && d->shift == 0) {
+                else if(d->instr == I_ROR && d->type == 0b11 &&
+                        d->shift == 0) {
                     d->instr = I_RRX;
                 }
             }
