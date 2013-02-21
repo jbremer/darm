@@ -22,8 +22,15 @@ typedef struct _darm_t {
 
     // conditional flags, if any
     uint32_t        cond;
+
     // does this instruction update the conditional flags?
     uint32_t        S;
+
+    // endian specifier for the SETEND instruction
+    uint32_t        E;
+
+    // option operand for the DMB, DSB and ISB instructions
+    uint32_t        option;
 
     // register operands
     darm_reg_t      Rd; // destination

@@ -99,6 +99,34 @@ void armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
 static int armv7_disas_uncond(darm_t *d, uint32_t w)
 {
     d->instr_type = T_UNCOND;
+
+    // there are not a lot of unconditional instructions, so the following
+    // values are a bit hardcoded
+    switch ((w >> 25) & 0b111) {
+    case 0b000:
+        d->instr = I_SETEND;
+        d->E = (w >> 9) & 1;
+        return 0;
+
+    case 0b010:
+        // if the 21th bit is set, then it's one of the CLREX, DMB, DSB or ISB
+        // instructions
+        if((w >> 21) & 1) {
+            d->instr = type_uncond2_instr_lookup[(w >> 4) & 0b111];
+            if(d->instr != I_INVLD) {
+                // if the instruction is either DMB, DSB or ISB, then the last
+                // four bits represent an "option"
+                if(d->instr != I_CLREX) {
+                    d->option = w & 0b1111;
+                }
+                return 0;
+            }
+        }
+        // otherwise, if the 21th bit is not set, it's either the PLD or the
+        // PLI instruction
+        else {
+        }
+    }
     return -1;
 }
 

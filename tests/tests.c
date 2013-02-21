@@ -74,6 +74,13 @@ struct {
     {0xe1a00000, 0, {
         .instr = I_NOP, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 0, .Rm = 0}},
+    {0xf57ff01f, 0, {
+        .instr = I_CLREX, .instr_type = T_UNCOND, .cond = 0b1111}},
+    {0xf57ff04c, 0, {
+        .instr = I_DSB, .instr_type = T_UNCOND, .cond = 0b1111,
+        .option = 12}},
+    {0xf1010200, 0, {
+        .instr = I_SETEND, .instr_type = T_UNCOND, .cond = 0b1111, .E = 1}}
 };
 
 int main()
@@ -96,9 +103,11 @@ int main()
             printf(
                 "ret: %d, instr: I_%s, instr-type: T_%s, cond: %d, S: %d\n"
                 "Rd: %d, Rn: %d, Rm: %d, op-imm: %d, add: %d\n"
-                "type: %d, shift-is-reg: %d, Rs: %d, shift: %d\n",
+                "type: %d, shift-is-reg: %d, Rs: %d, shift: %d\n"
+                "E: %d, option: %d\n",
                 ret, mnemonic, enctype, d.cond, d.S, d.Rd, d.Rn, d.Rm,
-                d.imm, d.add, d.type, d.shift_is_reg, d.Rs, d.shift);
+                d.imm, d.add, d.type, d.shift_is_reg, d.Rs, d.shift,
+                d.E, d.option);
             failure = 1;
         }
     }
