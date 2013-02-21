@@ -168,7 +168,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         if((d->instr == I_ADD || d->instr == I_SUB) &&
                 d->S == 0 && d->Rn == PC) {
             d->instr = I_ADR, d->Rn = 0;
-            d->add = (w >> 23) & 1;
+            d->U = (w >> 23) & 1;
         }
         return 0;
 

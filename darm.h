@@ -32,6 +32,10 @@ typedef struct _darm_t {
     // option operand for the DMB, DSB and ISB instructions
     uint32_t        option;
 
+    // to add or to subtract the immediate, this is used for instructions
+    // which take a relative offset to a pointer or to the program counter
+    uint32_t        U;
+
     // register operands
     darm_reg_t      Rd; // destination
     darm_reg_t      Rn; // first operand
@@ -39,10 +43,6 @@ typedef struct _darm_t {
 
     // immediate operand
     uint32_t        imm;
-
-    // if op-imm is a label, then this flag specifies whether the immediate
-    // should be added or subtracted from the current instruction pointer
-    uint32_t        add;
 
     // register shift info
     uint32_t        type;

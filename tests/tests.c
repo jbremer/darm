@@ -24,13 +24,13 @@ struct {
         .Rd = 4, .Rn = SP, .imm = 1}},
     {0xe28f4030, 0, {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 4, .imm = 48, .add = 1}},
+        .Rd = 4, .imm = 48, .U = 1}},
     {0xe24f3000, 0, {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 3, .imm = 0, .add = 0}},
+        .Rd = 3, .imm = 0, .U = 0}},
     {0xe24f329a, 0, {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 3, .imm = 666, .add = 0}},
+        .Rd = 3, .imm = 666, .U = 0}},
     {0xe1a02458, 0, {
         .instr = I_ASR, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 2, .Rm = 4, .Rn = 8, .type = 2}},
@@ -102,12 +102,12 @@ int main()
 
             printf(
                 "ret: %d, instr: I_%s, instr-type: T_%s, cond: %d, S: %d\n"
-                "Rd: %d, Rn: %d, Rm: %d, op-imm: %d, add: %d\n"
+                "Rd: %d, Rn: %d, Rm: %d, op-imm: %d\n"
                 "type: %d, shift-is-reg: %d, Rs: %d, shift: %d\n"
-                "E: %d, option: %d\n",
+                "E: %d, option: %d, U: %d\n",
                 ret, mnemonic, enctype, d.cond, d.S, d.Rd, d.Rn, d.Rm,
-                d.imm, d.add, d.type, d.shift_is_reg, d.Rs, d.shift,
-                d.E, d.option);
+                d.imm, d.type, d.shift_is_reg, d.Rs, d.shift,
+                d.E, d.option, d.U);
             failure = 1;
         }
     }
