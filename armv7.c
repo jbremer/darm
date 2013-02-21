@@ -96,6 +96,12 @@ void armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
     }
 }
 
+static int armv7_disas_uncond(darm_t *d, uint32_t w)
+{
+    d->instr_type = T_UNCOND;
+    return -1;
+}
+
 static int armv7_disas_cond(darm_t *d, uint32_t w)
 {
     // the instruction label
@@ -104,7 +110,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     // do a lookup for the type of instruction
     switch (d->instr_type) {
-    case T_INVLD:
+    case T_INVLD: case T_UNCOND:
         return -1;
 
     case T_ARITH_SHIFT:
@@ -273,7 +279,7 @@ int armv7_disassemble(darm_t *d, uint32_t w)
     d->w = w;
 
     if(d->cond == 0b1111) {
-        // TODO handle unconditional instructions
+        ret = armv7_disas_uncond(d, w);
     }
     else {
         ret = armv7_disas_cond(d, w);

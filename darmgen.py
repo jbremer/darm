@@ -92,6 +92,8 @@ d = darmtbl
 cond_instr_types = [
     ('INVLD', 'Invalid or non-existent type',
      ['I_INVLD'], lambda x, y, z: False),
+    ('UNCOND', 'All unconditional instructions',
+     [], lambda x, y, z: False),
     ('ARITH_SHIFT',
      'Arithmetic instructions which take a shift for the second source',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
