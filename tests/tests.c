@@ -76,11 +76,11 @@ struct {
         .Rd = 0, .Rm = 0}},
 };
 
-int main(int argc, char *argv[])
+int main()
 {
     int failure = 0;
-    for (int i = 0; i < ARRAYSIZE(tests); i++) {
-        darm_t d = {}; int ret;
+    for (uint32_t i = 0; i < ARRAYSIZE(tests); i++) {
+        darm_t d; int ret;
 
         ret = armv7_disassemble(&d, tests[i].w);
 

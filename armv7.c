@@ -64,7 +64,7 @@ int armv7_condition_index(const char *condition_code)
     // the "AL" condition flag
     if(condition_code[0] == 0) return 0b1110;
 
-    for (int i = 0; i < ARRAYSIZE(g_condition_codes); i++) {
+    for (uint32_t i = 0; i < ARRAYSIZE(g_condition_codes); i++) {
         if(!strcmp(condition_code, g_condition_codes[i].mnemonic_extension)) {
             return i;
         }
