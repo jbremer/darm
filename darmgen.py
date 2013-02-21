@@ -13,55 +13,56 @@ def instruction_names(arr):
     return ['INVLD'] + sorted(set(instruction_name(x) for x in arr))
 
 
+def enum_table(name, arr):
+    """Enumeration."""
+    text = '\n    '.join(textwrap.wrap(', '.join(arr), 74))
+    return 'typedef enum _%s_t {\n    %s\n} %s_t;\n' % (name, text, name)
+
+
+def typed_table(typ, name, arr):
+    """A table with a given type."""
+    text = '\n    '.join(textwrap.wrap(', '.join(arr), 74))
+
+    # if it's not a pointer, append a space
+    if typ[-1] != '*':
+        typ += ' '
+    return '%s%s[] = {\n    %s\n};\n' % (typ, name, text)
+
+
+def string_table(name, arr):
+    """A string table."""
+    return typed_table('const char *', name, ('"%s"' % x for x in arr))
+
+
 def instruction_names_enum(arr):
     """Enumeration of all instruction names."""
-    text = ', '.join('I_%s' % x for x in instruction_names(arr))
-    text = '\n    '.join(textwrap.wrap(text, 74))
-    return 'typedef enum {\n    %s\n} armv7_instr_t;\n' % text
+    return enum_table('armv7_instr',
+                      ('I_%s' % x for x in instruction_names(arr)))
 
 
 def instruction_names_table(arr):
     """Table of strings of all instructions."""
-    text = ', '.join('"%s"' % x for x in instruction_names(arr))
-    text = '\n    '.join(textwrap.wrap(text, 74))
-    return 'const char *armv7_mnemonics[] = {\n    %s\n};\n' % text
-
-
-def updates_condition_flags(arr):
-    """List of all instructions that have the S flag."""
-    return sorted(set(instruction_name(x[0]) for x in arr if darmtbl.S in x))
-
-
-def updates_condition_flags_table(arr):
-    """Lookup table returning True for instructions that have the S flag."""
-    names = instruction_names(arr)
-    flags = updates_condition_flags(arr)
-    table = ', '.join(('1' if x in flags else '0') for x in names)
-    text = '\n    '.join(textwrap.wrap(table, 74))
-    return 'uint8_t updates_condition_flags[] = {\n    %s\n};' % text
+    return string_table('armv7_mnemonics', instruction_names(arr))
 
 
 def instruction_types_table(arr):
     """Lookup table for the types of instructions."""
-    table = ', '.join('T_%s' % arr[x][1][0] if x in arr else 'T_INVLD'
-                      for x in xrange(256))
-    text = '\n    '.join(textwrap.wrap(table, 74))
-    return 'armv7_enctype_t armv7_instr_types[] = {\n    %s\n};\n' % text
+    arr = ['T_%s' % arr[x][1][0] if x in arr else 'T_INVLD'
+           for x in xrange(256)]
+    return typed_table('armv7_enctype_t', 'armv7_instr_types', arr)
 
 
 def instruction_names_index_table(arr):
     """Lookup table for instruction label for each instruction index."""
-    table = ', '.join('I_%s' % arr[x][0] if x in arr else 'I_INVLD'
-                      for x in xrange(256))
-    text = '\n    '.join(textwrap.wrap(table, 74))
-    return 'armv7_instr_t armv7_instr_labels[] = {\n    %s\n};\n' % text
+    arr = ['I_%s' % arr[x][0] if x in arr else 'I_INVLD'
+           for x in xrange(256)]
+    return typed_table('armv7_instr_t', 'armv7_instr_labels', arr)
 
 
 def type_lookup_table(name, *args):
     """Create a lookup table for a certain instruction type."""
-    table = ', '.join('I_%s' % x.upper() if x else 'I_INVLD' for x in args)
-    text = '\n    '.join(textwrap.wrap(table, 74))
-    return 'armv7_instr_t %s_instr_lookup[] = {\n    %s\n};\n' % (name, text)
+    arr = ('I_%s' % x.upper() if x else 'I_INVLD' for x in args)
+    return typed_table('armv7_instr_t', '%s_instr_lookup' % name, arr)
 
 
 def type_encoding_enum(enumname, arr):
@@ -81,9 +82,7 @@ def type_encoding_enum(enumname, arr):
 
 def type_encoding_table(tblname, arr):
     """Table of strings of all instructions."""
-    text = ', '.join('"%s"' % x[0] for x in arr)
-    text = '\n    '.join(textwrap.wrap(text, 74))
-    return 'const char *%s[] = {\n    %s\n};\n' % (tblname, text)
+    return string_table(tblname, (x[0] for x in arr))
 
 d = darmtbl
 
