@@ -26,9 +26,9 @@ typedef struct _darm_t {
     uint32_t        S;
 
     // register operands
-    uint32_t        Rd; // destination
-    uint32_t        Rn; // first operand
-    uint32_t        Rm; // second operand
+    darm_reg_t      Rd; // destination
+    darm_reg_t      Rn; // first operand
+    darm_reg_t      Rm; // second operand
 
     // immediate operand
     uint32_t        imm;
@@ -40,7 +40,7 @@ typedef struct _darm_t {
     // register shift info
     uint32_t        type;
     uint32_t        shift_is_reg; // shift from register Rs or not?
-    uint32_t        Rs;
+    darm_reg_t      Rs;
     uint32_t        shift;
 } darm_t;
 
@@ -52,5 +52,6 @@ int armv7_disassemble(darm_t *d, uint32_t w);
 
 const char *armv7_mnemonic_by_index(armv7_instr_t instr);
 const char *armv7_enctype_by_index(armv7_enctype_t enctype);
+const char *armv7_register_by_index(darm_reg_t reg);
 
 #endif

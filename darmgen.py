@@ -182,6 +182,7 @@ if __name__ == '__main__':
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
+        print 'const char *armv7_registers[16];'
         print
 
         print '#endif'
@@ -234,3 +235,6 @@ if __name__ == '__main__':
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)
+
+        reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
+        print string_table('armv7_registers', reg.split())

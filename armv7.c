@@ -298,3 +298,8 @@ const char *armv7_enctype_by_index(armv7_enctype_t enctype)
     return enctype < ARRAYSIZE(armv7_enctypes) ?
         armv7_enctypes[enctype] : NULL;
 }
+
+const char *armv7_register_by_index(darm_reg_t reg)
+{
+    return reg < ARRAYSIZE(armv7_registers) ? armv7_registers[reg] : NULL;
+}
