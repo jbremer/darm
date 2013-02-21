@@ -221,6 +221,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         if(d->instr != -1) {
             d->S = (w >> 20) & 1;
             d->Rd = (w >> 12) & 0b1111;
+            d->type = (w >> 5) & 0b11;
             if((w >> 4) & 1) {
                 d->Rm = (w >> 8) & 0b1111;
                 d->Rn = w & 0b1111;
