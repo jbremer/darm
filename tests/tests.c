@@ -7,9 +7,9 @@ struct {
     int r;
     darm_t d;
 } tests[] = {
-    {0xe0a10082, 0, {
+    {0xe0a13082, 0, {
         .instr = I_ADC, .instr_type = T_ARITH_SHIFT, .cond = 0b1110, .S = 0,
-        .Rd = 0, .Rn = 1, .Rm = 2, .type = 0, .shift_is_reg = 0, .shift = 1}},
+        .Rd = 3, .Rn = 1, .Rm = 2, .type = 0, .shift_is_reg = 0, .shift = 1}},
     {0xe2821003, 0, {
         .instr = I_ADD, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
         .Rd = 1, .Rn = 2, .imm = 3}},
@@ -98,8 +98,9 @@ struct {
         .RdHi = 7, .RdLo = 6, .Rm = 5, .Rn = 2}},
     // for now, when failing, some info might still be set, so for now we'll
     // hardcode the incorrect info as well..
-    {0xe0700090, -1, {
-        .instr = I_MLS, .instr_type = T_MUL, .cond = 0b1110, .S = 1}},
+    {0xe0712394, -1, {
+        .instr = I_MLS, .instr_type = T_MUL, .cond = 0b1110, .S = 1,
+        .Rn = 4, .Rm = 3}},
     {0xe7932384, 0, {
         .instr = I_LDR, .instr_type = T_STACK0, .cond = 0b1110, .Rt = 2,
         .Rn = 3, .Rm = 4, .P = 1, .W = 0, .U = 1, .shift_is_reg = 1,
@@ -121,6 +122,18 @@ int main()
     int failure = 0;
     for (uint32_t i = 0; i < ARRAYSIZE(tests); i++) {
         darm_t d; int ret;
+
+        // update the registers in the tests in order not to be 0, but R_INVLD
+        // instead
+        darm_t *p = &tests[i].d;
+        if(p->Rd == 0) p->Rd = R_INVLD;
+        if(p->Rn == 0) p->Rn = R_INVLD;
+        if(p->Rm == 0) p->Rm = R_INVLD;
+        if(p->Ra == 0) p->Ra = R_INVLD;
+        if(p->Rt == 0) p->Rt = R_INVLD;
+        if(p->RdHi == 0) p->RdHi = R_INVLD;
+        if(p->RdLo == 0) p->RdLo = R_INVLD;
+        if(p->Rs == 0) p->Rs = R_INVLD;
 
         ret = armv7_disassemble(&d, tests[i].w);
 

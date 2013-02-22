@@ -10,6 +10,8 @@
 typedef enum _darm_reg_t {
     r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
     FP = 0b1011, IP = 0b1100, SP = 0b1101, LR = 0b1110, PC = 0b1111,
+
+    R_INVLD = -1
 } darm_reg_t;
 
 typedef enum _darm_cond_t {
@@ -17,6 +19,9 @@ typedef enum _darm_cond_t {
     C_VC, C_HI, C_LS, C_GE, C_LT, C_GT, C_LE, C_AL,
 
     C_HS = C_CS, C_LO = C_CC,
+    C_UNCOND = 0b1111,
+
+    C_INVLD = -1
 } darm_cond_t;
 
 typedef struct _darm_t {

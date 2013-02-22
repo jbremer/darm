@@ -350,7 +350,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         // check whether this instruction is in fact an ADR instruction
         if((d->instr == I_ADD || d->instr == I_SUB) &&
                 d->S == 0 && d->Rn == PC) {
-            d->instr = I_ADR, d->Rn = 0;
+            d->instr = I_ADR, d->Rn = R_INVLD;
             d->U = (w >> 23) & 1;
         }
         return 0;
@@ -462,6 +462,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                     // if Rd and Rm are zero, then this is a NOP instruction
                     if(d->Rd == 0 && d->Rm == 0) {
                         d->instr = I_NOP;
+                        d->Rd = d->Rm = R_INVLD;
                     }
                 }
 
@@ -485,12 +486,15 @@ int armv7_disassemble(darm_t *d, uint32_t w)
 {
     int ret = -1;
 
-    // clear the entire darm state, in order to make sure that no members
+    // initialize the entire darm state, in order to make sure that no members
     // contain undefined data
     memset(d, 0, sizeof(darm_t));
-
-    d->cond = (w >> 28) & 0b1111;
     d->w = w;
+    d->cond = (w >> 28) & 0b1111;
+    d->instr = I_INVLD;
+    d->instr_type = T_INVLD;
+    d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
+    d->RdHi = d->RdLo = d->Rs = R_INVLD;
 
     if(d->cond == 0b1111) {
         ret = armv7_disas_uncond(d, w);
@@ -521,12 +525,13 @@ const char *armv7_enctype_by_index(armv7_enctype_t enctype)
 
 const char *armv7_register_by_index(darm_reg_t reg)
 {
-    return reg < ARRAYSIZE(armv7_registers) ? armv7_registers[reg] : NULL;
+    return reg != R_INVLD && reg < (int32_t) ARRAYSIZE(armv7_registers) ?
+        armv7_registers[reg] : NULL;
 }
 
 const char *armv7_condition_by_index(darm_cond_t cond)
 {
-    return cond < ARRAYSIZE(g_condition_codes) ?
+    return cond != C_INVLD && cond < (int32_t) ARRAYSIZE(g_condition_codes) ?
         g_condition_codes[cond].mnemonic_extension : NULL;
 }
 
@@ -539,26 +544,27 @@ void darm_dump(darm_t *d)
         d->w, armv7_mnemonic_by_index(d->instr),
         armv7_enctype_by_index(d->instr_type));
 
-    if(d->cond == 0b1111) {
+    if(d->cond == C_UNCOND) {
         printf("cond:          unconditional\n");
     }
-    else {
+    else if(d->cond != C_INVLD) {
         printf("cond:          C_%s\n", armv7_condition_by_index(d->cond));
     }
 
-    printf(
-        "Rd:            %s\n"
-        "Rn:            %s\n"
-        "Rm:            %s\n"
-        "Ra:            %s\n"
-        "Rt:            %s\n"
-        "Rs:            %s\n"
-        "RdHi:          %s\n"
-        "RdLo:          %s\n",
-        armv7_register_by_index(d->Rd), armv7_register_by_index(d->Rn),
-        armv7_register_by_index(d->Rm), armv7_register_by_index(d->Ra),
-        armv7_register_by_index(d->Rt), armv7_register_by_index(d->Rs),
-        armv7_register_by_index(d->RdHi), armv7_register_by_index(d->RdLo));
+#define PRINT_REG(reg) if(d->reg != R_INVLD) \
+    printf("%s:            %s\n", #reg, armv7_register_by_index(d->reg))
+
+    PRINT_REG(Rd);
+    PRINT_REG(Rn);
+    PRINT_REG(Rm);
+    PRINT_REG(Ra);
+    PRINT_REG(Rt);
+    PRINT_REG(RdHi);
+    PRINT_REG(RdLo);
+
+    if(d->imm != 0) {
+        printf("imm:           0x%08x  %d\n", d->imm, d->imm);
+    }
 
     printf(
         "imm:           0x%08x  %d\n"
@@ -572,9 +578,15 @@ void darm_dump(darm_t *d)
         "option:        %d\n",
         d->imm, d->imm, d->S, d->E, d->U, d->H, d->P, d->R, d->W, d->option);
 
-    printf(
-        "shift-is-reg:  %d   (is the operand register-shifted?)\n"
-        "type:          %s (shift type)\n"
-        "shift:         %-2d  (shift constant)\n",
-        d->shift_is_reg, shift_types[d->type], d->shift);
+    if(d->shift_is_reg != 0 || d->type != 0 || d->Rs != R_INVLD ||
+            d->shift != 0) {
+        printf(
+            "shift-is-reg:  %d   (is the operand register-shifted?)\n"
+            "type:          %s (shift type)\n"
+            "Rs:            %s  (register-shift)\n"
+            "shift:         %-2d  (shift constant)\n",
+            d->shift_is_reg, shift_types[d->type],
+            armv7_register_by_index(d->Rs), d->shift);
+    }
+    printf("\n");
 }
