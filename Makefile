@@ -1,6 +1,10 @@
 CC = gcc
 CFLAGS = -std=c99 -Wall -O2 -s -Wextra
 
+ifneq ($(OS),Windows_NT)
+	PIC_FLAGS = -fPIC
+endif
+
 SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
@@ -16,7 +20,7 @@ $(GENCODESRC):
 	python darmgen.py $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) -o $@ -c $^
+	$(CC) $(CFLAGS) -o $@ -c $^ $(PIC_FLAGS)
 
 %.exe: %.c $(OBJ) $(GENCODEOBJ)
 	$(CC) $(CFLAGS) -o $@ $^
