@@ -537,9 +537,10 @@ void darm_dump(darm_t *d)
         "U:             %d   (add or subtract the offset?)\n"
         "H:             %d   (branch to 2-byte aligned Thumb2 instruction)\n"
         "P:             %d   (pre- or post-indexed addressing)\n"
+        "R:             %d   (register-form or not?)\n"
         "W:             %d   (write-back bit)\n"
         "option:        %d\n",
-        d->imm, d->imm, d->S, d->E, d->U, d->H, d->P, d->W, d->option);
+        d->imm, d->imm, d->S, d->E, d->U, d->H, d->P, d->R, d->W, d->option);
 
     printf(
         "shift-is-reg:  %d   (is the operand register-shifted?)\n"
