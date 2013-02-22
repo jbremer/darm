@@ -12,6 +12,13 @@ typedef enum _darm_reg_t {
     FP = 0b1011, IP = 0b1100, SP = 0b1101, LR = 0b1110, PC = 0b1111,
 } darm_reg_t;
 
+typedef enum _darm_cond_t {
+    C_EQ, C_NE, C_CS, C_CC, C_MI, C_PL, C_VS,
+    C_VC, C_HI, C_LS, C_GE, C_LT, C_GT, C_LE, C_AL,
+
+    C_HS = C_CS, C_LO = C_CC,
+} darm_cond_t;
+
 typedef struct _darm_t {
     // the original encoded instruction
     uint32_t        w;
@@ -21,7 +28,7 @@ typedef struct _darm_t {
     armv7_enctype_t instr_type;
 
     // conditional flags, if any
-    uint32_t        cond;
+    darm_cond_t     cond;
 
     // does this instruction update the conditional flags?
     uint32_t        S;
@@ -64,5 +71,6 @@ int armv7_disassemble(darm_t *d, uint32_t w);
 const char *armv7_mnemonic_by_index(armv7_instr_t instr);
 const char *armv7_enctype_by_index(armv7_enctype_t enctype);
 const char *armv7_register_by_index(darm_reg_t reg);
+const char *armv7_condition_by_index(darm_cond_t cond);
 
 #endif

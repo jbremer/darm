@@ -386,3 +386,9 @@ const char *armv7_register_by_index(darm_reg_t reg)
 {
     return reg < ARRAYSIZE(armv7_registers) ? armv7_registers[reg] : NULL;
 }
+
+const char *armv7_condition_by_index(darm_cond_t cond)
+{
+    return cond < ARRAYSIZE(g_condition_codes) ?
+        g_condition_codes[cond].mnemonic_extension : NULL;
+}
