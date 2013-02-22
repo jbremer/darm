@@ -95,6 +95,9 @@ cond_instr_types = [
     ('UNCOND', 'All unconditional instructions',
      [], lambda x, y, z: False),
     ('MUL', 'All multiplication instructions',
+     ['ins{S}<c> <Rd>,<Rn>,<Rm>', 'ins{S}<c> <Rd>,<Rn>,<Rm>,<Ra>',
+     'ins{S}<c> <RdLo>,<RdHi>,<Rn>,<Rm>'],
+     lambda x, y, z: x[1:5] == (0, 0, 0, 0) and x[-5:-1] == (1, 0, 0, 1)),
      [], lambda x, y, z: False),
     ('STACK', 'Various STR and LDR instructions',
      [], lambda x, y, z: False),
@@ -142,6 +145,10 @@ if __name__ == '__main__':
     # encoding type
     cond_instr_types = [list(x) + [[]] for x in cond_instr_types]
 
+    # list of encoding types which should not be emitted in the table (because
+    # they are handled somewhere else, in a somewhat hardcoded fashion)
+    type_ignore = 'MUL',
+
     for description in darmtbl.ARMv7:
         instr = description[0]
         bits = description[1:]
@@ -165,7 +172,8 @@ if __name__ == '__main__':
             # instruction this is
             for y in cond_instr_types:
                 if bits[0] == d.cond and y[3](bits, instr, idx):
-                    cond_table[idx] = instruction_name(instr), y
+                    if not y[0] in type_ignore:
+                        cond_table[idx] = instruction_name(instr), y
                     y[-1].append(instr)
                     break
 
