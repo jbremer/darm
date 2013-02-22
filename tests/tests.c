@@ -115,6 +115,12 @@ struct {
     {0xe0c42fdf, 0, {
         .instr = I_LDRD, .instr_type = T_STACK2, .cond = 0b1110, .U = 1,
         .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff}},
+    {0xe7c8411f, 0, {
+        .instr = I_BFC, .instr_type = T_BITS, .cond = 0b1110, .Rd = 4,
+        .lsb = 2, .width = 6}},
+    {0xe7e42153, 0, {
+        .instr = I_UBFX, .instr_type = T_BITS, .cond = 0b1110, .Rd = 2,
+        .Rn = 3, .lsb = 2, .width = 5}},
 };
 
 int main()

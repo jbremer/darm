@@ -101,6 +101,12 @@ typedef struct _darm_t {
     uint32_t        shift_is_reg; // shift from register Rs or not?
     darm_reg_t      Rs;
     uint32_t        shift;
+
+    // certain instructions operate on bits, they specify the lowest
+    // significant bit to be used, as well as the width, the amount of bits
+    // that are affected
+    uint32_t        lsb;
+    uint32_t        width;
 } darm_t;
 
 const char *armv7_condition_info(int condition_flag,

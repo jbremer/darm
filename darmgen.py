@@ -125,6 +125,9 @@ cond_instr_types = [
      'Arithmetic instructions which take an immediate as second source',
      ['ins{S}<c> <Rd>,<Rn>,#<const>'],
      lambda x, y, z: d.Rn in x and d.Rd in x and d.imm12 in x),
+    ('BITS', 'Bit field magic',
+     [],
+     lambda x, y, z: d.lsb in x),
     ('BRNCHSC', 'Branch and System Call instructions',
      ['B(L)<c> <label>', 'SVC<c> #<imm24>'],
      lambda x, y, z: x[-1] == d.imm24),
@@ -225,6 +228,7 @@ if __name__ == '__main__':
         print 'armv7_instr_t type_stack0_instr_lookup[32];'
         print 'armv7_instr_t type_stack1_instr_lookup[8];'
         print 'armv7_instr_t type_stack2_instr_lookup[8];'
+        print 'armv7_instr_t type_bits_instr_lookup[4];'
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -331,6 +335,8 @@ if __name__ == '__main__':
         t_stack2 = None, None, 'strh', 'ldrh', 'ldrd', 'ldrsb', \
             'strd', 'ldrsh'
         print type_lookup_table('type_stack2', *t_stack2)
+
+        print type_lookup_table('type_bits', None, 'sbfx', 'bfi', 'ubfx')
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)

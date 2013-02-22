@@ -280,14 +280,11 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // handles the STR, STRT, LDR, LDRT, STRB, STRBT, LDRB, LDRBT stack
     // instructions, and the media instructions
     else if(((w >> 26) & 0b11) == 0b01) {
+
         // if both the 25th and the 4th bit are set, then this is a media
-        // instruction
+        // instruction, which is handled in the big switch-case statement
         const uint32_t media_mask = (1 << 25) | (1 << 4);
-        if((w & media_mask) == media_mask) {
-            // TODO
-            return -1;
-        }
-        else {
+        if((w & media_mask) != media_mask) {
             d->instr = type_stack0_instr_lookup[(w >> 20) & 0b11111];
             d->instr_type = T_STACK0;
 
@@ -352,6 +349,30 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->S == 0 && d->Rn == PC) {
             d->instr = I_ADR, d->Rn = R_INVLD;
             d->U = (w >> 23) & 1;
+        }
+        return 0;
+
+    case T_BITS:
+        d->instr = type_bits_instr_lookup[(w >> 21) & 0b11];
+
+        d->instr_type = T_BITS;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rn = w & 0b1111;
+        d->lsb = (w >> 7) & 0b11111;
+
+        // the bfi and bfc instructions specify the MSB, whereas the SBFX and
+        // UBFX instructions specify the width minus one
+        if(d->instr == I_BFI) {
+            d->width = ((w >> 16) & 0b11111) - d->lsb;
+
+            // if Rn is 0b1111, then this is in fact the BFC instruction
+            if(d->Rn == 0b1111) {
+                d->Rn = R_INVLD;
+                d->instr = I_BFC;
+            }
+        }
+        else {
+            d->width = ((w >> 16) & 0b11111) + 1;
         }
         return 0;
 
@@ -600,5 +621,13 @@ void darm_dump(const darm_t *d)
                 armv7_register_by_index(d->Rs));
         }
     }
+
+    if(d->lsb != 0 || d->width != 0) {
+        printf(
+            "lsb:           %d\n"
+            "width:         %d\n",
+            d->lsb, d->width);
+    }
+
     printf("\n");
 }
