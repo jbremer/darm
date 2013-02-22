@@ -101,18 +101,18 @@ struct {
     {0xe0700090, -1, {
         .instr = I_MLS, .instr_type = T_MUL, .cond = 0b1110, .S = 1}},
     {0xe7932384, 0, {
-        .instr = I_LDR, .instr_type = T_STACK, .cond = 0b1110, .Rt = 2,
+        .instr = I_LDR, .instr_type = T_STACK0, .cond = 0b1110, .Rt = 2,
         .Rn = 3, .Rm = 4, .P = 1, .W = 0, .U = 1, .shift_is_reg = 1,
         .type = 0, .shift = 7}},
     {0xe6e386c5, 0, {
-        .instr = I_STRBT, .instr_type = T_STACK, .cond = 0b1110, .Rn = 3,
+        .instr = I_STRBT, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 3,
         .Rt = 8, .shift_is_reg = 1, .shift = 13, .type = 2, .Rm = 5,
         .U = 1, .P = 0, .W = 1}},
     {0x90b480b3, 0, {
-        .instr = I_LDRHT, .instr_type = T_STACK, .cond = C_LS, .U = 1,
+        .instr = I_LDRHT, .instr_type = T_STACK1, .cond = C_LS, .U = 1,
         .Rn = 4, .Rt = 8, .Rm = 3, .P = 1, .R = 1}},
     {0xe0c42fdf, 0, {
-        .instr = I_LDRD, .instr_type = T_STACK, .cond = 0b1110, .U = 1,
+        .instr = I_LDRD, .instr_type = T_STACK2, .cond = 0b1110, .U = 1,
         .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff}},
 };
 

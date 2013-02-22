@@ -228,7 +228,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->instr = type_stack1_instr_lookup[index];
             if(d->instr == I_INVLD) return -1;
 
-            d->instr_type = T_STACK;
+            d->instr_type = T_STACK1;
             d->Rn = (w >> 16) & 0b1111;
             d->Rt = (w >> 12) & 0b1111;
             d->P = 1;
@@ -256,7 +256,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->instr = type_stack2_instr_lookup[index];
             if(d->instr == I_INVLD) return -1;
 
-            d->instr_type = T_STACK;
+            d->instr_type = T_STACK2;
             d->Rn = (w >> 16) & 0b1111;
             d->Rt = (w >> 12) & 0b1111;
             d->P = (w >> 24) & 1;
@@ -289,7 +289,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         else {
             d->instr = type_stack0_instr_lookup[(w >> 20) & 0b11111];
-            d->instr_type = T_STACK;
+            d->instr_type = T_STACK0;
 
             d->Rn = (w >> 16) & 0b1111;
             d->Rt = (w >> 12) & 0b1111;
@@ -320,7 +320,8 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     // do a lookup for the type of instruction
     switch (d->instr_type) {
-    case T_INVLD: case T_UNCOND: case T_MUL: case T_STACK:
+    case T_INVLD: case T_UNCOND: case T_MUL: case T_STACK0: case T_STACK1:
+    case T_STACK2:
         return -1;
 
     case T_ARITH_SHIFT:

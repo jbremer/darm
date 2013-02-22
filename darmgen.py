@@ -98,9 +98,23 @@ cond_instr_types = [
      ['ins{S}<c> <Rd>,<Rn>,<Rm>', 'ins{S}<c> <Rd>,<Rn>,<Rm>,<Ra>',
      'ins{S}<c> <RdLo>,<RdHi>,<Rn>,<Rm>'],
      lambda x, y, z: x[1:5] == (0, 0, 0, 0) and x[-5:-1] == (1, 0, 0, 1)),
-     [], lambda x, y, z: False),
-    ('STACK', 'Various STR and LDR instructions',
-     [], lambda x, y, z: False),
+    ('STACK0', 'Various STR and LDR instructions',
+     ['ins<c> <Rt>,[<Rn>,#+/-<imm12>]', 'ins<c> <Rt>,[<Rn>],#+/-<imm12>',
+     'ins<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}'],
+     lambda x, y, z: x[1:3] == (0, 1) and not (x[3] == 1 and x[-2] == 1)),
+    ('STACK1', 'Various unprivileged STR and LDR instructions',
+     ['ins<c> <Rt>,[<Rn>],+/-<Rm>', 'ins<c> <Rt>,[<Rn>]{,#+/-<imm8>}'],
+     lambda x, y, z: x[-5] == 1 and x[-2] == 1 and x[-4:-2] != (0, 0) and
+        x[1:5] == (0, 0, 0, 0) and x[7] == 1),
+    ('STACK2', 'Various other STR and LDR instructions',
+     ['ins<c> <Rt>,<Rt2>,[<Rn>],+/-<Rm>',
+      'ins<c> <Rt>,[<Rn>],+/-<Rm>',
+      'ins<c> <Rt>,<Rt2>,[<Rn>],#+/-<imm8>',
+      'ins<c> <Rt>,<Rt2>,[<Rn>,#+/-<imm8>]',
+      'ins<c> <Rt>,[<Rn>,#+/-<imm8>]', ],
+     lambda x, y, z: x[1:4] == (0, 0, 0) and x[-2] == 1 and x[-5] == 1 and
+        x[-4:-2] != (0, 0) and not x[-1] in (0, 1) and
+        not (x[4] == 0 and x[7] == 1)),
     ('ARITH_SHIFT',
      'Arithmetic instructions which take a shift for the second source',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
@@ -147,7 +161,7 @@ if __name__ == '__main__':
 
     # list of encoding types which should not be emitted in the table (because
     # they are handled somewhere else, in a somewhat hardcoded fashion)
-    type_ignore = 'MUL',
+    type_ignore = 'MUL', 'STACK0', 'STACK1', 'STACK2'
 
     for description in darmtbl.ARMv7:
         instr = description[0]
