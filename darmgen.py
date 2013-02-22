@@ -155,6 +155,9 @@ cond_instr_types = [
     ('LDSTREGS', 'Load or store multiple registers at once',
      ['ins<c> <Rn>{!},<registers>'],
      lambda x, y, z: x[-1] == d.register_list),
+    ('BITREV', 'Bit reverse instructions',
+     ['ins<c> <Rd>,<Rm>'],
+     lambda x, y, z: x[-1] == d.Rm and x[-10] == d.Rd and x[-11] != d.Rn),
 ]
 
 if __name__ == '__main__':

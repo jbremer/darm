@@ -130,6 +130,12 @@ struct {
     {0xe8bd00f6, 0, {
         .instr = I_POP, .instr_type = T_LDSTREGS, .cond = 0b1110,
         .Rn = SP, .W = 1, .reglist = 0b11110110}},
+    {0xe6ff4f32, 0, {
+        .instr = I_RBIT, .instr_type = T_BITREV, .cond = 0b1110,
+        .Rd = 4, .Rm = 2}},
+    {0xe6ff4fb2, 0, {
+        .instr = I_REVSH, .instr_type = T_BITREV, .cond = 0b1110,
+        .Rd = 4, .Rm = 2}},
 };
 
 int main()

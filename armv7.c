@@ -528,6 +528,22 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->instr = I_PUSH;
         }
         return 0;
+
+    case T_BITREV:
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rm = w & 0b1111;
+
+        // if this is the REV16 instruction and bits 4..7 are 0b0011, then
+        // this is in fact the REV instruction
+        if(d->instr == I_REV16 && ((w >> 4) & 0b1111) == 0b0011) {
+            d->instr = I_REV;
+        }
+        // if this is the REVSH instruction and bits 4..7 are 0b0011, then
+        // this is in fact the RBIT instruction
+        else if(d->instr == I_REVSH && ((w >> 4) & 0b1111) == 0b0011) {
+            d->instr = I_RBIT;
+        }
+        return 0;
     }
     return -1;
 }
