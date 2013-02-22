@@ -593,7 +593,7 @@ void armv7_reglist(uint16_t reglist, char *out)
 
     while (reglist != 0) {
         // count trailing zero's
-        uint32_t reg, start = __builtin_ctz(reglist);
+        int32_t reg, start = __builtin_ctz(reglist);
 
         // all registers have length two
         *(uint16_t *) out = *(uint16_t *) armv7_registers[start];
