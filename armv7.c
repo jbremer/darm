@@ -493,8 +493,10 @@ int armv7_disassemble(darm_t *d, uint32_t w)
     d->cond = (w >> 28) & 0b1111;
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
+    d->S = d->E = d->U = d->H = d->P = d->R = d->W = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
     d->RdHi = d->RdLo = d->Rs = R_INVLD;
+    d->option = O_INVLD;
 
     if(d->cond == 0b1111) {
         ret = armv7_disas_uncond(d, w);
@@ -566,17 +568,19 @@ void darm_dump(const darm_t *d)
         printf("imm:           0x%08x  %d\n", d->imm, d->imm);
     }
 
-    printf(
-        "imm:           0x%08x  %d\n"
-        "S:             %d   (updates conditional flags?)\n"
-        "E:             %d   (endian specifier for SETEND)\n"
-        "U:             %d   (add or subtract the offset?)\n"
-        "H:             %d   (branch to 2-byte aligned Thumb2 instruction)\n"
-        "P:             %d   (pre- or post-indexed addressing)\n"
-        "R:             %d   (register-form or not?)\n"
-        "W:             %d   (write-back bit)\n"
-        "option:        %d\n",
-        d->imm, d->imm, d->S, d->E, d->U, d->H, d->P, d->R, d->W, d->option);
+#define PRINT_FLAG(flag, comment) if(d->flag != B_INVLD) \
+    printf("%s:             %d   (%s)\n", #flag, d->flag, comment)
+
+    PRINT_FLAG(E, "endian specifier for SETEND");
+    PRINT_FLAG(U, "add or subtract the offset?");
+    PRINT_FLAG(H, "branch to 2-byte aligned Thumb2 instruction");
+    PRINT_FLAG(P, "pre- or post-indexed addressing");
+    PRINT_FLAG(R, "register-form or not?");
+    PRINT_FLAG(W, "write-back bit");
+
+    if(d->option != O_INVLD) {
+        printf("option:        %d\n", d->option);
+    }
 
     if(d->shift_is_reg != 0 || d->type != 0 || d->Rs != R_INVLD ||
             d->shift != 0) {

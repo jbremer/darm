@@ -7,6 +7,10 @@
 #define ARRAYSIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #endif
 
+#define B_UNSET 0
+#define B_SET   1
+#define B_INVLD 2
+
 typedef enum _darm_reg_t {
     r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
     FP = 0b1011, IP = 0b1100, SP = 0b1101, LR = 0b1110, PC = 0b1111,
@@ -23,6 +27,19 @@ typedef enum _darm_cond_t {
 
     C_INVLD = -1
 } darm_cond_t;
+
+typedef enum _armv7_option_t {
+    O_SY    = 0b1111,
+    O_ST    = 0b1110,
+    O_ISH   = 0b1011,
+    O_ISHST = 0b1010,
+    O_NSH   = 0b0111,
+    O_NSHST = 0b0110,
+    O_OSH   = 0b0011,
+    O_OSHST = 0b0010,
+
+    O_INVLD = 0b10000,
+} armv7_option_t;
 
 typedef struct _darm_t {
     // the original encoded instruction

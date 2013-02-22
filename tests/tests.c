@@ -134,13 +134,29 @@ int main()
         if(p->RdHi == 0) p->RdHi = R_INVLD;
         if(p->RdLo == 0) p->RdLo = R_INVLD;
         if(p->Rs == 0) p->Rs = R_INVLD;
+        if(p->option == 0) p->option = O_INVLD;
 
         ret = armv7_disassemble(&d, tests[i].w);
 
         // so we don't have to hardcode all of these
         tests[i].d.w = d.w;
 
-        if(ret != tests[i].r || memcmp(&tests[i].d, &d, sizeof(darm_t))) {
+#define C(x) p->x != d.x
+
+    // if d.x, the output from the disasm, is invalid or unset, then the set
+    // value must be unset, otherwise, it must be set (this is because we
+    // can't specify B_INVLD in the unittests without making everything
+    // unreadable)
+#define F(x) \
+    ((d.x == B_INVLD || d.x == B_UNSET) ? p->x != B_UNSET : p->x != B_SET)
+
+        // enter ugly code
+        if(ret != tests[i].r || C(w) || C(instr) || C(instr_type) ||
+                C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
+                F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
+                C(Rt) || C(RdHi) || C(RdLo) || C(imm) || C(type) ||
+                C(shift_is_reg) || C(Rs) || C(shift)) {
+            // leave ugly code
             printf("incorrect encoding for 0x%08x\n", d.w);
             darm_dump(&d);
             failure = 1;
