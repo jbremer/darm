@@ -1,0 +1,5 @@
+armv7-tbl.*
+libdarm.*
+*.pyc
+*.o
+*.exe
