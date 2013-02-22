@@ -471,3 +471,51 @@ const char *armv7_condition_by_index(darm_cond_t cond)
     return cond < ARRAYSIZE(g_condition_codes) ?
         g_condition_codes[cond].mnemonic_extension : NULL;
 }
+
+void darm_dump(darm_t *d)
+{
+    printf(
+        "encoded:       0x%08x\n"
+        "instr:         I_%s\n"
+        "instr-type:    T_%s\n",
+        d->w, armv7_mnemonic_by_index(d->instr),
+        armv7_enctype_by_index(d->instr_type));
+
+    if(d->cond == 0b1111) {
+        printf("cond:          unconditional\n");
+    }
+    else {
+        printf("cond:          C_%s\n", armv7_condition_by_index(d->cond));
+    }
+
+    printf(
+        "Rd:            %s\n"
+        "Rn:            %s\n"
+        "Rm:            %s\n"
+        "Ra:            %s\n"
+        "Rt:            %s\n"
+        "Rs:            %s\n"
+        "RdHi:          %s\n"
+        "RdLo:          %s\n",
+        armv7_register_by_index(d->Rd), armv7_register_by_index(d->Rn),
+        armv7_register_by_index(d->Rm), armv7_register_by_index(d->Ra),
+        armv7_register_by_index(d->Rt), armv7_register_by_index(d->Rs),
+        armv7_register_by_index(d->RdHi), armv7_register_by_index(d->RdLo));
+
+    printf(
+        "imm:           0x%08x  %d\n"
+        "S:             %d   (updates conditional flags?)\n"
+        "E:             %d   (endian specifier for SETEND)\n"
+        "U:             %d   (add or subtract the offset?)\n"
+        "H:             %d   (branch to 2-byte aligned Thumb2 instruction)\n"
+        "P:             %d   (pre- or post-indexed addressing)\n"
+        "W:             %d   (write-back bit)\n"
+        "option:        %d\n",
+        d->imm, d->imm, d->S, d->E, d->U, d->H, d->P, d->W, d->option);
+
+    printf(
+        "shift-is-reg:  %d   (is the operand register-shifted?)\n"
+        "type:          %s (shift type)\n"
+        "shift:         %-2d  (shift constant)\n",
+        d->shift_is_reg, shift_types[d->type], d->shift);
+}

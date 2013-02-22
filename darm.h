@@ -86,5 +86,6 @@ const char *armv7_mnemonic_by_index(armv7_instr_t instr);
 const char *armv7_enctype_by_index(armv7_enctype_t enctype);
 const char *armv7_register_by_index(darm_reg_t reg);
 const char *armv7_condition_by_index(darm_cond_t cond);
+void darm_dump(darm_t *d);
 
 #endif
