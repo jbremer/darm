@@ -107,6 +107,9 @@ typedef struct _darm_t {
     // that are affected
     uint32_t        lsb;
     uint32_t        width;
+
+    // bitmask of registers affected by the STM/LDM/PUSH/POP instruction
+    uint16_t        reglist;
 } darm_t;
 
 const char *armv7_condition_info(int condition_flag,
@@ -119,6 +122,7 @@ const char *armv7_mnemonic_by_index(armv7_instr_t instr);
 const char *armv7_enctype_by_index(armv7_enctype_t enctype);
 const char *armv7_register_by_index(darm_reg_t reg);
 const char *armv7_condition_by_index(darm_cond_t cond);
+void armv7_reglist(uint16_t reglist, char *out);
 void darm_dump(const darm_t *d);
 
 #endif

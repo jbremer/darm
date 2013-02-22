@@ -569,6 +569,37 @@ const char *armv7_condition_by_index(darm_cond_t cond)
         g_condition_codes[cond].mnemonic_extension : NULL;
 }
 
+void armv7_reglist(uint16_t reglist, char *out)
+{
+    *out++ = '{';
+
+    while (reglist != 0) {
+        // count trailing zero's
+        uint32_t reg, start = __builtin_ctz(reglist);
+
+        // all registers have length two
+        *(uint16_t *) out = *(uint16_t *) armv7_registers[start];
+        out += 2;
+
+        for (reg = start; reg == __builtin_ctz(reglist); reg++) {
+            // unset this bit
+            reglist &= ~(1 << reg);
+        }
+
+        // if reg is not start + 1, then this means that a series of
+        // consecutive registers have been identified
+        if(reg != start + 1) {
+            *out++ = '-';
+            *(uint16_t *) out = *(uint16_t *) armv7_registers[reg-1];
+            out += 2;
+        }
+        *out++ = ',';
+    }
+
+    out[-1] = '}';
+    *out = 0;
+}
+
 void darm_dump(const darm_t *d)
 {
     printf(
@@ -638,6 +669,12 @@ void darm_dump(const darm_t *d)
             "lsb:           %d\n"
             "width:         %d\n",
             d->lsb, d->width);
+    }
+
+    if(d->reglist != 0) {
+        char reglist[64];
+        armv7_reglist(d->reglist, reglist);
+        printf("reglist:       %s\n", reglist);
     }
 
     printf("\n");
