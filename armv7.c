@@ -5,6 +5,7 @@
 #include "armv7-tbl.h"
 
 #define BITMSK_12 ((1 << 12) - 1)
+#define BITMSK_16 ((1 << 16) - 1)
 #define BITMSK_24 ((1 << 24) - 1)
 
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
@@ -509,6 +510,23 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             }
         }
 
+        return 0;
+
+    case T_LDSTREGS:
+        d->W = (w >> 21) & 1;
+        d->Rn = (w >> 16) & 0b1111;
+        d->reglist = w & BITMSK_16;
+
+        // if this is the LDM instruction and W = 1 and Rn = SP then this is
+        // a POP instruction
+        if(d->instr == I_LDM && d->W == 1 && d->Rn == SP) {
+            d->instr = I_POP;
+        }
+        // if this is the STMDB instruction and W = 1 and Rn = SP then this is
+        // the PUSH instruction
+        else if(d->instr == I_STMDB && d->W == 1 && d->Rn == SP) {
+            d->instr = I_PUSH;
+        }
         return 0;
     }
     return -1;

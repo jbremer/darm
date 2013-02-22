@@ -152,6 +152,9 @@ cond_instr_types = [
      ['ins{S}<c> <Rd>,<Rm>', 'ins{S}<c> <Rd>,<Rm>,#<imm>',
      'ins{S}<c> <Rd>,<Rn>,<Rm>'],
      lambda x, y, z: z == 26 or z == 27),
+    ('LDSTREGS', 'Load or store multiple registers at once',
+     ['ins<c> <Rn>{!},<registers>'],
+     lambda x, y, z: x[-1] == d.register_list),
 ]
 
 if __name__ == '__main__':

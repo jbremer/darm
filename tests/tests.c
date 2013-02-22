@@ -127,6 +127,9 @@ struct {
     {0xe49d7004, 0, {
         .instr = I_POP, .instr_type = T_STACK0, .cond = 0b1110,
         .Rn = SP, .Rt = 7, .imm = 4, .U = 1, .P = 0, .W = 0}},
+    {0xe8bd0030, 0, {
+        .instr = I_POP, .instr_type = T_LDSTREGS, .cond = 0b1110,
+        .Rn = SP, .W = 1, .reglist = 0b000011110110}},
 };
 
 int main()
