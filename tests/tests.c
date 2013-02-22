@@ -90,6 +90,16 @@ struct {
     {0xe3a01a01, 0, {
         .instr = I_MOV, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
         .Rd = 1, .imm = 0x1000}},
+    {0xe0140298, 0, {
+        .instr = I_MUL, .instr_type = T_MUL, .cond = 0b1110, .S = 1,
+        .Rd = 4, .Rm = 2, .Rn = 8}},
+    {0x00976592, 0, {
+        .instr = I_UMULL, .instr_type = T_MUL, .cond = C_EQ, .S = 1,
+        .RdHi = 7, .RdLo = 6, .Rm = 5, .Rn = 2}},
+    // for now, when failing, some info might still be set, so for now we'll
+    // hardcode the incorrect info as well..
+    {0xe0700090, -1, {
+        .instr = I_MLS, .instr_type = T_MUL, .cond = 0b1110, .S = 1}},
 };
 
 int main()

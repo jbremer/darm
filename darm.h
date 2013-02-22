@@ -51,6 +51,12 @@ typedef struct _darm_t {
     darm_reg_t      Rd; // destination
     darm_reg_t      Rn; // first operand
     darm_reg_t      Rm; // second operand
+    darm_reg_t      Ra; // accumulate operand
+
+    // for instructions which produce a 64bit output we have to specify a
+    // high and a low 32bits destination register
+    darm_reg_t      RdHi; // high 32bits destination
+    darm_reg_t      RdLo; // low 32bits destination
 
     // immediate operand
     uint32_t        imm;

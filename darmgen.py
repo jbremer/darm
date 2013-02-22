@@ -94,6 +94,8 @@ cond_instr_types = [
      ['I_INVLD'], lambda x, y, z: False),
     ('UNCOND', 'All unconditional instructions',
      [], lambda x, y, z: False),
+    ('MUL', 'All multiplication instructions',
+     [], lambda x, y, z: False),
     ('ARITH_SHIFT',
      'Arithmetic instructions which take a shift for the second source',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
@@ -195,6 +197,7 @@ if __name__ == '__main__':
         print 'armv7_instr_t type4_instr_lookup[16];'
         print 'armv7_instr_t type_opless_instr_lookup[8];'
         print 'armv7_instr_t type_uncond2_instr_lookup[8];'
+        print 'armv7_instr_t type_mul_instr_lookup[8];'
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -251,6 +254,10 @@ if __name__ == '__main__':
 
         t_uncond2 = None, 'clrex', None, None, 'dsb', 'dmb', 'isb', None
         print type_lookup_table('type_uncond2', *t_uncond2)
+
+        t_mul = 'mul', 'mla', 'umaal', 'mls', 'umull', 'umlal', \
+            'smull', 'smlal'
+        print type_lookup_table('type_mul', *t_mul)
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)

@@ -178,13 +178,56 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
 
 static int armv7_disas_cond(darm_t *d, uint32_t w)
 {
+    // we first handle some exceptions for MUL, STR, and LDR-like
+    // instructions, which don't fit in the regular table (as they interfere
+    // with the other instructions)
+    if(((w >> 24) & 0b1111) == 0b0000) {
+
+        // all variants of the MUL instruction
+        if(((w >> 4) & 0b1111) == 0b1001) {
+
+            d->instr = type_mul_instr_lookup[(w >> 21) & 0b111];
+            d->instr_type = T_MUL;
+
+            // except for UMAAL and MLS, every variant takes the S bit
+            d->S = (w >> 20) & 1;
+
+            // each variant takes Rm and Rn
+            d->Rm = (w >> 8) & 0b1111;
+            d->Rn = w & 0b1111;
+
+            // if this is the UMAAL or MLS instruction *and* the S bit is set,
+            // then this is an invalid instruction
+            if((d->instr == I_UMAAL || d->instr == I_MLS) && d->S != 0) {
+                return -1;
+            }
+
+            switch ((uint32_t) d->instr) {
+            case I_MLA: case I_MLS:
+                d->Ra = (w >> 12) & 0b1111;
+                // fall-through
+
+            case I_MUL:
+                d->Rd = (w >> 16) & 0b1111;
+                break;
+
+            case I_UMAAL: case I_UMULL: case I_UMLAL: case I_SMULL:
+            case I_SMLAL:
+                d->RdHi = (w >> 16) & 0b1111;
+                d->RdLo = (w >> 12) & 0b1111;
+                break;
+            }
+            return 0;
+        }
+    }
+
     // the instruction label
     d->instr = armv7_instr_labels[(w >> 20) & 0xff];
     d->instr_type = armv7_instr_types[(w >> 20) & 0xff];
 
     // do a lookup for the type of instruction
     switch (d->instr_type) {
-    case T_INVLD: case T_UNCOND:
+    case T_INVLD: case T_UNCOND: case T_MUL:
         return -1;
 
     case T_ARITH_SHIFT:
