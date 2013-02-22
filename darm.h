@@ -51,6 +51,11 @@ typedef struct _darm_t {
     // post-indexed addressing
     uint32_t        P;
 
+    // register-form specifies whether an immediate or a register should be
+    // used as source operator, this value will then be added or subtracted
+    // (see the U flag)
+    uint32_t        R;
+
     // write-back bit
     uint32_t        W;
 

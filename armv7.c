@@ -181,10 +181,10 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // we first handle some exceptions for MUL, STR, and LDR-like
     // instructions, which don't fit in the regular table (as they interfere
     // with the other instructions)
-    if(((w >> 24) & 0b1111) == 0b0000) {
+    if(((w >> 25) & 0b111) == 0b000) {
 
         // all variants of the MUL instruction
-        if(((w >> 4) & 0b1111) == 0b1001) {
+        if(((w >> 24) & 1) == 0 && ((w >> 4) & 0b1111) == 0b1001) {
 
             d->instr = type_mul_instr_lookup[(w >> 21) & 0b111];
             d->instr_type = T_MUL;
@@ -216,6 +216,34 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->RdHi = (w >> 16) & 0b1111;
                 d->RdLo = (w >> 12) & 0b1111;
                 break;
+            }
+            return 0;
+        }
+        else if(((w >> 24) & 1) == 0 && ((w >> 4) & 0b1001) == 0b1001 &&
+                ((w >> 5) & 0b11) != 0 && (w >> 21) & 1) {
+
+            // the high 2 bits are represented by the 5th and 6th bit, the
+            // lower bit is represented by the 20th bit
+            uint32_t index = ((w >> 4) & 0b110) | ((w >> 20) & 1);
+            d->instr = type_stack1_instr_lookup[index];
+            if(d->instr == I_INVLD) return -1;
+
+            d->instr_type = T_STACK;
+            d->Rn = (w >> 16) & 0b1111;
+            d->Rt = (w >> 12) & 0b1111;
+            d->P = 1;
+            d->U = (w >> 23) & 1;
+            d->R = (w >> 22) & 1;
+
+            // depending on the register form we either have to extract a
+            // register or an immediate
+            if(d->R == 0) {
+                d->Rm = w & 0b1111;
+            }
+            else {
+                // the four high bits start at bit 8, so we shift them right
+                // to their destination
+                d->imm = ((w >> 4) & 0b11110000) | (w & 0b1111);
             }
             return 0;
         }
