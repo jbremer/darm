@@ -535,7 +535,7 @@ const char *armv7_condition_by_index(darm_cond_t cond)
         g_condition_codes[cond].mnemonic_extension : NULL;
 }
 
-void darm_dump(darm_t *d)
+void darm_dump(const darm_t *d)
 {
     printf(
         "encoded:       0x%08x\n"
