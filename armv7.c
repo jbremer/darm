@@ -307,6 +307,19 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->shift = (w >> 7) & 0b11111;
                 d->Rm = w & 0b1111;
             }
+
+            // if Rn == SP and P = 1 and U = 0 and W = 1 and imm12 = 4 and
+            // this is a STR instruction, then this is a PUSH instruction
+            if(d->instr == I_STR && d->Rn == SP && d->P == 1 && d->U == 0 &&
+                    d->W == 1 && d->imm == 4) {
+                d->instr = I_PUSH;
+            }
+            // if Rn == SP and P = 0 and U = 1 and W = 0 and imm12 = 4 and
+            // this is a LDR instruction, then this is a POP instruction
+            else if(d->instr == I_LDR && d->Rn == SP && d->P == 0 &&
+                    d->U == 1 && d->imm == 4) {
+                d->instr = I_POP;
+            }
             return 0;
         }
     }

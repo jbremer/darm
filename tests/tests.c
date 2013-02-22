@@ -121,6 +121,12 @@ struct {
     {0xe7e42153, 0, {
         .instr = I_UBFX, .instr_type = T_BITS, .cond = 0b1110, .Rd = 2,
         .Rn = 3, .lsb = 2, .width = 5}},
+    {0xe52d4004, 0, {
+        .instr = I_PUSH, .instr_type = T_STACK0, .cond = 0b1110,
+        .Rn = SP, .Rt = 4, .imm = 4, .U = 0, .P = 1, .W = 1}},
+    {0xe49d7004, 0, {
+        .instr = I_POP, .instr_type = T_STACK0, .cond = 0b1110,
+        .Rn = SP, .Rt = 7, .imm = 4, .U = 1, .P = 0, .W = 0}},
 };
 
 int main()
