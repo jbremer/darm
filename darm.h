@@ -47,11 +47,19 @@ typedef struct _darm_t {
     // branch with link to a 2-byte aligned thumb2 instruction
     uint32_t        H;
 
+    // specifies whether this instruction uses pre-indexed addressing or
+    // post-indexed addressing
+    uint32_t        P;
+
+    // write-back bit
+    uint32_t        W;
+
     // register operands
     darm_reg_t      Rd; // destination
     darm_reg_t      Rn; // first operand
     darm_reg_t      Rm; // second operand
     darm_reg_t      Ra; // accumulate operand
+    darm_reg_t      Rt; // transferred operand
 
     // for instructions which produce a 64bit output we have to specify a
     // high and a low 32bits destination register

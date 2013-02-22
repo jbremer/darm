@@ -220,6 +220,42 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             return 0;
         }
     }
+    // handles the STR, STRT, LDR, LDRT, STRB, STRBT, LDRB, LDRBT stack
+    // instructions, and the media instructions
+    else if(((w >> 26) & 0b11) == 0b01) {
+        // if both the 25th and the 4th bit are set, then this is a media
+        // instruction
+        const uint32_t media_mask = (1 << 25) | (1 << 4);
+        if((w & media_mask) == media_mask) {
+            // TODO
+            return -1;
+        }
+        else {
+            d->instr = type_stack0_instr_lookup[(w >> 20) & 0b11111];
+            d->instr_type = T_STACK;
+
+            d->Rn = (w >> 16) & 0b1111;
+            d->Rt = (w >> 12) & 0b1111;
+
+            // extract some flags
+            d->P = (w >> 24) & 1;
+            d->U = (w >> 23) & 1;
+            d->W = (w >> 21) & 1;
+
+            // if the 25th bit is not set, then this instruction takes an
+            // immediate, otherwise, it takes a shifted register
+            d->shift_is_reg = (w >> 25) & 1;
+            if(d->shift_is_reg == 0) {
+                d->imm = w & BITMSK_12;
+            }
+            else {
+                d->type = (w >> 5) & 0b11;
+                d->shift = (w >> 7) & 0b11111;
+                d->Rm = w & 0b1111;
+            }
+            return 0;
+        }
+    }
 
     // the instruction label
     d->instr = armv7_instr_labels[(w >> 20) & 0xff];
@@ -227,7 +263,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     // do a lookup for the type of instruction
     switch (d->instr_type) {
-    case T_INVLD: case T_UNCOND: case T_MUL:
+    case T_INVLD: case T_UNCOND: case T_MUL: case T_STACK:
         return -1;
 
     case T_ARITH_SHIFT:

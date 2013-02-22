@@ -96,6 +96,8 @@ cond_instr_types = [
      [], lambda x, y, z: False),
     ('MUL', 'All multiplication instructions',
      [], lambda x, y, z: False),
+    ('STACK', 'Various STR and LDR instructions',
+     [], lambda x, y, z: False),
     ('ARITH_SHIFT',
      'Arithmetic instructions which take a shift for the second source',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
@@ -198,6 +200,7 @@ if __name__ == '__main__':
         print 'armv7_instr_t type_opless_instr_lookup[8];'
         print 'armv7_instr_t type_uncond2_instr_lookup[8];'
         print 'armv7_instr_t type_mul_instr_lookup[8];'
+        print 'armv7_instr_t type_stack0_instr_lookup[32];'
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -258,6 +261,44 @@ if __name__ == '__main__':
         t_mul = 'mul', 'mla', 'umaal', 'mls', 'umull', 'umlal', \
             'smull', 'smlal'
         print type_lookup_table('type_mul', *t_mul)
+
+        t_stack = {
+            0b00000: 'str',
+            0b00001: 'ldr',
+            0b00010: 'strt',
+            0b00011: 'ldrt',
+            0b00100: 'strb',
+            0b00101: 'ldrb',
+            0b00110: 'strbt',
+            0b00111: 'ldrbt',
+            0b01000: 'str',
+            0b01001: 'ldr',
+            0b01010: 'strt',
+            0b01011: 'ldrt',
+            0b01100: 'strb',
+            0b01101: 'ldrb',
+            0b01110: 'strbt',
+            0b01111: 'ldrbt',
+            0b10000: 'str',
+            0b10001: 'ldr',
+            0b10010: 'str',
+            0b10011: 'ldr',
+            0b10100: 'strb',
+            0b10101: 'ldrb',
+            0b10110: 'strb',
+            0b10111: 'ldrb',
+            0b11000: 'str',
+            0b11001: 'ldr',
+            0b11010: 'str',
+            0b11011: 'ldr',
+            0b11100: 'strb',
+            0b11101: 'ldrb',
+            0b11110: 'strb',
+            0b11111: 'ldrb',
+        }
+
+        print type_lookup_table('type_stack0',
+                                *[t_stack[x] for x in xrange(32)])
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)
