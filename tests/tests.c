@@ -127,9 +127,9 @@ struct {
     {0xe49d7004, 0, {
         .instr = I_POP, .instr_type = T_STACK0, .cond = 0b1110,
         .Rn = SP, .Rt = 7, .imm = 4, .U = 1, .P = 0, .W = 0}},
-    {0xe8bd0030, 0, {
+    {0xe8bd00f6, 0, {
         .instr = I_POP, .instr_type = T_LDSTREGS, .cond = 0b1110,
-        .Rn = SP, .W = 1, .reglist = 0b000011110110}},
+        .Rn = SP, .W = 1, .reglist = 0b11110110}},
 };
 
 int main()
@@ -170,7 +170,8 @@ int main()
                 C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
                 C(Rt) || C(RdHi) || C(RdLo) || C(imm) || C(type) ||
-                C(shift_is_reg) || C(Rs) || C(shift)) {
+                C(shift_is_reg) || C(Rs) || C(shift) || C(lsb) ||
+                C(width) || C(reglist)) {
             // leave ugly code
             printf("incorrect encoding for 0x%08x\n", d.w);
             darm_dump(&d);
