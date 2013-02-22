@@ -202,6 +202,7 @@ if __name__ == '__main__':
         print 'armv7_instr_t type_mul_instr_lookup[8];'
         print 'armv7_instr_t type_stack0_instr_lookup[32];'
         print 'armv7_instr_t type_stack1_instr_lookup[8];'
+        print 'armv7_instr_t type_stack2_instr_lookup[8];'
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -304,6 +305,10 @@ if __name__ == '__main__':
         t_stack1 = None, None, 'strht', 'ldrht', None, 'ldrsbt', \
             None, 'ldrsht'
         print type_lookup_table('type_stack1', *t_stack1)
+
+        t_stack2 = None, None, 'strh', 'ldrh', 'ldrd', 'ldrsb', \
+            'strd', 'ldrsh'
+        print type_lookup_table('type_stack2', *t_stack2)
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)

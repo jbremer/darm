@@ -110,7 +110,10 @@ struct {
         .U = 1, .P = 0, .W = 1}},
     {0x90b480b3, 0, {
         .instr = I_LDRHT, .instr_type = T_STACK, .cond = C_LS, .U = 1,
-        .Rn = 4, .Rt = 8, .Rm = 3, .P = 1, .R = 0}},
+        .Rn = 4, .Rt = 8, .Rm = 3, .P = 1, .R = 1}},
+    {0xe0c42fdf, 0, {
+        .instr = I_LDRD, .instr_type = T_STACK, .cond = 0b1110, .U = 1,
+        .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff}},
 };
 
 int main()

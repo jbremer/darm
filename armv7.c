@@ -233,11 +233,40 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->Rt = (w >> 12) & 0b1111;
             d->P = 1;
             d->U = (w >> 23) & 1;
-            d->R = (w >> 22) & 1;
+            d->R = ((w >> 22) & 1) == 0;
 
             // depending on the register form we either have to extract a
             // register or an immediate
-            if(d->R == 0) {
+            if(d->R != 0) {
+                d->Rm = w & 0b1111;
+            }
+            else {
+                // the four high bits start at bit 8, so we shift them right
+                // to their destination
+                d->imm = ((w >> 4) & 0b11110000) | (w & 0b1111);
+            }
+            return 0;
+        }
+        else if(((w >> 4) & 0b1001) == 0b1001 && ((w >> 5) & 0b11) != 0 &&
+                ((w >> 20) & 0b10010) != 0b00010) {
+
+            // the high 2 bits are represented by the 5th and 6th bit, the
+            // lower bit is represented by the 20th bit
+            uint32_t index = ((w >> 4) & 0b110) | ((w >> 20) & 1);
+            d->instr = type_stack2_instr_lookup[index];
+            if(d->instr == I_INVLD) return -1;
+
+            d->instr_type = T_STACK;
+            d->Rn = (w >> 16) & 0b1111;
+            d->Rt = (w >> 12) & 0b1111;
+            d->P = (w >> 24) & 1;
+            d->U = (w >> 23) & 1;
+            d->R = ((w >> 22) & 1) == 0;
+            d->W = (w >> 21) & 1;
+
+            // depending on the register form we either have to extract a
+            // register or an immediate
+            if(d->R != 0) {
                 d->Rm = w & 0b1111;
             }
             else {
