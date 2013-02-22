@@ -584,13 +584,21 @@ void darm_dump(const darm_t *d)
 
     if(d->shift_is_reg != 0 || d->type != 0 || d->Rs != R_INVLD ||
             d->shift != 0) {
-        printf(
-            "shift-is-reg:  %d   (is the operand register-shifted?)\n"
-            "type:          %s (shift type)\n"
-            "Rs:            %s  (register-shift)\n"
-            "shift:         %-2d  (shift constant)\n",
-            d->shift_is_reg, shift_types[d->type],
-            armv7_register_by_index(d->Rs), d->shift);
+        if(d->shift_is_reg == 0) {
+            printf(
+                "shift-is-reg:  %d   (is the operand register-shifted?)\n"
+                "type:          %s (shift type)\n"
+                "shift:         %-2d  (shift constant)\n",
+                d->shift_is_reg, shift_types[d->type], d->shift);
+        }
+        else {
+            printf(
+                "shift-is-reg:  %d   (is the operand register-shifted?)\n"
+                "type:          %s (shift type)\n"
+                "Rs:            %s  (register-shift)\n",
+                d->shift_is_reg, shift_types[d->type],
+                armv7_register_by_index(d->Rs));
+        }
     }
     printf("\n");
 }
