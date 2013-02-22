@@ -28,9 +28,9 @@ struct {
     {0xe24f3000, 0, {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
         .Rd = 3, .imm = 0, .U = 0}},
-    {0xe24f329a, 0, {
+    {0xe24f3210, 0, {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 3, .imm = 666, .U = 0}},
+        .Rd = 3, .imm = 1, .U = 0}},
     {0xe1a02458, 0, {
         .instr = I_ASR, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 2, .Rm = 4, .Rn = 8, .type = 2}},
@@ -57,9 +57,9 @@ struct {
     {0xe15a017b, 0, {
         .instr = I_CMP, .instr_type = T_CMP_OP, .cond = 0b1110, .Rn = 10,
         .Rm = 11, .type = 3, .shift_is_reg = 1, .Rs = 1}},
-    {0xe357029a, 0, {
+    {0xe35704f0, 0, {
         .instr = I_CMP, .instr_type = T_CMP_IMM, .cond = 0b1110, .Rn = 7,
-        .imm = 666}},
+        .imm = 0xf0000000}},
     {0xe320f000, 0, {.instr = I_NOP, .instr_type = T_OPLESS, .cond = 0b1110}},
     {0xe320f003, 0, {.instr = I_WFI, .instr_type = T_OPLESS, .cond = 0b1110}},
     {0xe1a0c064, 0, {
@@ -67,7 +67,7 @@ struct {
         .Rd = 12, .shift = 0, .Rm = 4, .type = 3}},
     {0xe3a013e8, 0, {
         .instr = I_MOV, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 1, .imm = 1000}},
+        .Rd = 1, .imm = 0xa0000003}},
     {0xe3012f40, 0, {
         .instr = I_MOVW, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
         .Rd = 2, .imm = 8000}},
@@ -87,6 +87,9 @@ struct {
     {0xfb000000, 0, {
         .instr = I_BLX, .instr_type = T_UNCOND, .cond = 0b1111, .H = 1,
         .imm = 2}},
+    {0xe3a01a01, 0, {
+        .instr = I_MOV, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
+        .Rd = 1, .imm = 0x1000}},
 };
 
 int main()
