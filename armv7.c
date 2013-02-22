@@ -476,42 +476,40 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     case T_DST_SRC:
         d->instr = type_shift_instr_lookup[(w >> 4) & 0b1111];
-        if(d->instr != I_INVLD) {
-            d->S = (w >> 20) & 1;
-            d->Rd = (w >> 12) & 0b1111;
-            d->type = (w >> 5) & 0b11;
-            if((w >> 4) & 1) {
-                d->Rm = (w >> 8) & 0b1111;
-                d->Rn = w & 0b1111;
-            }
-            else {
-                d->Rm = w & 0b1111;
-                d->shift = (w >> 7) & 0b11111;
+        if(d->instr == I_INVLD) return -1;
 
-                // if this is a LSL instruction with a zero shift, then it's
-                // actually a MOV instruction
-                if(d->instr == I_LSL && d->type == 0 && d->shift == 0) {
-                    d->instr = I_MOV;
+        d->S = (w >> 20) & 1;
+        d->Rd = (w >> 12) & 0b1111;
+        d->type = (w >> 5) & 0b11;
+        if((w >> 4) & 1) {
+            d->Rm = (w >> 8) & 0b1111;
+            d->Rn = w & 0b1111;
+        }
+        else {
+            d->Rm = w & 0b1111;
+            d->shift = (w >> 7) & 0b11111;
 
-                    // if Rd and Rm are zero, then this is a NOP instruction
-                    if(d->Rd == 0 && d->Rm == 0) {
-                        d->instr = I_NOP;
-                        d->Rd = d->Rm = R_INVLD;
-                    }
-                }
+            // if this is a LSL instruction with a zero shift, then it's
+            // actually a MOV instruction
+            if(d->instr == I_LSL && d->type == 0 && d->shift == 0) {
+                d->instr = I_MOV;
 
-                // if this is a ROR instruction with a zero shift, then it's
-                // actually a RRX instruction
-                else if(d->instr == I_ROR && d->type == 0b11 &&
-                        d->shift == 0) {
-                    d->instr = I_RRX;
+                // if Rd and Rm are zero, then this is a NOP instruction
+                if(d->Rd == 0 && d->Rm == 0) {
+                    d->instr = I_NOP;
+                    d->Rd = d->Rm = R_INVLD;
                 }
             }
 
-            return 0;
+            // if this is a ROR instruction with a zero shift, then it's
+            // actually a RRX instruction
+            else if(d->instr == I_ROR && d->type == 0b11 &&
+                    d->shift == 0) {
+                d->instr = I_RRX;
+            }
         }
 
-        // fall-through for all STR instructions
+        return 0;
     }
     return -1;
 }
