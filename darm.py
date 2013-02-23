@@ -37,8 +37,15 @@ class _Base:
     def __int__(self):
         return self.idx
 
+    def __nonzero__(self):
+        return self.idx != self._nonzero
+
+    __bool__ = __nonzero__
+
 
 class Condition(_Base):
+    _nonzero = -1
+
     def __str__(self):
         return _lib.armv7_condition_by_index(self.idx)
 
@@ -47,6 +54,8 @@ class Condition(_Base):
 
 
 class Instruction(_Base):
+    _nonzero = 0
+
     def __str__(self):
         return _lib.armv7_mnemonic_by_index(self.idx)
 
@@ -55,6 +64,8 @@ class Instruction(_Base):
 
 
 class Register(_Base):
+    _nonzero = -1
+
     def __str__(self):
         return _lib.armv7_register_by_index(self.idx)
 
@@ -63,6 +74,8 @@ class Register(_Base):
 
 
 class Encoding(_Base):
+    _nonzero = 0
+
     def __str__(self):
         return _lib.armv7_enctype_by_index(self.idx)
 
@@ -78,6 +91,9 @@ class RegisterList:
         buf = create_string_buffer(64)
         _lib.armv7_reglist(self.reglist, byref(buf))
         return buf.value
+
+    def __nonzero__(self):
+        return self.reglist != 0
 
 
 def flag(v):
