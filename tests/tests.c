@@ -177,7 +177,7 @@ int main()
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
                 C(Rt) || C(RdHi) || C(RdLo) || C(imm) || C(type) ||
                 C(shift_is_reg) || C(Rs) || C(shift) || C(lsb) ||
-                C(width) || C(reglist)) {
+                C(width) || C(reglist) || F(T)) {
             // leave ugly code
             printf("incorrect encoding for 0x%08x\n", d.w);
             darm_dump(&d);

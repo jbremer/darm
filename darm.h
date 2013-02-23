@@ -107,6 +107,11 @@ typedef struct _darm_t {
     // (see the U flag)
     uint32_t        R;
 
+    // the PKH instruction has two variants, namely, PKHBT and PKHTB, the
+    // tbform is represented by T, i.e., if T = 1 then the instruction is
+    // PKHTB, otherwise it's PKHBT
+    uint32_t        T;
+
     // write-back bit
     uint32_t        W;
 
