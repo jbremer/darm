@@ -4,6 +4,11 @@ A disassembler written in C for the ARMv7 instruction set.
 
 Other versions might be supported in the future.
 
+# License
+
+The darm library is released under the **BSD 3-Clause License**, also known
+as **BSD Simplified**.
+
 # Support & Contact
 
 The official IRC channel is #darm at freenode.
