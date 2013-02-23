@@ -83,6 +83,33 @@ class Encoding(_Base):
         return 'T_%s' % self.__str__()
 
 
+class Shift:
+    _types = 'LSL', 'LSR', 'ASR', 'ROR'
+
+    def __init__(self, is_reg, type_, Rs, shift):
+        self.is_reg = is_reg
+        self.type_ = type_
+        self.Rs = Rs
+        self.shift = shift
+
+    def __str__(self):
+        if self.is_reg:
+            return '%s %s' % (self._types[self.type_], self.Rs)
+        else:
+            return '%s #%d' % (self._types[self.type_], self.shift)
+
+    def __repr__(self):
+        if self.is_reg:
+            return 'Shift(is_reg=%s, type_=%s, Rs=%s)' % \
+                (self.is_reg, bin(self.type_), self.Rs)
+        else:
+            return 'Shift(is_reg=%s, type_=%s, shift=%d)' % \
+                (self.is_reg, bin(self.type_), self.shift)
+
+    def __nonzero__(self):
+        return bool(self.is_reg or self.type_ or self.Rs or self.shift)
+
+
 class RegisterList:
     def __init__(self, reglist):
         self.reglist = reglist
@@ -143,7 +170,7 @@ class _Darm(Structure):
 
 class Darm:
     _flags = 'S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W'
-    _regs = 'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'RdHi', 'RdLo', 'Rs'
+    _regs = 'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'RdHi', 'RdLo'
 
     def __init__(self, d):
         self.w = d.w
@@ -160,9 +187,10 @@ class Darm:
 
         self.option = d.option
         self.imm = d.imm
-        self.type_ = d.type_
-        self.shift_is_reg = d.shift_is_reg
-        self.shift = d.shift
+        self.shift = Shift(d.shift_is_reg,
+                           d.type_,
+                           Register(d.Rs) if d.Rs >= 0 else None,
+                           d.shift)
         self.lsb = d.lsb
         self.width = d.width
         self.reglist = RegisterList(d.reglist)
