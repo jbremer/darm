@@ -121,7 +121,9 @@ cond_instr_types = [
     ('INVLD', 'Invalid or non-existent type',
      ['I_INVLD'], lambda x, y, z: False),
     ('UNCOND', 'All unconditional instructions',
-     [], lambda x, y, z: False),
+     ['ins <endian_specifier>', 'ins [<Rn>,#+/-<imm12>]',
+     'ins [<Rn>,#<imm12>]', 'ins', 'ins #<option>', 'ins <label>'],
+     lambda x, y, z: False),
     ('MUL', 'All multiplication instructions',
      ['ins{S}<c> <Rd>,<Rn>,<Rm>', 'ins{S}<c> <Rd>,<Rn>,<Rm>,<Ra>',
      'ins{S}<c> <RdLo>,<RdHi>,<Rn>,<Rm>'],
@@ -215,6 +217,14 @@ if __name__ == '__main__':
                 break
             else:
                 identifier += ['01'] * bits[x].bitsize
+
+        # first handle all unconditional instructions, i.e., whitelist those
+        # instructions that have already been implemented
+        if bits[:4] == (1, 1, 1, 1) and \
+                bits[4:7] in ((0, 0, 0), (0, 1, 0), (0, 1, 1), (1, 0, 1)):
+            # hardcoded index for the T_UNCOND type encoding
+            cond_instr_types[1][-1].append(instr)
+            continue
 
         for x in itertools.product(*identifier[:8]):
             idx = sum(int(x[y])*2**(7-y) for y in xrange(8))
