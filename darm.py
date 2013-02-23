@@ -116,7 +116,7 @@ class RegisterList:
 
     def __str__(self):
         buf = create_string_buffer(64)
-        _lib.armv7_reglist(self.reglist, byref(buf))
+        _lib.armv7_reglist(self.reglist, buf)
         return buf.value
 
     def __nonzero__(self):
