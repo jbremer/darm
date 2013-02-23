@@ -195,6 +195,39 @@ class Darm:
         self.width = d.width
         self.reglist = RegisterList(d.reglist)
 
+    def __repr__(self):
+        g = lambda x: getattr(self, x)
+
+        args = []
+
+        # registers
+        args += ['%s=%s' % (r, g(r)) for r in self._regs if not g(r) is None]
+
+        # flags
+        args += ['%s=%s' % (r, g(r)) for r in self._flags if not g(r) is None]
+
+        # other flags
+        if self.option != 16:
+            args.append('option=%s' % bin(self.option))
+
+        if self.imm:
+            args.append('imm=%s' % (str(self.imm)
+                                    if self.imm < 0x1000 else
+                                    hex(self.imm)[2:]))
+
+        if self.shift:
+            args.append(repr(self.shift))
+
+        if self.lsb or self.width:
+            args += ['lsb=%d' % self.lsb, 'width=%d' % self.width]
+
+        if self.reglist:
+            args.append('reglist=%s' % str(self.reglist))
+
+        args = ', ' + ', '.join(args) if args else ''
+        return 'Darm(instr=%s, instr_type=%s, cond=%s%s)' % \
+            (repr(self.instr), repr(self.instr_type), repr(self.cond), args)
+
 
 def disasm(w):
     d = _Darm()
