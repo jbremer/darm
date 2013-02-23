@@ -35,7 +35,7 @@ class Condition:
         self.idx = idx
 
     def __str__(self):
-        return _lib.armv7_condition_by_index(self.code)
+        return _lib.armv7_condition_by_index(self.idx)
 
     def __repr__(self):
         return 'C_%s' % self.__str__()
@@ -121,7 +121,7 @@ class _Darm(Structure):
         ('imm', c_uint32),
         ('type_', c_uint32),
         ('shift_is_reg', c_uint32),
-        ('Rs', c_uint32),
+        ('Rs', c_int32),
         ('shift', c_uint32),
         ('lsb', c_uint32),
         ('width', c_uint32),
