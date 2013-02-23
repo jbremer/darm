@@ -305,6 +305,10 @@ if __name__ == '__main__':
     print '*/'
     print
 
+    fmtstrs = generate_format_strings(darmtbl.ARMv7)
+    # until we remove all unused instructions..
+    instrcnt = len(open('instructions.txt').readlines())
+
     if sys.argv[1][-2:] == '.h':
 
         # print required headers
@@ -336,6 +340,7 @@ if __name__ == '__main__':
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
         print 'const char *armv7_registers[16];'
+        print 'const char *armv7_format_strings[%d][3];' % instrcnt
         print
 
         print '#endif'
@@ -447,11 +452,10 @@ if __name__ == '__main__':
         reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
         print string_table('armv7_registers', reg.split())
 
-        fmtstrs = generate_format_strings(darmtbl.ARMv7)
         lines = []
         for instr, fmtstr in fmtstrs.items():
             fmtstr = ', '.join('"%s"' % x for x in set(fmtstr))
             lines.append('    [I_%s] = {%s},' % (instr, fmtstr))
-        print 'const char *armv7_format_strings[][3] = {'
+        print 'const char *armv7_format_strings[%d][3] = {' % instrcnt
         print '\n'.join(sorted(lines))
         print '};'
