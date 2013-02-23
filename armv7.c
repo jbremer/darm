@@ -211,7 +211,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // we first handle some exceptions for MUL, STR, and LDR-like
     // instructions, which don't fit in the regular table (as they interfere
     // with the other instructions)
-    if(((w >> 25) & 0b111) == 0b000) {
+    if(((w >> 25) & 0b111) == 0b000 && ((w >> 4) & 0b1001) == 0b1001) {
 
         // all variants of the MUL instruction
         if(((w >> 24) & 1) == 0 && ((w >> 4) & 0b1111) == 0b1001) {
@@ -249,8 +249,8 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             }
             return 0;
         }
-        else if(((w >> 24) & 1) == 0 && ((w >> 4) & 0b1001) == 0b1001 &&
-                ((w >> 5) & 0b11) != 0 && (w >> 21) & 1) {
+        else if(((w >> 24) & 1) == 0 && ((w >> 5) & 0b11) != 0 &&
+                (w >> 21) & 1) {
 
             // the high 2 bits are represented by the 5th and 6th bit, the
             // lower bit is represented by the 20th bit
@@ -277,8 +277,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             }
             return 0;
         }
-        else if(((w >> 4) & 0b1001) == 0b1001 && ((w >> 5) & 0b11) != 0 &&
-                ((w >> 20) & 0b10010) != 0b00010) {
+        else if(((w >> 5) & 0b11) != 0 && ((w >> 20) & 0b10010) != 0b00010) {
 
             // the high 2 bits are represented by the 5th and 6th bit, the
             // lower bit is represented by the 20th bit
