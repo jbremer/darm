@@ -126,17 +126,21 @@ class _Darm(Structure):
 
 
 class Darm:
+    _flags = 'S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W'
+    _regs = 'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'RdHi', 'RdLo', 'Rs'
+
     def __init__(self, d):
         self.w = d.w
         self.instr = Instruction(d.instr)
         self.instr_type = Encoding(d.instr_type)
         self.cond = Condition(d.cond)
 
-        for x in ('S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W'):
+        for x in self._flags:
             setattr(self, x, flag(getattr(d, x)))
 
-        for x in ('Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'RdHi', 'RdLo', 'Rs'):
-            setattr(self, x, Register(getattr(d, x)))
+        for x in self._regs:
+            r = getattr(d, x)
+            setattr(self, x, Register(r) if r >= 0 else None)
 
         self.option = d.option
         self.imm = d.imm
