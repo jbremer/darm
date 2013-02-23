@@ -30,10 +30,15 @@ from ctypes import cdll, Structure, byref, POINTER, create_string_buffer
 from ctypes import c_uint16, c_int32, c_uint32, c_char_p
 
 
-class Condition:
+class _Base:
     def __init__(self, idx):
         self.idx = idx
 
+    def __int__(self):
+        return self.idx
+
+
+class Condition(_Base):
     def __str__(self):
         return _lib.armv7_condition_by_index(self.idx)
 
@@ -41,10 +46,7 @@ class Condition:
         return 'C_%s' % self.__str__()
 
 
-class Instruction:
-    def __init__(self, idx):
-        self.idx = idx
-
+class Instruction(_Base):
     def __str__(self):
         return _lib.armv7_mnemonic_by_index(self.idx)
 
@@ -52,10 +54,7 @@ class Instruction:
         return 'I_%s' % self.__str__()
 
 
-class Register:
-    def __init__(self, idx):
-        self.idx = idx
-
+class Register(_Base):
     def __str__(self):
         return _lib.armv7_register_by_index(self.idx)
 
@@ -63,10 +62,7 @@ class Register:
         return self.__str__()
 
 
-class Encoding:
-    def __init__(self, idx):
-        self.idx = idx
-
+class Encoding(_Base):
     def __str__(self):
         return _lib.armv7_enctype_by_index(self.idx)
 
