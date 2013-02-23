@@ -114,6 +114,51 @@ def type_encoding_table(tblname, arr):
     """Table of strings of all instructions."""
     return string_table(tblname, (x[0] for x in arr))
 
+
+def generate_format_strings(arr):
+    ret = {}
+
+    # a set of rules to transform a string representation as given by the
+    # armv7 manual, into our own custom format string
+    rules = {
+        '{S}': 's',
+        '<c>': 'c',
+        '<Rd>': 'd',
+        '<Rn>': 'n',
+        '<Rm>': 'm',
+        '<Ra>': 'a',
+        '<Rt>': 't',
+        '<RdHi>': 'h',
+        '<RdLo>': 'l',
+        '#<const>': 'i',
+        '{,<shift>}': 'S',
+        '<type> <Rs>': 'S',
+        '#<imm16>': 'i',
+        '#<lsb>': 'L',
+        '#<width>': 'w',
+        '<label>': 'b',
+        '#<option>': 'o',
+        '<registers>': 'r',
+    }
+
+    for row in arr:
+        full = row[0]
+
+        instr = instruction_name(full)
+
+        # strip the instruction
+        full = full[len(instr):]
+
+        # apply all rules
+        for k, v in rules.items():
+            full = full.replace(k, v)
+
+        if instr not in ret:
+            ret[instr] = []
+
+        ret[instr].append(full.replace(',', '').replace(' ', ''))
+    return ret
+
 d = darmtbl
 
 # we specify various instruction types
@@ -401,3 +446,12 @@ if __name__ == '__main__':
 
         reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
         print string_table('armv7_registers', reg.split())
+
+        fmtstrs = generate_format_strings(darmtbl.ARMv7)
+        lines = []
+        for instr, fmtstr in fmtstrs.items():
+            fmtstr = ', '.join('"%s"' % x for x in set(fmtstr))
+            lines.append('    [I_%s] = {%s},' % (instr, fmtstr))
+        print 'const char *armv7_format_strings[][3] = {'
+        print '\n'.join(sorted(lines))
+        print '};'
