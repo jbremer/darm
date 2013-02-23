@@ -634,7 +634,8 @@ int armv7_disassemble(darm_t *d, uint32_t w)
     d->cond = (w >> 28) & 0b1111;
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
-    d->S = d->E = d->U = d->H = d->P = d->F = d->R = d->T = d->W = B_INVLD;
+    d->S = d->E = d->U = d->H = d->P = d->F = B_INVLD;
+    d->R = d->T = d->W = d->M = d->N = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
     d->RdHi = d->RdLo = d->Rs = R_INVLD;
     d->option = O_INVLD;
@@ -751,6 +752,8 @@ void darm_dump(const darm_t *d)
     PRINT_FLAG(H, "branch to 2-byte aligned Thumb2 instruction");
     PRINT_FLAG(P, "pre- or post-indexed addressing");
     PRINT_FLAG(F, "register-form or not?");
+    PRINT_FLAG(M, "swap halfwords before operation");
+    PRINT_FLAG(N, "which source operand to take");
     PRINT_FLAG(T, "tbform for PKH");
     PRINT_FLAG(R, "rounded results");
     PRINT_FLAG(W, "write-back bit");

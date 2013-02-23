@@ -92,6 +92,14 @@ typedef struct _darm_t {
     // (see the U flag)
     uint32_t        F;
 
+    // whether halfwords should be swapped before various signed
+    // multiplication operations
+    uint32_t        M;
+
+    // specifies, together with the M flag, which half of the source
+    // operand is used to multiply
+    uint32_t        N;
+
     // option operand for the DMB, DSB and ISB instructions
     uint32_t        option;
 
