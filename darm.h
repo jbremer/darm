@@ -87,6 +87,11 @@ typedef struct _darm_t {
     // endian specifier for the SETEND instruction
     uint32_t        E;
 
+    // register-form specifies whether an immediate or a register should be
+    // used as source operator, this value will then be added or subtracted
+    // (see the U flag)
+    uint32_t        F;
+
     // option operand for the DMB, DSB and ISB instructions
     uint32_t        option;
 
@@ -102,9 +107,8 @@ typedef struct _darm_t {
     // post-indexed addressing
     uint32_t        P;
 
-    // register-form specifies whether an immediate or a register should be
-    // used as source operator, this value will then be added or subtracted
-    // (see the U flag)
+    // specifies whether signed multiplication results should be rounded
+    // or not
     uint32_t        R;
 
     // the PKH instruction has two variants, namely, PKHBT and PKHTB, the

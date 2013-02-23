@@ -268,11 +268,11 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->Rt = (w >> 12) & 0b1111;
             d->P = 1;
             d->U = (w >> 23) & 1;
-            d->R = ((w >> 22) & 1) == 0;
+            d->F = ((w >> 22) & 1) == 0;
 
             // depending on the register form we either have to extract a
             // register or an immediate
-            if(d->R != 0) {
+            if(d->F != 0) {
                 d->Rm = w & 0b1111;
             }
             else {
@@ -295,12 +295,12 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->Rt = (w >> 12) & 0b1111;
             d->P = (w >> 24) & 1;
             d->U = (w >> 23) & 1;
-            d->R = ((w >> 22) & 1) == 0;
+            d->F = ((w >> 22) & 1) == 0;
             d->W = (w >> 21) & 1;
 
             // depending on the register form we either have to extract a
             // register or an immediate
-            if(d->R != 0) {
+            if(d->F != 0) {
                 d->Rm = w & 0b1111;
             }
             else {
@@ -634,7 +634,7 @@ int armv7_disassemble(darm_t *d, uint32_t w)
     d->cond = (w >> 28) & 0b1111;
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
-    d->S = d->E = d->U = d->H = d->P = d->R = d->T = d->W = B_INVLD;
+    d->S = d->E = d->U = d->H = d->P = d->F = d->R = d->T = d->W = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
     d->RdHi = d->RdLo = d->Rs = R_INVLD;
     d->option = O_INVLD;
@@ -750,8 +750,9 @@ void darm_dump(const darm_t *d)
     PRINT_FLAG(U, "add or subtract the offset?");
     PRINT_FLAG(H, "branch to 2-byte aligned Thumb2 instruction");
     PRINT_FLAG(P, "pre- or post-indexed addressing");
-    PRINT_FLAG(R, "register-form or not?");
+    PRINT_FLAG(F, "register-form or not?");
     PRINT_FLAG(T, "tbform for PKH");
+    PRINT_FLAG(R, "rounded results");
     PRINT_FLAG(W, "write-back bit");
 
     if(d->option != O_INVLD) {
