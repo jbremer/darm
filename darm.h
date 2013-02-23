@@ -158,6 +158,20 @@ typedef struct _darm_t {
     uint16_t        reglist;
 } darm_t;
 
+typedef struct _darm_str_t {
+    // the full mnemonic, including extensions, flags, etc.
+    char mnemonic[12];
+
+    // a representation of each argument in a separate string
+    char arg[4][32];
+
+    // representation of shifting, if present
+    char shift[12];
+
+    // the entire instruction
+    char instr[64];
+} darm_str_t;
+
 const char *armv7_condition_info(int condition_flag,
     const char **meaning_integer, const char **meaning_floating_point,
     int omit_always_mnemonic);
@@ -170,5 +184,6 @@ const char *armv7_register_by_index(darm_reg_t reg);
 const char *armv7_condition_by_index(darm_cond_t cond);
 void armv7_reglist(uint16_t reglist, char *out);
 void darm_dump(const darm_t *d);
+int darm_str(const darm_t *d, darm_str_t *str);
 
 #endif
