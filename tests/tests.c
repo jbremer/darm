@@ -136,6 +136,14 @@ struct {
     {0xe6ff4fb2, 0, {
         .instr = I_REVSH, .instr_type = T_BITREV, .cond = 0b1110,
         .Rd = 4, .Rm = 2}},
+    {0xe6842351, 0, {
+        .instr = I_PKH, .instr_type = T_MISC, .cond = 0b1110,
+        .Rn = 4, .Rd = 2, .Rm = 1, .type = 2, .shift = 6, .T = 1}},
+    {0xe1e041c1, 0, {
+        .instr = I_MVN, .instr_type = T_MISC, .cond = 0b1110,
+        .Rd = 4, .shift = 3, .type = 2, .Rm = 1}},
+    {0xe1600075, 0, {
+        .instr = I_SMC, .instr_type = T_MISC, .cond = 0b1110, .imm = 5}},
 };
 
 int main()

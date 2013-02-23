@@ -188,6 +188,12 @@ cond_instr_types = [
     ('BITREV', 'Bit reverse instructions',
      ['ins<c> <Rd>,<Rm>'],
      lambda x, y, z: x[-1] == d.Rm and x[-10] == d.Rd and x[-11] != d.Rn),
+    ('MISC', 'Various miscellaneous instructions',
+     ['ins{S}<c> <Rd>,<Rm>,<type> <Rs>', 'ins{S}<c> <Rd>,<Rm>{,<shift>}',
+     'ins<c> #<imm4>', 'ins<c> #<option>',
+     'ins<c> <Rd>,<Rn>,<Rm>{,<type> #<imm>}', 'ins<c> <Rd>,<Rn>,<Rm>'],
+     lambda x, y, z: instruction_name(y) in ('MVN', 'SMC', 'DBG', 'PKH',
+                                             'SEL')),
 ]
 
 if __name__ == '__main__':

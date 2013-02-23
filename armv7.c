@@ -573,6 +573,48 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->instr = I_RBIT;
         }
         return 0;
+
+    case T_MISC:
+        switch ((uint32_t) d->instr) {
+        case I_MVN:
+            d->S = (w >> 20) & 1;
+            d->Rd = (w >> 12) & 0b1111;
+            d->shift_is_reg = (w >> 4) & 1;
+            d->type = (w >> 5) & 0b11;
+            d->Rm = w & 0b1111;
+            if(d->shift_is_reg == 0) {
+                d->shift = (w >> 7) & 0b11111;
+            }
+            else {
+                d->Rs = (w >> 8) & 0b1111;
+            }
+            return 0;
+
+        case I_DBG:
+            d->option = w & 0b1111;
+            return 0;
+
+        case I_SMC:
+            d->imm = w & 0b1111;
+            return 0;
+
+        case I_SEL:
+            d->Rd = (w >> 12) & 0b1111;
+            d->Rn = (w >> 16) & 0b1111;
+            d->Rm = w & 0b1111;
+
+            // the SEL and PKH instructions share the same 8-bit identifier,
+            // if the 5th bit is set, then this is the SEL instruction,
+            // otherwise it's the PKH instruction
+            if(((w >> 5) & 1) == 0) {
+                d->instr = I_PKH;
+                d->shift_is_reg = 0;
+                d->type = (w >> 5) & 0b10;
+                d->shift = (w >> 7) & 0b11111;
+                d->T = (w >> 6) & 1;
+            }
+            return 0;
+        }
     }
     return -1;
 }
