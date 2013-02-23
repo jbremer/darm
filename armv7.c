@@ -623,7 +623,10 @@ void armv7_reglist(uint16_t reglist, char *out)
         // if reg is not start + 1, then this means that a series of
         // consecutive registers have been identified
         if(reg != start + 1) {
-            *out++ = '-';
+            // if reg is start + 2, then this means that two consecutive
+            // registers have been found, but we prefer the notation
+            // {r0,r1} over {r0-r1} in that case
+            *out++ = reg == start + 2 ? ',' : '-';
             *(uint16_t *) out = *(uint16_t *) armv7_registers[reg-1];
             out += 2;
         }
