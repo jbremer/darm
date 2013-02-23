@@ -211,7 +211,12 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // we first handle some exceptions for MUL, STR, and LDR-like
     // instructions, which don't fit in the regular table (as they interfere
     // with the other instructions)
-    if(((w >> 25) & 0b111) == 0b000 && ((w >> 4) & 0b1001) == 0b1001) {
+
+    // we have to check two parts of the encoded instruction, namely bits
+    // 25..27 which should be zero, and bits 4..7, of which bit 4 and bit 7
+    // should be one
+    const uint32_t mask = (0b111 << 25) | (0b1001 << 4);
+    if((w & mask) == (0b1001 << 4)) {
 
         // all variants of the MUL instruction
         if(((w >> 24) & 1) == 0 && ((w >> 4) & 0b1111) == 0b1001) {
