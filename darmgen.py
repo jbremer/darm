@@ -194,6 +194,8 @@ cond_instr_types = [
      'ins<c> <Rd>,<Rn>,<Rm>{,<type> #<imm>}', 'ins<c> <Rd>,<Rn>,<Rm>'],
      lambda x, y, z: instruction_name(y) in ('MVN', 'SMC', 'DBG', 'PKH',
                                              'SEL')),
+    ('SM', 'Various signed multiply instructions', [],
+     lambda x, y, z: y[:2] == 'SM'),
 ]
 
 if __name__ == '__main__':

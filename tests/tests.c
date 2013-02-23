@@ -144,6 +144,15 @@ struct {
         .Rd = 4, .shift = 3, .type = 2, .Rm = 1}},
     {0xe1600075, 0, {
         .instr = I_SMC, .instr_type = T_MISC, .cond = 0b1110, .imm = 5}},
+    {0xe16601e8, 0, {
+        .instr = I_SMUL, .instr_type = T_SM, .cond = 0b1110, .Rd = 6,
+        .Rm = 1, .M = 1, .N = 1, .Rn = 8}},
+    {0xe7042113, 0, {
+        .instr = I_SMLAD, .instr_type = T_SM, .cond = 0b1110, .Rd = 4,
+        .Ra = 2, .Rm = 1, .M = 0, .Rn = 3}},
+    {0xe75123d4, 0, {
+        .instr = I_SMMLS, .instr_type = T_SM, .cond = 0b1110, .Rd = 1,
+        .Ra = 2, .Rm = 3, .R = 0, .Rn = 4}},
 };
 
 int main()

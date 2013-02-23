@@ -599,7 +599,19 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             return 0;
 
         case I_SMC:
-            d->imm = w & 0b1111;
+            // if the 7th bit is 1, then this is the SMUL instruction
+            if((w >> 7) & 1) {
+                d->instr = I_SMUL;
+                d->instr_type = T_SM;
+                d->Rd = (w >> 16) & 0b1111;
+                d->Rm = (w >> 8) & 0b1111;
+                d->M  = (w >> 6) & 1;
+                d->N  = (w >> 5) & 1;
+                d->Rn = w & 0b1111;
+            }
+            else {
+                d->imm = w & 0b1111;
+            }
             return 0;
 
         case I_SEL:
@@ -618,6 +630,81 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->T = (w >> 6) & 1;
             }
             return 0;
+        }
+
+    case T_SM:
+        switch ((uint32_t) d->instr) {
+        case I_SMMUL:
+            d->Rd = (w >> 16) & 0b1111;
+            d->Ra = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
+            d->R  = (w >> 5) & 1;
+            d->Rn = w & 0b1111;
+
+            // this can be either the SMMUL, the SMMLA, or the SMMLS
+            // instruction, depending on the 6th bit and Ra
+            if((w >> 6) & 1) {
+                d->instr = I_SMMLS;
+            }
+            // if it's SMMUL instruction, but Ra is not 0b1111, then this is
+            // the SMMLA instruction
+            else if(d->Ra != 0b1111) {
+                d->instr = I_SMMLA;
+            }
+            return 0;
+
+        case I_SMUSD:
+            d->Rd = (w >> 16) & 0b1111;
+            d->Ra = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
+            d->M  = (w >> 5) & 1;
+            d->Rn = w & 0b1111;
+
+            // this can be either the SMLAD, the SMLSD, the SMUAD, or the
+            // SMUSD instruction, depending on the 6th bit and Ra
+            if((w >> 6) & 1 && d->Rn != 0b1111) {
+                d->instr = I_SMLSD;
+            }
+            else if(((w >> 6) & 1) == 0) {
+                d->instr = d->Ra == 0b1111 ? I_SMUAD : I_SMLAD;
+            }
+            return 0;
+
+        case I_SMLSLD:
+            d->RdHi = (w >> 16) & 0b1111;
+            d->RdLo = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
+            d->M = (w >> 5) & 1;
+            d->Rn = w & 0b1111;
+
+            // if the 6th bit is zero, then this is in fact the SMLALD
+            // instruction
+            if(((w >> 6) & 1) == 0) {
+                d->instr = I_SMLALD;
+            }
+            return 0;
+
+        case I_SMLA:
+            d->Rd = (w >> 16) & 0b1111;
+            d->Ra = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
+            d->M  = (w >> 6) & 1;
+            d->N  = (w >> 5) & 1;
+            d->Rn = w & 0b1111;
+            return 0;
+
+        case I_SMLAL:
+            d->RdHi = (w >> 16) & 0b1111;
+            d->RdLo = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
+            d->M  = (w >> 6) & 1;
+            d->N  = (w >> 5) & 1;
+            d->Rn = w & 0b1111;
+            return 0;
+
+        case I_SMUL:
+            // SMUL overlaps with SMC, so we define SMUL in SMC..
+            break;
         }
     }
     return -1;
