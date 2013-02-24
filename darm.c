@@ -34,9 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define APPEND(out, ptr) \
     do { \
-        const char *s = ptr; \
-        char *d = out; \
-        if(s != NULL) while (*s != 0) *d++ = *s++; \
+        const char *p = ptr; \
+        if(p != NULL) while (*p != 0) *out++ = *p++; \
     } while (0);
 
 
@@ -79,30 +78,31 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
         case 'd':
             if(d->Rd == R_INVLD) break;
-            APPEND(args[arg++], armv7_register_by_index(d->Rd));
+            APPEND(args[arg], armv7_register_by_index(d->Rd));
+            arg++;
             continue;
 
         case 'n':
             if(d->Rn == R_INVLD) break;
-            APPEND(args[arg++], armv7_register_by_index(d->Rn));
+            APPEND(args[arg], armv7_register_by_index(d->Rn));
             arg++;
             continue;
 
         case 'm':
             if(d->Rm == R_INVLD) break;
-            APPEND(args[arg++], armv7_register_by_index(d->Rm));
+            APPEND(args[arg], armv7_register_by_index(d->Rm));
             arg++;
             continue;
 
         case 'a':
             if(d->Ra == R_INVLD) break;
-            APPEND(args[arg++], armv7_register_by_index(d->Ra));
+            APPEND(args[arg], armv7_register_by_index(d->Ra));
             arg++;
             continue;
 
         case 't':
             if(d->Rt == R_INVLD) break;
-            APPEND(args[arg++], armv7_register_by_index(d->Rt));
+            APPEND(args[arg], armv7_register_by_index(d->Rt));
             arg++;
             continue;
 
