@@ -269,7 +269,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->instr_type = T_STACK1;
             d->Rn = (w >> 16) & 0b1111;
             d->Rt = (w >> 12) & 0b1111;
-            d->P = 1;
+            d->P = (w >> 24) & 1;
             d->U = (w >> 23) & 1;
             d->F = ((w >> 22) & 1) == 0;
 
