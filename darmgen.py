@@ -203,10 +203,13 @@ def generate_format_strings(arr):
         for k, v in zip(*[iter(rules)]*2):
             full = full.replace(k, v)
 
+        full = full.replace(',', '').replace(' ', '')
         if instr not in ret:
-            ret[instr] = []
-
-        ret[instr].append(full.replace(',', '').replace(' ', ''))
+            ret[instr] = [full]
+        elif ret[instr][0] == full[:len(ret[instr][0])]:
+            ret[instr][0] = full
+        else:
+            ret[instr].append(full)
     return ret
 
 d = darmtbl
