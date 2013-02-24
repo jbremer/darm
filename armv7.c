@@ -778,6 +778,8 @@ int armv7_reglist(uint16_t reglist, char *out)
 {
     char *base = out;
 
+    if(reglist == 0) return -1;
+
     *out++ = '{';
 
     while (reglist != 0) {

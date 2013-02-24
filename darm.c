@@ -177,7 +177,14 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case 'r':
-            args[arg] += armv7_reglist(d->reglist, args[arg]);
+            if(d->reglist != 0) {
+                args[arg] += armv7_reglist(d->reglist, args[arg]);
+            }
+            else {
+                *args[arg]++ = '{';
+                APPEND(args[arg], armv7_register_by_index(d->Rt));
+                *args[arg]++ = '}';
+            }
             continue;
 
         default:
