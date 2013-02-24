@@ -156,6 +156,26 @@ int darm_str(const darm_t *d, darm_str_t *str)
             }
             continue;
 
+        case '!':
+            if(d->W == B_SET) {
+                *args[arg-1]++ = '!';
+            }
+            continue;
+
+        case 'e':
+            args[arg] += utoa(d->E, args[arg], 10);
+            continue;
+
+        case 'x':
+            if(d->M == B_SET) {
+                *mnemonic++ = 'x';
+            }
+            continue;
+
+        case 'T':
+            APPEND(mnemonic, d->T ? "TB" : "BT");
+            continue;
+
         default:
             return -1;
         }

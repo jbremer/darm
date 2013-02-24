@@ -135,11 +135,16 @@ def generate_format_strings(arr):
         '#<shift>': 'S',
         '<type> <Rs>': 'S',
         '#<imm16>': 'i',
+        '#<imm4>': 'i',
         '#<lsb>': 'L',
         '#<width>': 'w',
         '<label>': 'b',
         '#<option>': 'o',
         '<registers>': 'r',
+        '{!}': '!',
+        '<endian_specifier>': 'e',
+        '{X}': 'x',
+        '<T>': 'T',
     }
 
     for row in arr:
