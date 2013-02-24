@@ -335,11 +335,11 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
             // if the 25th bit is not set, then this instruction takes an
             // immediate, otherwise, it takes a shifted register
-            d->shift_is_reg = (w >> 25) & 1;
-            if(d->shift_is_reg == 0) {
+            if(((w >> 25) & 1) == 0) {
                 d->imm = w & BITMSK_12;
             }
             else {
+                d->shift_is_reg = 0;
                 d->type = (w >> 5) & 0b11;
                 d->shift = (w >> 7) & 0b11111;
                 d->Rm = w & 0b1111;

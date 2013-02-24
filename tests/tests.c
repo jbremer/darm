@@ -103,11 +103,11 @@ struct {
         .Rn = 4, .Rm = 3}},
     {0xe7932384, 0, {
         .instr = I_LDR, .instr_type = T_STACK0, .cond = 0b1110, .Rt = 2,
-        .Rn = 3, .Rm = 4, .P = 1, .W = 0, .U = 1, .shift_is_reg = 1,
+        .Rn = 3, .Rm = 4, .P = 1, .W = 0, .U = 1, .shift_is_reg = 0,
         .type = 0, .shift = 7}},
     {0xe6e386c5, 0, {
         .instr = I_STRBT, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 3,
-        .Rt = 8, .shift_is_reg = 1, .shift = 13, .type = 2, .Rm = 5,
+        .Rt = 8, .shift_is_reg = 0, .shift = 13, .type = 2, .Rm = 5,
         .U = 1, .P = 0, .W = 1}},
     {0x90b480b3, 0, {
         .instr = I_LDRHT, .instr_type = T_STACK1, .cond = C_LS, .U = 1,
