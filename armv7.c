@@ -114,9 +114,10 @@ static const char *shift_types[] = {
     "LSL", "LSR", "ASR", "ROR",
 };
 
-void armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
+void armv7_immshift_decode(const darm_t *d, const char **type,
+    uint32_t *immediate)
 {
-    if(d->type == 0 && d->Rs == 0) {
+    if(d->type == 0 && d->shift == 0) {
         *type = NULL, *immediate = 0;
     }
     else if(d->type == 0b11 && d->Rs == 0) {
@@ -124,10 +125,10 @@ void armv7_shift_decode(darm_t *d, const char **type, uint32_t *immediate)
     }
     else {
         *type = shift_types[d->type];
-        *immediate = d->Rs;
+        *immediate = d->shift;
 
         // 32 is encoded as 0
-        if((d->type == 0b01 || d->type == 0b10) && d->Rs == 0) {
+        if((d->type == 0b01 || d->type == 0b10) && d->shift == 0) {
             *immediate = 32;
         }
     }

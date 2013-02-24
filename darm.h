@@ -175,6 +175,8 @@ typedef struct _darm_str_t {
 const char *armv7_condition_info(int condition_flag,
     const char **meaning_integer, const char **meaning_floating_point,
     int omit_always_mnemonic);
+void armv7_immshift_decode(const darm_t *d, const char **type,
+    uint32_t *immediate);
 
 int armv7_disassemble(darm_t *d, uint32_t w);
 
