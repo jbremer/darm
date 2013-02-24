@@ -185,7 +185,7 @@ const char *armv7_enctype_by_index(armv7_enctype_t enctype);
 const char *armv7_register_by_index(darm_reg_t reg);
 const char *armv7_condition_by_index(darm_cond_t cond);
 const char *armv7_shift_type_by_index(uint32_t idx);
-void armv7_reglist(uint16_t reglist, char *out);
+int armv7_reglist(uint16_t reglist, char *out);
 void darm_dump(const darm_t *d);
 
 int darm_str(const darm_t *d, darm_str_t *str);

@@ -774,8 +774,10 @@ const char *armv7_shift_type_by_index(uint32_t idx)
     return idx < ARRAYSIZE(shift_types) ? shift_types[idx] : NULL;
 }
 
-void armv7_reglist(uint16_t reglist, char *out)
+int armv7_reglist(uint16_t reglist, char *out)
 {
+    char *base = out;
+
     *out++ = '{';
 
     while (reglist != 0) {
@@ -806,6 +808,7 @@ void armv7_reglist(uint16_t reglist, char *out)
 
     out[-1] = '}';
     *out = 0;
+    return out - base;
 }
 
 void darm_dump(const darm_t *d)

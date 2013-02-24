@@ -176,6 +176,10 @@ int darm_str(const darm_t *d, darm_str_t *str)
             APPEND(mnemonic, d->T ? "TB" : "BT");
             continue;
 
+        case 'r':
+            args[arg] += armv7_reglist(d->reglist, args[arg]);
+            continue;
+
         default:
             return -1;
         }
