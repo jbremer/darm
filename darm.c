@@ -149,6 +149,11 @@ int darm_str(const darm_t *d, darm_str_t *str)
                     shift += utoa(imm, shift, 10);
                 }
             }
+            else {
+                APPEND(shift, armv7_shift_type_by_index(d->type));
+                *shift++ = ' ';
+                APPEND(shift, armv7_register_by_index(d->Rs));
+            }
             continue;
 
         default:

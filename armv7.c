@@ -769,6 +769,11 @@ const char *armv7_condition_by_index(darm_cond_t cond)
         g_condition_codes[cond].mnemonic_extension : NULL;
 }
 
+const char *armv7_shift_type_by_index(uint32_t idx)
+{
+    return idx < ARRAYSIZE(shift_types) ? shift_types[idx] : NULL;
+}
+
 void armv7_reglist(uint16_t reglist, char *out)
 {
     *out++ = '{';
