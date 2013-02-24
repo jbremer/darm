@@ -28,7 +28,6 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <stdio.h>
-#include <string.h>
 #include <stdint.h>
 #include "darm.h"
 
@@ -38,6 +37,24 @@ POSSIBILITY OF SUCH DAMAGE.
         if(p != NULL) while (*p != 0) *out++ = *p++; \
     } while (0);
 
+int utoa(unsigned int value, char *out, int base)
+{
+    char buf[30]; unsigned int i, counter = 0;
+
+    if(value == 0) {
+        buf[counter++] = '0';
+    }
+
+    for (; value != 0; value /= base) {
+        buf[counter++] = "0123456789abcdef"[value % base];
+    }
+
+    for (i = 0; i < counter; i++) {
+        out[i] = buf[counter - i - 1];
+    }
+
+    return counter;
+}
 
 int darm_str(const darm_t *d, darm_str_t *str)
 {
@@ -105,6 +122,19 @@ int darm_str(const darm_t *d, darm_str_t *str)
         case 't':
             if(d->Rt == R_INVLD) break;
             APPEND(args[arg], armv7_register_by_index(d->Rt));
+            arg++;
+            continue;
+
+        case 'i':
+            *args[arg]++ = '#';
+            if(d->imm > 0x1000) {
+                *args[arg]++ = '0';
+                *args[arg]++ = 'x';
+                args[arg] += utoa(d->imm, args[arg], 16);
+            }
+            else {
+                args[arg] += utoa(d->imm, args[arg], 10);
+            }
             arg++;
             continue;
 
