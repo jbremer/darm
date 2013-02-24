@@ -141,11 +141,12 @@ int darm_str(const darm_t *d, darm_str_t *str)
         case 'S':
             if(d->shift_is_reg == 0) {
                 const char *type; uint32_t imm;
-                armv7_immshift_decode(d, &type, &imm);
-                APPEND(shift, type);
-                *shift++ = ' ';
-                *shift++ = '#';
-                shift += utoa(imm, shift, 10);
+                if(armv7_immshift_decode(d, &type, &imm) == 0) {
+                    APPEND(shift, type);
+                    *shift++ = ' ';
+                    *shift++ = '#';
+                    shift += utoa(imm, shift, 10);
+                }
             }
             continue;
 
