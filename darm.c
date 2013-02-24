@@ -28,6 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <stdio.h>
+#include <ctype.h>
 #include <stdint.h>
 #include "darm.h"
 
@@ -176,5 +177,21 @@ int darm_str(const darm_t *d, darm_str_t *str)
     }
 
     *instr = 0;
+    return 0;
+}
+
+int darm_str2(const darm_t *d, darm_str_t *str, int lowercase)
+{
+    if(darm_str(d, str) < 0) {
+        return -1;
+    }
+
+    if(lowercase != 0) {
+        // just lowercase the entire object, including null-bytes
+        char *buf = (char *) str;
+        for (uint32_t i = 0; i < sizeof(darm_str_t); i++) {
+            buf[i] = tolower(buf[i]);
+        }
+    }
     return 0;
 }

@@ -186,6 +186,8 @@ const char *armv7_register_by_index(darm_reg_t reg);
 const char *armv7_condition_by_index(darm_cond_t cond);
 void armv7_reglist(uint16_t reglist, char *out);
 void darm_dump(const darm_t *d);
+
 int darm_str(const darm_t *d, darm_str_t *str);
+int darm_str2(const darm_t *d, darm_str_t *str, int lowercase);
 
 #endif
