@@ -315,6 +315,41 @@ int darm_str(const darm_t *d, darm_str_t *str)
             args[arg] += utoa(d->imm, args[arg], 16);
             continue;
 
+        case 'M':
+            *args[arg]++ = '[';
+            APPEND(args[arg], armv7_register_by_index(d->Rn));
+            *args[arg]++ = ',';
+            *args[arg]++ = ' ';
+
+            // if the Rm operand is defined, then we use that optionally with
+            // a shift, otherwise there might be an immediate value as offset
+            if(d->Rm != R_INVLD) {
+                APPEND(args[arg], armv7_register_by_index(d->Rm));
+
+                const char *type; uint32_t imm;
+                if(armv7_immshift_decode(d, &type, &imm) == 0) {
+                    *args[arg]++ = ',';
+                    *args[arg]++ = ' ';
+                    APPEND(args[arg], type);
+                    *args[arg]++ = ' ';
+                    *args[arg]++ = '#';
+                    args[arg] += utoa(imm, args[arg], 10);
+                }
+            }
+            else {
+                *args[arg]++ = '#';
+
+                // negative offset
+                if(d->U == B_UNSET) {
+                    *args[arg]++ = '-';
+                }
+
+                args[arg] += utoa(d->imm, args[arg], 10);
+            }
+
+            *args[arg]++ = ']';
+            continue;
+
         default:
             return -1;
         }
