@@ -138,6 +138,17 @@ int darm_str(const darm_t *d, darm_str_t *str)
             arg++;
             continue;
 
+        case 'S':
+            if(d->shift_is_reg == 0) {
+                const char *type; uint32_t imm;
+                armv7_immshift_decode(d, &type, &imm);
+                APPEND(shift, type);
+                *shift++ = ' ';
+                *shift++ = '#';
+                shift += utoa(imm, shift, 10);
+            }
+            continue;
+
         default:
             return -1;
         }
@@ -146,7 +157,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
         off--;
     }
 
-    *mnemonic = *args[0] = *args[1] = *args[2] = *args[3] = 0;
+    *mnemonic = *args[0] = *args[1] = *args[2] = *args[3] = *shift = 0;
 
     char *instr = str->instr;
     APPEND(instr, str->mnemonic);
