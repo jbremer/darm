@@ -152,6 +152,13 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case 'S':
+            if(d->P == B_SET) {
+                // we're still inside the memory address
+                shift = args[arg] - 1;
+                *shift++ = ',';
+                *shift++ = ' ';
+            }
+
             if(d->shift_is_reg == 0) {
                 const char *type; uint32_t imm;
                 if(armv7_immshift_decode(d, &type, &imm) == 0) {
@@ -160,11 +167,26 @@ int darm_str(const darm_t *d, darm_str_t *str)
                     *shift++ = '#';
                     shift += utoa(imm, shift, 10);
                 }
+                else if(d->P == B_SET) {
+                    // we're still in the memory address, but there was
+                    // no shift, so we have to revert the shift pointer so
+                    // it will write a closing bracket again
+                    shift -= 2;
+                }
             }
             else {
                 APPEND(shift, armv7_shift_type_by_index(d->type));
                 *shift++ = ' ';
                 APPEND(shift, armv7_register_by_index(d->Rs));
+            }
+
+            if(d->P == B_SET) {
+                // close the memory address
+                *shift++ = ']';
+
+                // reset shift
+                args[arg] = shift;
+                shift = str->shift;
             }
             continue;
 
@@ -253,6 +275,11 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 }
 
                 APPEND(args[arg], armv7_register_by_index(d->Rm));
+
+                // if post-indexed this was a stand-alone operator one
+                if(d->P == B_UNSET) {
+                    arg++;
+                }
             }
             else {
                 *args[arg]++ = '#';
@@ -265,11 +292,11 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 args[arg] += utoa(d->imm, args[arg], 10);
             }
 
-            // if pre-indexed, close the memory address
+            // if pre-indexed, close the memory address, but don't increase
+            // arg so we can alter it in the shift handler
             if(d->P == B_SET) {
                 *args[arg]++ = ']';
             }
-            arg++;
             continue;
 
         default:
