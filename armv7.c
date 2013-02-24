@@ -179,7 +179,7 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         // register as offset, otherwise, it takes an immediate as offset
         if((w >> 25) & 1) {
             d->Rm = w & 0b1111;
-            d->shift_is_reg = 0;
+            d->shift_is_reg = B_UNSET;
             d->type = (w >> 5) & 0b11;
             d->shift = (w >> 7) & 0b11111;
         }
@@ -339,7 +339,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->imm = w & BITMSK_12;
             }
             else {
-                d->shift_is_reg = 0;
+                d->shift_is_reg = B_UNSET;
                 d->type = (w >> 5) & 0b11;
                 d->shift = (w >> 7) & 0b11111;
                 d->Rm = w & 0b1111;
@@ -380,7 +380,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
         // type == 1, shift with the value of the lower bits of Rs
         d->shift_is_reg = (w >> 4) & 1;
-        if(d->shift_is_reg != 0) {
+        if(d->shift_is_reg == B_SET) {
             d->Rs = (w >> 8) & 0b1111;
         }
         else {
@@ -494,7 +494,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
         // type == 1, shift with the value of the lower bits of Rs
         d->shift_is_reg = (w >> 4) & 1;
-        if(d->shift_is_reg != 0) {
+        if(d->shift_is_reg == B_SET) {
             d->Rs = (w >> 8) & 0b1111;
         }
         else {
@@ -523,6 +523,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->Rn = w & 0b1111;
         }
         else {
+            d->shift_is_reg = B_UNSET;
             d->Rm = w & 0b1111;
             d->shift = (w >> 7) & 0b11111;
 
@@ -589,7 +590,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->shift_is_reg = (w >> 4) & 1;
             d->type = (w >> 5) & 0b11;
             d->Rm = w & 0b1111;
-            if(d->shift_is_reg == 0) {
+            if(d->shift_is_reg == B_UNSET) {
                 d->shift = (w >> 7) & 0b11111;
             }
             else {
@@ -627,7 +628,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // otherwise it's the PKH instruction
             if(((w >> 5) & 1) == 0) {
                 d->instr = I_PKH;
-                d->shift_is_reg = 0;
+                d->shift_is_reg = B_UNSET;
                 d->type = (w >> 5) & 0b10;
                 d->shift = (w >> 7) & 0b11111;
                 d->T = (w >> 6) & 1;
@@ -862,8 +863,7 @@ void darm_dump(const darm_t *d)
         printf("option:        %d\n", d->option);
     }
 
-    if(d->shift_is_reg != 0 || d->type != 0 || d->Rs != R_INVLD ||
-            d->shift != 0) {
+    if(d->shift_is_reg != B_INVLD) {
         if(d->shift_is_reg == 0) {
             printf(
                 "shift-is-reg:  %d   (is the operand register-shifted?)\n"
