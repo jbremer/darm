@@ -27,7 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from ctypes import cdll, Structure, byref, POINTER, create_string_buffer
-from ctypes import c_uint16, c_int32, c_uint32, c_char_p
+from ctypes import c_uint16, c_int32, c_uint32, c_char_p, c_char
 
 
 class _Base:
@@ -168,11 +168,24 @@ class _Darm(Structure):
     ]
 
 
+class _DarmStr(Structure):
+    _fields_ = [
+        ('mnemonic', c_char * 12),
+        ('arg0', c_char * 32),
+        ('arg1', c_char * 32),
+        ('arg2', c_char * 32),
+        ('arg3', c_char * 32),
+        ('shift', c_char * 12),
+        ('instr', c_char * 64),
+    ]
+
+
 class Darm:
     _flags = 'S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W'
     _regs = 'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'RdHi', 'RdLo'
 
     def __init__(self, d):
+        self.d = d
         self.w = d.w
         self.instr = Instruction(d.instr)
         self.instr_type = Encoding(d.instr_type)
@@ -228,6 +241,12 @@ class Darm:
         return 'Darm(instr=%s, instr_type=%s, cond=%s%s)' % \
             (repr(self.instr), repr(self.instr_type), repr(self.cond), args)
 
+    def __str__(self):
+        x = _DarmStr()
+        if _lib.darm_str2(self.d, byref(x), True) == 0:
+            return x.instr
+        return ''
+
 
 def disasm(w):
     d = _Darm()
@@ -246,3 +265,5 @@ _set_func('armv7_enctype_by_index', c_char_p, c_uint32)
 _set_func('armv7_register_by_index', c_char_p, c_int32)
 _set_func('armv7_condition_by_index', c_char_p, c_int32)
 _set_func('armv7_reglist', None, c_uint16, c_char_p)
+_set_func('darm_str', c_int32, POINTER(_Darm), POINTER(_DarmStr))
+_set_func('darm_str2', c_int32, POINTER(_Darm), POINTER(_DarmStr), c_int32)
