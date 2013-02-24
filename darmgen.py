@@ -121,8 +121,15 @@ def generate_format_strings(arr):
     # a set of rules to transform a string representation as given by the
     # armv7 manual, into our own custom format string
     rules = {
+        # if this instruction updates the condition flags, then an S is added
+        # to the end of the instruction
         '{S}': 's',
+
+        # if this instruction is conditional, then the condition under which
+        # it executes is appended to the instruction
         '<c>': 'c',
+
+        # various register operands
         '<Rd>': 'd',
         '<Rn>': 'n',
         '<Rm>': 'm',
@@ -130,20 +137,42 @@ def generate_format_strings(arr):
         '<Rt>': 't',
         '<RdHi>': 'h',
         '<RdLo>': 'l',
+
+        # immediate values
         '#<const>': 'i',
+        '#<imm16>': 'i',
+        '#<imm4>': 'i',
+
+        # immediate and register shift
         '{,<shift>}': 'S',
         '#<shift>': 'S',
         '<type> <Rs>': 'S',
-        '#<imm16>': 'i',
-        '#<imm4>': 'i',
+
+        # some bit instructions take a lsb and width as operand
         '#<lsb>': 'L',
         '#<width>': 'w',
+
+        # for branch instructions
         '<label>': 'b',
+
+        # option immediate for various obscure instructions
         '#<option>': 'o',
+
+        # either a list of registers, reglist, or a single register
         '<registers>': 'r',
+
+        # exclamation mark to specify the write-back bit
         '{!}': '!',
+
+        # the SETEND instruction takes a one or zero as operand
         '<endian_specifier>': 'e',
+
+        # some signed multiplication instructions take an X flag, which
+        # means that you can swap halfwords of the second operand
         '{X}': 'x',
+
+        # the PKH instruction has either a TB or BT postfix, specified by
+        # the T member of the darm object
         '<T>': 'T',
     }
 
