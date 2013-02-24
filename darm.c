@@ -305,6 +305,16 @@ int darm_str(const darm_t *d, darm_str_t *str)
             }
             continue;
 
+        case 'b':
+            // BLX first checks for branch and only then for the conditional
+            // version which takes the Rm as operand, so let's see if the
+            // branch stuff has been initialized yet
+            if(d->instr == I_BLX && d->H == B_INVLD) break;
+
+            APPEND(args[arg], "#0x");
+            args[arg] += utoa(d->imm, args[arg], 16);
+            continue;
+
         default:
             return -1;
         }
