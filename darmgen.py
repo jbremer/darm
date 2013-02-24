@@ -120,69 +120,69 @@ def generate_format_strings(arr):
 
     # a set of rules to transform a string representation as given by the
     # armv7 manual, into our own custom format string
-    rules = {
+    rules = [
         # if this instruction updates the condition flags, then an S is added
         # to the end of the instruction
-        '{S}': 's',
+        '{S}', 's',
 
         # if this instruction is conditional, then the condition under which
         # it executes is appended to the instruction
-        '<c>': 'c',
+        '<c>', 'c',
 
         # various register operands
-        '<Rd>': 'd',
-        '<Rn>': 'n',
-        '<Rm>': 'm',
-        '<Ra>': 'a',
-        '<Rt>': 't',
-        '<RdHi>': 'h',
-        '<RdLo>': 'l',
+        '<Rd>', 'd',
+        '<Rn>', 'n',
+        '<Rm>', 'm',
+        '<Ra>', 'a',
+        '<Rt>', 't',
+        '<RdHi>', 'h',
+        '<RdLo>', 'l',
 
         # immediate values
-        '#<const>': 'i',
-        '#<imm4>': 'i',
-        '#<imm16>': 'i',
-        '#<imm24>': 'i',
+        '#<const>', 'i',
+        '#<imm4>', 'i',
+        '#<imm16>', 'i',
+        '#<imm24>', 'i',
 
         # immediate and register shift
-        '{,<shift>}': 'S',
-        '#<shift>': 'S',
-        '<type> <Rs>': 'S',
+        '{,<shift>}', 'S',
+        '#<shift>', 'S',
+        '<type> <Rs>', 'S',
 
         # some bit instructions take a lsb and width as operand
-        '#<lsb>': 'L',
-        '#<width>': 'w',
+        '#<lsb>', 'L',
+        '#<width>', 'w',
 
         # for branch instructions
-        '<label>': 'b',
+        '<label>', 'b',
 
         # option immediate for various obscure instructions
-        '#<option>': 'o',
+        '#<option>', 'o',
 
         # either a list of registers, reglist, or a single register
-        '<registers>': 'r',
+        '<registers>', 'r',
 
         # exclamation mark to specify the write-back bit
-        '{!}': '!',
+        '{!}', '!',
 
         # the SETEND instruction takes a one or zero as operand
-        '<endian_specifier>': 'e',
+        '<endian_specifier>', 'e',
 
         # some signed multiplication instructions take an X flag, which
         # means that you can swap halfwords of the second operand
-        '{X}': 'x',
+        '{X}', 'x',
 
         # certain signed multiplication instructions take these flags in
         # order to swap halfwords that are being used
-        '<x><y>': 'X',
+        '<x><y>', 'X',
 
         # rounding flag for various signed multiplication instructions
-        '{R}': 'R',
+        '{R}', 'R',
 
         # the PKH instruction has either a TB or BT postfix, specified by
         # the T member of the darm object
-        '<T>': 'T',
-    }
+        '<T>', 'T',
+    ]
 
     for row in arr:
         full = row[0]
@@ -193,7 +193,7 @@ def generate_format_strings(arr):
         full = full[len(instr):]
 
         # apply all rules
-        for k, v in rules.items():
+        for k, v in zip(*[iter(rules)]*2):
             full = full.replace(k, v)
 
         if instr not in ret:
