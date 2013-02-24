@@ -129,6 +129,13 @@ def generate_format_strings(arr):
         # it executes is appended to the instruction
         '<c>', 'c',
 
+        # memory address with Rn as base register and an immediate or Rm
+        # operand as offset
+        '[<Rn>]', 'B',
+        '#+/-<imm12>', 'O',
+        '#+/-<imm8>', 'O',
+        '+/-<Rm>', 'O',
+
         # various register operands
         '<Rd>', 'd',
         '<Rn>', 'n',

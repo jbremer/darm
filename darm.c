@@ -228,6 +228,50 @@ int darm_str(const darm_t *d, darm_str_t *str)
             arg++;
             continue;
 
+        case 'B':
+            *args[arg]++ = '[';
+            APPEND(args[arg], armv7_register_by_index(d->Rn));
+
+            // if post-indexed, then we close the memory address
+            if(d->P == B_UNSET) {
+                *args[arg++]++ = ']';
+            }
+            else {
+                *args[arg]++ = ',';
+                *args[arg]++ = ' ';
+            }
+            continue;
+
+        case 'O':
+            // if the Rm operand is set, then this is about the Rm operand,
+            // otherwise it's about the immediate
+            if(d->Rm != R_INVLD) {
+
+                // negative offset
+                if(d->U == B_UNSET) {
+                    *args[arg]++ = '-';
+                }
+
+                APPEND(args[arg], armv7_register_by_index(d->Rm));
+            }
+            else {
+                *args[arg]++ = '#';
+
+                // negative offset
+                if(d->U == B_UNSET) {
+                    *args[arg]++ = '-';
+                }
+
+                args[arg] += utoa(d->imm, args[arg], 10);
+            }
+
+            // if pre-indexed, close the memory address
+            if(d->P == B_SET) {
+                *args[arg]++ = ']';
+            }
+            arg++;
+            continue;
+
         default:
             return -1;
         }
