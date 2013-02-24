@@ -126,6 +126,18 @@ int darm_str(const darm_t *d, darm_str_t *str)
             arg++;
             continue;
 
+        case 'h':
+            if(d->RdHi == R_INVLD) break;
+            APPEND(args[arg], armv7_register_by_index(d->RdHi));
+            arg++;
+            continue;
+
+        case 'l':
+            if(d->RdLo == R_INVLD) break;
+            APPEND(args[arg], armv7_register_by_index(d->RdLo));
+            arg++;
+            continue;
+
         case 'i':
             *args[arg]++ = '#';
             if(d->imm > 0x1000) {
@@ -172,8 +184,19 @@ int darm_str(const darm_t *d, darm_str_t *str)
             }
             continue;
 
+        case 'X':
+            *mnemonic++ = d->N == B_SET ? 'T' : 'B';
+            *mnemonic++ = d->M == B_SET ? 'T' : 'B';
+            continue;
+
+        case 'R':
+            if(d->R == B_SET) {
+                *mnemonic++ = 'R';
+            }
+            continue;
+
         case 'T':
-            APPEND(mnemonic, d->T ? "TB" : "BT");
+            APPEND(mnemonic, d->T == B_SET ? "TB" : "BT");
             continue;
 
         case 'r':
@@ -185,6 +208,24 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 APPEND(args[arg], armv7_register_by_index(d->Rt));
                 *args[arg]++ = '}';
             }
+            continue;
+
+        case 'L':
+            *args[arg]++ = '#';
+            args[arg] += utoa(d->lsb, args[arg], 10);
+            arg++;
+            continue;
+
+        case 'w':
+            *args[arg]++ = '#';
+            args[arg] += utoa(d->width, args[arg], 10);
+            arg++;
+            continue;
+
+        case 'o':
+            *args[arg]++ = '#';
+            args[arg] += utoa(d->option, args[arg], 10);
+            arg++;
             continue;
 
         default:

@@ -140,8 +140,9 @@ def generate_format_strings(arr):
 
         # immediate values
         '#<const>': 'i',
-        '#<imm16>': 'i',
         '#<imm4>': 'i',
+        '#<imm16>': 'i',
+        '#<imm24>': 'i',
 
         # immediate and register shift
         '{,<shift>}': 'S',
@@ -170,6 +171,13 @@ def generate_format_strings(arr):
         # some signed multiplication instructions take an X flag, which
         # means that you can swap halfwords of the second operand
         '{X}': 'x',
+
+        # certain signed multiplication instructions take these flags in
+        # order to swap halfwords that are being used
+        '<x><y>': 'X',
+
+        # rounding flag for various signed multiplication instructions
+        '{R}': 'R',
 
         # the PKH instruction has either a TB or BT postfix, specified by
         # the T member of the darm object
