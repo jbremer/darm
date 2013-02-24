@@ -132,6 +132,7 @@ def generate_format_strings(arr):
         '<RdLo>': 'l',
         '#<const>': 'i',
         '{,<shift>}': 'S',
+        '#<shift>': 'S',
         '<type> <Rs>': 'S',
         '#<imm16>': 'i',
         '#<lsb>': 'L',
