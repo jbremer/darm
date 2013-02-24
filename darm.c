@@ -64,6 +64,8 @@ int darm_str(const darm_t *d, darm_str_t *str)
     char *shift = str->shift;
 
     const char **ptrs = armv7_format_strings[d->instr];
+    if(ptrs[0] == NULL) return -1;
+
     for (char ch; (ch = ptrs[idx][off]) != 0; off++) {
         switch (ch) {
         case 's':
