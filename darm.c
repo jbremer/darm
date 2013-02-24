@@ -126,6 +126,12 @@ int darm_str(const darm_t *d, darm_str_t *str)
             arg++;
             continue;
 
+        case '2':
+            if(d->Rt == R_INVLD) break;
+            APPEND(args[arg], armv7_register_by_index(d->Rt + 1));
+            arg++;
+            continue;
+
         case 'h':
             if(d->RdHi == R_INVLD) break;
             APPEND(args[arg], armv7_register_by_index(d->RdHi));

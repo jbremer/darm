@@ -142,6 +142,7 @@ def generate_format_strings(arr):
         '<Rm>', 'm',
         '<Ra>', 'a',
         '<Rt>', 't',
+        '<Rt2>', '2',
         '<RdHi>', 'h',
         '<RdLo>', 'l',
 
