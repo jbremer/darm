@@ -138,6 +138,7 @@ class _Darm(Structure):
         ('instr', c_uint32),
         ('instr_type', c_uint32),
         ('cond', c_uint32),
+        ('B', c_uint32),
         ('S', c_uint32),
         ('E', c_uint32),
         ('F', c_uint32),
@@ -150,11 +151,13 @@ class _Darm(Structure):
         ('R', c_uint32),
         ('T', c_uint32),
         ('W', c_uint32),
+        ('rotate', c_uint32),
         ('Rd', c_int32),
         ('Rn', c_int32),
         ('Rm', c_int32),
         ('Ra', c_int32),
         ('Rt', c_int32),
+        ('Rt2', c_int32),
         ('RdHi', c_int32),
         ('RdLo', c_int32),
         ('imm', c_uint32),
@@ -181,8 +184,8 @@ class _DarmStr(Structure):
 
 
 class Darm:
-    _flags = 'S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W'
-    _regs = 'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'RdHi', 'RdLo'
+    _flags = 'B', 'S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W'
+    _regs = 'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'Rt2', 'RdHi', 'RdLo'
 
     def __init__(self, d):
         self.d = d
@@ -198,6 +201,7 @@ class Darm:
             r = getattr(d, x)
             setattr(self, x, Register(r) if r >= 0 else None)
 
+        self.rotate = d.rotate
         self.option = d.option
         self.imm = d.imm
         self.shift = Shift(d.shift_is_reg,
@@ -220,6 +224,9 @@ class Darm:
         args += ['%s=%s' % (r, g(r)) for r in self._flags if not g(r) is None]
 
         # other flags
+        if self.rotate:
+            args.append('rotate=%d' % self.rotate)
+
         if self.option != 16:
             args.append('option=%s' % bin(self.option))
 
