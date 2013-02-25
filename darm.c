@@ -289,14 +289,9 @@ int darm_str(const darm_t *d, darm_str_t *str)
             }
             // if there's an immediate, append it
             else if(d->imm != 0) {
-                *args[arg]++ = '#';
-
-                // negative offset
-                if(d->U == B_UNSET) {
-                    *args[arg]++ = '-';
-                }
-
-                args[arg] += utoa(d->imm, args[arg], 10);
+                // negative offset?
+                APPEND(args[arg], d->U == B_UNSET ? "#-0x" : "#0x");
+                args[arg] += utoa(d->imm, args[arg], 16);
             }
             else {
                 // there's no immediate, so we have to remove the ", " which
@@ -343,14 +338,9 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 }
             }
             else {
-                *args[arg]++ = '#';
-
-                // negative offset
-                if(d->U == B_UNSET) {
-                    *args[arg]++ = '-';
-                }
-
-                args[arg] += utoa(d->imm, args[arg], 10);
+                // negative offset?
+                APPEND(args[arg], d->U == B_UNSET ? "#-0x" : "#0x");
+                args[arg] += utoa(d->imm, args[arg], 16);
             }
 
             *args[arg]++ = ']';

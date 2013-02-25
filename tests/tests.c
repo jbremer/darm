@@ -156,6 +156,9 @@ struct {
     {0xe5242000, 0, {
         .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 4,
         .Rt = 2, .P = 1, .W = 1, .U = 0, .imm = 0, .shift_is_reg = 0}},
+    {0xe5a350f0, 0, {
+        .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 3,
+        .Rt = 5, .P = 1, .W = 1, .U = 1, .imm = 0xf0, .shift_is_reg = 0}},
 };
 
 int main()
