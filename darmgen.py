@@ -384,16 +384,20 @@ if __name__ == '__main__':
 
         # print some required definitions
         print 'armv7_enctype_t armv7_instr_types[256];'
+
+        def type_lut(name, bits):
+            print 'armv7_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits)
+
         print 'armv7_instr_t armv7_instr_labels[256];'
-        print 'armv7_instr_t type_shift_instr_lookup[16];'
-        print 'armv7_instr_t type4_instr_lookup[16];'
-        print 'armv7_instr_t type_opless_instr_lookup[8];'
-        print 'armv7_instr_t type_uncond2_instr_lookup[8];'
-        print 'armv7_instr_t type_mul_instr_lookup[8];'
-        print 'armv7_instr_t type_stack0_instr_lookup[32];'
-        print 'armv7_instr_t type_stack1_instr_lookup[8];'
-        print 'armv7_instr_t type_stack2_instr_lookup[8];'
-        print 'armv7_instr_t type_bits_instr_lookup[4];'
+        type_lut('shift', 4)
+        type_lut('brnchmisc', 4)
+        type_lut('opless', 3)
+        type_lut('uncond2', 3)
+        type_lut('mul', 3)
+        type_lut('stack0', 5)
+        type_lut('stack1', 3)
+        type_lut('stack2', 3)
+        type_lut('bits', 2)
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -444,7 +448,7 @@ if __name__ == '__main__':
 
         t4 = 'msr', 'bx', 'bxj', 'blx', None, 'qsub', None, 'bkpt', 'smlaw', \
             None, 'smulw', None, 'smlaw', None, 'smulw', None
-        print type_lookup_table('type4', *t4)
+        print type_lookup_table('type_brnchmisc', *t4)
 
         t_opless = 'nop', 'yield', 'wfe', 'wfi', 'sev', None, None, None
         print type_lookup_table('type_opless', *t_opless)

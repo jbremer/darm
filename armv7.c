@@ -445,7 +445,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     case T_BRNCHMISC:
         // first get the real instruction label
-        d->instr = type4_instr_lookup[(w >> 4) & 0b1111];
+        d->instr = type_brnchmisc_instr_lookup[(w >> 4) & 0b1111];
 
         // now we do a switch statement based on the instruction label,
         // rather than some magic values
