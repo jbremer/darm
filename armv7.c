@@ -710,6 +710,21 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // SMUL overlaps with SMC, so we define SMUL in SMC..
             break;
         }
+
+    case T_PAS:
+        // we have a lookup table with size 64, for all parallel signed and
+        // unsigned addition and subtraction instructions
+        // the upper three bits are represented by bits 20..22, so we only
+        // right-shift those 17 bytes, the lower three bits are represented
+        // by bits 5..7
+        d->instr = type_pas_instr_lookup[((w >> 17) & 0b111000) |
+                                         ((w >> 5) & 0b111)];
+        if(d->instr == I_INVLD) return -1;
+
+        d->Rn = (w >> 16) & 0b1111;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rm = w & 0b1111;
+        return 0;
     }
     return -1;
 }

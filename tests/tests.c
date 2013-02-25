@@ -159,6 +159,12 @@ struct {
     {0xe5a350f0, 0, {
         .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 3,
         .Rt = 5, .P = 1, .W = 1, .U = 1, .imm = 0xf0, .shift_is_reg = 0}},
+    {0xa6112f53, 0, {
+        .instr = I_SSAX, .instr_type = T_PAS, .cond = 0b1010, .Rn = 1,
+        .Rd = 2, .Rm = 3}},
+    {0xe6614ff5, 0, {
+        .instr = I_UQSUB8, .instr_type = T_PAS, .cond = 0b1110, .Rn = 1,
+        .Rd = 4, .Rm = 5}},
 };
 
 int main()

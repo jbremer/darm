@@ -299,6 +299,9 @@ cond_instr_types = [
                                              'SEL')),
     ('SM', 'Various signed multiply instructions', [],
      lambda x, y, z: y[:2] == 'SM'),
+    ('PAS', 'Parallel signed and unsigned addition and subtraction',
+     ['ins<c> <Rd>,<Rn>,<Rm>'],
+     lambda x, y, z: z in (97, 98, 99, 101, 102, 103)),
 ]
 
 if __name__ == '__main__':
@@ -398,6 +401,7 @@ if __name__ == '__main__':
         type_lut('stack1', 3)
         type_lut('stack2', 3)
         type_lut('bits', 2)
+        type_lut('pas', 6)
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -507,6 +511,21 @@ if __name__ == '__main__':
         print type_lookup_table('type_stack2', *t_stack2)
 
         print type_lookup_table('type_bits', None, 'sbfx', 'bfi', 'ubfx')
+
+        t_pas = {
+            0b000: 'add16',
+            0b001: 'asx',
+            0b010: 'sax',
+            0b011: 'sub16',
+            0b100: 'add8',
+            0b111: 'sub8',
+        }
+        t_pas_prefix = 's', 'q', 'sh', 'u', 'uq', 'uh'
+        t_pas = dict(((1 + (idx > 2) + idx) * 2**3 + k, x + v)
+                     for idx, x in enumerate(t_pas_prefix)
+                     for k, v in t_pas.items())
+        print type_lookup_table('type_pas',
+                                *[t_pas.get(x) for x in xrange(64)])
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)
