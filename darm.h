@@ -136,7 +136,7 @@ typedef struct _darm_t {
     darm_reg_t      Rm; // second operand
     darm_reg_t      Ra; // accumulate operand
     darm_reg_t      Rt; // transferred operand
-    darm_reg_T      Rt2; // second transferred operand
+    darm_reg_t      Rt2; // second transferred operand
 
     // for instructions which produce a 64bit output we have to specify a
     // high and a low 32bits destination register

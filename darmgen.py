@@ -305,6 +305,11 @@ cond_instr_types = [
     ('SAT', 'Saturating addition and subtraction instructions',
      ['ins<c> <Rd>,<Rn>,<Rm>'],
      lambda x, y, z: y[0] == 'Q'),
+    ('SYNC', 'Synchronization primitives',
+     ['ins{B}<c> <Rt>,<Rt2>,[<Rn>]', 'ins<c> <Rd>,<Rt>,[<Rn>]',
+     'ins<c> <Rt>,<Rt2>,[<Rn>]', 'ins<c> <Rt>,[<Rn>]'],
+     lambda x, y, z: x[1:5] == (0, 0, 0, 1) and (x[-5:-1] == (1, 0, 0, 1) or
+                                                 x[-8:-4] == (1, 0, 0, 1))),
 ]
 
 if __name__ == '__main__':
@@ -317,7 +322,7 @@ if __name__ == '__main__':
 
     # list of encoding types which should not be emitted in the table (because
     # they are handled somewhere else, in a somewhat hardcoded fashion)
-    type_ignore = 'MUL', 'STACK0', 'STACK1', 'STACK2'
+    type_ignore = 'MUL', 'STACK0', 'STACK1', 'STACK2', 'SAT', 'SYNC'
 
     for description in darmtbl.ARMv7:
         instr = description[0]
@@ -406,6 +411,7 @@ if __name__ == '__main__':
         type_lut('bits', 2)
         type_lut('pas', 6)
         type_lut('sat', 2)
+        type_lut('sync', 4)
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -532,6 +538,11 @@ if __name__ == '__main__':
                                 *[t_pas.get(x) for x in xrange(64)])
 
         print type_lookup_table('type_sat', 'qadd', 'qsub', 'qdadd', 'qdsub')
+
+        t_sync = 'swp', None, None, None, 'swpb', None, None, None, \
+            'strex', 'ldrex', 'strexd', 'ldrexd', 'strexb', 'ldrexb', \
+            'strexh', 'ldrexh'
+        print type_lookup_table('type_sync', *t_sync)
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)

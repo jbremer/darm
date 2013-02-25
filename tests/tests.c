@@ -168,6 +168,12 @@ struct {
     {0xe1018052, 0, {
         .instr = I_QADD, .instr_type = T_SAT, .cond = 0b1110, .Rn = 1,
         .Rd = 8, .Rm = 2}},
+    {0xe1c12f94, 0, {
+        .instr = I_STREXB, .instr_type = T_SYNC, .cond = 0b1110,
+        .Rn = 1, .Rd = 2, .Rt = 4}},
+    {0xe1413094, 0, {
+        .instr = I_SWPB, .instr_type = T_SYNC, .cond = 0b1110,
+        .Rn = 1, .Rt = 3, .Rt2 = 4, .B = 1}},
 };
 
 int main()

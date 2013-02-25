@@ -313,6 +313,28 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             }
             return 0;
         }
+        // synchronization primitive instructions
+        else if(((w >> 24) & 1) == 1 && ((w >> 4) & 0b1111) == 0b1001) {
+            d->instr = type_sync_instr_lookup[(w >> 20) & 0b1111];
+            d->instr_type = T_SYNC;
+            d->Rn = (w >> 16) & 0b1111;
+            switch ((uint32_t) d->instr) {
+            case I_SWP: case I_SWPB:
+                d->B = (w >> 22) & 1;
+                d->Rt = (w >> 12) & 0b1111;
+                d->Rt2 = w & 0b1111;
+                return 0;
+
+            case I_LDREX: case I_LDREXD: case I_LDREXB: case I_LDREXH:
+                d->Rt = (w >> 12) & 0b1111;
+                return 0;
+
+            case I_STREX: case I_STREXD: case I_STREXB: case I_STREXH:
+                d->Rd = (w >> 12) & 0b1111;
+                d->Rt = w & 0b1111;
+                return 0;
+            }
+        }
     }
     // handles the STR, STRT, LDR, LDRT, STRB, STRBT, LDRB, LDRBT stack
     // instructions, and the media instructions
@@ -381,7 +403,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // do a lookup for the type of instruction
     switch (d->instr_type) {
     case T_INVLD: case T_UNCOND: case T_MUL: case T_STACK0: case T_STACK1:
-    case T_STACK2: case T_SAT:
+    case T_STACK2: case T_SAT: case T_SYNC:
         return -1;
 
     case T_ARITH_SHIFT:
