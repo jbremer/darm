@@ -130,6 +130,9 @@ typedef struct _darm_t {
     // write-back bit
     uint32_t        W;
 
+    // rotation value
+    uint32_t        rotate;
+
     // register operands
     darm_reg_t      Rd; // destination
     darm_reg_t      Rn; // first operand

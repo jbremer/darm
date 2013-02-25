@@ -356,6 +356,13 @@ int darm_str(const darm_t *d, darm_str_t *str)
             *args[arg]++ = ']';
             continue;
 
+        case 'A':
+            if(d->rotate != 0) {
+                APPEND(args[arg], "ROR #");
+                args[arg] += utoa(d->rotate, args[arg], 10);
+            }
+            continue;
+
         default:
             return -1;
         }

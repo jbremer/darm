@@ -153,6 +153,7 @@ def generate_format_strings(arr):
         # immediate values
         '#<const>', 'i',
         '#<imm4>', 'i',
+        '#<imm5>', 'i',
         '#<imm16>', 'i',
         '#<imm24>', 'i',
 
@@ -190,6 +191,9 @@ def generate_format_strings(arr):
 
         # rounding flag for various signed multiplication instructions
         '{R}', 'R',
+
+        # rotation of operands
+        '{,<rotation>}', 'A',
 
         # the PKH instruction has either a TB or BT postfix, specified by
         # the T member of the darm object
@@ -310,6 +314,10 @@ cond_instr_types = [
      'ins<c> <Rt>,<Rt2>,[<Rn>]', 'ins<c> <Rt>,[<Rn>]'],
      lambda x, y, z: x[1:5] == (0, 0, 0, 1) and (x[-5:-1] == (1, 0, 0, 1) or
                                                  x[-8:-4] == (1, 0, 0, 1))),
+    ('PUSR', 'Packing, unpacking, saturation, and reversal instructions',
+     ['ins<c> <Rd>,#<imm>,<Rn>', 'ins<c> <Rd>,#<imm>,<Rn>{,<shift>}',
+     'ins<c> <Rd>,<Rn>,<Rm>{,<rotation>}', 'ins<c> <Rd>,<Rm>{,<rotation>}'],
+     lambda x, y, z: x[1:6] == (0, 1, 1, 0, 1)),
 ]
 
 if __name__ == '__main__':
@@ -322,7 +330,7 @@ if __name__ == '__main__':
 
     # list of encoding types which should not be emitted in the table (because
     # they are handled somewhere else, in a somewhat hardcoded fashion)
-    type_ignore = 'MUL', 'STACK0', 'STACK1', 'STACK2', 'SAT', 'SYNC'
+    type_ignore = 'MUL', 'STACK0', 'STACK1', 'STACK2', 'SAT', 'SYNC', 'PUSR'
 
     for description in darmtbl.ARMv7:
         instr = description[0]
@@ -412,6 +420,7 @@ if __name__ == '__main__':
         type_lut('pas', 6)
         type_lut('sat', 2)
         type_lut('sync', 4)
+        type_lut('pusr', 4)
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -543,6 +552,11 @@ if __name__ == '__main__':
             'strex', 'ldrex', 'strexd', 'ldrexd', 'strexb', 'ldrexb', \
             'strexh', 'ldrexh'
         print type_lookup_table('type_sync', *t_sync)
+
+        t_pusr = 'sxtab16', 'sxtb16', None, None, 'sxtab', 'sxtb', \
+            'sxtah', 'sxth', 'uxtab16', 'uxtb16', None, None, \
+            'uxtab', 'uxtb', 'uxtah', 'uxth'
+        print type_lookup_table('type_pusr', *t_pusr)
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)

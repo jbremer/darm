@@ -395,6 +395,69 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->Rm = w & 0b1111;
         return 0;
     }
+    // handle packing, unpacking, saturation, and reversal instructions, these
+    // instructions have the 4th bit set and bits 23..27 represent 0b01101
+    const uint32_t mask3 = (0b11111 << 23) | (1 << 4);
+    if((w & mask3) == ((0b01101 << 23) | (1 << 4))) {
+        // some instructions are already handled elsewhere (namely, PKH, SEL,
+        // REV, REV16, RBIT, and REVSH)
+        uint32_t op1 = (w >> 20) & 0b111;
+        uint32_t A = (w >> 16) & 0b1111;
+        uint32_t op2 = (w >> 5) & 0b111;
+
+        d->instr_type = T_PUSR;
+
+        // the (SX|UX)T(A)(B|H)(16) instructions
+        if(op2 == 0b011) {
+            // op1 represents the upper three bits, and A = 0b1111 represents
+            // the lower bit
+            d->instr = type_pusr_instr_lookup[(op1 << 1) | (A == 0b1111)];
+            if(d->instr != I_INVLD) {
+                d->Rd = (w >> 12) & 0b1111;
+                d->Rm = w & 0b1111;
+
+                // rotation is shifted to the left by three, so we do this
+                // directly in our shift as well
+                d->rotate = (w >> 7) & 0b11000;
+
+                // if A is not 0b1111, then A represents the Rn operand
+                if(A != 0b1111) {
+                    d->Rn = A;
+                }
+                return 0;
+            }
+        }
+
+        // SSAT
+        if((op1 & 0b010) == 0b010 && (op2 & 1) == 0) {
+            // if the upper bit is set, then it's USAT, otherwise SSAT
+            d->instr = (op1 >> 2) ? I_USAT : I_SSAT;
+            d->imm = (w >> 16) & 0b11111;
+            // signed saturate adds one to the immediate
+            if(d->instr == I_SSAT) {
+                d->imm++;
+            }
+            d->Rd = (w >> 12) & 0b1111;
+            d->shift_is_reg = B_UNSET;
+            d->shift = (w >> 7) & 0b11111;
+            d->type = (w >> 5) & 0b11;
+            d->Rn = w & 0b1111;
+            return 0;
+        }
+
+        // SSAT16 and USAT16
+        if((op1 == 0b010 || op1 == 0b110) && op2 == 0b001) {
+            d->instr = op1 == 0b010 ? I_SSAT16 : I_USAT16;
+            d->imm = (w >> 16) & 0b1111;
+            // signed saturate 16 adds one to the immediate
+            if(d->instr == I_SSAT16) {
+                d->imm++;
+            }
+            d->Rd = (w >> 12) & 0b1111;
+            d->Rn = w & 0b1111;
+            return 0;
+        }
+    }
 
     // the instruction label
     d->instr = armv7_instr_labels[(w >> 20) & 0xff];
@@ -403,7 +466,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // do a lookup for the type of instruction
     switch (d->instr_type) {
     case T_INVLD: case T_UNCOND: case T_MUL: case T_STACK0: case T_STACK1:
-    case T_STACK2: case T_SAT: case T_SYNC:
+    case T_STACK2: case T_SAT: case T_SYNC: case T_PUSR:
         return -1;
 
     case T_ARITH_SHIFT:
@@ -914,6 +977,10 @@ void darm_dump(const darm_t *d)
 
     if(d->option != O_INVLD) {
         printf("option:        %d\n", d->option);
+    }
+
+    if(d->rotate != 0) {
+        printf("rotate:        %d\n", d->rotate);
     }
 
     if(d->shift_is_reg != B_INVLD) {

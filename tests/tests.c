@@ -174,6 +174,12 @@ struct {
     {0xe1413094, 0, {
         .instr = I_SWPB, .instr_type = T_SYNC, .cond = 0b1110,
         .Rn = 1, .Rt = 3, .Rt2 = 4, .B = 1}},
+    {0xe6e141d2, 0, {
+        .instr = I_USAT, .instr_type = T_PUSR, .cond = 0b1110,
+        .imm = 1, .Rd = 4, .shift = 3, .type = 0b10, .Rn = 2}},
+    {0xe6b21474, 0, {
+        .instr = I_SXTAH, .instr_type = T_PUSR, .cond = 0b1110,
+        .Rn = 2, .Rd = 1, .rotate = 0b1000, .Rm = 4}},
 };
 
 int main()
