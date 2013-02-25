@@ -127,10 +127,19 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case '2':
-            if(d->Rt == R_INVLD) break;
-            APPEND(args[arg], armv7_register_by_index(d->Rt + 1));
-            arg++;
-            continue;
+            // first check if Rt2 is actually set
+            if(d->Rt2 != R_INVLD) {
+                APPEND(args[arg], armv7_register_by_index(d->Rt2));
+                arg++;
+                continue;
+            }
+            // for some instructions, Rt2 = Rt + 1
+            else if(d->Rt != R_INVLD) {
+                APPEND(args[arg], armv7_register_by_index(d->Rt + 1));
+                arg++;
+                continue;
+            }
+            break;
 
         case 'h':
             if(d->RdHi == R_INVLD) break;
