@@ -269,8 +269,9 @@ int darm_str(const darm_t *d, darm_str_t *str)
             *args[arg]++ = '[';
             APPEND(args[arg], armv7_register_by_index(d->Rn));
 
-            // if post-indexed, then we close the memory address
-            if(d->P == B_UNSET) {
+            // if post-indexed or the index is not even set, then we close
+            // the memory address
+            if(d->P != B_SET) {
                 *args[arg++]++ = ']';
             }
             else {
