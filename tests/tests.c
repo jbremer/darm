@@ -165,6 +165,9 @@ struct {
     {0xe6614ff5, 0, {
         .instr = I_UQSUB8, .instr_type = T_PAS, .cond = 0b1110, .Rn = 1,
         .Rd = 4, .Rm = 5}},
+    {0xe1018052, 0, {
+        .instr = I_QADD, .instr_type = T_SAT, .cond = 0b1110, .Rn = 1,
+        .Rd = 8, .Rm = 2}},
 };
 
 int main()

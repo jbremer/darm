@@ -266,7 +266,7 @@ cond_instr_types = [
      lambda x, y, z: x[-1] == d.imm24),
     ('BRNCHMISC', 'Branch and Misc instructions',
      ['B(L)X(J)<c> <Rm>', 'BKPT #<imm16>', 'MSR<c> <spec_reg>,<Rn>'],
-     lambda x, y, z: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0)),
+     lambda x, y, z: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0) and not y[0] == 'Q'),
     ('MOV_IMM', 'Move immediate to a register (possibly negating it)',
      ['ins{S}<c> <Rd>,#<const>'],
      lambda x, y, z: x[-1] == d.imm12 and x[-2] == d.Rd),
@@ -302,6 +302,9 @@ cond_instr_types = [
     ('PAS', 'Parallel signed and unsigned addition and subtraction',
      ['ins<c> <Rd>,<Rn>,<Rm>'],
      lambda x, y, z: z in (97, 98, 99, 101, 102, 103)),
+    ('SAT', 'Saturating addition and subtraction instructions',
+     ['ins<c> <Rd>,<Rn>,<Rm>'],
+     lambda x, y, z: y[0] == 'Q'),
 ]
 
 if __name__ == '__main__':
@@ -402,6 +405,7 @@ if __name__ == '__main__':
         type_lut('stack2', 3)
         type_lut('bits', 2)
         type_lut('pas', 6)
+        type_lut('sat', 2)
         count = len(instruction_names(open('instructions.txt')))
         print 'const char *armv7_mnemonics[%d];' % count
         print 'const char *armv7_enctypes[%d];' % len(cond_instr_types)
@@ -526,6 +530,8 @@ if __name__ == '__main__':
                      for k, v in t_pas.items())
         print type_lookup_table('type_pas',
                                 *[t_pas.get(x) for x in xrange(64)])
+
+        print type_lookup_table('type_sat', 'qadd', 'qsub', 'qdadd', 'qdsub')
 
         print instruction_names_table(open('instructions.txt'))
         print type_encoding_table('armv7_enctypes', cond_instr_types)

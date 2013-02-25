@@ -360,6 +360,19 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             return 0;
         }
     }
+    // handle saturating addition and subtraction instructions, these
+    // instructions have various masks; of bits 20..27 bit 24 is set and bits
+    // 21..22 specify which instruction this is, furthermore, bits 4..7
+    // represent the value 0b0101
+    const uint32_t mask2 = (0b11111001 << 20) | (0b1111 << 4);
+    if((w & mask2) == ((1 << 24) | (0b0101 << 4))) {
+        d->instr = type_sat_instr_lookup[(w >> 21) & 0b11];
+        d->instr_type = T_SAT;
+        d->Rn = (w >> 16) & 0b1111;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rm = w & 0b1111;
+        return 0;
+    }
 
     // the instruction label
     d->instr = armv7_instr_labels[(w >> 20) & 0xff];
@@ -368,7 +381,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // do a lookup for the type of instruction
     switch (d->instr_type) {
     case T_INVLD: case T_UNCOND: case T_MUL: case T_STACK0: case T_STACK1:
-    case T_STACK2:
+    case T_STACK2: case T_SAT:
         return -1;
 
     case T_ARITH_SHIFT:
