@@ -754,9 +754,9 @@ int armv7_disassemble(darm_t *d, uint32_t w)
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
     d->S = d->E = d->U = d->H = d->P = d->F = B_INVLD;
-    d->R = d->T = d->W = d->M = d->N = B_INVLD;
+    d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
-    d->RdHi = d->RdLo = d->Rs = R_INVLD;
+    d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
     d->option = O_INVLD;
 
     if(d->cond == 0b1111) {
@@ -866,6 +866,7 @@ void darm_dump(const darm_t *d)
     PRINT_REG(Rm);
     PRINT_REG(Ra);
     PRINT_REG(Rt);
+    PRINT_REG(Rt2);
     PRINT_REG(RdHi);
     PRINT_REG(RdLo);
 
@@ -876,6 +877,8 @@ void darm_dump(const darm_t *d)
 #define PRINT_FLAG(flag, comment) if(d->flag != B_INVLD) \
     printf("%s:             %d   (%s)\n", #flag, d->flag, comment)
 
+    PRINT_FLAG(B, "swap one byte or four bytes?");
+    PRINT_FLAG(S, "does this instruction update conditional flags?");
     PRINT_FLAG(E, "endian specifier for SETEND");
     PRINT_FLAG(U, "add or subtract the offset?");
     PRINT_FLAG(H, "branch to 2-byte aligned Thumb2 instruction");

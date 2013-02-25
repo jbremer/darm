@@ -81,6 +81,9 @@ typedef struct _darm_t {
     // conditional flags, if any
     darm_cond_t     cond;
 
+    // if set, swap only one byte, otherwise swap four bytes
+    uint32_t        B;
+
     // does this instruction update the conditional flags?
     uint32_t        S;
 
@@ -133,6 +136,7 @@ typedef struct _darm_t {
     darm_reg_t      Rm; // second operand
     darm_reg_t      Ra; // accumulate operand
     darm_reg_t      Rt; // transferred operand
+    darm_reg_T      Rt2; // second transferred operand
 
     // for instructions which produce a 64bit output we have to specify a
     // high and a low 32bits destination register

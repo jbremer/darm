@@ -184,6 +184,7 @@ int main()
         if(p->Rm == 0) p->Rm = R_INVLD;
         if(p->Ra == 0) p->Ra = R_INVLD;
         if(p->Rt == 0) p->Rt = R_INVLD;
+        if(p->Rt2 == 0) p->Rt2 = R_INVLD;
         if(p->RdHi == 0) p->RdHi = R_INVLD;
         if(p->RdLo == 0) p->RdLo = R_INVLD;
         if(p->Rs == 0) p->Rs = R_INVLD;
@@ -209,7 +210,8 @@ int main()
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
                 C(Rt) || C(RdHi) || C(RdLo) || C(imm) || C(type) ||
                 C(shift_is_reg) || C(Rs) || C(shift) || C(lsb) ||
-                C(width) || C(reglist) || F(T) || F(F) || F(M) || F(N)) {
+                C(width) || C(reglist) || F(T) || F(F) || F(M) || F(N) ||
+                C(Rt2) || F(B)) {
             // leave ugly code
             printf("incorrect encoding for 0x%08x\n", d.w);
             darm_dump(&d);
