@@ -287,7 +287,8 @@ int darm_str(const darm_t *d, darm_str_t *str)
                     arg++;
                 }
             }
-            else {
+            // if there's an immediate, append it
+            else if(d->imm != 0) {
                 *args[arg]++ = '#';
 
                 // negative offset
@@ -296,6 +297,11 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 }
 
                 args[arg] += utoa(d->imm, args[arg], 10);
+            }
+            else {
+                // there's no immediate, so we have to remove the ", " which
+                // was introduced by the base register of the memory address
+                args[arg] -= 2;
             }
 
             // if pre-indexed, close the memory address, but don't increase

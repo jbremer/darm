@@ -153,6 +153,9 @@ struct {
     {0xe75123d4, 0, {
         .instr = I_SMMLS, .instr_type = T_SM, .cond = 0b1110, .Rd = 1,
         .Ra = 2, .Rm = 3, .R = 0, .Rn = 4}},
+    {0xe5242000, 0, {
+        .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 4,
+        .Rt = 2, .P = 1, .W = 1, .U = 0, .imm = 0, .shift_is_reg = 0}},
 };
 
 int main()
