@@ -838,6 +838,7 @@ int armv7_disassemble(darm_t *d, uint32_t w)
     d->cond = (w >> 28) & 0b1111;
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
+    d->shift_is_reg = B_INVLD;
     d->S = d->E = d->U = d->H = d->P = d->F = B_INVLD;
     d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;

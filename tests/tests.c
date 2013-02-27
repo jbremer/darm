@@ -221,7 +221,7 @@ int main()
                 C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
                 C(Rt) || C(RdHi) || C(RdLo) || C(imm) || C(type) ||
-                C(shift_is_reg) || C(Rs) || C(shift) || C(lsb) ||
+                F(shift_is_reg) || C(Rs) || C(shift) || C(lsb) ||
                 C(width) || C(reglist) || F(T) || F(F) || F(M) || F(N) ||
                 C(Rt2) || F(B)) {
             // leave ugly code
