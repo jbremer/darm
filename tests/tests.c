@@ -12,25 +12,25 @@ struct {
         .Rd = 3, .Rn = 1, .Rm = 2, .type = 0, .shift_is_reg = 0, .shift = 1}},
     {0xe2821003, 0, {
         .instr = I_ADD, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 1, .Rn = 2, .imm = 3}},
+        .Rd = 1, .Rn = 2, .imm = 3, .I = B_SET}},
     {0xe257502a, 0, {
         .instr = I_SUB, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 1,
-        .Rd = 5, .Rn = 7, .imm = 42}},
+        .Rd = 5, .Rn = 7, .imm = 42, .I = B_SET}},
     {0xe04d2007, 0, {
         .instr = I_SUB, .instr_type = T_ARITH_SHIFT, .cond = 0b1110, .S = 0,
         .Rd = 2, .Rn = SP, .Rm = 7}},
     {0xe28d4001, 0, {
         .instr = I_ADD, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 4, .Rn = SP, .imm = 1}},
+        .Rd = 4, .Rn = SP, .imm = 1, .I = B_SET}},
     {0xe28f4030, 0, {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 4, .imm = 48, .U = 1}},
+        .Rd = 4, .imm = 48, .I = B_SET, .U = 1}},
     {0xe24f3000, 0, {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 3, .imm = 0, .U = 0}},
+        .Rd = 3, .imm = 0, .I = B_SET, .U = 0}},
     {0xe24f3210, 0, {
         .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 3, .imm = 1, .U = 0}},
+        .Rd = 3, .imm = 1, .I = B_SET, .U = 0}},
     {0xe1a02458, 0, {
         .instr = I_ASR, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 2, .Rm = 4, .Rn = 8, .type = 2}},
@@ -38,19 +38,22 @@ struct {
         .instr = I_LSL, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 2, .shift = 30, .Rm = 3}},
     {0xeb00014e, 0, {
-        .instr = I_BL, .instr_type = T_BRNCHSC, .cond = 0b1110, .imm = 1336}},
+        .instr = I_BL, .instr_type = T_BRNCHSC, .cond = 0b1110,
+        .imm = 1336, .I = B_SET}},
     {0xeaffff00, 0, {
-        .instr = I_B, .instr_type = T_BRNCHSC, .cond = 0b1110, .imm = -1024}},
+        .instr = I_B, .instr_type = T_BRNCHSC, .cond = 0b1110,
+        .imm = -1024, .I = B_SET}},
     {0xef000001, 0, {
-        .instr = I_SVC, .instr_type = T_BRNCHSC, .cond = 0b1110, .imm = 1}},
+        .instr = I_SVC, .instr_type = T_BRNCHSC, .cond = 0b1110,
+        .imm = 1, .I = B_SET}},
     {0xe1200071, 0, {
         .instr = I_BKPT, .instr_type = T_BRNCHMISC, .cond = 0b1110,
-        .imm = 1}},
+        .imm = 1, .I = B_SET}},
     {0xe12fff14, 0, {
         .instr = I_BX, .instr_type = T_BRNCHMISC, .cond = 0b1110, .Rm = 4}},
     {0xe3e04020, 0, {
         .instr = I_MVN, .instr_type = T_MOV_IMM, .cond = 0b1110, .Rd = 4,
-        .imm = 32}},
+        .imm = 32, .I = B_SET}},
     {0xe1140505, 0, {
         .instr = I_TST, .instr_type = T_CMP_OP, .cond = 0b1110, .Rn = 4,
         .Rm = 5, .shift_is_reg = 0, .type = 0, .shift = 10}},
@@ -59,7 +62,7 @@ struct {
         .Rm = 11, .type = 3, .shift_is_reg = 1, .Rs = 1}},
     {0xe35704f0, 0, {
         .instr = I_CMP, .instr_type = T_CMP_IMM, .cond = 0b1110, .Rn = 7,
-        .imm = 0xf0000000}},
+        .imm = 0xf0000000, .I = B_SET}},
     {0xe320f000, 0, {.instr = I_NOP, .instr_type = T_OPLESS, .cond = 0b1110}},
     {0xe320f003, 0, {.instr = I_WFI, .instr_type = T_OPLESS, .cond = 0b1110}},
     {0xe1a0c064, 0, {
@@ -67,10 +70,10 @@ struct {
         .Rd = 12, .shift = 0, .Rm = 4, .type = 3}},
     {0xe3a013e8, 0, {
         .instr = I_MOV, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 1, .imm = 0xa0000003}},
+        .Rd = 1, .imm = 0xa0000003, .I = B_SET}},
     {0xe3012f40, 0, {
         .instr = I_MOVW, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 2, .imm = 8000}},
+        .Rd = 2, .imm = 8000, .I = B_SET}},
     {0xe1a00000, 0, {
         .instr = I_NOP, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 0, .Rm = 0}},
@@ -83,13 +86,13 @@ struct {
         .instr = I_SETEND, .instr_type = T_UNCOND, .cond = 0b1111, .E = 1}},
     {0xf4d2f001, 0, {
         .instr = I_PLI, .instr_type = T_UNCOND, .cond = 0b1111, .U = 1,
-        .Rn = 2, .imm = 1}},
+        .Rn = 2, .imm = 1, .I = B_SET}},
     {0xfb000000, 0, {
         .instr = I_BLX, .instr_type = T_UNCOND, .cond = 0b1111, .H = 1,
-        .imm = 2}},
+        .imm = 2, .I = B_SET}},
     {0xe3a01a01, 0, {
         .instr = I_MOV, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
-        .Rd = 1, .imm = 0x1000}},
+        .Rd = 1, .imm = 0x1000, .I = B_SET}},
     {0xe0140298, 0, {
         .instr = I_MUL, .instr_type = T_MUL, .cond = 0b1110, .S = 1,
         .Rd = 4, .Rm = 2, .Rn = 8}},
@@ -114,7 +117,7 @@ struct {
         .Rn = 4, .Rt = 8, .Rm = 3, .P = 0, .F = 1}},
     {0xe0c42fdf, 0, {
         .instr = I_LDRD, .instr_type = T_STACK2, .cond = 0b1110, .U = 1,
-        .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff}},
+        .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff, .I = B_SET}},
     {0xe7c8411f, 0, {
         .instr = I_BFC, .instr_type = T_BITS, .cond = 0b1110, .Rd = 4,
         .lsb = 2, .width = 6}},
@@ -123,10 +126,10 @@ struct {
         .Rn = 3, .lsb = 2, .width = 5}},
     {0xe52d4004, 0, {
         .instr = I_PUSH, .instr_type = T_STACK0, .cond = 0b1110,
-        .Rn = SP, .Rt = 4, .imm = 4, .U = 0, .P = 1, .W = 1}},
+        .Rn = SP, .Rt = 4, .imm = 4, .I = B_SET, .U = 0, .P = 1, .W = 1}},
     {0xe49d7004, 0, {
         .instr = I_POP, .instr_type = T_STACK0, .cond = 0b1110,
-        .Rn = SP, .Rt = 7, .imm = 4, .U = 1, .P = 0, .W = 0}},
+        .Rn = SP, .Rt = 7, .imm = 4, .I = B_SET, .U = 1, .P = 0, .W = 0}},
     {0xe8bd00f6, 0, {
         .instr = I_POP, .instr_type = T_LDSTREGS, .cond = 0b1110,
         .Rn = SP, .W = 1, .reglist = 0b11110110}},
@@ -143,7 +146,8 @@ struct {
         .instr = I_MVN, .instr_type = T_MISC, .cond = 0b1110,
         .Rd = 4, .shift = 3, .type = 2, .Rm = 1}},
     {0xe1600075, 0, {
-        .instr = I_SMC, .instr_type = T_MISC, .cond = 0b1110, .imm = 5}},
+        .instr = I_SMC, .instr_type = T_MISC, .cond = 0b1110,
+        .imm = 5, .I = B_SET}},
     {0xe16601e8, 0, {
         .instr = I_SMUL, .instr_type = T_SM, .cond = 0b1110, .Rd = 6,
         .Rm = 1, .M = 1, .N = 1, .Rn = 8}},
@@ -155,10 +159,12 @@ struct {
         .Ra = 2, .Rm = 3, .R = 0, .Rn = 4}},
     {0xe5242000, 0, {
         .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 4,
-        .Rt = 2, .P = 1, .W = 1, .U = 0, .imm = 0, .shift_is_reg = 0}},
+        .Rt = 2, .P = 1, .W = 1, .U = 0, .imm = 0, .I = B_SET,
+        .shift_is_reg = 0}},
     {0xe5a350f0, 0, {
         .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 3,
-        .Rt = 5, .P = 1, .W = 1, .U = 1, .imm = 0xf0, .shift_is_reg = 0}},
+        .Rt = 5, .P = 1, .W = 1, .U = 1, .imm = 0xf0, .I = B_SET,
+        .shift_is_reg = 0}},
     {0xa6112f53, 0, {
         .instr = I_SSAX, .instr_type = T_PAS, .cond = 0b1010, .Rn = 1,
         .Rd = 2, .Rm = 3}},
@@ -176,7 +182,7 @@ struct {
         .Rn = 1, .Rt = 3, .Rt2 = 4, .B = 1}},
     {0xe6e141d2, 0, {
         .instr = I_USAT, .instr_type = T_PUSR, .cond = 0b1110,
-        .imm = 1, .Rd = 4, .shift = 3, .type = 0b10, .Rn = 2}},
+        .imm = 1, .I = B_SET, .Rd = 4, .shift = 3, .type = 0b10, .Rn = 2}},
     {0xe6b21474, 0, {
         .instr = I_SXTAH, .instr_type = T_PUSR, .cond = 0b1110,
         .Rn = 2, .Rd = 1, .rotate = 0b1000, .Rm = 4}},
@@ -220,7 +226,7 @@ int main()
         if(ret != tests[i].r || C(w) || C(instr) || C(instr_type) ||
                 C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
-                C(Rt) || C(RdHi) || C(RdLo) || C(imm) || C(type) ||
+                C(Rt) || C(RdHi) || C(RdLo) || F(I) || C(imm) || C(type) ||
                 F(shift_is_reg) || C(Rs) || C(shift) || C(lsb) ||
                 C(width) || C(reglist) || F(T) || F(F) || F(M) || F(N) ||
                 C(Rt2) || F(B)) {
