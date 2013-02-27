@@ -136,6 +136,9 @@ typedef struct _darm_t {
     // write-back bit
     uint32_t        W;
 
+    // flag which specifies whether an immediate has been set
+    uint32_t        I;
+
     // rotation value
     uint32_t        rotate;
 

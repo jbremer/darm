@@ -154,6 +154,9 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case 'i':
+            // check if an immediate has been set
+            if(d->I != B_SET) break;
+
             *args[arg]++ = '#';
             if(d->imm > 0x1000) {
                 *args[arg]++ = '0';

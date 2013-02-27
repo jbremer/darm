@@ -145,6 +145,7 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
             d->shift = (w >> 7) & 0b11111;
         }
         else {
+            d->I = B_SET;
             d->imm = w & BITMSK_12;
         }
         return 0;
@@ -153,6 +154,7 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         d->instr = I_BLX;
         d->H = (w >> 24) & 1;
         d->imm = w & BITMSK_24;
+        d->I = B_SET;
 
         // check if the highest bit of the imm24 is set, if so, we
         // manually sign-extend the integer
@@ -243,6 +245,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 // the four high bits start at bit 8, so we shift them right
                 // to their destination
                 d->imm = ((w >> 4) & 0b11110000) | (w & 0b1111);
+                d->I = B_SET;
             }
             return 0;
         }
@@ -271,6 +274,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 // the four high bits start at bit 8, so we shift them right
                 // to their destination
                 d->imm = ((w >> 4) & 0b11110000) | (w & 0b1111);
+                d->I = B_SET;
             }
             return 0;
         }
@@ -320,6 +324,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // immediate, otherwise, it takes a shifted register
             if(((w >> 25) & 1) == 0) {
                 d->imm = w & BITMSK_12;
+                d->I = B_SET;
             }
             else {
                 d->shift_is_reg = B_UNSET;
@@ -394,6 +399,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // if the upper bit is set, then it's USAT, otherwise SSAT
             d->instr = (op1 >> 2) ? I_USAT : I_SSAT;
             d->imm = (w >> 16) & 0b11111;
+            d->I = B_SET;
             // signed saturate adds one to the immediate
             if(d->instr == I_SSAT) {
                 d->imm++;
@@ -410,6 +416,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         if((op1 == 0b010 || op1 == 0b110) && op2 == 0b001) {
             d->instr = op1 == 0b010 ? I_SSAT16 : I_USAT16;
             d->imm = (w >> 16) & 0b1111;
+            d->I = B_SET;
             // signed saturate 16 adds one to the immediate
             if(d->instr == I_SSAT16) {
                 d->imm++;
@@ -452,6 +459,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
         d->imm = ARMExpandImm(w & BITMSK_12);
+        d->I = B_SET;
 
         // check whether this instruction is in fact an ADR instruction
         if((d->instr == I_ADD || d->instr == I_SUB) &&
@@ -487,6 +495,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     case T_BRNCHSC:
         d->imm = w & BITMSK_24;
+        d->I = B_SET;
 
         // if the instruction is B or BL, then we have to sign-extend it and
         // multiply it with four
@@ -511,6 +520,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         switch ((uint32_t) d->instr) {
         case I_BKPT:
             d->imm = (((w >> 8) & BITMSK_12) << 4) + (w & 0b1111);
+            d->I = B_SET;
             return 0;
 
         case I_BX: case I_BXJ: case I_BLX:
@@ -520,6 +530,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         case I_MSR:
             d->Rn = w & 0b1111;
             d->imm = (w >> 18) & 0b11;
+            d->I = B_SET;
             return 0;
 
         case I_QSUB: case I_SMLAW: case I_SMULW: default:
@@ -531,6 +542,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     case T_MOV_IMM:
         d->Rd = (w >> 12) & 0b1111;
         d->imm = w & BITMSK_12;
+        d->I = B_SET;
 
         // the MOV and MVN instructions have an S bit
         if(d->instr == I_MOV || d->instr == I_MVN) {
@@ -564,6 +576,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     case T_CMP_IMM:
         d->Rn = (w >> 16) & 0b1111;
         d->imm = ARMExpandImm(w & BITMSK_12);
+        d->I = B_SET;
         return 0;
 
     case T_OPLESS:
@@ -674,6 +687,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             }
             else {
                 d->imm = w & 0b1111;
+                d->I = B_SET;
             }
             return 0;
 
@@ -799,7 +813,7 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
     d->cond = (w >> 28) & 0b1111;
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
-    d->shift_is_reg = B_INVLD;
+    d->shift_is_reg = d->I = B_INVLD;
     d->S = d->E = d->U = d->H = d->P = d->F = B_INVLD;
     d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
@@ -950,7 +964,7 @@ void darm_dump(const darm_t *d)
     PRINT_REG(RdHi);
     PRINT_REG(RdLo);
 
-    if(d->imm != 0) {
+    if(d->I == B_SET) {
         printf("imm:           0x%08x  %d\n", d->imm, d->imm);
     }
 
