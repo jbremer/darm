@@ -47,7 +47,7 @@ class Condition(_Base):
     _nonzero = -1
 
     def __str__(self):
-        return _lib.armv7_condition_by_index(self.idx)
+        return _lib.darm_condition_name(self.idx)
 
     def __repr__(self):
         return 'C_%s' % self.__str__()
@@ -57,7 +57,7 @@ class Instruction(_Base):
     _nonzero = 0
 
     def __str__(self):
-        return _lib.armv7_mnemonic_by_index(self.idx)
+        return _lib.darm_mnemonic_name(self.idx)
 
     def __repr__(self):
         return 'I_%s' % self.__str__()
@@ -67,7 +67,7 @@ class Register(_Base):
     _nonzero = -1
 
     def __str__(self):
-        return _lib.armv7_register_by_index(self.idx)
+        return _lib.darm_register_name(self.idx)
 
     def __repr__(self):
         return self.__str__()
@@ -77,7 +77,7 @@ class Encoding(_Base):
     _nonzero = 0
 
     def __str__(self):
-        return _lib.armv7_enctype_by_index(self.idx)
+        return _lib.darm_enctype_name(self.idx)
 
     def __repr__(self):
         return 'T_%s' % self.__str__()
@@ -116,7 +116,7 @@ class RegisterList:
 
     def __str__(self):
         buf = create_string_buffer(64)
-        _lib.armv7_reglist(self.reglist, buf)
+        _lib.darm_reglist(self.reglist, buf)
         return buf.value
 
     def __nonzero__(self):
@@ -257,7 +257,7 @@ class Darm:
 
 def disasm(w):
     d = _Darm()
-    ret = _lib.armv7_disassemble(byref(d), w)
+    ret = _lib.darm_armv7_disasm(byref(d), w)
     return Darm(d) if ret == 0 else None
 
 
@@ -266,11 +266,11 @@ def _set_func(name, restype, *argtypes):
     getattr(_lib, name).argtypes = argtypes
 
 _lib = cdll.LoadLibrary('libdarm.so')
-_set_func('armv7_disassemble', c_int32, POINTER(_Darm), c_uint32)
-_set_func('armv7_mnemonic_by_index', c_char_p, c_uint32)
-_set_func('armv7_enctype_by_index', c_char_p, c_uint32)
-_set_func('armv7_register_by_index', c_char_p, c_int32)
-_set_func('armv7_condition_by_index', c_char_p, c_int32)
-_set_func('armv7_reglist', c_int32, c_uint16, c_char_p)
+_set_func('darm_armv7_disasm', c_int32, POINTER(_Darm), c_uint32)
+_set_func('darm_mnemonic_name', c_char_p, c_uint32)
+_set_func('darm_enctype_name', c_char_p, c_uint32)
+_set_func('darm_register_name', c_char_p, c_int32)
+_set_func('darm_condition_name', c_char_p, c_int32)
+_set_func('darm_reglist', c_int32, c_uint16, c_char_p)
 _set_func('darm_str', c_int32, POINTER(_Darm), POINTER(_DarmStr))
 _set_func('darm_str2', c_int32, POINTER(_Darm), POINTER(_DarmStr), c_int32)
