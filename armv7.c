@@ -845,11 +845,11 @@ const char *darm_shift_type_name(darm_shift_type_t shifttype)
         shift_types[shifttype] : NULL;
 }
 
-const char *darm_condition_name(darm_cond_t cond)
+const char *darm_condition_name(darm_cond_t cond, int omit_always_execute)
 {
     // we don't give the AL postfix, as almost every instruction would need
     // one then
-    if(cond == C_AL) return "";
+    if(omit_always_execute != 0 && cond == C_AL) return "";
 
     return cond != C_INVLD && cond < (int32_t) ARRAYSIZE(g_condition_codes) ?
         g_condition_codes[cond].mnemonic_extension : NULL;
@@ -935,7 +935,7 @@ void darm_dump(const darm_t *d)
         printf("cond:          unconditional\n");
     }
     else if(d->cond != C_INVLD) {
-        printf("cond:          C_%s\n", darm_condition_name(d->cond));
+        printf("cond:          C_%s\n", darm_condition_name(d->cond, 0));
     }
 
 #define PRINT_REG(reg) if(d->reg != R_INVLD) \

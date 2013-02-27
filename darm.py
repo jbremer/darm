@@ -47,7 +47,7 @@ class Condition(_Base):
     _nonzero = -1
 
     def __str__(self):
-        return _lib.darm_condition_name(self.idx)
+        return _lib.darm_condition_name(self.idx, 0)
 
     def __repr__(self):
         return 'C_%s' % self.__str__()
@@ -270,7 +270,7 @@ _set_func('darm_armv7_disasm', c_int32, POINTER(_Darm), c_uint32)
 _set_func('darm_mnemonic_name', c_char_p, c_uint32)
 _set_func('darm_enctype_name', c_char_p, c_uint32)
 _set_func('darm_register_name', c_char_p, c_int32)
-_set_func('darm_condition_name', c_char_p, c_int32)
+_set_func('darm_condition_name', c_char_p, c_int32, c_int32)
 _set_func('darm_reglist', c_int32, c_uint16, c_char_p)
 _set_func('darm_str', c_int32, POINTER(_Darm), POINTER(_DarmStr))
 _set_func('darm_str2', c_int32, POINTER(_Darm), POINTER(_DarmStr), c_int32)

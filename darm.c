@@ -93,7 +93,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case 'c':
-            APPEND(mnemonic, darm_condition_name(d->cond));
+            APPEND(mnemonic, darm_condition_name(d->cond, 1));
             continue;
 
         case 'd':

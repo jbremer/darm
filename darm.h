@@ -196,7 +196,7 @@ const char *darm_register_name(darm_reg_t reg);
 const char *darm_shift_type_name(darm_shift_type_t shifttype);
 
 // postfix for each condition, e.g., EQ, NE
-const char *darm_condition_name(darm_cond_t cond);
+const char *darm_condition_name(darm_cond_t cond, int omit_always_execute);
 
 // meaning if this condition is used for regular instructions
 const char *darm_condition_meaning_int(darm_cond_t cond);
