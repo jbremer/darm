@@ -57,7 +57,13 @@ typedef enum _darm_cond_t {
     C_INVLD = -1
 } darm_cond_t;
 
-typedef enum _armv7_option_t {
+typedef enum _darm_shift_type_t {
+    S_LSL, S_LSR, S_ASR, S_ROR,
+
+    S_INVLD = -1,
+} darm_shift_type_t;
+
+typedef enum _darm_option_t {
     O_SY    = 0b1111,
     O_ST    = 0b1110,
     O_ISH   = 0b1011,
@@ -67,8 +73,8 @@ typedef enum _armv7_option_t {
     O_OSH   = 0b0011,
     O_OSHST = 0b0010,
 
-    O_INVLD = 0b10000,
-} armv7_option_t;
+    O_INVLD = -1,
+} darm_option_t;
 
 typedef struct _darm_t {
     // the original encoded instruction
@@ -104,7 +110,7 @@ typedef struct _darm_t {
     uint32_t        N;
 
     // option operand for the DMB, DSB and ISB instructions
-    uint32_t        option;
+    darm_option_t   option;
 
     // to add or to subtract the immediate, this is used for instructions
     // which take a relative offset to a pointer or to the program counter
@@ -179,20 +185,29 @@ typedef struct _darm_str_t {
     char instr[64];
 } darm_str_t;
 
-const char *armv7_condition_info(int condition_flag,
-    const char **meaning_integer, const char **meaning_floating_point,
-    int omit_always_mnemonic);
-int armv7_immshift_decode(const darm_t *d, const char **type,
+int darm_armv7_disasm(darm_t *d, uint32_t w);
+
+int darm_immshift_decode(const darm_t *d, const char **type,
     uint32_t *immediate);
 
-int armv7_disassemble(darm_t *d, uint32_t w);
+const char *darm_mnemonic_name(armv7_instr_t instr);
+const char *darm_enctype_name(armv7_enctype_t enctype);
+const char *darm_register_name(darm_reg_t reg);
+const char *darm_shift_type_name(darm_shift_type_t shifttype);
 
-const char *armv7_mnemonic_by_index(armv7_instr_t instr);
-const char *armv7_enctype_by_index(armv7_enctype_t enctype);
-const char *armv7_register_by_index(darm_reg_t reg);
-const char *armv7_condition_by_index(darm_cond_t cond);
-const char *armv7_shift_type_by_index(uint32_t idx);
-int armv7_reglist(uint16_t reglist, char *out);
+// postfix for each condition, e.g., EQ, NE
+const char *darm_condition_name(darm_cond_t cond);
+
+// meaning if this condition is used for regular instructions
+const char *darm_condition_meaning_int(darm_cond_t cond);
+
+// meaning if this condition is used for floating point instructions
+const char *darm_condition_meaning_fp(darm_cond_t cond);
+
+// look up a condition code, e.g., "EQ" => C_EQ
+darm_cond_t darm_condition_index(const char *condition_code);
+
+int darm_reglist(uint16_t reglist, char *out);
 void darm_dump(const darm_t *d);
 
 int darm_str(const darm_t *d, darm_str_t *str);

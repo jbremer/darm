@@ -77,7 +77,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
     // ptr to the output mnemonic
     char *mnemonic = str->mnemonic;
-    APPEND(mnemonic, armv7_mnemonic_by_index(d->instr));
+    APPEND(mnemonic, darm_mnemonic_name(d->instr));
 
     char *shift = str->shift;
 
@@ -93,49 +93,49 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case 'c':
-            APPEND(mnemonic, armv7_condition_info(d->cond, NULL, NULL, 1));
+            APPEND(mnemonic, darm_condition_name(d->cond));
             continue;
 
         case 'd':
             if(d->Rd == R_INVLD) break;
-            APPEND(args[arg], armv7_register_by_index(d->Rd));
+            APPEND(args[arg], darm_register_name(d->Rd));
             arg++;
             continue;
 
         case 'n':
             if(d->Rn == R_INVLD) break;
-            APPEND(args[arg], armv7_register_by_index(d->Rn));
+            APPEND(args[arg], darm_register_name(d->Rn));
             arg++;
             continue;
 
         case 'm':
             if(d->Rm == R_INVLD) break;
-            APPEND(args[arg], armv7_register_by_index(d->Rm));
+            APPEND(args[arg], darm_register_name(d->Rm));
             arg++;
             continue;
 
         case 'a':
             if(d->Ra == R_INVLD) break;
-            APPEND(args[arg], armv7_register_by_index(d->Ra));
+            APPEND(args[arg], darm_register_name(d->Ra));
             arg++;
             continue;
 
         case 't':
             if(d->Rt == R_INVLD) break;
-            APPEND(args[arg], armv7_register_by_index(d->Rt));
+            APPEND(args[arg], darm_register_name(d->Rt));
             arg++;
             continue;
 
         case '2':
             // first check if Rt2 is actually set
             if(d->Rt2 != R_INVLD) {
-                APPEND(args[arg], armv7_register_by_index(d->Rt2));
+                APPEND(args[arg], darm_register_name(d->Rt2));
                 arg++;
                 continue;
             }
             // for some instructions, Rt2 = Rt + 1
             else if(d->Rt != R_INVLD) {
-                APPEND(args[arg], armv7_register_by_index(d->Rt + 1));
+                APPEND(args[arg], darm_register_name(d->Rt + 1));
                 arg++;
                 continue;
             }
@@ -143,13 +143,13 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
         case 'h':
             if(d->RdHi == R_INVLD) break;
-            APPEND(args[arg], armv7_register_by_index(d->RdHi));
+            APPEND(args[arg], darm_register_name(d->RdHi));
             arg++;
             continue;
 
         case 'l':
             if(d->RdLo == R_INVLD) break;
-            APPEND(args[arg], armv7_register_by_index(d->RdLo));
+            APPEND(args[arg], darm_register_name(d->RdLo));
             arg++;
             continue;
 
@@ -176,7 +176,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
             if(d->shift_is_reg == 0) {
                 const char *type; uint32_t imm;
-                if(armv7_immshift_decode(d, &type, &imm) == 0) {
+                if(darm_immshift_decode(d, &type, &imm) == 0) {
                     APPEND(shift, type);
                     *shift++ = ' ';
                     *shift++ = '#';
@@ -190,9 +190,9 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 }
             }
             else {
-                APPEND(shift, armv7_shift_type_by_index(d->type));
+                APPEND(shift, darm_shift_type_name(d->type));
                 *shift++ = ' ';
-                APPEND(shift, armv7_register_by_index(d->Rs));
+                APPEND(shift, darm_register_name(d->Rs));
             }
 
             if(d->P == B_SET) {
@@ -238,11 +238,11 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
         case 'r':
             if(d->reglist != 0) {
-                args[arg] += armv7_reglist(d->reglist, args[arg]);
+                args[arg] += darm_reglist(d->reglist, args[arg]);
             }
             else {
                 *args[arg]++ = '{';
-                APPEND(args[arg], armv7_register_by_index(d->Rt));
+                APPEND(args[arg], darm_register_name(d->Rt));
                 *args[arg]++ = '}';
             }
             continue;
@@ -267,7 +267,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
         case 'B':
             *args[arg]++ = '[';
-            APPEND(args[arg], armv7_register_by_index(d->Rn));
+            APPEND(args[arg], darm_register_name(d->Rn));
 
             // if post-indexed or the index is not even set, then we close
             // the memory address
@@ -290,7 +290,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
                     *args[arg]++ = '-';
                 }
 
-                APPEND(args[arg], armv7_register_by_index(d->Rm));
+                APPEND(args[arg], darm_register_name(d->Rm));
 
                 // if post-indexed this was a stand-alone operator one
                 if(d->P == B_UNSET) {
@@ -328,17 +328,17 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
         case 'M':
             *args[arg]++ = '[';
-            APPEND(args[arg], armv7_register_by_index(d->Rn));
+            APPEND(args[arg], darm_register_name(d->Rn));
             *args[arg]++ = ',';
             *args[arg]++ = ' ';
 
             // if the Rm operand is defined, then we use that optionally with
             // a shift, otherwise there might be an immediate value as offset
             if(d->Rm != R_INVLD) {
-                APPEND(args[arg], armv7_register_by_index(d->Rm));
+                APPEND(args[arg], darm_register_name(d->Rm));
 
                 const char *type; uint32_t imm;
-                if(armv7_immshift_decode(d, &type, &imm) == 0) {
+                if(darm_immshift_decode(d, &type, &imm) == 0) {
                     *args[arg]++ = ',';
                     *args[arg]++ = ' ';
                     APPEND(args[arg], type);

@@ -202,7 +202,7 @@ int main()
         if(p->Rs == 0) p->Rs = R_INVLD;
         if(p->option == 0) p->option = O_INVLD;
 
-        ret = armv7_disassemble(&d, tests[i].w);
+        ret = darm_armv7_disasm(&d, tests[i].w);
 
         // so we don't have to hardcode all of these
         tests[i].d.w = d.w;

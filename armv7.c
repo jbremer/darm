@@ -44,7 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // right shift of seven, effectively avoiding the left shift of one
 #define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & 0b11110)
 
-struct {
+static struct {
     const char *mnemonic_extension;
     const char *meaning_integer;
     const char *meaning_fp;
@@ -71,50 +71,11 @@ struct {
     {"LO", "Carry Clear", "Less than"},
 };
 
-const char *armv7_condition_info(int condition_flag,
-    const char **meaning_integer, const char **meaning_fp,
-    int omit_always_mnemonic)
-{
-    if(condition_flag < 0 || condition_flag > 0b1110) return NULL;
-
-    if(meaning_integer != NULL) {
-        *meaning_integer = g_condition_codes[condition_flag].meaning_integer;
-    }
-
-    if(meaning_fp != NULL) {
-        *meaning_fp = g_condition_codes[condition_flag].meaning_fp;
-    }
-
-    // the "AL" mnemonic extension can be omitted
-    if(omit_always_mnemonic != 0 && condition_flag == 0b1110) {
-        return "";
-    }
-
-    // return the mnemonic extension
-    return g_condition_codes[condition_flag].mnemonic_extension;
-}
-
-int armv7_condition_index(const char *condition_code)
-{
-    if(condition_code == NULL) return -1;
-
-    // the "AL" condition flag
-    if(condition_code[0] == 0) return 0b1110;
-
-    for (uint32_t i = 0; i < ARRAYSIZE(g_condition_codes); i++) {
-        if(!strcmp(condition_code, g_condition_codes[i].mnemonic_extension)) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
 static const char *shift_types[] = {
     "LSL", "LSR", "ASR", "ROR",
 };
 
-int armv7_immshift_decode(const darm_t *d, const char **type,
+int darm_immshift_decode(const darm_t *d, const char **type,
     uint32_t *immediate)
 {
     if(d->type == 0 && d->shift == 0) {
@@ -125,7 +86,7 @@ int armv7_immshift_decode(const darm_t *d, const char **type,
         *type = "RRX", *immediate = 0;
     }
     else {
-        *type = shift_types[d->type];
+        *type = darm_shift_type_name(d->type);
         *immediate = d->shift;
 
         // 32 is encoded as 0
@@ -827,7 +788,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     return -1;
 }
 
-int armv7_disassemble(darm_t *d, uint32_t w)
+int darm_armv7_disasm(darm_t *d, uint32_t w)
 {
     int ret = -1;
 
@@ -860,36 +821,69 @@ int armv7_disassemble(darm_t *d, uint32_t w)
     return 0;
 }
 
-const char *armv7_mnemonic_by_index(armv7_instr_t instr)
+const char *darm_mnemonic_name(armv7_instr_t instr)
 {
     return instr < ARRAYSIZE(armv7_mnemonics) ?
         armv7_mnemonics[instr] : NULL;
 }
 
-const char *armv7_enctype_by_index(armv7_enctype_t enctype)
+const char *darm_enctype_name(armv7_enctype_t enctype)
 {
     return enctype < ARRAYSIZE(armv7_enctypes) ?
         armv7_enctypes[enctype] : NULL;
 }
 
-const char *armv7_register_by_index(darm_reg_t reg)
+const char *darm_register_name(darm_reg_t reg)
 {
     return reg != R_INVLD && reg < (int32_t) ARRAYSIZE(armv7_registers) ?
         armv7_registers[reg] : NULL;
 }
 
-const char *armv7_condition_by_index(darm_cond_t cond)
+const char *darm_shift_type_name(darm_shift_type_t shifttype)
 {
+    return shifttype < (int32_t) ARRAYSIZE(shift_types) ?
+        shift_types[shifttype] : NULL;
+}
+
+const char *darm_condition_name(darm_cond_t cond)
+{
+    // we don't give the AL postfix, as almost every instruction would need
+    // one then
+    if(cond == C_AL) return "";
+
     return cond != C_INVLD && cond < (int32_t) ARRAYSIZE(g_condition_codes) ?
         g_condition_codes[cond].mnemonic_extension : NULL;
 }
 
-const char *armv7_shift_type_by_index(uint32_t idx)
+const char *darm_condition_meaning_int(darm_cond_t cond)
 {
-    return idx < ARRAYSIZE(shift_types) ? shift_types[idx] : NULL;
+    return cond != C_INVLD && cond < (int32_t) ARRAYSIZE(g_condition_codes) ?
+        g_condition_codes[cond].meaning_integer : NULL;
 }
 
-int armv7_reglist(uint16_t reglist, char *out)
+const char *darm_condition_meaning_fp(darm_cond_t cond)
+{
+    return cond != C_INVLD && cond < (int32_t) ARRAYSIZE(g_condition_codes) ?
+        g_condition_codes[cond].meaning_fp : NULL;
+}
+
+darm_cond_t darm_condition_index(const char *condition_code)
+{
+    if(condition_code == NULL) return -1;
+
+    // the "AL" condition flag
+    if(condition_code[0] == 0) return C_AL;
+
+    for (uint32_t i = 0; i < ARRAYSIZE(g_condition_codes); i++) {
+        if(!strcmp(condition_code, g_condition_codes[i].mnemonic_extension)) {
+            return i;
+        }
+    }
+
+    return C_INVLD;
+}
+
+int darm_reglist(uint16_t reglist, char *out)
 {
     char *base = out;
 
@@ -934,18 +928,18 @@ void darm_dump(const darm_t *d)
         "encoded:       0x%08x\n"
         "instr:         I_%s\n"
         "instr-type:    T_%s\n",
-        d->w, armv7_mnemonic_by_index(d->instr),
-        armv7_enctype_by_index(d->instr_type));
+        d->w, darm_mnemonic_name(d->instr),
+        darm_enctype_name(d->instr_type));
 
     if(d->cond == C_UNCOND) {
         printf("cond:          unconditional\n");
     }
     else if(d->cond != C_INVLD) {
-        printf("cond:          C_%s\n", armv7_condition_by_index(d->cond));
+        printf("cond:          C_%s\n", darm_condition_name(d->cond));
     }
 
 #define PRINT_REG(reg) if(d->reg != R_INVLD) \
-    printf("%s:            %s\n", #reg, armv7_register_by_index(d->reg))
+    printf("%s:            %s\n", #reg, darm_register_name(d->reg))
 
     PRINT_REG(Rd);
     PRINT_REG(Rn);
@@ -998,7 +992,7 @@ void darm_dump(const darm_t *d)
                 "type:          %s (shift type)\n"
                 "Rs:            %s  (register-shift)\n",
                 d->shift_is_reg, shift_types[d->type],
-                armv7_register_by_index(d->Rs));
+                darm_register_name(d->Rs));
         }
     }
 
@@ -1011,7 +1005,7 @@ void darm_dump(const darm_t *d)
 
     if(d->reglist != 0) {
         char reglist[64];
-        armv7_reglist(d->reglist, reglist);
+        darm_reglist(d->reglist, reglist);
         printf("reglist:       %s\n", reglist);
     }
 
