@@ -820,7 +820,7 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
     d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
     d->option = O_INVLD;
 
-    if(d->cond == 0b1111) {
+    if(d->cond == C_UNCOND) {
         ret = armv7_disas_uncond(d, w);
     }
     else {
