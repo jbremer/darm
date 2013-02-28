@@ -185,6 +185,9 @@ struct {
     {0xe6b21474, 0, {
         .instr = I_SXTAH, .instr_type = T_PUSR, .cond = 0b1110,
         .Rn = 2, .Rd = 1, .rotate = 0b1000, .Rm = 4}},
+    {0xe0f12394, 0, {
+        .instr = I_SMLAL, .instr_type = T_MUL, .cond = 0b1110, .S = 1,
+        .RdHi = 1, .RdLo = 2, .Rm = 3, .Rn = 4}},
 };
 
 int main()

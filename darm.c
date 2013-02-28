@@ -228,6 +228,10 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case 'X':
+            // if the flags are not set, then this instruction doesn't take
+            // the (B|T)(B|T) postfix
+            if(d->N == B_INVLD || d->M == B_INVLD) break;
+
             *mnemonic++ = d->N == B_SET ? 'T' : 'B';
             *mnemonic++ = d->M == B_SET ? 'T' : 'B';
             continue;
