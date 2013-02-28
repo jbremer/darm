@@ -949,7 +949,7 @@ void darm_dump(const darm_t *d)
     }
 
 #define PRINT_REG(reg) if(d->reg != R_INVLD) \
-    printf("%s:            %s\n", #reg, darm_register_name(d->reg))
+    printf("%-5s          %s\n", #reg ":", darm_register_name(d->reg))
 
     PRINT_REG(Rd);
     PRINT_REG(Rn);
