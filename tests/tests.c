@@ -114,7 +114,7 @@ struct {
         .U = 1, .P = 0, .W = 1}},
     {0x90b480b3, 0, {
         .instr = I_LDRHT, .instr_type = T_STACK1, .cond = C_LS, .U = 1,
-        .Rn = 4, .Rt = 8, .Rm = 3, .P = 0, .F = 1}},
+        .Rn = 4, .Rt = 8, .Rm = 3, .P = 0}},
     {0xe0c42fdf, 0, {
         .instr = I_LDRD, .instr_type = T_STACK2, .cond = 0b1110, .U = 1,
         .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff, .I = B_SET}},
@@ -231,7 +231,7 @@ int main()
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
                 C(Rt) || C(RdHi) || C(RdLo) || F(I) || C(imm) ||
                 C(shift_type) || C(Rs) || C(shift) || C(lsb) ||
-                C(width) || C(reglist) || F(T) || F(F) || F(M) || F(N) ||
+                C(width) || C(reglist) || F(T) || F(M) || F(N) ||
                 C(Rt2) || F(B)) {
             // leave ugly code
             printf("incorrect encoding for 0x%08x\n", d.w);

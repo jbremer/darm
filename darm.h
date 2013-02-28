@@ -96,11 +96,6 @@ typedef struct _darm_t {
     // endian specifier for the SETEND instruction
     uint32_t        E;
 
-    // register-form specifies whether an immediate or a register should be
-    // used as source operator, this value will then be added or subtracted
-    // (see the U flag)
-    uint32_t        F;
-
     // whether halfwords should be swapped before various signed
     // multiplication operations
     uint32_t        M;
