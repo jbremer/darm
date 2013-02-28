@@ -141,7 +141,6 @@ class _Darm(Structure):
         ('B', c_uint32),
         ('S', c_uint32),
         ('E', c_uint32),
-        ('F', c_uint32),
         ('M', c_uint32),
         ('N', c_uint32),
         ('option', c_int32),
@@ -184,7 +183,7 @@ class _DarmStr(Structure):
 
 
 class Darm:
-    _flags = 'B', 'S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W', 'I'
+    _flags = 'B', 'S', 'E', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W', 'I'
     _regs = 'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'Rt2', 'RdHi', 'RdLo'
 
     def __init__(self, d):
