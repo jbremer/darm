@@ -964,20 +964,25 @@ void darm_dump(const darm_t *d)
         printf("imm:           0x%08x  %d\n", d->imm, d->imm);
     }
 
-#define PRINT_FLAG(flag, comment) if(d->flag != B_INVLD) \
-    printf("%s:             %d   (%s)\n", #flag, d->flag, comment)
+#define PRINT_FLAG(flag, comment, comment2) if(d->flag != B_INVLD) \
+    printf("%s:             %d   (%s)\n", #flag, d->flag, \
+        d->flag == B_SET ? comment : comment2)
 
-    PRINT_FLAG(B, "swap one byte or four bytes?");
-    PRINT_FLAG(S, "does this instruction update conditional flags?");
-    PRINT_FLAG(E, "endian specifier for SETEND");
-    PRINT_FLAG(U, "add or subtract the offset?");
-    PRINT_FLAG(H, "branch to 2-byte aligned Thumb2 instruction");
-    PRINT_FLAG(P, "pre- or post-indexed addressing");
-    PRINT_FLAG(M, "swap halfwords before operation");
-    PRINT_FLAG(N, "which source operand to take");
-    PRINT_FLAG(T, "tbform for PKH");
-    PRINT_FLAG(R, "rounded results");
-    PRINT_FLAG(W, "write-back bit");
+    PRINT_FLAG(B, "swap one byte", "swap four bytes");
+    PRINT_FLAG(S, "updates conditional flag",
+        "does NOT update conditional flags");
+    PRINT_FLAG(E, "change to big endian", "change to little endian");
+    PRINT_FLAG(U, "add offset to address", "subtract offset from address");
+    PRINT_FLAG(H, "Thumb2 instruction is two-byte aligned",
+        "Thumb2 instruction is four-byte aligned");
+    PRINT_FLAG(P, "pre-indexed addressing", "post-indexed addressing");
+    PRINT_FLAG(M, "take the top halfword as source",
+        "take the bottom halfword as source");
+    PRINT_FLAG(N, "take the top halfword as source",
+        "take the bottom halfword as source");
+    PRINT_FLAG(T, "PKHTB form", "PKHBT form");
+    PRINT_FLAG(R, "round the result", "do NOT round the result");
+    PRINT_FLAG(W, "write-back", "do NOT write-back");
 
     if(d->option != O_INVLD) {
         printf("option:        %d\n", d->option);
