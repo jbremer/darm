@@ -84,8 +84,6 @@ class Encoding(_Base):
 
 
 class Shift:
-    _types = 'LSL', 'LSR', 'ASR', 'ROR'
-
     def __init__(self, is_reg, type_, Rs, shift):
         self.is_reg = is_reg
         self.type_ = type_
@@ -93,10 +91,11 @@ class Shift:
         self.shift = shift
 
     def __str__(self):
+        type_name = _lib.darm_shift_type_name(self.type_)
         if self.is_reg:
-            return '%s %s' % (self._types[self.type_], self.Rs)
+            return '%s %s' % (type_name, self.Rs)
         else:
-            return '%s #%d' % (self._types[self.type_], self.shift)
+            return '%s #%d' % (type_name, self.shift)
 
     def __repr__(self):
         if self.is_reg:
@@ -270,6 +269,7 @@ _set_func('darm_armv7_disasm', c_int32, POINTER(_Darm), c_uint32)
 _set_func('darm_mnemonic_name', c_char_p, c_uint32)
 _set_func('darm_enctype_name', c_char_p, c_uint32)
 _set_func('darm_register_name', c_char_p, c_int32)
+_set_func('darm_shift_type_name', c_char_p, c_int32)
 _set_func('darm_condition_name', c_char_p, c_int32, c_int32)
 _set_func('darm_reglist', c_int32, c_uint16, c_char_p)
 _set_func('darm_str', c_int32, POINTER(_Darm), POINTER(_DarmStr))
