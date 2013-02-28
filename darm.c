@@ -171,7 +171,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
         case 'S':
             // is there even a shift?
-            if(d->shift_is_reg == B_INVLD) continue;
+            if(d->shift_type == S_INVLD) continue;
 
             if(d->P == B_SET) {
                 // we're still inside the memory address
@@ -180,7 +180,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 *shift++ = ' ';
             }
 
-            if(d->shift_is_reg == 0) {
+            if(d->Rs == R_INVLD) {
                 const char *type; uint32_t imm;
                 if(darm_immshift_decode(d, &type, &imm) == 0) {
                     APPEND(shift, type);
@@ -196,7 +196,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 }
             }
             else {
-                APPEND(shift, darm_shift_type_name(d->type));
+                APPEND(shift, darm_shift_type_name(d->shift_type));
                 *shift++ = ' ';
                 APPEND(shift, darm_register_name(d->Rs));
             }

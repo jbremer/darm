@@ -159,8 +159,7 @@ typedef struct _darm_t {
     uint32_t        imm;
 
     // register shift info
-    uint32_t        type;
-    uint32_t        shift_is_reg; // shift from register Rs or not?
+    darm_shift_type_t shift_type;
     darm_reg_t      Rs;
     uint32_t        shift;
 

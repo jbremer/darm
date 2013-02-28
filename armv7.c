@@ -78,19 +78,20 @@ static const char *shift_types[] = {
 int darm_immshift_decode(const darm_t *d, const char **type,
     uint32_t *immediate)
 {
-    if(d->type == 0 && d->shift == 0) {
+    if(d->shift_type == 0 && d->shift == 0) {
         *type = NULL, *immediate = 0;
         return -1;
     }
-    else if(d->type == 0b11 && d->Rs == 0) {
+    else if(d->shift_type == 0b11 && d->Rs == 0) {
         *type = "RRX", *immediate = 0;
     }
     else {
-        *type = darm_shift_type_name(d->type);
+        *type = darm_shift_type_name(d->shift_type);
         *immediate = d->shift;
 
         // 32 is encoded as 0
-        if((d->type == 0b01 || d->type == 0b10) && d->shift == 0) {
+        if((d->shift_type == 0b01 || d->shift_type == 0b10) &&
+                d->shift == 0) {
             *immediate = 32;
         }
     }
@@ -140,8 +141,7 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         // register as offset, otherwise, it takes an immediate as offset
         if((w >> 25) & 1) {
             d->Rm = w & 0b1111;
-            d->shift_is_reg = B_UNSET;
-            d->type = (w >> 5) & 0b11;
+            d->shift_type = (w >> 5) & 0b11;
             d->shift = (w >> 7) & 0b11111;
         }
         else {
@@ -327,8 +327,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->I = B_SET;
             }
             else {
-                d->shift_is_reg = B_UNSET;
-                d->type = (w >> 5) & 0b11;
+                d->shift_type = (w >> 5) & 0b11;
                 d->shift = (w >> 7) & 0b11111;
                 d->Rm = w & 0b1111;
             }
@@ -405,9 +404,8 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->imm++;
             }
             d->Rd = (w >> 12) & 0b1111;
-            d->shift_is_reg = B_UNSET;
             d->shift = (w >> 7) & 0b11111;
-            d->type = (w >> 5) & 0b11;
+            d->shift_type = (w >> 5) & 0b11;
             d->Rn = w & 0b1111;
             return 0;
         }
@@ -442,11 +440,10 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
         d->Rm = w & 0b1111;
-        d->type = (w >> 5) & 0b11;
+        d->shift_type = (w >> 5) & 0b11;
 
         // type == 1, shift with the value of the lower bits of Rs
-        d->shift_is_reg = (w >> 4) & 1;
-        if(d->shift_is_reg == B_SET) {
+        if(((w >> 4) & 1) == B_SET) {
             d->Rs = (w >> 8) & 0b1111;
         }
         else {
@@ -561,11 +558,10 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     case T_CMP_OP:
         d->Rn = (w >> 16) & 0b1111;
         d->Rm = w & 0b1111;
-        d->type = (w >> 5) & 0b11;
+        d->shift_type = (w >> 5) & 0b11;
 
         // type == 1, shift with the value of the lower bits of Rs
-        d->shift_is_reg = (w >> 4) & 1;
-        if(d->shift_is_reg == B_SET) {
+        if(((w >> 4) & 1) == B_SET) {
             d->Rs = (w >> 8) & 0b1111;
         }
         else {
@@ -589,19 +585,18 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
-        d->type = (w >> 5) & 0b11;
+        d->shift_type = (w >> 5) & 0b11;
         if((w >> 4) & 1) {
             d->Rm = (w >> 8) & 0b1111;
             d->Rn = w & 0b1111;
         }
         else {
-            d->shift_is_reg = B_UNSET;
             d->Rm = w & 0b1111;
             d->shift = (w >> 7) & 0b11111;
 
             // if this is a LSL instruction with a zero shift, then it's
             // actually a MOV instruction
-            if(d->instr == I_LSL && d->type == 0 && d->shift == 0) {
+            if(d->instr == I_LSL && d->shift_type == 0 && d->shift == 0) {
                 d->instr = I_MOV;
 
                 // if Rd and Rm are zero, then this is a NOP instruction
@@ -613,7 +608,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
             // if this is a ROR instruction with a zero shift, then it's
             // actually a RRX instruction
-            else if(d->instr == I_ROR && d->type == 0b11 &&
+            else if(d->instr == I_ROR && d->shift_type == 0b11 &&
                     d->shift == 0) {
                 d->instr = I_RRX;
             }
@@ -659,10 +654,9 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         case I_MVN:
             d->S = (w >> 20) & 1;
             d->Rd = (w >> 12) & 0b1111;
-            d->shift_is_reg = (w >> 4) & 1;
-            d->type = (w >> 5) & 0b11;
+            d->shift_type = (w >> 5) & 0b11;
             d->Rm = w & 0b1111;
-            if(d->shift_is_reg == B_UNSET) {
+            if(((w >> 4) & 1) == B_UNSET) {
                 d->shift = (w >> 7) & 0b11111;
             }
             else {
@@ -701,8 +695,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // otherwise it's the PKH instruction
             if(((w >> 5) & 1) == 0) {
                 d->instr = I_PKH;
-                d->shift_is_reg = B_UNSET;
-                d->type = (w >> 5) & 0b10;
+                d->shift_type = (w >> 5) & 0b10;
                 d->shift = (w >> 7) & 0b11111;
                 d->T = (w >> 6) & 1;
             }
@@ -813,8 +806,8 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
     d->cond = (w >> 28) & 0b1111;
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
-    d->shift_is_reg = d->I = B_INVLD;
-    d->S = d->E = d->U = d->H = d->P = d->F = B_INVLD;
+    d->shift_type = S_INVLD;
+    d->S = d->E = d->U = d->H = d->P = d->F = d->I = B_INVLD;
     d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
     d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
@@ -830,7 +823,11 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
     // return error
     if(ret < 0) return ret;
 
-    // TODO
+    // if the shift-type is set to S_LSL, but Rs is R_INVLD and shift is zero,
+    // then there's effectively no shift, so we set shift-type to S_INVLD
+    if(d->shift_type == S_LSL && d->Rs == R_INVLD && d->shift == 0) {
+        d->shift_type = S_INVLD;
+    }
 
     return 0;
 }
@@ -855,7 +852,8 @@ const char *darm_register_name(darm_reg_t reg)
 
 const char *darm_shift_type_name(darm_shift_type_t shifttype)
 {
-    return shifttype < (int32_t) ARRAYSIZE(shift_types) ?
+    return
+        shifttype != S_INVLD && shifttype < (int32_t) ARRAYSIZE(shift_types) ?
         shift_types[shifttype] : NULL;
 }
 
@@ -992,21 +990,18 @@ void darm_dump(const darm_t *d)
         printf("rotate:        %d\n", d->rotate);
     }
 
-    if(d->shift_is_reg != B_INVLD) {
-        if(d->shift_is_reg == 0) {
+    if(d->shift_type != S_INVLD) {
+        if(d->Rs == R_INVLD) {
             printf(
-                "shift-is-reg:  %d   (is the operand register-shifted?)\n"
                 "type:          %s (shift type)\n"
                 "shift:         %-2d  (shift constant)\n",
-                d->shift_is_reg, shift_types[d->type], d->shift);
+                shift_types[d->shift_type], d->shift);
         }
         else {
             printf(
-                "shift-is-reg:  %d   (is the operand register-shifted?)\n"
                 "type:          %s (shift type)\n"
                 "Rs:            %s  (register-shift)\n",
-                d->shift_is_reg, shift_types[d->type],
-                darm_register_name(d->Rs));
+                shift_types[d->shift_type], darm_register_name(d->Rs));
         }
     }
 
