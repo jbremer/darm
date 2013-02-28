@@ -78,20 +78,20 @@ static const char *shift_types[] = {
 int darm_immshift_decode(const darm_t *d, const char **type,
     uint32_t *immediate)
 {
-    if(d->shift_type == 0 && d->shift == 0) {
+    if(d->shift_type == S_INVLD) {
         *type = NULL, *immediate = 0;
         return -1;
     }
-    else if(d->shift_type == 0b11 && d->Rs == 0) {
+    else if(d->shift_type == S_ROR && d->Rs == R_INVLD && d->shift == 0) {
         *type = "RRX", *immediate = 0;
     }
     else {
         *type = darm_shift_type_name(d->shift_type);
         *immediate = d->shift;
 
-        // 32 is encoded as 0
-        if((d->shift_type == 0b01 || d->shift_type == 0b10) &&
-                d->shift == 0) {
+        // 32 is encoded as 0 for immediate shifts
+        if((d->shift_type == S_LSR || d->shift_type == S_ASR) &&
+                d->Rs == R_INVLD && d->shift == 0) {
             *immediate = 32;
         }
     }
@@ -595,8 +595,8 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->shift = (w >> 7) & 0b11111;
 
             // if this is a LSL instruction with a zero shift, then it's
-            // actually a MOV instruction
-            if(d->instr == I_LSL && d->shift_type == 0 && d->shift == 0) {
+            // actually a MOV instruction (there's no register-shifted LSL)
+            if(d->instr == I_LSL && d->shift_type == S_LSL && d->shift == 0) {
                 d->instr = I_MOV;
 
                 // if Rd and Rm are zero, then this is a NOP instruction
@@ -607,8 +607,8 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             }
 
             // if this is a ROR instruction with a zero shift, then it's
-            // actually a RRX instruction
-            else if(d->instr == I_ROR && d->shift_type == 0b11 &&
+            // actually a RRX instruction (there's no register-shifted ROR)
+            else if(d->instr == I_ROR && d->shift_type == S_ROR &&
                     d->shift == 0) {
                 d->instr = I_RRX;
             }
