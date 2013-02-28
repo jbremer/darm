@@ -9,7 +9,7 @@ struct {
 } tests[] = {
     {0xe0a13082, 0, {
         .instr = I_ADC, .instr_type = T_ARITH_SHIFT, .cond = 0b1110, .S = 0,
-        .Rd = 3, .Rn = 1, .Rm = 2, .type = 0, .shift_is_reg = 0, .shift = 1}},
+        .Rd = 3, .Rn = 1, .Rm = 2, .shift_type = S_LSL, .shift = 1}},
     {0xe2821003, 0, {
         .instr = I_ADD, .instr_type = T_ARITH_IMM, .cond = 0b1110, .S = 0,
         .Rd = 1, .Rn = 2, .imm = 3, .I = B_SET}},
@@ -33,7 +33,7 @@ struct {
         .Rd = 3, .imm = 1, .I = B_SET, .U = 0}},
     {0xe1a02458, 0, {
         .instr = I_ASR, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
-        .Rd = 2, .Rm = 4, .Rn = 8, .type = 2}},
+        .Rd = 2, .Rm = 4, .Rn = 8, .shift_type = S_ASR}},
     {0xe1a02f03, 0, {
         .instr = I_LSL, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 2, .shift = 30, .Rm = 3}},
@@ -56,10 +56,10 @@ struct {
         .imm = 32, .I = B_SET}},
     {0xe1140505, 0, {
         .instr = I_TST, .instr_type = T_CMP_OP, .cond = 0b1110, .Rn = 4,
-        .Rm = 5, .shift_is_reg = 0, .type = 0, .shift = 10}},
+        .Rm = 5, .shift_type = S_LSL, .shift = 10}},
     {0xe15a017b, 0, {
         .instr = I_CMP, .instr_type = T_CMP_OP, .cond = 0b1110, .Rn = 10,
-        .Rm = 11, .type = 3, .shift_is_reg = 1, .Rs = 1}},
+        .Rm = 11, .shift_type = S_ROR, .Rs = 1}},
     {0xe35704f0, 0, {
         .instr = I_CMP, .instr_type = T_CMP_IMM, .cond = 0b1110, .Rn = 7,
         .imm = 0xf0000000, .I = B_SET}},
@@ -67,7 +67,7 @@ struct {
     {0xe320f003, 0, {.instr = I_WFI, .instr_type = T_OPLESS, .cond = 0b1110}},
     {0xe1a0c064, 0, {
         .instr = I_RRX, .instr_type = T_DST_SRC, .cond = 0b1110, .S = 0,
-        .Rd = 12, .shift = 0, .Rm = 4, .type = 3}},
+        .Rd = 12, .shift = 0, .Rm = 4, .shift_type = S_ROR}},
     {0xe3a013e8, 0, {
         .instr = I_MOV, .instr_type = T_MOV_IMM, .cond = 0b1110, .S = 0,
         .Rd = 1, .imm = 0xa0000003, .I = B_SET}},
@@ -106,11 +106,11 @@ struct {
         .Rn = 4, .Rm = 3}},
     {0xe7932384, 0, {
         .instr = I_LDR, .instr_type = T_STACK0, .cond = 0b1110, .Rt = 2,
-        .Rn = 3, .Rm = 4, .P = 1, .W = 0, .U = 1, .shift_is_reg = 0,
-        .type = 0, .shift = 7}},
+        .Rn = 3, .Rm = 4, .P = 1, .W = 0, .U = 1,
+        .shift_type = S_LSL, .shift = 7}},
     {0xe6e386c5, 0, {
         .instr = I_STRBT, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 3,
-        .Rt = 8, .shift_is_reg = 0, .shift = 13, .type = 2, .Rm = 5,
+        .Rt = 8, .shift = 13, .shift_type = S_ASR, .Rm = 5,
         .U = 1, .P = 0, .W = 1}},
     {0x90b480b3, 0, {
         .instr = I_LDRHT, .instr_type = T_STACK1, .cond = C_LS, .U = 1,
@@ -141,10 +141,10 @@ struct {
         .Rd = 4, .Rm = 2}},
     {0xe6842351, 0, {
         .instr = I_PKH, .instr_type = T_MISC, .cond = 0b1110,
-        .Rn = 4, .Rd = 2, .Rm = 1, .type = 2, .shift = 6, .T = 1}},
+        .Rn = 4, .Rd = 2, .Rm = 1, .shift_type = S_ASR, .shift = 6, .T = 1}},
     {0xe1e041c1, 0, {
         .instr = I_MVN, .instr_type = T_MISC, .cond = 0b1110,
-        .Rd = 4, .shift = 3, .type = 2, .Rm = 1}},
+        .Rd = 4, .shift = 3, .shift_type = S_ASR, .Rm = 1}},
     {0xe1600075, 0, {
         .instr = I_SMC, .instr_type = T_MISC, .cond = 0b1110,
         .imm = 5, .I = B_SET}},
@@ -159,12 +159,10 @@ struct {
         .Ra = 2, .Rm = 3, .R = 0, .Rn = 4}},
     {0xe5242000, 0, {
         .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 4,
-        .Rt = 2, .P = 1, .W = 1, .U = 0, .imm = 0, .I = B_SET,
-        .shift_is_reg = 0}},
+        .Rt = 2, .P = 1, .W = 1, .U = 0, .imm = 0, .I = B_SET}},
     {0xe5a350f0, 0, {
         .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .Rn = 3,
-        .Rt = 5, .P = 1, .W = 1, .U = 1, .imm = 0xf0, .I = B_SET,
-        .shift_is_reg = 0}},
+        .Rt = 5, .P = 1, .W = 1, .U = 1, .imm = 0xf0, .I = B_SET}},
     {0xa6112f53, 0, {
         .instr = I_SSAX, .instr_type = T_PAS, .cond = 0b1010, .Rn = 1,
         .Rd = 2, .Rm = 3}},
@@ -182,7 +180,8 @@ struct {
         .Rn = 1, .Rt = 3, .Rt2 = 4, .B = 1}},
     {0xe6e141d2, 0, {
         .instr = I_USAT, .instr_type = T_PUSR, .cond = 0b1110,
-        .imm = 1, .I = B_SET, .Rd = 4, .shift = 3, .type = 0b10, .Rn = 2}},
+        .imm = 1, .I = B_SET, .Rd = 4, .shift = 3, .shift_type = S_ASR,
+        .Rn = 2}},
     {0xe6b21474, 0, {
         .instr = I_SXTAH, .instr_type = T_PUSR, .cond = 0b1110,
         .Rn = 2, .Rd = 1, .rotate = 0b1000, .Rm = 4}},
@@ -208,6 +207,10 @@ int main()
         if(p->Rs == 0) p->Rs = R_INVLD;
         if(p->option == 0) p->option = O_INVLD;
 
+        if(p->shift_type == S_LSL && p->Rs == R_INVLD && p->shift == 0) {
+            p->shift_type = S_INVLD;
+        }
+
         ret = darm_armv7_disasm(&d, tests[i].w);
 
         // so we don't have to hardcode all of these
@@ -226,8 +229,8 @@ int main()
         if(ret != tests[i].r || C(w) || C(instr) || C(instr_type) ||
                 C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
-                C(Rt) || C(RdHi) || C(RdLo) || F(I) || C(imm) || C(type) ||
-                F(shift_is_reg) || C(Rs) || C(shift) || C(lsb) ||
+                C(Rt) || C(RdHi) || C(RdLo) || F(I) || C(imm) ||
+                C(shift_type) || C(Rs) || C(shift) || C(lsb) ||
                 C(width) || C(reglist) || F(T) || F(F) || F(M) || F(N) ||
                 C(Rt2) || F(B)) {
             // leave ugly code
