@@ -84,29 +84,30 @@ class Encoding(_Base):
 
 
 class Shift:
-    def __init__(self, is_reg, type_, Rs, shift):
-        self.is_reg = is_reg
+    def __init__(self, type_, Rs, shift):
         self.type_ = type_
         self.Rs = Rs
         self.shift = shift
 
+    def type_name(self):
+        return _lib.darm_shift_type_name(self.type_)
+
     def __str__(self):
-        type_name = _lib.darm_shift_type_name(self.type_)
-        if self.is_reg:
+        type_name = self.type_name()
+        if self.Rs:
             return '%s %s' % (type_name, self.Rs)
         else:
             return '%s #%d' % (type_name, self.shift)
 
     def __repr__(self):
-        if self.is_reg:
-            return 'Shift(is_reg=%s, type_=%s, Rs=%s)' % \
-                (self.is_reg, bin(self.type_), self.Rs)
+        type_name = self.type_name()
+        if self.Rs:
+            return 'Shift(type_=%s, Rs=%s)' % (type_name, self.Rs)
         else:
-            return 'Shift(is_reg=%s, type_=%s, shift=%d)' % \
-                (self.is_reg, bin(self.type_), self.shift)
+            return 'Shift(type_=%s, shift=%d)' % (type_name, self.shift)
 
     def __nonzero__(self):
-        return bool(self.is_reg or self.type_ or self.Rs or self.shift)
+        return self.type_ != -1
 
 
 class RegisterList:
@@ -161,8 +162,7 @@ class _Darm(Structure):
         ('RdHi', c_int32),
         ('RdLo', c_int32),
         ('imm', c_uint32),
-        ('type_', c_uint32),
-        ('shift_is_reg', c_uint32),
+        ('type_', c_int32),
         ('Rs', c_int32),
         ('shift', c_uint32),
         ('lsb', c_uint32),
@@ -184,8 +184,7 @@ class _DarmStr(Structure):
 
 
 class Darm:
-    _flags = 'B', 'S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', \
-        'W', 'I', 'shift_is_reg'
+    _flags = 'B', 'S', 'E', 'F', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W', 'I'
     _regs = 'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'Rt2', 'RdHi', 'RdLo'
 
     def __init__(self, d):
@@ -205,8 +204,7 @@ class Darm:
         self.rotate = d.rotate
         self.option = d.option
         self.imm = d.imm
-        self.shift = Shift(self.shift_is_reg,
-                           d.type_,
+        self.shift = Shift(d.type_,
                            Register(d.Rs) if d.Rs >= 0 else None,
                            d.shift)
         self.lsb = d.lsb
