@@ -170,6 +170,9 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case 'S':
+            // is there even a shift?
+            if(d->shift_is_reg == B_INVLD) continue;
+
             if(d->P == B_SET) {
                 // we're still inside the memory address
                 shift = args[arg] - 1;
