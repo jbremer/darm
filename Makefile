@@ -26,7 +26,7 @@ $(GENCODESRC):
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.so: $(OBJ) $(GENCODEOBJ)
-	gcc -shared -o $@ $^
+	gcc -shared $(CFLAGS) -o $@ $^
 
 %.a: $(OBJ) $(GENCODEOBJ)
 	ar cr $@ $^
