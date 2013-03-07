@@ -65,7 +65,8 @@ def string_table(name, arr):
 def instruction_names_enum(arr):
     """Enumeration of all instruction names."""
     return enum_table('armv7_instr',
-                      ('I_%s' % x for x in instruction_names(arr)))
+                      ['I_%s' % x for x in instruction_names(arr)] +
+                      ['I_INSTRCNT'])
 
 
 def instruction_names_table(arr):
