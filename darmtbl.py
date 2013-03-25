@@ -365,4 +365,4 @@ if __name__ == '__main__':
 
         bits = [1 if type(x) == int else x.bitsize for x in bits]
         if sum(bits) != 32:
-            print instr, bits, sum(bits)
+            print(instr, bits, sum(bits))
