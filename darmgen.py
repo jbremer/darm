@@ -228,6 +228,8 @@ d = darmtbl
 cond_instr_types = [
     ('INVLD', 'Invalid or non-existent type',
      ['I_INVLD'], lambda x, y, z: False),
+    ('ADR', 'ADR Instruction, which is an optimization of ADD',
+     ['ADR<c> <Rd>,<label>'], lambda x, y, z: y[:3] == 'ADR'),
     ('UNCOND', 'All unconditional instructions',
      ['ins <endian_specifier>', 'ins [<Rn>,#+/-<imm12>]',
      'ins [<Rn>,#<imm12>]', 'ins', 'ins #<option>', 'ins <label>'],
@@ -331,7 +333,8 @@ if __name__ == '__main__':
 
     # list of encoding types which should not be emitted in the table (because
     # they are handled somewhere else, in a somewhat hardcoded fashion)
-    type_ignore = 'MUL', 'STACK0', 'STACK1', 'STACK2', 'SAT', 'SYNC', 'PUSR'
+    type_ignore = 'MUL', 'STACK0', 'STACK1', 'STACK2', 'SAT', \
+        'SYNC', 'PUSR', 'ADR'
 
     for description in darmtbl.ARMv7:
         instr = description[0]
