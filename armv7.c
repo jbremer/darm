@@ -430,7 +430,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // do a lookup for the type of instruction
     switch (d->instr_type) {
     case T_INVLD: case T_UNCOND: case T_MUL: case T_STACK0: case T_STACK1:
-    case T_STACK2: case T_SAT: case T_SYNC: case T_PUSR:
+    case T_STACK2: case T_SAT: case T_SYNC: case T_PUSR: case T_ADR:
         return -1;
 
     case T_ARITH_SHIFT:
