@@ -339,7 +339,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // if Rn == SP and P = 0 and U = 1 and W = 0 and imm12 = 4 and
             // this is a LDR instruction, then this is a POP instruction
             else if(d->instr == I_LDR && d->Rn == SP && d->P == 0 &&
-                    d->U == 1 && d->imm == 4) {
+                    d->U == 1 && d->W == 0 && d->imm == 4) {
                 d->instr = I_POP;
             }
             return 0;
