@@ -1,3 +1,4 @@
+AR = ar
 CC = gcc
 CFLAGS = -std=c99 -Wall -O2 -s -Wextra
 
@@ -26,10 +27,10 @@ $(GENCODESRC):
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.so: $(OBJ) $(GENCODEOBJ)
-	gcc -shared $(CFLAGS) -o $@ $^
+	$(CC) -shared $(CFLAGS) -o $@ $^
 
 %.a: $(OBJ) $(GENCODEOBJ)
-	ar cr $@ $^
+	$(AR) cr $@ $^
 
 test: $(STUFF)
 	./tests/tests.exe
