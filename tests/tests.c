@@ -188,6 +188,18 @@ struct {
     {0xe0f12394, 0, {
         .instr = I_SMLAL, .instr_type = T_MUL, .cond = 0b1110, .S = 1,
         .RdHi = 1, .RdLo = 2, .Rm = 3, .Rn = 4}},
+    {0xe5a43000, 0, {
+        .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .S = 0,
+        .P = B_SET, .U = B_SET, .W = B_SET, .Rn = 4, .Rt = 3, .I = B_SET,
+        .imm = 0}},
+    {0xe5a43003, 0, {
+        .instr = I_STR, .instr_type = T_STACK0, .cond = 0b1110, .S = 0,
+        .P = B_SET, .U = B_SET, .W = B_SET, .Rn = 4, .Rt = 3, .I = B_SET,
+        .imm = 3}},
+    {0xe28fc601, 0, {
+        .instr = I_ADR, .instr_type = T_ARITH_IMM, .cond = C_AL, .S = B_UNSET,
+        .U = B_SET, .I = B_SET, .imm = 0x100000, .Rd = 12}},
+
 };
 
 int main()
@@ -216,6 +228,17 @@ int main()
 
         ret = darm_armv7_disasm(&d, tests[i].w);
 
+        darm_str_t str;
+        memset(&str, 0, sizeof(str));
+        if(darm_str2(&d, &str, 1) == 0) {
+            printf("%s\n", str.instr);
+            fflush(stdout);
+        }
+        else if(ret == 0) {
+            printf("error decoding instr..\n");
+        }
+
+
         // so we don't have to hardcode all of these
         tests[i].d.w = d.w;
 
@@ -237,7 +260,7 @@ int main()
                 C(width) || C(reglist) || F(T) || F(M) || F(N) ||
                 C(Rt2) || F(B)) {
             // leave ugly code
-            printf("incorrect encoding for 0x%08x\n", d.w);
+            printf("incorrect encoding for 0x%08x, ret %d\n", d.w, ret);
             darm_dump(&d);
             failure = 1;
         }
