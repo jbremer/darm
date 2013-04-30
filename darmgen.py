@@ -468,7 +468,7 @@ if __name__ == '__main__':
     # print a header
     print('#include <stdio.h>')
     print('#include <stdint.h>')
-    print('#include "%s"' % (sys.argv[1][:-2] + '.h'))
+    print('#include "armv7-tbl.h"')
 
     # print a table containing all the types of instructions
     print(instruction_types_table(cond_table, 'armv7'))

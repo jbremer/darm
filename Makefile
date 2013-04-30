@@ -9,7 +9,7 @@ endif
 SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
-GENCODESRC = armv7-tbl.c armv7-tbl.h
+GENCODESRC = darm-tbl.h armv7-tbl.c armv7-tbl.h
 GENCODEOBJ = armv7-tbl.o
 
 STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
@@ -18,7 +18,7 @@ STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
 default: $(STUFF)
 
 $(GENCODESRC):
-	python darmgen.py $@
+	python darmgen.py
 
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $^ $(PIC_FLAGS)
