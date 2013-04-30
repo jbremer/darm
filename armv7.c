@@ -830,7 +830,7 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
     return 0;
 }
 
-const char *darm_mnemonic_name(armv7_instr_t instr)
+const char *darm_mnemonic_name(darm_instr_t instr)
 {
     return instr < ARRAYSIZE(armv7_mnemonics) ?
         armv7_mnemonics[instr] : NULL;

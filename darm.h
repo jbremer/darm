@@ -81,7 +81,7 @@ typedef struct _darm_t {
     uint32_t        w;
 
     // the instruction label
-    armv7_instr_t   instr;
+    darm_instr_t    instr;
     armv7_enctype_t instr_type;
 
     // conditional flags, if any
@@ -187,7 +187,7 @@ int darm_armv7_disasm(darm_t *d, uint32_t w);
 int darm_immshift_decode(const darm_t *d, const char **type,
     uint32_t *immediate);
 
-const char *darm_mnemonic_name(armv7_instr_t instr);
+const char *darm_mnemonic_name(darm_instr_t instr);
 const char *darm_enctype_name(armv7_enctype_t enctype);
 const char *darm_register_name(darm_reg_t reg);
 const char *darm_shift_type_name(darm_shift_type_t shifttype);

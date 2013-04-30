@@ -64,34 +64,34 @@ def string_table(name, arr):
 
 def instruction_names_enum(arr):
     """Enumeration of all instruction names."""
-    return enum_table('armv7_instr',
+    return enum_table('darm_instr',
                       ['I_%s' % x for x in instruction_names(arr)] +
                       ['I_INSTRCNT'])
 
 
 def instruction_names_table(arr):
     """Table of strings of all instructions."""
-    return string_table('armv7_mnemonics', instruction_names(arr))
+    return string_table('darm_mnemonics', instruction_names(arr))
 
 
-def instruction_types_table(arr):
+def instruction_types_table(arr, kind):
     """Lookup table for the types of instructions."""
     arr = ['T_%s' % arr[x][1][0] if x in arr else 'T_INVLD'
            for x in range(256)]
-    return typed_table('armv7_enctype_t', 'armv7_instr_types', arr)
+    return typed_table('%s_enctype_t' % kind, '%s_instr_types' % kind, arr)
 
 
-def instruction_names_index_table(arr):
+def instruction_names_index_table(arr, kind):
     """Lookup table for instruction label for each instruction index."""
     arr = ['I_%s' % arr[x][0] if x in arr else 'I_INVLD'
            for x in range(256)]
-    return typed_table('armv7_instr_t', 'armv7_instr_labels', arr)
+    return typed_table('darm_instr_t', '%s_instr_labels' % kind, arr)
 
 
 def type_lookup_table(name, *args):
     """Create a lookup table for a certain instruction type."""
     arr = ('I_%s' % x.upper() if x else 'I_INVLD' for x in args)
-    return typed_table('armv7_instr_t', '%s_instr_lookup' % name, arr)
+    return typed_table('darm_instr_t', '%s_instr_lookup' % name, arr)
 
 
 def type_encoding_enum(enumname, arr):
@@ -221,6 +221,16 @@ def generate_format_strings(arr):
         else:
             ret[instr].append(full)
     return ret
+
+
+def magic_open(fname):
+    # python magic!
+    sys.stdout = open(fname, 'w')
+
+    # print the license
+    print('/*')
+    print(__doc__.strip())
+    print('*/')
 
 d = darmtbl
 
@@ -367,205 +377,228 @@ if __name__ == '__main__':
             # instruction this is
             for y in cond_instr_types:
                 if bits[0] == d.cond and y[3](bits, instr, idx):
+                    if y[0] == 'PUSR0':
+                        print bin(int(idx)), idx, identifier, instr, remainder
+                    #if y[0] == 'DST_SRC':
+                        #print 'dst-src', idx
                     if not y[0] in type_ignore:
                         cond_table[idx] = instruction_name(instr), y
                     y[-1].append(instr)
                     break
+            # show all instructions which we don't disasm yet
+            else:
+                if bits[0] == d.cond:
+                    pass
+                    print idx, description
 
     # make a list of unique instructions affected by each encoding type,
     # we remove the first item from the instruction names, as this is I_INVLD
     cond_instr_types = [x[:4] + [instruction_names(x[4])[1:]]
                         for x in cond_instr_types]
 
-    # python magic!
-    sys.stdout = open(sys.argv[1], 'w')
+    #
+    # darm-tbl.h
+    #
 
-    # print the license
-    print('/*')
-    print(__doc__.strip())
-    print('*/')
+    magic_open('darm-tbl.h')
 
     fmtstrs = generate_format_strings(darmtbl.ARMv7)
     # until we remove all unused instructions..
     instrcnt = len(open('instructions.txt').readlines())
 
-    if sys.argv[1][-2:] == '.h':
+    # print required headers
+    print('#ifndef __DARM_TBL__')
+    print('#define __DARM_TBL__')
+    print('#include <stdint.h>')
 
-        # print required headers
-        print('#ifndef __ARMV7_TBL__')
-        print('#define __ARMV7_TBL__')
-        print('#include <stdint.h>')
+    # print all instruction labels
+    print(instruction_names_enum(open('instructions.txt')))
 
-        # print all instruction labels
-        print(instruction_names_enum(open('instructions.txt')))
+    print('#endif')
 
-        # print type info for each encoding type
-        print(type_encoding_enum('armv7_enctype', cond_instr_types))
+    #
+    # armv7-tbl.h
+    #
 
-        # print some required definitions
-        print('armv7_enctype_t armv7_instr_types[256];')
+    magic_open('armv7-tbl.h')
 
-        def type_lut(name, bits):
-            print('armv7_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
+    # print required headers
+    print('#ifndef __ARMV7_TBL__')
+    print('#define __ARMV7_TBL__')
+    print('#include <stdint.h>')
+    print('#include "darm-tbl.h"')
 
-        print('armv7_instr_t armv7_instr_labels[256];')
-        type_lut('shift', 4)
-        type_lut('brnchmisc', 4)
-        type_lut('opless', 3)
-        type_lut('uncond2', 3)
-        type_lut('mul', 3)
-        type_lut('stack0', 5)
-        type_lut('stack1', 3)
-        type_lut('stack2', 3)
-        type_lut('bits', 2)
-        type_lut('pas', 6)
-        type_lut('sat', 2)
-        type_lut('sync', 4)
-        type_lut('pusr', 4)
-        count = len(instruction_names(open('instructions.txt')))
-        print('const char *armv7_mnemonics[%d];' % count)
-        print('const char *armv7_enctypes[%d];' % len(cond_instr_types))
-        print('const char *armv7_registers[16];')
-        print('const char *armv7_format_strings[%d][3];' % instrcnt)
+    # print type info for each encoding type
+    print(type_encoding_enum('armv7_enctype', cond_instr_types))
 
-        print('#endif')
+    # print some required definitions
+    print('armv7_enctype_t armv7_instr_types[256];')
 
-    elif sys.argv[1][-2:] == '.c':
+    def type_lut(name, bits):
+        print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
 
-        # print a header
-        print('#include <stdio.h>')
-        print('#include <stdint.h>')
-        print('#include "%s"' % (sys.argv[1][:-2] + '.h'))
+    print('darm_instr_t armv7_instr_labels[256];')
+    type_lut('shift', 4)
+    type_lut('brnchmisc', 4)
+    type_lut('opless', 3)
+    type_lut('uncond2', 3)
+    type_lut('mul', 3)
+    type_lut('stack0', 5)
+    type_lut('stack1', 3)
+    type_lut('stack2', 3)
+    type_lut('bits', 2)
+    type_lut('pas', 6)
+    type_lut('sat', 2)
+    type_lut('sync', 4)
+    type_lut('pusr', 4)
+    count = len(instruction_names(open('instructions.txt')))
+    print('const char *armv7_mnemonics[%d];' % count)
+    print('const char *armv7_enctypes[%d];' % len(cond_instr_types))
+    print('const char *armv7_registers[16];')
+    print('const char *armv7_format_strings[%d][3];' % instrcnt)
 
-        # print a table containing all the types of instructions
-        print(instruction_types_table(cond_table))
+    print('#endif')
 
-        # print a table containing the instruction label for each entry
-        print(instruction_names_index_table(cond_table))
+    #
+    # armv7-tbl.c
+    #
 
-        # print a lookup table for the shift type (which is a sub-type of
-        # the dst-src type), the None types represent instructions of the
-        # STR family, which we'll handle in the next handler, T_STR.
-        t_shift = {
-            0b0000: 'lsl',
-            0b0001: 'lsl',
-            0b0010: 'lsr',
-            0b0011: 'lsr',
-            0b0100: 'asr',
-            0b0101: 'asr',
-            0b0110: 'ror',
-            0b0111: 'ror',
-            0b1000: 'lsl',
-            0b1001: None,
-            0b1010: 'lsr',
-            0b1011: None,
-            0b1100: 'asr',
-            0b1101: None,
-            0b1110: 'ror',
-            0b1111: None}
+    magic_open('armv7-tbl.c')
 
-        print(type_lookup_table('type_shift',
-                                *[t_shift[x] for x in range(16)]))
+    # print a header
+    print('#include <stdio.h>')
+    print('#include <stdint.h>')
+    print('#include "%s"' % (sys.argv[1][:-2] + '.h'))
 
-        t4 = 'msr', 'bx', 'bxj', 'blx', None, 'qsub', None, 'bkpt', 'smlaw', \
-            None, 'smulw', None, 'smlaw', None, 'smulw', None
-        print(type_lookup_table('type_brnchmisc', *t4))
+    # print a table containing all the types of instructions
+    print(instruction_types_table(cond_table, 'armv7'))
 
-        t_opless = 'nop', 'yield', 'wfe', 'wfi', 'sev', None, None, None
-        print(type_lookup_table('type_opless', *t_opless))
+    # print a table containing the instruction label for each entry
+    print(instruction_names_index_table(cond_table, 'armv7'))
 
-        t_uncond2 = None, 'clrex', None, None, 'dsb', 'dmb', 'isb', None
-        print(type_lookup_table('type_uncond2', *t_uncond2))
+    # print a lookup table for the shift type (which is a sub-type of
+    # the dst-src type), the None types represent instructions of the
+    # STR family, which we'll handle in the next handler, T_STR.
+    t_shift = {
+        0b0000: 'lsl',
+        0b0001: 'lsl',
+        0b0010: 'lsr',
+        0b0011: 'lsr',
+        0b0100: 'asr',
+        0b0101: 'asr',
+        0b0110: 'ror',
+        0b0111: 'ror',
+        0b1000: 'lsl',
+        0b1001: None,
+        0b1010: 'lsr',
+        0b1011: None,
+        0b1100: 'asr',
+        0b1101: None,
+        0b1110: 'ror',
+        0b1111: None}
 
-        t_mul = 'mul', 'mla', 'umaal', 'mls', 'umull', 'umlal', \
-            'smull', 'smlal'
-        print(type_lookup_table('type_mul', *t_mul))
+    print(type_lookup_table('type_shift',
+                            *[t_shift[x] for x in range(16)]))
 
-        t_stack0 = {
-            0b00000: 'str',
-            0b00001: 'ldr',
-            0b00010: 'strt',
-            0b00011: 'ldrt',
-            0b00100: 'strb',
-            0b00101: 'ldrb',
-            0b00110: 'strbt',
-            0b00111: 'ldrbt',
-            0b01000: 'str',
-            0b01001: 'ldr',
-            0b01010: 'strt',
-            0b01011: 'ldrt',
-            0b01100: 'strb',
-            0b01101: 'ldrb',
-            0b01110: 'strbt',
-            0b01111: 'ldrbt',
-            0b10000: 'str',
-            0b10001: 'ldr',
-            0b10010: 'str',
-            0b10011: 'ldr',
-            0b10100: 'strb',
-            0b10101: 'ldrb',
-            0b10110: 'strb',
-            0b10111: 'ldrb',
-            0b11000: 'str',
-            0b11001: 'ldr',
-            0b11010: 'str',
-            0b11011: 'ldr',
-            0b11100: 'strb',
-            0b11101: 'ldrb',
-            0b11110: 'strb',
-            0b11111: 'ldrb',
-        }
+    t4 = 'msr', 'bx', 'bxj', 'blx', None, 'qsub', None, 'bkpt', 'smlaw', \
+        None, 'smulw', None, 'smlaw', None, 'smulw', None
+    print(type_lookup_table('type_brnchmisc', *t4))
 
-        print(type_lookup_table('type_stack0',
-                                *[t_stack0[x] for x in range(32)]))
+    t_opless = 'nop', 'yield', 'wfe', 'wfi', 'sev', None, None, None
+    print(type_lookup_table('type_opless', *t_opless))
 
-        t_stack1 = None, None, 'strht', 'ldrht', None, 'ldrsbt', \
-            None, 'ldrsht'
-        print(type_lookup_table('type_stack1', *t_stack1))
+    t_uncond2 = None, 'clrex', None, None, 'dsb', 'dmb', 'isb', None
+    print(type_lookup_table('type_uncond2', *t_uncond2))
 
-        t_stack2 = None, None, 'strh', 'ldrh', 'ldrd', 'ldrsb', \
-            'strd', 'ldrsh'
-        print(type_lookup_table('type_stack2', *t_stack2))
+    t_mul = 'mul', 'mla', 'umaal', 'mls', 'umull', 'umlal', \
+        'smull', 'smlal'
+    print(type_lookup_table('type_mul', *t_mul))
 
-        print(type_lookup_table('type_bits', None, 'sbfx', 'bfi', 'ubfx'))
+    t_stack0 = {
+        0b00000: 'str',
+        0b00001: 'ldr',
+        0b00010: 'strt',
+        0b00011: 'ldrt',
+        0b00100: 'strb',
+        0b00101: 'ldrb',
+        0b00110: 'strbt',
+        0b00111: 'ldrbt',
+        0b01000: 'str',
+        0b01001: 'ldr',
+        0b01010: 'strt',
+        0b01011: 'ldrt',
+        0b01100: 'strb',
+        0b01101: 'ldrb',
+        0b01110: 'strbt',
+        0b01111: 'ldrbt',
+        0b10000: 'str',
+        0b10001: 'ldr',
+        0b10010: 'str',
+        0b10011: 'ldr',
+        0b10100: 'strb',
+        0b10101: 'ldrb',
+        0b10110: 'strb',
+        0b10111: 'ldrb',
+        0b11000: 'str',
+        0b11001: 'ldr',
+        0b11010: 'str',
+        0b11011: 'ldr',
+        0b11100: 'strb',
+        0b11101: 'ldrb',
+        0b11110: 'strb',
+        0b11111: 'ldrb',
+    }
 
-        t_pas = {
-            0b000: 'add16',
-            0b001: 'asx',
-            0b010: 'sax',
-            0b011: 'sub16',
-            0b100: 'add8',
-            0b111: 'sub8',
-        }
-        t_pas_prefix = 's', 'q', 'sh', 'u', 'uq', 'uh'
-        t_pas = dict(((1 + (idx > 2) + idx) * 2**3 + k, x + v)
-                     for idx, x in enumerate(t_pas_prefix)
-                     for k, v in t_pas.items())
-        print(type_lookup_table('type_pas',
-                                *[t_pas.get(x) for x in range(64)]))
+    print(type_lookup_table('type_stack0',
+                            *[t_stack0[x] for x in range(32)]))
 
-        print(type_lookup_table('type_sat', 'qadd', 'qsub', 'qdadd', 'qdsub'))
+    t_stack1 = None, None, 'strht', 'ldrht', None, 'ldrsbt', \
+        None, 'ldrsht'
+    print(type_lookup_table('type_stack1', *t_stack1))
 
-        t_sync = 'swp', None, None, None, 'swpb', None, None, None, \
-            'strex', 'ldrex', 'strexd', 'ldrexd', 'strexb', 'ldrexb', \
-            'strexh', 'ldrexh'
-        print(type_lookup_table('type_sync', *t_sync))
+    t_stack2 = None, None, 'strh', 'ldrh', 'ldrd', 'ldrsb', \
+        'strd', 'ldrsh'
+    print(type_lookup_table('type_stack2', *t_stack2))
 
-        t_pusr = 'sxtab16', 'sxtb16', None, None, 'sxtab', 'sxtb', \
-            'sxtah', 'sxth', 'uxtab16', 'uxtb16', None, None, \
-            'uxtab', 'uxtb', 'uxtah', 'uxth'
-        print(type_lookup_table('type_pusr', *t_pusr))
+    print(type_lookup_table('type_bits', None, 'sbfx', 'bfi', 'ubfx'))
 
-        print(instruction_names_table(open('instructions.txt')))
-        print(type_encoding_table('armv7_enctypes', cond_instr_types))
+    t_pas = {
+        0b000: 'add16',
+        0b001: 'asx',
+        0b010: 'sax',
+        0b011: 'sub16',
+        0b100: 'add8',
+        0b111: 'sub8',
+    }
+    t_pas_prefix = 's', 'q', 'sh', 'u', 'uq', 'uh'
+    t_pas = dict(((1 + (idx > 2) + idx) * 2**3 + k, x + v)
+                 for idx, x in enumerate(t_pas_prefix)
+                 for k, v in t_pas.items())
+    print(type_lookup_table('type_pas',
+                            *[t_pas.get(x) for x in range(64)]))
 
-        reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
-        print(string_table('armv7_registers', reg.split()))
+    print(type_lookup_table('type_sat', 'qadd', 'qsub', 'qdadd', 'qdsub'))
 
-        lines = []
-        for instr, fmtstr in fmtstrs.items():
-            fmtstr = ', '.join('"%s"' % x for x in set(fmtstr))
-            lines.append('    [I_%s] = {%s},' % (instr, fmtstr))
-        print('const char *armv7_format_strings[%d][3] = {' % instrcnt)
-        print('\n'.join(sorted(lines)))
-        print('};')
+    t_sync = 'swp', None, None, None, 'swpb', None, None, None, \
+        'strex', 'ldrex', 'strexd', 'ldrexd', 'strexb', 'ldrexb', \
+        'strexh', 'ldrexh'
+    print(type_lookup_table('type_sync', *t_sync))
+
+    t_pusr = 'sxtab16', 'sxtb16', None, None, 'sxtab', 'sxtb', \
+        'sxtah', 'sxth', 'uxtab16', 'uxtb16', None, None, \
+        'uxtab', 'uxtb', 'uxtah', 'uxth'
+    print(type_lookup_table('type_pusr', *t_pusr))
+
+    print(instruction_names_table(open('instructions.txt')))
+    print(type_encoding_table('armv7_enctypes', cond_instr_types))
+
+    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
+    print(string_table('armv7_registers', reg.split()))
+
+    lines = []
+    for instr, fmtstr in fmtstrs.items():
+        fmtstr = ', '.join('"%s"' % x for x in set(fmtstr))
+        lines.append('    [I_%s] = {%s},' % (instr, fmtstr))
+    print('const char *armv7_format_strings[%d][3] = {' % instrcnt)
+    print('\n'.join(sorted(lines)))
+    print('};')
