@@ -100,7 +100,7 @@ int darm_immshift_decode(const darm_t *d, const char **type,
 
 static int armv7_disas_uncond(darm_t *d, uint32_t w)
 {
-    d->instr_type = T_UNCOND;
+    d->instr_type = T_ARM_UNCOND;
 
     // there are not a lot of unconditional instructions, so the following
     // values are a bit hardcoded
@@ -188,7 +188,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         if(((w >> 24) & 1) == 0 && ((w >> 4) & 0b1111) == 0b1001) {
 
             d->instr = type_mul_instr_lookup[(w >> 21) & 0b111];
-            d->instr_type = T_MUL;
+            d->instr_type = T_ARM_MUL;
 
             // except for UMAAL and MLS, every variant takes the S bit
             d->S = (w >> 20) & 1;
@@ -229,7 +229,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->instr = type_stack1_instr_lookup[index];
             if(d->instr == I_INVLD) return -1;
 
-            d->instr_type = T_STACK1;
+            d->instr_type = T_ARM_STACK1;
             d->Rn = (w >> 16) & 0b1111;
             d->Rt = (w >> 12) & 0b1111;
             d->P = (w >> 24) & 1;
@@ -256,7 +256,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->instr = type_stack2_instr_lookup[index];
             if(d->instr == I_INVLD) return -1;
 
-            d->instr_type = T_STACK2;
+            d->instr_type = T_ARM_STACK2;
             d->Rn = (w >> 16) & 0b1111;
             d->Rt = (w >> 12) & 0b1111;
             d->P = (w >> 24) & 1;
@@ -279,7 +279,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         // synchronization primitive instructions
         else if(((w >> 24) & 1) == 1 && ((w >> 4) & 0b1111) == 0b1001) {
             d->instr = type_sync_instr_lookup[(w >> 20) & 0b1111];
-            d->instr_type = T_SYNC;
+            d->instr_type = T_ARM_SYNC;
             d->Rn = (w >> 16) & 0b1111;
             switch ((uint32_t) d->instr) {
             case I_SWP: case I_SWPB:
@@ -308,7 +308,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         const uint32_t media_mask = (1 << 25) | (1 << 4);
         if((w & media_mask) != media_mask) {
             d->instr = type_stack0_instr_lookup[(w >> 20) & 0b11111];
-            d->instr_type = T_STACK0;
+            d->instr_type = T_ARM_STACK0;
 
             d->Rn = (w >> 16) & 0b1111;
             d->Rt = (w >> 12) & 0b1111;
@@ -352,7 +352,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     const uint32_t mask2 = (0b11111001 << 20) | (0b1111 << 4);
     if((w & mask2) == ((1 << 24) | (0b0101 << 4))) {
         d->instr = type_sat_instr_lookup[(w >> 21) & 0b11];
-        d->instr_type = T_SAT;
+        d->instr_type = T_ARM_SAT;
         d->Rn = (w >> 16) & 0b1111;
         d->Rd = (w >> 12) & 0b1111;
         d->Rm = w & 0b1111;
@@ -368,7 +368,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         uint32_t A = (w >> 16) & 0b1111;
         uint32_t op2 = (w >> 5) & 0b111;
 
-        d->instr_type = T_PUSR;
+        d->instr_type = T_ARM_PUSR;
 
         // the (SX|UX)T(A)(B|H)(16) instructions
         if(op2 == 0b011) {
@@ -429,11 +429,12 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     // do a lookup for the type of instruction
     switch (d->instr_type) {
-    case T_INVLD: case T_UNCOND: case T_MUL: case T_STACK0: case T_STACK1:
-    case T_STACK2: case T_SAT: case T_SYNC: case T_PUSR: case T_ADR:
+    case T_INVLD: case T_ARM_UNCOND: case T_ARM_MUL: case T_ARM_STACK0:
+    case T_ARM_STACK1: case T_ARM_STACK2: case T_ARM_SAT: case T_ARM_SYNC:
+    case T_ARM_PUSR: case T_ARM_ADR:
         return -1;
 
-    case T_ARITH_SHIFT:
+    case T_ARM_ARITH_SHIFT:
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
@@ -449,7 +450,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case T_ARITH_IMM:
+    case T_ARM_ARITH_IMM:
         d->S = (w >> 20) & 1;
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = (w >> 16) & 0b1111;
@@ -464,10 +465,10 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case T_BITS:
+    case T_ARM_BITS:
         d->instr = type_bits_instr_lookup[(w >> 21) & 0b11];
 
-        d->instr_type = T_BITS;
+        d->instr_type = T_ARM_BITS;
         d->Rd = (w >> 12) & 0b1111;
         d->Rn = w & 0b1111;
         d->lsb = (w >> 7) & 0b11111;
@@ -488,7 +489,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case T_BRNCHSC:
+    case T_ARM_BRNCHSC:
         d->imm = w & BITMSK_24;
         d->I = B_SET;
 
@@ -506,7 +507,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case T_BRNCHMISC:
+    case T_ARM_BRNCHMISC:
         // first get the real instruction label
         d->instr = type_brnchmisc_instr_lookup[(w >> 4) & 0b1111];
 
@@ -534,7 +535,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         break;
 
-    case T_MOV_IMM:
+    case T_ARM_MOV_IMM:
         d->Rd = (w >> 12) & 0b1111;
         d->imm = w & BITMSK_12;
         d->I = B_SET;
@@ -553,7 +554,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case T_CMP_OP:
+    case T_ARM_CMP_OP:
         d->Rn = (w >> 16) & 0b1111;
         d->Rm = w & 0b1111;
         d->shift_type = (w >> 5) & 0b11;
@@ -567,17 +568,17 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case T_CMP_IMM:
+    case T_ARM_CMP_IMM:
         d->Rn = (w >> 16) & 0b1111;
         d->imm = ARMExpandImm(w & BITMSK_12);
         d->I = B_SET;
         return 0;
 
-    case T_OPLESS:
+    case T_ARM_OPLESS:
         d->instr = type_opless_instr_lookup[w & 0b111];
         return d->instr == I_INVLD ? -1 : 0;
 
-    case T_DST_SRC:
+    case T_ARM_DST_SRC:
         d->instr = type_shift_instr_lookup[(w >> 4) & 0b1111];
         if(d->instr == I_INVLD) return -1;
 
@@ -614,7 +615,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
         return 0;
 
-    case T_LDSTREGS:
+    case T_ARM_LDSTREGS:
         d->W = (w >> 21) & 1;
         d->Rn = (w >> 16) & 0b1111;
         d->reglist = w & BITMSK_16;
@@ -631,7 +632,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case T_BITREV:
+    case T_ARM_BITREV:
         d->Rd = (w >> 12) & 0b1111;
         d->Rm = w & 0b1111;
 
@@ -647,7 +648,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case T_MISC:
+    case T_ARM_MISC:
         switch ((uint32_t) d->instr) {
         case I_MVN:
             d->S = (w >> 20) & 1;
@@ -670,7 +671,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // if the 7th bit is 1, then this is the SMUL instruction
             if((w >> 7) & 1) {
                 d->instr = I_SMUL;
-                d->instr_type = T_SM;
+                d->instr_type = T_ARM_SM;
                 d->Rd = (w >> 16) & 0b1111;
                 d->Rm = (w >> 8) & 0b1111;
                 d->M  = (w >> 6) & 1;
@@ -700,7 +701,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             return 0;
         }
 
-    case T_SM:
+    case T_ARM_SM:
         switch ((uint32_t) d->instr) {
         case I_SMMUL:
             d->Rd = (w >> 16) & 0b1111;
@@ -775,7 +776,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             break;
         }
 
-    case T_PAS:
+    case T_ARM_PAS:
         // we have a lookup table with size 64, for all parallel signed and
         // unsigned addition and subtraction instructions
         // the upper three bits are represented by bits 20..22, so we only
@@ -832,14 +833,14 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
 
 const char *darm_mnemonic_name(darm_instr_t instr)
 {
-    return instr < ARRAYSIZE(armv7_mnemonics) ?
-        armv7_mnemonics[instr] : NULL;
+    return instr < ARRAYSIZE(darm_mnemonics) ?
+        darm_mnemonics[instr] : NULL;
 }
 
-const char *darm_enctype_name(armv7_enctype_t enctype)
+const char *darm_enctype_name(darm_enctype_t enctype)
 {
-    return enctype < ARRAYSIZE(armv7_enctypes) ?
-        armv7_enctypes[enctype] : NULL;
+    return enctype < ARRAYSIZE(darm_enctypes) ?
+        darm_enctypes[enctype] : NULL;
 }
 
 const char *darm_register_name(darm_reg_t reg)

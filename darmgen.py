@@ -76,9 +76,9 @@ def instruction_names_table(arr):
 
 def instruction_types_table(arr, kind):
     """Lookup table for the types of instructions."""
-    arr = ['T_%s' % arr[x][1][0] if x in arr else 'T_INVLD'
+    arr = ['T_%s' % arr[x][1][1] if x in arr else 'T_INVLD'
            for x in range(256)]
-    return typed_table('%s_enctype_t' % kind, '%s_instr_types' % kind, arr)
+    return typed_table('darm_enctype_t', '%s_instr_types' % kind, arr)
 
 
 def instruction_names_index_table(arr, kind):
@@ -96,7 +96,7 @@ def type_lookup_table(name, *args):
 
 def type_encoding_enum(enumname, arr):
     text = []
-    for name, info, encodings, _, affects in arr:
+    for _, name, info, encodings, _, affects in arr:
         text.append(
             '    // info:\n' +
             '    // %s\n    //\n' % info +
@@ -234,117 +234,140 @@ def magic_open(fname):
 
 d = darmtbl
 
+
+def notype(*x):
+    return (0,) + x
+
+
+def armv7(*x):
+    return (1,) + x
+
+
+def thumb(*x):
+    return (2,) + x
+
+
+def thumb2(*x):
+    return (3,) + x
+
+
 # we specify various instruction types
-cond_instr_types = [
-    ('INVLD', 'Invalid or non-existent type',
-     ['I_INVLD'], lambda x, y, z: False),
-    ('ADR', 'ADR Instruction, which is an optimization of ADD',
-     ['ADR<c> <Rd>,<label>'], lambda x, y, z: y[:3] == 'ADR'),
-    ('UNCOND', 'All unconditional instructions',
-     ['ins <endian_specifier>', 'ins [<Rn>,#+/-<imm12>]',
-     'ins [<Rn>,#<imm12>]', 'ins', 'ins #<option>', 'ins <label>'],
-     lambda x, y, z: False),
-    ('MUL', 'All multiplication instructions',
-     ['ins{S}<c> <Rd>,<Rn>,<Rm>', 'ins{S}<c> <Rd>,<Rn>,<Rm>,<Ra>',
-     'ins{S}<c> <RdLo>,<RdHi>,<Rn>,<Rm>'],
-     lambda x, y, z: x[1:5] == (0, 0, 0, 0) and x[-5:-1] == (1, 0, 0, 1)),
-    ('STACK0', 'Various STR and LDR instructions',
-     ['ins<c> <Rt>,[<Rn>,#+/-<imm12>]', 'ins<c> <Rt>,[<Rn>],#+/-<imm12>',
-     'ins<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}'],
-     lambda x, y, z: x[1:3] == (0, 1) and not (x[3] == 1 and x[-2] == 1)),
-    ('STACK1', 'Various unprivileged STR and LDR instructions',
-     ['ins<c> <Rt>,[<Rn>],+/-<Rm>', 'ins<c> <Rt>,[<Rn>]{,#+/-<imm8>}'],
-     lambda x, y, z: x[-5] == 1 and x[-2] == 1 and x[-4:-2] != (0, 0) and
-        x[1:5] == (0, 0, 0, 0) and x[7] == 1),
-    ('STACK2', 'Various other STR and LDR instructions',
-     ['ins<c> <Rt>,<Rt2>,[<Rn>],+/-<Rm>',
-      'ins<c> <Rt>,[<Rn>],+/-<Rm>',
-      'ins<c> <Rt>,<Rt2>,[<Rn>],#+/-<imm8>',
-      'ins<c> <Rt>,<Rt2>,[<Rn>,#+/-<imm8>]',
-      'ins<c> <Rt>,[<Rn>,#+/-<imm8>]', ],
-     lambda x, y, z: x[1:4] == (0, 0, 0) and x[-2] == 1 and x[-5] == 1 and
-        x[-4:-2] != (0, 0) and not x[-1] in (0, 1) and
-        not (x[4] == 0 and x[7] == 1)),
-    ('ARITH_SHIFT',
-     'Arithmetic instructions which take a shift for the second source',
-     ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
-      'ins{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>'],
-     lambda x, y, z: d.Rn in x and d.Rd in x and x[-3] == d.type_
-     and x[-1] == d.Rm),
-    ('ARITH_IMM',
-     'Arithmetic instructions which take an immediate as second source',
-     ['ins{S}<c> <Rd>,<Rn>,#<const>'],
-     lambda x, y, z: d.Rn in x and d.Rd in x and d.imm12 in x),
-    ('BITS', 'Bit field magic',
-     [],
-     lambda x, y, z: d.lsb in x),
-    ('BRNCHSC', 'Branch and System Call instructions',
-     ['B(L)<c> <label>', 'SVC<c> #<imm24>'],
-     lambda x, y, z: x[-1] == d.imm24),
-    ('BRNCHMISC', 'Branch and Misc instructions',
-     ['B(L)X(J)<c> <Rm>', 'BKPT #<imm16>', 'MSR<c> <spec_reg>,<Rn>'],
-     lambda x, y, z: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0) and not y[0] == 'Q'),
-    ('MOV_IMM', 'Move immediate to a register (possibly negating it)',
-     ['ins{S}<c> <Rd>,#<const>'],
-     lambda x, y, z: x[-1] == d.imm12 and x[-2] == d.Rd),
-    ('CMP_OP', 'Comparison instructions which take two operands',
-     ['ins<c> <Rn>,<Rm>{,<shift>}', 'ins<c> <Rn>,<Rm>,<type> <Rs>'],
-     lambda x, y, z: x[-1] == d.Rm and x[-3] == d.type_ and
-        (x[-4] == d.imm5 and x[-8:-4] == (0, 0, 0, 0) or
-         x[-5] == d.Rs and x[-9:-5] == (0, 0, 0, 0))),
-    ('CMP_IMM', 'Comparison instructions which take an immediate',
-     ['ins<c> <Rn>,#<const>'],
-     lambda x, y, z: x[-1] == d.imm12 and x[-6] == d.Rn),
-    ('OPLESS', 'Instructions which don\'t take any operands',
-     ['ins<c>'],
-     lambda x, y, z: len(x) == 29),
-    ('DST_SRC', 'Manipulate and move a register to another register',
-     ['ins{S}<c> <Rd>,<Rm>', 'ins{S}<c> <Rd>,<Rm>,#<imm>',
-     'ins{S}<c> <Rd>,<Rn>,<Rm>'],
-     lambda x, y, z: z == 26 or z == 27),
-    ('LDSTREGS', 'Load or store multiple registers at once',
-     ['ins<c> <Rn>{!},<registers>'],
-     lambda x, y, z: x[-1] == d.register_list),
-    ('BITREV', 'Bit reverse instructions',
-     ['ins<c> <Rd>,<Rm>'],
-     lambda x, y, z: x[-1] == d.Rm and x[-10] == d.Rd and x[-11] != d.Rn),
-    ('MISC', 'Various miscellaneous instructions',
-     ['ins{S}<c> <Rd>,<Rm>,<type> <Rs>', 'ins{S}<c> <Rd>,<Rm>{,<shift>}',
-     'ins<c> #<imm4>', 'ins<c> #<option>',
-     'ins<c> <Rd>,<Rn>,<Rm>{,<type> #<imm>}', 'ins<c> <Rd>,<Rn>,<Rm>'],
-     lambda x, y, z: instruction_name(y) in ('MVN', 'SMC', 'DBG', 'PKH',
-                                             'SEL')),
-    ('SM', 'Various signed multiply instructions', [],
-     lambda x, y, z: y[:2] == 'SM'),
-    ('PAS', 'Parallel signed and unsigned addition and subtraction',
-     ['ins<c> <Rd>,<Rn>,<Rm>'],
-     lambda x, y, z: z in (97, 98, 99, 101, 102, 103)),
-    ('SAT', 'Saturating addition and subtraction instructions',
-     ['ins<c> <Rd>,<Rn>,<Rm>'],
-     lambda x, y, z: y[0] == 'Q'),
-    ('SYNC', 'Synchronization primitives',
-     ['ins{B}<c> <Rt>,<Rt2>,[<Rn>]', 'ins<c> <Rd>,<Rt>,[<Rn>]',
-     'ins<c> <Rt>,<Rt2>,[<Rn>]', 'ins<c> <Rt>,[<Rn>]'],
-     lambda x, y, z: x[1:5] == (0, 0, 0, 1) and (x[-5:-1] == (1, 0, 0, 1) or
-                                                 x[-8:-4] == (1, 0, 0, 1))),
-    ('PUSR', 'Packing, unpacking, saturation, and reversal instructions',
-     ['ins<c> <Rd>,#<imm>,<Rn>', 'ins<c> <Rd>,#<imm>,<Rn>{,<shift>}',
-     'ins<c> <Rd>,<Rn>,<Rm>{,<rotation>}', 'ins<c> <Rd>,<Rm>{,<rotation>}'],
-     lambda x, y, z: x[1:6] == (0, 1, 1, 0, 1)),
+instr_types = [
+    notype('INVLD', 'Invalid or non-existent type',
+           ['I_INVLD'], lambda x, y, z: False),
+    armv7('ADR', 'ADR Instruction, which is an optimization of ADD',
+          ['ADR<c> <Rd>,<label>'], lambda x, y, z: y[:3] == 'ADR'),
+    armv7('UNCOND', 'All unconditional instructions',
+          ['ins <endian_specifier>', 'ins [<Rn>,#+/-<imm12>]',
+           'ins [<Rn>,#<imm12>]', 'ins', 'ins #<option>', 'ins <label>'],
+          lambda x, y, z: False),
+    armv7('MUL', 'All multiplication instructions',
+          ['ins{S}<c> <Rd>,<Rn>,<Rm>', 'ins{S}<c> <Rd>,<Rn>,<Rm>,<Ra>',
+           'ins{S}<c> <RdLo>,<RdHi>,<Rn>,<Rm>'],
+          lambda x, y, z: x[1:5] == (0,)*4 and x[-5:-1] == (1, 0, 0, 1)),
+    armv7('STACK0', 'Various STR and LDR instructions',
+          ['ins<c> <Rt>,[<Rn>,#+/-<imm12>]', 'ins<c> <Rt>,[<Rn>],#+/-<imm12>',
+           'ins<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}'],
+          lambda x, y, z: x[1:3] == (0, 1) and not (x[3] == 1 == x[-2])),
+    armv7('STACK1', 'Various unprivileged STR and LDR instructions',
+          ['ins<c> <Rt>,[<Rn>],+/-<Rm>', 'ins<c> <Rt>,[<Rn>]{,#+/-<imm8>}'],
+          lambda x, y, z: x[-5] == 1 and x[-2] == 1 and x[-4:-2] != (0, 0) and
+          x[1:5] == (0, 0, 0, 0) and x[7] == 1),
+    armv7('STACK2', 'Various other STR and LDR instructions',
+          ['ins<c> <Rt>,<Rt2>,[<Rn>],+/-<Rm>',
+           'ins<c> <Rt>,[<Rn>],+/-<Rm>',
+           'ins<c> <Rt>,<Rt2>,[<Rn>],#+/-<imm8>',
+           'ins<c> <Rt>,<Rt2>,[<Rn>,#+/-<imm8>]',
+           'ins<c> <Rt>,[<Rn>,#+/-<imm8>]', ],
+          lambda x, y, z: x[1:4] == (0,)*3 and x[-2] == 1 and x[-5] == 1 and
+          x[-4:-2] != (0, 0) and not x[-1] in (0, 1) and
+          not (x[4] == 0 and x[7] == 1)),
+    armv7('ARITH_SHIFT',
+          'Arithmetic instructions which take a shift for the second source',
+          ['ins{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}',
+           'ins{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>'],
+          lambda x, y, z: d.Rn in x and d.Rd in x and x[-3] == d.type_
+          and x[-1] == d.Rm),
+    armv7('ARITH_IMM',
+          'Arithmetic instructions which take an immediate as second source',
+          ['ins{S}<c> <Rd>,<Rn>,#<const>'],
+          lambda x, y, z: d.Rn in x and d.Rd in x and d.imm12 in x),
+    armv7('BITS', 'Bit field magic',
+          [], lambda x, y, z: d.lsb in x),
+    armv7('BRNCHSC', 'Branch and System Call instructions',
+          ['B(L)<c> <label>', 'SVC<c> #<imm24>'],
+          lambda x, y, z: x[-1] == d.imm24),
+    armv7('BRNCHMISC', 'Branch and Misc instructions',
+          ['B(L)X(J)<c> <Rm>', 'BKPT #<imm16>', 'MSR<c> <spec_reg>,<Rn>'],
+          lambda x, y, z: x[1:9] == (0, 0, 0, 1, 0, 0, 1, 0) and
+          not y[0] == 'Q'),
+    armv7('MOV_IMM', 'Move immediate to a register (possibly negating it)',
+          ['ins{S}<c> <Rd>,#<const>'],
+          lambda x, y, z: x[-1] == d.imm12 and x[-2] == d.Rd),
+    armv7('CMP_OP', 'Comparison instructions which take two operands',
+          ['ins<c> <Rn>,<Rm>{,<shift>}', 'ins<c> <Rn>,<Rm>,<type> <Rs>'],
+          lambda x, y, z: x[-1] == d.Rm and x[-3] == d.type_ and
+          (x[-4] == d.imm5 and x[-8:-4] == (0, 0, 0, 0) or
+           x[-5] == d.Rs and x[-9:-5] == (0, 0, 0, 0))),
+    armv7('CMP_IMM', 'Comparison instructions which take an immediate',
+          ['ins<c> <Rn>,#<const>'],
+          lambda x, y, z: x[-1] == d.imm12 and x[-6] == d.Rn),
+    armv7('OPLESS', 'Instructions which don\'t take any operands',
+          ['ins<c>'],
+          lambda x, y, z: len(x) == 29),
+    armv7('DST_SRC', 'Manipulate and move a register to another register',
+          ['ins{S}<c> <Rd>,<Rm>', 'ins{S}<c> <Rd>,<Rm>,#<imm>',
+           'ins{S}<c> <Rd>,<Rn>,<Rm>'],
+          lambda x, y, z: z == 26 or z == 27),
+    armv7('LDSTREGS', 'Load or store multiple registers at once',
+          ['ins<c> <Rn>{!},<registers>'],
+          lambda x, y, z: x[-1] == d.register_list),
+    armv7('BITREV', 'Bit reverse instructions',
+          ['ins<c> <Rd>,<Rm>'],
+          lambda x, y, z: x[-1] == d.Rm and x[-10] == d.Rd and
+          x[-11] != d.Rn),
+    armv7('MISC', 'Various miscellaneous instructions',
+          ['ins{S}<c> <Rd>,<Rm>,<type> <Rs>', 'ins{S}<c> <Rd>,<Rm>{,<shift>}',
+           'ins<c> #<imm4>', 'ins<c> #<option>',
+           'ins<c> <Rd>,<Rn>,<Rm>{,<type> #<imm>}', 'ins<c> <Rd>,<Rn>,<Rm>'],
+          lambda x, y, z: instruction_name(y) in ('MVN', 'SMC', 'DBG', 'PKH',
+                                                  'SEL')),
+    armv7('SM', 'Various signed multiply instructions', [],
+          lambda x, y, z: y[:2] == 'SM'),
+    armv7('PAS', 'Parallel signed and unsigned addition and subtraction',
+          ['ins<c> <Rd>,<Rn>,<Rm>'],
+          lambda x, y, z: z in (97, 98, 99, 101, 102, 103)),
+    armv7('SAT', 'Saturating addition and subtraction instructions',
+          ['ins<c> <Rd>,<Rn>,<Rm>'],
+          lambda x, y, z: y[0] == 'Q'),
+    armv7('SYNC', 'Synchronization primitives',
+          ['ins{B}<c> <Rt>,<Rt2>,[<Rn>]', 'ins<c> <Rd>,<Rt>,[<Rn>]',
+           'ins<c> <Rt>,<Rt2>,[<Rn>]', 'ins<c> <Rt>,[<Rn>]'],
+          lambda x, y, z: x[1:5] == (0, 0, 0, 1) and
+          (x[-5:-1] == (1, 0, 0, 1) or x[-8:-4] == (1, 0, 0, 1))),
+    armv7('PUSR', 'Packing, unpacking, saturation, and reversal instructions',
+          ['ins<c> <Rd>,#<imm>,<Rn>', 'ins<c> <Rd>,#<imm>,<Rn>{,<shift>}',
+           'ins<c> <Rd>,<Rn>,<Rm>{,<rotation>}',
+           'ins<c> <Rd>,<Rm>{,<rotation>}'],
+          lambda x, y, z: x[1:6] == (0, 1, 1, 0, 1)),
 ]
 
 if __name__ == '__main__':
-    uncond_table = {}
-    cond_table = {}
+    armv7_table = {}
 
     # the last item (a list) will contain the instructions affected by this
     # encoding type
-    cond_instr_types = [list(x) + [[]] for x in cond_instr_types]
+    instr_types = [list(x) + [[]] for x in instr_types]
+
+    # prepend the instruction set to the encoding types
+    insns_types = '', 'ARM_', 'THUMB_', 'THUMB2_'
+    instr_types = [[x[0]] + [insns_types[x[0]] + x[1]] + x[2:6]
+                   for x in instr_types]
 
     # list of encoding types which should not be emitted in the table (because
     # they are handled somewhere else, in a somewhat hardcoded fashion)
-    type_ignore = 'MUL', 'STACK0', 'STACK1', 'STACK2', 'SAT', \
-        'SYNC', 'PUSR', 'ADR'
+    type_ignore = 'ARM_MUL', 'ARM_STACK0', 'ARM_STACK1', 'ARM_STACK2', \
+        'ARM_SAT', 'ARM_SYNC', 'ARM_PUSR', 'ARM_ADR'
 
     for description in darmtbl.ARMv7:
         instr = description[0]
@@ -367,7 +390,7 @@ if __name__ == '__main__':
         if bits[:4] == (1, 1, 1, 1) and \
                 bits[4:7] in ((0, 0, 0), (0, 1, 0), (0, 1, 1), (1, 0, 1)):
             # hardcoded index for the T_UNCOND type encoding
-            cond_instr_types[1][-1].append(instr)
+            instr_types[2][-1].append(instr)
             continue
 
         for x in itertools.product(*identifier[:8]):
@@ -375,14 +398,15 @@ if __name__ == '__main__':
 
             # for each conditional instruction, check which type of
             # instruction this is
-            for y in cond_instr_types:
-                if bits[0] == d.cond and y[3](bits, instr, idx):
-                    if y[0] == 'PUSR0':
+            for y in instr_types:
+                if y[1][:3] == 'ARM' and bits[0] == d.cond and \
+                        y[4](bits, instr, idx):
+                    if y[1] == 'PUSR0':
                         print bin(int(idx)), idx, identifier, instr, remainder
                     #if y[0] == 'DST_SRC':
                         #print 'dst-src', idx
-                    if not y[0] in type_ignore:
-                        cond_table[idx] = instruction_name(instr), y
+                    if not y[1] in type_ignore:
+                        armv7_table[idx] = instruction_name(instr), y
                     y[-1].append(instr)
                     break
             # show all instructions which we don't disasm yet
@@ -393,8 +417,7 @@ if __name__ == '__main__':
 
     # make a list of unique instructions affected by each encoding type,
     # we remove the first item from the instruction names, as this is I_INVLD
-    cond_instr_types = [x[:4] + [instruction_names(x[4])[1:]]
-                        for x in cond_instr_types]
+    instr_types = [x[:5] + [instruction_names(x[5])[1:]] for x in instr_types]
 
     #
     # darm-tbl.h
@@ -429,10 +452,12 @@ if __name__ == '__main__':
     print('#include "darm-tbl.h"')
 
     # print type info for each encoding type
-    print(type_encoding_enum('armv7_enctype', cond_instr_types))
+    print(type_encoding_enum('darm_enctype', instr_types))
 
     # print some required definitions
-    print('armv7_enctype_t armv7_instr_types[256];')
+    print('darm_enctype_t armv7_instr_types[256];')
+    print('darm_enctype_t thumb_instr_types[256];')
+    print('darm_enctype_t thumb2_instr_types[256];')
 
     def type_lut(name, bits):
         print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
@@ -452,8 +477,8 @@ if __name__ == '__main__':
     type_lut('sync', 4)
     type_lut('pusr', 4)
     count = len(instruction_names(open('instructions.txt')))
-    print('const char *armv7_mnemonics[%d];' % count)
-    print('const char *armv7_enctypes[%d];' % len(cond_instr_types))
+    print('const char *darm_mnemonics[%d];' % count)
+    print('const char *darm_enctypes[%d];' % len(instr_types))
     print('const char *armv7_registers[16];')
     print('const char *armv7_format_strings[%d][3];' % instrcnt)
 
@@ -471,10 +496,10 @@ if __name__ == '__main__':
     print('#include "armv7-tbl.h"')
 
     # print a table containing all the types of instructions
-    print(instruction_types_table(cond_table, 'armv7'))
+    print(instruction_types_table(armv7_table, 'armv7'))
 
     # print a table containing the instruction label for each entry
-    print(instruction_names_index_table(cond_table, 'armv7'))
+    print(instruction_names_index_table(armv7_table, 'armv7'))
 
     # print a lookup table for the shift type (which is a sub-type of
     # the dst-src type), the None types represent instructions of the
@@ -590,7 +615,7 @@ if __name__ == '__main__':
     print(type_lookup_table('type_pusr', *t_pusr))
 
     print(instruction_names_table(open('instructions.txt')))
-    print(type_encoding_table('armv7_enctypes', cond_instr_types))
+    print(type_encoding_table('armv7_enctypes', instr_types))
 
     reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
     print(string_table('armv7_registers', reg.split()))

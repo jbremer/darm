@@ -59,7 +59,7 @@ int utoa(unsigned int value, char *out, int base)
 
 int darm_str(const darm_t *d, darm_str_t *str)
 {
-    if(d->instr == I_INVLD || d->instr >= ARRAYSIZE(armv7_mnemonics)) {
+    if(d->instr == I_INVLD || d->instr >= ARRAYSIZE(darm_mnemonics)) {
         return -1;
     }
 
