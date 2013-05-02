@@ -845,8 +845,8 @@ const char *darm_enctype_name(darm_enctype_t enctype)
 
 const char *darm_register_name(darm_reg_t reg)
 {
-    return reg != R_INVLD && reg < (int32_t) ARRAYSIZE(armv7_registers) ?
-        armv7_registers[reg] : NULL;
+    return reg != R_INVLD && reg < (int32_t) ARRAYSIZE(darm_registers) ?
+        darm_registers[reg] : NULL;
 }
 
 const char *darm_shift_type_name(darm_shift_type_t shifttype)
@@ -907,7 +907,7 @@ int darm_reglist(uint16_t reglist, char *out)
         int32_t reg, start = __builtin_ctz(reglist);
 
         // all registers have length two
-        *(uint16_t *) out = *(uint16_t *) armv7_registers[start];
+        *(uint16_t *) out = *(uint16_t *) darm_registers[start];
         out += 2;
 
         for (reg = start; reg == __builtin_ctz(reglist); reg++) {
@@ -922,7 +922,7 @@ int darm_reglist(uint16_t reglist, char *out)
             // registers have been found, but we prefer the notation
             // {r0,r1} over {r0-r1} in that case
             *out++ = reg == start + 2 ? ',' : '-';
-            *(uint16_t *) out = *(uint16_t *) armv7_registers[reg-1];
+            *(uint16_t *) out = *(uint16_t *) darm_registers[reg-1];
             out += 2;
         }
         *out++ = ',';

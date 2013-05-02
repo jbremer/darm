@@ -113,7 +113,7 @@ def type_encoding_enum(enumname, arr):
 
 def type_encoding_table(tblname, arr):
     """Table of strings of all instructions."""
-    return string_table(tblname, (x[0] for x in arr))
+    return string_table(tblname, (x[1] for x in arr))
 
 
 def generate_format_strings(arr):
@@ -434,8 +434,15 @@ if __name__ == '__main__':
     print('#define __DARM_TBL__')
     print('#include <stdint.h>')
 
+    # print type info for each encoding type
+    print(type_encoding_enum('darm_enctype', instr_types))
+
     # print all instruction labels
     print(instruction_names_enum(open('instructions.txt')))
+    count = len(instruction_names(open('instructions.txt')))
+    print('const char *darm_mnemonics[%d];' % count)
+    print('const char *darm_enctypes[%d];' % len(instr_types))
+    print('const char *darm_registers[16];')
 
     print('#endif')
 
@@ -450,9 +457,6 @@ if __name__ == '__main__':
     print('#define __ARMV7_TBL__')
     print('#include <stdint.h>')
     print('#include "darm-tbl.h"')
-
-    # print type info for each encoding type
-    print(type_encoding_enum('darm_enctype', instr_types))
 
     # print some required definitions
     print('darm_enctype_t armv7_instr_types[256];')
@@ -476,21 +480,30 @@ if __name__ == '__main__':
     type_lut('sat', 2)
     type_lut('sync', 4)
     type_lut('pusr', 4)
-    count = len(instruction_names(open('instructions.txt')))
-    print('const char *darm_mnemonics[%d];' % count)
-    print('const char *darm_enctypes[%d];' % len(instr_types))
-    print('const char *armv7_registers[16];')
     print('const char *armv7_format_strings[%d][3];' % instrcnt)
 
     print('#endif')
+
+    #
+    # darm-tbl.c
+    #
+
+    magic_open('darm-tbl.c')
+    print('#include <stdio.h>')
+    print('#include <stdint.h>')
+    print('#include "darm-tbl.h"')
+    print(instruction_names_table(open('instructions.txt')))
+    print(type_encoding_table('darm_enctypes', instr_types))
+
+    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
+    print(string_table('darm_registers', reg.split()))
+
 
     #
     # armv7-tbl.c
     #
 
     magic_open('armv7-tbl.c')
-
-    # print a header
     print('#include <stdio.h>')
     print('#include <stdint.h>')
     print('#include "armv7-tbl.h"')
@@ -613,12 +626,6 @@ if __name__ == '__main__':
         'sxtah', 'sxth', 'uxtab16', 'uxtb16', None, None, \
         'uxtab', 'uxtb', 'uxtah', 'uxth'
     print(type_lookup_table('type_pusr', *t_pusr))
-
-    print(instruction_names_table(open('instructions.txt')))
-    print(type_encoding_table('armv7_enctypes', instr_types))
-
-    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
-    print(string_table('armv7_registers', reg.split()))
 
     lines = []
     for instr, fmtstr in fmtstrs.items():
