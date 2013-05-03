@@ -203,13 +203,40 @@ struct {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = C_AL,
         .S = B_UNSET, .U = B_SET, .I = B_SET, .imm = 0x100000, .Rd = 12}},
 
+    // we switch to thumb (oboy)
+    {0, 0, {}},
+
+    {0xbe03, 0, {
+        .instr = I_BKPT, .instr_type = T_THUMB_ONLY_IMM8, .I = B_SET,
+        .imm = 3}},
 };
+
+static int _darm_thumb_disasm(darm_t *d, uint32_t w)
+{
+    return darm_thumb_disasm(d, w);
+}
+
+static int _darm_thumb2_disasm(darm_t *d, uint32_t w)
+{
+    return darm_thumb2_disasm(d, w >> 16, w & 0xffff);
+}
 
 int main()
 {
     int failure = 0;
+
+    int disasm_index = 0;
+    int (*disasms[])(darm_t *d, uint32_t w) = {
+        &darm_armv7_disasm, &_darm_thumb_disasm, &_darm_thumb2_disasm,
+    };
+
     for (uint32_t i = 0; i < ARRAYSIZE(tests); i++) {
         darm_t d; int ret;
+
+        if(tests[i].w == 0) {
+            disasm_index++;
+            continue;
+        }
 
         // update the registers in the tests in order not to be 0, but R_INVLD
         // instead
@@ -229,7 +256,7 @@ int main()
             p->shift_type = S_INVLD;
         }
 
-        ret = darm_armv7_disasm(&d, tests[i].w);
+        ret = disasms[disasm_index](&d, tests[i].w);
 
         darm_str_t str;
         memset(&str, 0, sizeof(str));

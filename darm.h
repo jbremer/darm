@@ -182,7 +182,14 @@ typedef struct _darm_str_t {
     char instr[64];
 } darm_str_t;
 
+// disassemble an armv7 instruction
 int darm_armv7_disasm(darm_t *d, uint32_t w);
+
+// disassemble a thumb instruction
+int darm_thumb_disasm(darm_t *d, uint16_t w);
+
+// disassemble a thumb2 instruction
+int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2);
 
 int darm_immshift_decode(const darm_t *d, const char **type,
     uint32_t *immediate);

@@ -27,6 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 import darmtbl
+import darmtbl2
 import itertools
 import sys
 import textwrap
@@ -233,6 +234,7 @@ def magic_open(fname):
     print('*/')
 
 d = darmtbl
+d2 = darmtbl2
 
 
 def notype(*x):
@@ -350,10 +352,13 @@ instr_types = [
            'ins<c> <Rd>,<Rn>,<Rm>{,<rotation>}',
            'ins<c> <Rd>,<Rm>{,<rotation>}'],
           lambda x, y, z: x[1:6] == (0, 1, 1, 0, 1)),
+    thumb('ONLY_IMM8', 'Instructions which only take an 8-byte immediate',
+          ['ins<c> #<imm8>'],
+          lambda x, y, z: d2.imm8 in x and len(x) == 9),
 ]
 
 if __name__ == '__main__':
-    armv7_table = {}
+    armv7_table, thumb_table, thumb2_table = {}, {}, {}
 
     # the last item (a list) will contain the instructions affected by this
     # encoding type
@@ -381,7 +386,6 @@ if __name__ == '__main__':
             elif len(identifier) + bits[x].bitsize > 8:
                 identifier += ['01'] * (8-len(identifier))
                 remainder = bits[x:]
-                break
             else:
                 identifier += ['01'] * bits[x].bitsize
 
@@ -399,8 +403,7 @@ if __name__ == '__main__':
             # for each conditional instruction, check which type of
             # instruction this is
             for y in instr_types:
-                if y[1][:3] == 'ARM' and bits[0] == d.cond and \
-                        y[4](bits, instr, idx):
+                if y[0] == 1 and bits[0] == d.cond and y[4](bits, instr, idx):
                     if y[1] == 'PUSR0':
                         print bin(int(idx)), idx, identifier, instr, remainder
                     #if y[0] == 'DST_SRC':
@@ -414,6 +417,30 @@ if __name__ == '__main__':
                 if bits[0] == d.cond:
                     pass
                     print idx, description
+
+    for description in darmtbl2.thumbs:
+        instr = description[0]
+        bits = description[1:]
+
+        bitcount = sum(1 if isinstance(x, int) else x.bitsize for x in bits)
+        if bitcount in (16, 17, 18, 19):
+            # TODO fix >16
+            identifier, remainder = [], []
+            for x in range(len(bits)):
+                if isinstance(bits[x], int):
+                    identifier.append(str(bits[x]))
+                elif len(identifier) + bits[x].bitsize > 8:
+                    identifier += ['01'] * (8-len(identifier))
+                    remainder = bits[x:]
+                else:
+                    identifier += ['01'] * bits[x].bitsize
+            for x in itertools.product(*identifier[:8]):
+                idx = sum(int(x[y])*2**(7-y) for y in range(8))
+                for y in (_ for _ in instr_types if _[0] == 2):
+                    if y[4](bits, instr, 0):
+                        print instruction_name(instr), bits, y
+                        thumb_table[idx] = instruction_name(instr), y
+                        y[-1].append(instr)
 
     # make a list of unique instructions affected by each encoding type,
     # we remove the first item from the instruction names, as this is I_INVLD
@@ -440,9 +467,27 @@ if __name__ == '__main__':
     # print all instruction labels
     print(instruction_names_enum(open('instructions.txt')))
     count = len(instruction_names(open('instructions.txt')))
-    print('const char *darm_mnemonics[%d];' % count)
-    print('const char *darm_enctypes[%d];' % len(instr_types))
-    print('const char *darm_registers[16];')
+    print('extern const char *darm_mnemonics[%d];' % count)
+    print('extern const char *darm_enctypes[%d];' % len(instr_types))
+    print('extern const char *darm_registers[16];')
+
+    print('#endif')
+
+    #
+    # thumb-tbl.h
+    #
+
+    magic_open('thumb-tbl.h')
+
+    # print required headers
+    print('#ifndef __THUMB_TBL__')
+    print('#define __THUMB_TBL__')
+    print('#include <stdint.h>')
+    print('#include "darm-tbl.h"')
+
+    # print some required definitions
+    print('extern darm_enctype_t thumb_instr_types[256];')
+    print('extern darm_instr_t thumb_instr_labels[256];')
 
     print('#endif')
 
@@ -459,14 +504,13 @@ if __name__ == '__main__':
     print('#include "darm-tbl.h"')
 
     # print some required definitions
-    print('darm_enctype_t armv7_instr_types[256];')
-    print('darm_enctype_t thumb_instr_types[256];')
-    print('darm_enctype_t thumb2_instr_types[256];')
+    print('extern darm_enctype_t armv7_instr_types[256];')
+    print('extern darm_enctype_t thumb2_instr_types[256];')
 
     def type_lut(name, bits):
         print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
 
-    print('darm_instr_t armv7_instr_labels[256];')
+    print('extern darm_instr_t armv7_instr_labels[256];')
     type_lut('shift', 4)
     type_lut('brnchmisc', 4)
     type_lut('opless', 3)
@@ -498,6 +542,20 @@ if __name__ == '__main__':
     reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
     print(string_table('darm_registers', reg.split()))
 
+    #
+    # thumb-tbl.c
+    #
+
+    magic_open('thumb-tbl.c')
+    print('#include <stdio.h>')
+    print('#include <stdint.h>')
+    print('#include "thumb-tbl.h"')
+
+    # print a table containing all the types of instructions
+    print(instruction_types_table(thumb_table, 'thumb'))
+
+    # print a table containing the instruction label for each entry
+    print(instruction_names_index_table(thumb_table, 'thumb'))
 
     #
     # armv7-tbl.c
