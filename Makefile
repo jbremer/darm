@@ -9,8 +9,8 @@ endif
 SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
-GENCODESRC = darm-tbl.h armv7-tbl.c armv7-tbl.h
-GENCODEOBJ = armv7-tbl.o
+GENCODESRC = darm-tbl.c darm-tbl.h armv7-tbl.c armv7-tbl.h
+GENCODEOBJ = darm-tbl.o armv7-tbl.o
 
 STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
 	tests/tests.exe libdarm.a libdarm.so
