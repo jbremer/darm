@@ -204,7 +204,7 @@ struct {
         .S = B_UNSET, .U = B_SET, .I = B_SET, .imm = 0x100000, .Rd = 12}},
 
     // we switch to thumb (oboy)
-    {0, 0, {}},
+    {0, 0, {.instr = I_INVLD}},
 
     {0xbe03, 0, {
         .instr = I_BKPT, .instr_type = T_THUMB_ONLY_IMM8, .I = B_SET,

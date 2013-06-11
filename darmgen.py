@@ -404,19 +404,10 @@ if __name__ == '__main__':
             # instruction this is
             for y in instr_types:
                 if y[0] == 1 and bits[0] == d.cond and y[4](bits, instr, idx):
-                    if y[1] == 'PUSR0':
-                        print bin(int(idx)), idx, identifier, instr, remainder
-                    #if y[0] == 'DST_SRC':
-                        #print 'dst-src', idx
                     if not y[1] in type_ignore:
                         armv7_table[idx] = instruction_name(instr), y
                     y[-1].append(instr)
                     break
-            # show all instructions which we don't disasm yet
-            else:
-                if bits[0] == d.cond:
-                    pass
-                    print idx, description
 
     for description in darmtbl2.thumbs:
         instr = description[0]
@@ -438,7 +429,6 @@ if __name__ == '__main__':
                 idx = sum(int(x[y])*2**(7-y) for y in range(8))
                 for y in (_ for _ in instr_types if _[0] == 2):
                     if y[4](bits, instr, 0):
-                        print instruction_name(instr), bits, y
                         thumb_table[idx] = instruction_name(instr), y
                         y[-1].append(instr)
 
