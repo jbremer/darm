@@ -430,9 +430,10 @@ int darm_reglist(uint16_t reglist, char *out)
         // count trailing zero's
         int32_t reg, start = __builtin_ctz(reglist);
 
-        // all registers have length two
+        // most registers have length two
         *(uint16_t *) out = *(uint16_t *) darm_registers[start];
-        out += 2;
+        out[2] = darm_registers[start][2];
+        out += 2 + (out[2] != 0);
 
         for (reg = start; reg == __builtin_ctz(reglist); reg++) {
             // unset this bit
@@ -447,7 +448,8 @@ int darm_reglist(uint16_t reglist, char *out)
             // {r0,r1} over {r0-r1} in that case
             *out++ = reg == start + 2 ? ',' : '-';
             *(uint16_t *) out = *(uint16_t *) darm_registers[reg-1];
-            out += 2;
+            out[2] = darm_registers[reg-1][2];
+            out += 2 + (out[2] != 0);
         }
         *out++ = ',';
     }
