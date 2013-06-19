@@ -417,3 +417,134 @@ int darm_str2(const darm_t *d, darm_str_t *str, int lowercase)
     }
     return 0;
 }
+
+int darm_reglist(uint16_t reglist, char *out)
+{
+    char *base = out;
+
+    if(reglist == 0) return -1;
+
+    *out++ = '{';
+
+    while (reglist != 0) {
+        // count trailing zero's
+        int32_t reg, start = __builtin_ctz(reglist);
+
+        // all registers have length two
+        *(uint16_t *) out = *(uint16_t *) darm_registers[start];
+        out += 2;
+
+        for (reg = start; reg == __builtin_ctz(reglist); reg++) {
+            // unset this bit
+            reglist &= ~(1 << reg);
+        }
+
+        // if reg is not start + 1, then this means that a series of
+        // consecutive registers have been identified
+        if(reg != start + 1) {
+            // if reg is start + 2, then this means that two consecutive
+            // registers have been found, but we prefer the notation
+            // {r0,r1} over {r0-r1} in that case
+            *out++ = reg == start + 2 ? ',' : '-';
+            *(uint16_t *) out = *(uint16_t *) darm_registers[reg-1];
+            out += 2;
+        }
+        *out++ = ',';
+    }
+
+    out[-1] = '}';
+    *out = 0;
+    return out - base;
+}
+
+void darm_dump(const darm_t *d)
+{
+    printf(
+        "encoded:       0x%08x\n"
+        "instr:         I_%s\n"
+        "instr-type:    T_%s\n",
+        d->w, darm_mnemonic_name(d->instr),
+        darm_enctype_name(d->instr_type));
+
+    if(d->cond == C_UNCOND) {
+        printf("cond:          unconditional\n");
+    }
+    else if(d->cond != C_INVLD) {
+        printf("cond:          C_%s\n", darm_condition_name(d->cond, 0));
+    }
+
+#define PRINT_REG(reg) if(d->reg != R_INVLD) \
+    printf("%-5s          %s\n", #reg ":", darm_register_name(d->reg))
+
+    PRINT_REG(Rd);
+    PRINT_REG(Rn);
+    PRINT_REG(Rm);
+    PRINT_REG(Ra);
+    PRINT_REG(Rt);
+    PRINT_REG(Rt2);
+    PRINT_REG(RdHi);
+    PRINT_REG(RdLo);
+
+    if(d->I == B_SET) {
+        printf("imm:           0x%08x  %d\n", d->imm, d->imm);
+    }
+
+#define PRINT_FLAG(flag, comment, comment2) if(d->flag != B_INVLD) \
+    printf("%s:             %d   (%s)\n", #flag, d->flag, \
+        d->flag == B_SET ? comment : comment2)
+
+    PRINT_FLAG(B, "swap one byte", "swap four bytes");
+    PRINT_FLAG(S, "updates conditional flag",
+        "does NOT update conditional flags");
+    PRINT_FLAG(E, "change to big endian", "change to little endian");
+    PRINT_FLAG(U, "add offset to address", "subtract offset from address");
+    PRINT_FLAG(H, "Thumb2 instruction is two-byte aligned",
+        "Thumb2 instruction is four-byte aligned");
+    PRINT_FLAG(P, "pre-indexed addressing", "post-indexed addressing");
+    PRINT_FLAG(M, "take the top halfword as source",
+        "take the bottom halfword as source");
+    PRINT_FLAG(N, "take the top halfword as source",
+        "take the bottom halfword as source");
+    PRINT_FLAG(T, "PKHTB form", "PKHBT form");
+    PRINT_FLAG(R, "round the result", "do NOT round the result");
+    PRINT_FLAG(W, "write-back", "do NOT write-back");
+
+    if(d->option != O_INVLD) {
+        printf("option:        %d\n", d->option);
+    }
+
+    if(d->rotate != 0) {
+        printf("rotate:        %d\n", d->rotate);
+    }
+
+    if(d->shift_type != S_INVLD) {
+        if(d->Rs == R_INVLD) {
+            printf(
+                "type:          %s (shift type)\n"
+                "shift:         %-2d  (shift constant)\n",
+                darm_shift_type_name(d->shift_type), d->shift);
+        }
+        else {
+            printf(
+                "type:          %s (shift type)\n"
+                "Rs:            %s  (register-shift)\n",
+                darm_shift_type_name(d->shift_type),
+                darm_register_name(d->Rs));
+        }
+    }
+
+    if(d->lsb != 0 || d->width != 0) {
+        printf(
+            "lsb:           %d\n"
+            "width:         %d\n",
+            d->lsb, d->width);
+    }
+
+    if(d->reglist != 0) {
+        char reglist[64];
+        darm_reglist(d->reglist, reglist);
+        printf("reglist:       %s\n", reglist);
+    }
+
+    printf("\n");
+}
