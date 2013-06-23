@@ -1,5 +1,5 @@
 AR = ar
-CC = gcc
+#CC = gcc
 CFLAGS = -std=c99 -Wall -O2 -s -Wextra
 
 ifneq ($(OS),Windows_NT)
@@ -17,7 +17,7 @@ STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
 
 default: $(STUFF)
 
-$(GENCODESRC):
+$(GENCODESRC): darmgen.py
 	python darmgen.py
 
 %.o: %.c

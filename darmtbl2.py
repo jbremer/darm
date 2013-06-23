@@ -40,18 +40,25 @@ class Bitsize:
 
 cond          = Bitsize('cond', 4, 'Conditional Flags')
 Rd            = Bitsize('Rd', 4, 'Destination Register')
-Rs            = Bitsize('Rs', 4, 'Shift Immediate')
+Rd3           = Bitsize('Rd3', 3, 'Destination Register')
+Rs            = Bitsize('Rs', 3, 'Shift Immediate')
 Rn            = Bitsize('Rn', 4, 'N Register')
+Rn3           = Bitsize('Rn', 3, 'N Register')
 Rm            = Bitsize('Rm', 4, 'Shift Register')
-Rt            = Bitsize('Rt', 4, 'Transferred Register')
+Rm3           = Bitsize('Rm', 3, 'Shift Register')
+Rt            = Bitsize('Rt', 3, 'Transferred Register')
 Rt2           = Bitsize('Rt2', 4, 'Second Ternary Register')
 Ra            = Bitsize('Ra', 4, 'Accumulate Register')
+Rdm           = Bitsize('Rdm', 3, 'Destination & M Register')
 Rdm           = Bitsize('Rdm', 4, 'Destination & M Register')
+Rdm3          = Bitsize('Rdm', 3, 'Destination & M Register')
 Rdn           = Bitsize('Rdn', 4, 'Destination & N Register')
+Rdn3          = Bitsize('Rdn', 3, 'Destination & N Register')
 S             = Bitsize('S', 1, 'Update Conditional Flags')
 type_         = Bitsize('type', 2, 'Shift Type')
 msb           = Bitsize('msb', 5, 'Most Significant Bit')
 lsb           = Bitsize('lsb', 5, 'Least Significant Bit')
+register_list8= Bitsize('register_list', 8, 'Register List')
 register_list = Bitsize('register_list', 16, 'Register List')
 E             = Bitsize('E', 1, 'Endian Specifier')
 msr           = Bitsize('msr', 2, 'Move to Special Register mask')
@@ -166,7 +173,7 @@ thumbs = [
     ('ISB<c> <option>', 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 1, 0, option),
     #('IT{<x>{<y>{<z>}}} <firstcond>', 1, 0, 1, 1, 1, 1, 1, 1, firstcond, mask),
     #('IT{<x>{<y>{<z>}}} <firstcond>', 1, 0, 1, 1, 1, 1, 1, 1, firstcond, mask),
-    ('LDM<c> <Rn>, <registers>', 1, 1, 0, 0, 1, Rn, register_list),
+    ('LDM<c> <Rn>, <registers>', 1, 1, 0, 0, 1, Rn, register_list8),
     ('LDM<c>.W <Rn>{!}, <registers>', 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, W, 1, Rn, P, M, (0), register_list),
     ('LDM<c>.W <Rn>{!}, <registers>', 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, W, 1, Rn, P, M, (0), register_list),
     ('LDMDB<c> <Rn>{!}, <registers>', 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, W, 1, Rn, P, M, (0), register_list),
@@ -225,7 +232,7 @@ thumbs = [
     ('LSR{S}<c>.W <Rd>, <Rn>, <Rm>', 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, S, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm),
     ('MLA<c> <Rd>, <Rn>, <Rm>, <Ra>', 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, Rn, Ra, Rd, 0, 0, 0, 0, Rm),
     ('MLS<c> <Rd>, <Rn>, <Rm>, <Ra>', 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, Rn, Ra, Rd, 0, 0, 0, 1, Rm),
-    ('MOVS <Rd>, #<imm8>', 0, 0, 1, 0, 0, Rd, imm8),
+    ('MOVS <Rd3>, #<imm8>', 0, 0, 1, 0, 0, Rd3, imm8),
     ('MOV{S}<c>.W <Rd>, #<const>', 1, 1, 1, 1, 0, i, 0, 0, 0, 1, 0, S, 1, 1, 1, 1, 0, imm3, Rd, imm8),
     ('MOVW<c> <Rd>, #<imm16>', 1, 1, 1, 1, 0, i, 1, 0, 0, 1, 0, 0, imm4, 0, imm3, Rd, imm8),
     ('MOV<c> <Rd>, <Rm>', 0, 1, 0, 0, 0, 1, 1, 0, D, Rm, Rd),
@@ -255,10 +262,10 @@ thumbs = [
     ('PLI<c> [<Rn>, #-<imm8>]', 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, Rn, 1, 1, 1, 1, 1, 1, 0, 0, imm8),
     ('PLI<c> <label>', 1, 1, 1, 1, 1, 0, 0, 1, U, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, imm12),
     ('PLI<c> [<Rn>, <Rm>{, LSL #<imm2>}]', 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, Rn, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, imm2, Rm),
-    ('POP<c> <registers>', 1, 0, 1, 1, 1, 1, 0, P, register_list),
+    ('POP<c> <registers>', 1, 0, 1, 1, 1, 1, 0, P, register_list8),
     ('POP<c>.W <registers>', 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, P, M, (0), register_list),
     ('POP<c>.W <registers>', 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, Rt, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0),
-    ('PUSH<c> <registers>', 1, 0, 1, 1, 0, 1, 0, M, register_list),
+    ('PUSH<c> <registers>', 1, 0, 1, 1, 0, 1, 0, M, register_list8),
     ('PUSH<c>.W <registers>', 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, (0), M, (0), register_list),
     ('PUSH<c>.W <registers>', 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, Rt, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0),
     ('QADD<c> <Rd>, <Rm>, <Rn>', 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, Rn, 1, 1, 1, 1, Rd, 1, 0, 0, 0, Rm),
