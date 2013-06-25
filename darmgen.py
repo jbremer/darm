@@ -144,8 +144,13 @@ def generate_format_strings(arr):
 
         # various register operands
         '<Rd>', 'd',
+        '<Rd3>', 'd',
+        '<Rdn>', 'd',
+        '<Rdn3>', 'd',
         '<Rn>', 'n',
+        '<Rn3>', 'n',
         '<Rm>', 'm',
+        '<Rm3>', 'm',
         '<Ra>', 'a',
         '<Rt>', 't',
         '<Rt2>', '2',
@@ -154,8 +159,12 @@ def generate_format_strings(arr):
 
         # immediate values
         '#<const>', 'i',
+        '#<imm2>', 'i',
         '#<imm4>', 'i',
         '#<imm5>', 'i',
+        '#<imm7>', 'i',
+        '#<imm8>', 'i',
+        '#<imm12>', 'i',
         '#<imm16>', 'i',
         '#<imm24>', 'i',
 
@@ -359,7 +368,8 @@ instr_types = [
           ['ins<c> <registers>'],
           lambda x, y, z: x[0:4] == (1, 0, 1, 1) and x[5:7] == (1, 0) and x[-1] == d2.register_list8),
     thumb('REG_IMM', 'Apply immediate to a register',
-          ['ins{S}<c> <Rd>,#<const>',
+          ['ins <Rd3>,#<const>',
+           'ins{S}<c> <Rd>,#<const>',
            'ins{S}<c> <Rd3>,#<const>',
            'ins{S}<c> <Rdn>,#<const>'],	
           lambda x, y, z: x[0:3] == (0, 0, 1) and x[-1] == d2.imm8 and x[-2] in (d2.Rd, d2.Rd3, d2.Rdn)),
@@ -489,6 +499,8 @@ if __name__ == '__main__':
     print('extern darm_instr_t thumb_instr_labels[256];')
     print('extern const char *thumb_registers[9];')
 
+    thumb_fmtstrs = generate_format_strings(darmtbl2.thumbs)
+    print('const char *thumb_format_strings[%d][3];' % instrcnt)
     print('#endif')
 
     #
@@ -506,7 +518,6 @@ if __name__ == '__main__':
     # print some required definitions
     print('extern darm_enctype_t armv7_instr_types[256];')
     print('extern darm_enctype_t thumb2_instr_types[256];')
-
     def type_lut(name, bits):
         print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
 
@@ -559,6 +570,14 @@ if __name__ == '__main__':
 
     # print a table containing the instruction label for each entry
     print(instruction_names_index_table(thumb_table, 'thumb'))
+
+    lines = []
+    for instr, fmtstr in thumb_fmtstrs.items():
+        fmtstr = ', '.join('"%s"' % x for x in set(fmtstr))
+        lines.append('    [I_%s] = {%s},' % (instr, fmtstr))
+    print('const char *thumb_format_strings[%d][3] = {' % instrcnt)
+    print('\n'.join(sorted(lines)))
+    print('};')
 
     #
     # armv7-tbl.c

@@ -39,6 +39,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
     uint16_t tmp = 0;
     d->instr = thumb_instr_labels[w >> 8];
     d->instr_type = thumb_instr_types[w >> 8];
+    d->isthumb = 1;
 
     d->cond = C_AL;
     switch ((uint32_t) d->instr_type) {

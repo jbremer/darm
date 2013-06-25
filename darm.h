@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define __DARM__
 
 #include "armv7-tbl.h"
+#include "thumb-tbl.h"
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
@@ -166,6 +167,9 @@ typedef struct _darm_t {
 
     // bitmask of registers affected by the STM/LDM/PUSH/POP instruction
     uint16_t        reglist;
+
+    // indicates arm vs thumb
+    uint8_t         isthumb;
 } darm_t;
 
 typedef struct _darm_str_t {

@@ -8,6 +8,7 @@ ADD (register-shifted register)
 ADD (SP plus immediate)
 ADD (SP plus register)
 ADDS (immediate)
+ADDW
 ADR
 AND (immediate)
 AND (register)
@@ -244,6 +245,7 @@ SUB (SP minus immediate)
 SUB (SP minus register)
 SVC (previously SWI)
 SUBS (immediate, Thumb)
+SUBW
 SWP
 SWPB
 SXTAB
