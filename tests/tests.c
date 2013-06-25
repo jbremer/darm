@@ -215,6 +215,9 @@ struct {
     {0x264c, 0, {
         .instr = I_MOVS, .instr_type = T_THUMB_REG_IMM, .I = B_SET,
         .cond = C_AL, .Rd = 6, .imm = 0x4c}},
+    {0x1ae3, 0, {
+        .instr = I_SUBS, .instr_type = T_THUMB_ARITH_REG_REG, .cond = C_AL,
+        .Rd = 3, .Rn = 4, .Rm = 3}},
 };
 
 static int _darm_thumb_disasm(darm_t *d, uint32_t w)
@@ -297,7 +300,10 @@ int main()
                 C(Rt2) || F(B)) {
             // leave ugly code
             printf("incorrect encoding for 0x%08x, ret %d\n", d.w, ret);
+            printf("decoded:\n");
             darm_dump(&d);
+            printf("test values:\n");
+            darm_dump(&tests[i].d);
             failure = 1;
         }
     }

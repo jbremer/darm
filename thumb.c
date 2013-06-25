@@ -67,6 +67,16 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->imm = w & BITMSK_8;
         d->I = B_SET;
         return 0;
+    case T_THUMB_ARITH_REG_REG:
+        tmp = (w>>9) & 0b11;
+        if(tmp == 0b1)
+            d->instr = I_SUBS;
+        else if (tmp == 0b0)
+            d->instr = I_ADDS;
+        d->Rd = (w) & 0b111;
+        d->Rn = (w>>3) & 0b111;
+        d->Rm = (w>>6) & 0b111;
+        return 0;
     }
     return -1;
 }

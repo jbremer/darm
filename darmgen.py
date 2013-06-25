@@ -373,6 +373,12 @@ instr_types = [
            'ins{S}<c> <Rd3>,#<const>',
            'ins{S}<c> <Rdn>,#<const>'],	
           lambda x, y, z: x[0:3] == (0, 0, 1) and x[-1] == d2.imm8 and x[-2] in (d2.Rd, d2.Rd3, d2.Rdn)),
+	thumb('ARITH_REG_REG', 'Arithmetic with registers',
+			['ins{S}<c> <Rd>,<Rn>,<Rm>',
+			'ins{S} <Rd3>, <Rn3>, <Rm3>',
+			'ins <Rd3>, <Rn3>, <Rm3>'
+				],
+			lambda x, y, z: x[0:5] == (0,0,0,1,1) and x[-3:] == (d2.Rm3, d2.Rn3, d2.Rd3)),
 ]
 
 if __name__ == '__main__':
@@ -448,7 +454,8 @@ if __name__ == '__main__':
                 for y in (_ for _ in instr_types if _[0] == 2):
                     if y[4](bits, instr, 0):
                         thumb_table[idx] = instruction_name(instr), y
-                        # debug matching # print instr, thumb_table[idx]
+                        # debug matching
+                        print instr, thumb_table[idx]
                         y[-1].append(instr)
 
     # make a list of unique instructions affected by each encoding type,
