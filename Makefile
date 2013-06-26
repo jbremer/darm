@@ -17,7 +17,7 @@ STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
 
 default: $(STUFF)
 
-$(GENCODESRC):
+$(GENCODESRC): darmgen.py
 	python darmgen.py
 
 %.o: %.c
