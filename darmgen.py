@@ -144,8 +144,13 @@ def generate_format_strings(arr):
 
         # various register operands
         '<Rd>', 'd',
+        '<Rd3>', 'd',
+        '<Rdn>', 'd',
+        '<Rdn3>', 'd',
         '<Rn>', 'n',
+        '<Rn3>', 'n',
         '<Rm>', 'm',
+        '<Rm3>', 'm',
         '<Ra>', 'a',
         '<Rt>', 't',
         '<Rt2>', '2',
@@ -154,8 +159,12 @@ def generate_format_strings(arr):
 
         # immediate values
         '#<const>', 'i',
+        '#<imm2>', 'i',
         '#<imm4>', 'i',
         '#<imm5>', 'i',
+        '#<imm7>', 'i',
+        '#<imm8>', 'i',
+        '#<imm12>', 'i',
         '#<imm16>', 'i',
         '#<imm24>', 'i',
 
@@ -355,6 +364,21 @@ instr_types = [
     thumb('ONLY_IMM8', 'Instructions which only take an 8-byte immediate',
           ['ins<c> #<imm8>'],
           lambda x, y, z: d2.imm8 in x and len(x) == 9),
+    thumb('PUSHPOP', 'Push and pop instruction',
+          ['ins<c> <registers>'],
+          lambda x, y, z: x[0:4] == (1, 0, 1, 1) and x[5:7] == (1, 0) and x[-1] == d2.register_list8),
+    thumb('REG_IMM', 'Apply immediate to a register',
+          ['ins <Rd3>,#<const>',
+           'ins{S}<c> <Rd>,#<const>',
+           'ins{S}<c> <Rd3>,#<const>',
+           'ins{S}<c> <Rdn>,#<const>'],	
+          lambda x, y, z: x[0:3] == (0, 0, 1) and x[-1] == d2.imm8 and x[-2] in (d2.Rd, d2.Rd3, d2.Rdn)),
+	thumb('ARITH_REG_REG', 'Arithmetic with registers',
+			['ins{S}<c> <Rd>,<Rn>,<Rm>',
+			'ins{S} <Rd3>, <Rn3>, <Rm3>',
+			'ins <Rd3>, <Rn3>, <Rm3>'
+				],
+			lambda x, y, z: x[0:5] == (0,0,0,1,1) and x[-3:] == (d2.Rm3, d2.Rn3, d2.Rd3)),
 ]
 
 if __name__ == '__main__':
@@ -430,6 +454,8 @@ if __name__ == '__main__':
                 for y in (_ for _ in instr_types if _[0] == 2):
                     if y[4](bits, instr, 0):
                         thumb_table[idx] = instruction_name(instr), y
+                        # debug matching
+                        print instr, thumb_table[idx]
                         y[-1].append(instr)
 
     # make a list of unique instructions affected by each encoding type,
@@ -488,7 +514,10 @@ if __name__ == '__main__':
     # print some required definitions
     print('extern darm_enctype_t thumb_instr_types[256];')
     print('extern darm_instr_t thumb_instr_labels[256];')
+    print('extern const char *thumb_registers[9];')
 
+    thumb_fmtstrs = generate_format_strings(darmtbl2.thumbs)
+    print('const char *thumb_format_strings[%d][3];' % instrcnt)
     print('#endif')
 
     #
@@ -506,7 +535,6 @@ if __name__ == '__main__':
     # print some required definitions
     print('extern darm_enctype_t armv7_instr_types[256];')
     print('extern darm_enctype_t thumb2_instr_types[256];')
-
     def type_lut(name, bits):
         print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
 
@@ -539,7 +567,7 @@ if __name__ == '__main__':
     print(instruction_names_table(open('instructions.txt')))
     print(type_encoding_table('darm_enctypes', instr_types))
 
-    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
+    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 SP LR PC'
     print(string_table('darm_registers', reg.split()))
 
     #
@@ -551,11 +579,22 @@ if __name__ == '__main__':
     print('#include <stdint.h>')
     print('#include "thumb-tbl.h"')
 
+    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 LR'
+    print(string_table('thumb_registers', reg.split()))
+
     # print a table containing all the types of instructions
     print(instruction_types_table(thumb_table, 'thumb'))
 
     # print a table containing the instruction label for each entry
     print(instruction_names_index_table(thumb_table, 'thumb'))
+
+    lines = []
+    for instr, fmtstr in thumb_fmtstrs.items():
+        fmtstr = ', '.join('"%s"' % x for x in set(fmtstr))
+        lines.append('    [I_%s] = {%s},' % (instr, fmtstr))
+    print('const char *thumb_format_strings[%d][3] = {' % instrcnt)
+    print('\n'.join(sorted(lines)))
+    print('};')
 
     #
     # armv7-tbl.c

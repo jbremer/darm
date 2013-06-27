@@ -258,6 +258,15 @@ def disasm(w):
     ret = _lib.darm_armv7_disasm(byref(d), w)
     return Darm(d) if ret == 0 else None
 
+def disasm_thumb(w):
+	d = _Darm()
+	ret = _lib.darm_thumb_disasm(byref(d), w)
+	return Darm(d) if ret == 0 else None
+
+def disasm_thumb2(w):
+	d = _Darm()
+	ret = _lib.darm_thumb2_disasm(byref(d), w)
+	return Darm(d) if ret == 0 else None
 
 def _set_func(name, restype, *argtypes):
     getattr(_lib, name).restype = restype

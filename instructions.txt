@@ -7,6 +7,8 @@ ADD (register)
 ADD (register-shifted register)
 ADD (SP plus immediate)
 ADD (SP plus register)
+ADDS (immediate)
+ADDW
 ADR
 AND (immediate)
 AND (register)
@@ -107,6 +109,7 @@ MOV (register)
 MOV (shifted register)
 MOVT
 MOVW
+MOVS
 MRC
 MRC2
 MRRC
@@ -241,6 +244,8 @@ SUB (register-shifted register)
 SUB (SP minus immediate)
 SUB (SP minus register)
 SVC (previously SWI)
+SUBS (immediate, Thumb)
+SUBW
 SWP
 SWPB
 SXTAB

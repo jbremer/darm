@@ -33,15 +33,49 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "darm.h"
 #include "thumb-tbl.h"
 
+#define BITMSK_8 ((1 << 8) - 1)
 static int thumb_disasm(darm_t *d, uint16_t w)
 {
+    uint16_t tmp = 0;
     d->instr = thumb_instr_labels[w >> 8];
     d->instr_type = thumb_instr_types[w >> 8];
+    d->isthumb = 1;
 
+    d->cond = C_AL;
     switch ((uint32_t) d->instr_type) {
     case T_THUMB_ONLY_IMM8:
         d->I = B_SET;
         d->imm = w & 0xff;
+        return 0;
+    case T_THUMB_PUSHPOP:
+        if((w>>11) & 1)
+            d->instr = I_POP;
+        else
+            d->instr = I_PUSH;
+        d->reglist = ((w) & BITMSK_8);
+        d->reglist |= (((w>>8)&1)<<14); // or in the LR(9th bit)
+        return 0;
+    case T_THUMB_REG_IMM:
+        tmp = (w>>11) & 0b11;
+        if(tmp == 0b10)
+            d->instr = I_ADDS;
+        else if(tmp == 0b11)
+            d->instr = I_SUBS;
+        else if(tmp == 0b00)
+            d->instr = I_MOVS;
+        d->Rd = (w >> 8) & 0b111;
+        d->imm = w & BITMSK_8;
+        d->I = B_SET;
+        return 0;
+    case T_THUMB_ARITH_REG_REG:
+        tmp = (w>>9) & 0b11;
+        if(tmp == 0b1)
+            d->instr = I_SUBS;
+        else if (tmp == 0b0)
+            d->instr = I_ADDS;
+        d->Rd = (w) & 0b111;
+        d->Rn = (w>>3) & 0b111;
+        d->Rm = (w>>6) & 0b111;
         return 0;
     }
     return -1;

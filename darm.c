@@ -81,10 +81,15 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
     char *shift = str->shift;
 
-    const char **ptrs = armv7_format_strings[d->instr];
+    const char **ptrs = NULL;
+    if(d->isthumb)
+        ptrs = thumb_format_strings[d->instr];
+    else 
+        ptrs = armv7_format_strings[d->instr];
     if(ptrs[0] == NULL) return -1;
 
     for (char ch; (ch = ptrs[idx][off]) != 0; off++) {
+        //printf("got %c %d\n", ch, ch);
         switch (ch) {
         case 's':
             if(d->S == B_SET) {
