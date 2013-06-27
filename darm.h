@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 typedef enum _darm_reg_t {
     r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
-    FP = 0b1011, IP = 0b1100, SP = 0b1101, LR = 0b1110, PC = 0b1111,
+    FP = b1011, IP = b1100, SP = b1101, LR = b1110, PC = b1111,
 
     R_INVLD = -1
 } darm_reg_t;
@@ -53,7 +53,7 @@ typedef enum _darm_cond_t {
     C_VC, C_HI, C_LS, C_GE, C_LT, C_GT, C_LE, C_AL,
 
     C_HS = C_CS, C_LO = C_CC,
-    C_UNCOND = 0b1111,
+    C_UNCOND = b1111,
 
     C_INVLD = -1
 } darm_cond_t;
@@ -65,14 +65,14 @@ typedef enum _darm_shift_type_t {
 } darm_shift_type_t;
 
 typedef enum _darm_option_t {
-    O_SY    = 0b1111,
-    O_ST    = 0b1110,
-    O_ISH   = 0b1011,
-    O_ISHST = 0b1010,
-    O_NSH   = 0b0111,
-    O_NSHST = 0b0110,
-    O_OSH   = 0b0011,
-    O_OSHST = 0b0010,
+    O_SY    = b1111,
+    O_ST    = b1110,
+    O_ISH   = b1011,
+    O_ISHST = b1010,
+    O_NSH   = b0111,
+    O_NSHST = b0110,
+    O_OSH   = b0011,
+    O_OSHST = b0010,
 
     O_INVLD = -1,
 } darm_option_t;
