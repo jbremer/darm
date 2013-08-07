@@ -184,7 +184,8 @@ int darm_str(const darm_t *d, darm_str_t *str)
                 const char *type; uint32_t imm;
                 if(darm_immshift_decode(d, &type, &imm) == 0) {
                     switch (d->instr) {
-                    case I_LSL: case I_LSR: case I_ROR: case I_RRX:
+                    case I_LSL: case I_LSR: case I_ASR:
+                    case I_ROR: case I_RRX:
                         break;
 
                     default:
