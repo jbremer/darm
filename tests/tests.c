@@ -23,13 +23,13 @@ struct {
     {0xe28d4001, 0, "add r4, sp, #1", {
         .instr = I_ADD, .instr_type = T_ARM_ARITH_IMM, .cond = 0b1110, .S = 0,
         .Rd = 4, .Rn = SP, .imm = 1, .I = B_SET}},
-    {0xe28f4030, 0, "adr r4, #0x30", {
+    {0xe28f4030, 0, "adr r4, #+48", {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = 0b1110, .S = 0,
         .Rd = 4, .imm = 48, .I = B_SET, .U = 1}},
-    {0xe24f3000, 0, "adr r3, #0x0", {
+    {0xe24f3000, 0, "adr r3, #+-0", {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = 0b1110, .S = 0,
         .Rd = 3, .imm = 0, .I = B_SET, .U = 0}},
-    {0xe24f3210, 0, "adr r3, #-0x1", {
+    {0xe24f3210, 0, "adr r3, #+-1", {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = 0b1110, .S = 0,
         .Rd = 3, .imm = 1, .I = B_SET, .U = 0}},
     {0xe1a02458, 0, "asr r2, r8, r4", {
@@ -38,10 +38,10 @@ struct {
     {0xe1a02f03, 0, "lsl r2, r3, #30", {
         .instr = I_LSL, .instr_type = T_ARM_DST_SRC, .cond = 0b1110, .S = 0,
         .Rd = 2, .shift = 30, .Rm = 3}},
-    {0xeb00014e, 0, "bl #0x538", {
+    {0xeb00014e, 0, "bl #+1336", {
         .instr = I_BL, .instr_type = T_ARM_BRNCHSC, .cond = 0b1110,
         .imm = 1336, .I = B_SET}},
-    {0xeaffff00, 0, "b #0xfffffc00", {
+    {0xeaffff00, 0, "b #+0xfffffc00", {
         .instr = I_B, .instr_type = T_ARM_BRNCHSC, .cond = 0b1110,
         .imm = -1024, .I = B_SET}},
     {0xef000001, 0, "svc #1", {
@@ -88,10 +88,10 @@ struct {
     {0xf1010200, 0, "setend 1", {
         .instr = I_SETEND, .instr_type = T_ARM_UNCOND, .cond = 0b1111,
         .E = 1}},
-    {0xf4d2f001, 0, "pli [r2, #0x1]", {
+    {0xf4d2f001, 0, "pli [r2, #1]", {
         .instr = I_PLI, .instr_type = T_ARM_UNCOND, .cond = 0b1111, .U = 1,
         .Rn = 2, .imm = 1, .I = B_SET}},
-    {0xfb000000, 0, "blx #0x2", {
+    {0xfb000000, 0, "blx #+2", {
         .instr = I_BLX, .instr_type = T_ARM_UNCOND, .cond = 0b1111, .H = 1,
         .imm = 2, .I = B_SET}},
     {0xe3a01a01, 0, "mov r1, #4096", {
@@ -119,7 +119,7 @@ struct {
     {0x90b480b3, 0, "ldrhtls r8, [r4], r3", {
         .instr = I_LDRHT, .instr_type = T_ARM_STACK1, .cond = C_LS, .U = 1,
         .Rn = 4, .Rt = 8, .Rm = 3, .P = 0}},
-    {0xe0c42fdf, 0, "ldrd r2, r3, [r4], #0xff", {
+    {0xe0c42fdf, 0, "ldrd r2, r3, [r4], #255", {
         .instr = I_LDRD, .instr_type = T_ARM_STACK2, .cond = 0b1110, .U = 1,
         .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff, .I = B_SET}},
     {0xe7c8411f, 0, "bfc r4, #2, #6", {
@@ -164,7 +164,7 @@ struct {
     {0xe5242000, 0, "str r2, [r4]!", {
         .instr = I_STR, .instr_type = T_ARM_STACK0, .cond = 0b1110, .Rn = 4,
         .Rt = 2, .P = 1, .W = 1, .U = 0, .imm = 0, .I = B_SET}},
-    {0xe5a350f0, 0, "str r5, [r3, #0xf0]!", {
+    {0xe5a350f0, 0, "str r5, [r3, #240]!", {
         .instr = I_STR, .instr_type = T_ARM_STACK0, .cond = 0b1110, .Rn = 3,
         .Rt = 5, .P = 1, .W = 1, .U = 1, .imm = 0xf0, .I = B_SET}},
     {0xa6112f53, 0, "ssaxge r2, r1, r3", {
@@ -196,11 +196,11 @@ struct {
         .instr = I_STR, .instr_type = T_ARM_STACK0, .cond = 0b1110, .S = 0,
         .P = B_SET, .U = B_SET, .W = B_SET, .Rn = 4, .Rt = 3, .I = B_SET,
         .imm = 0}},
-    {0xe5a43003, 0, "str r3, [r4, #0x3]!", {
+    {0xe5a43003, 0, "str r3, [r4, #3]!", {
         .instr = I_STR, .instr_type = T_ARM_STACK0, .cond = 0b1110, .S = 0,
         .P = B_SET, .U = B_SET, .W = B_SET, .Rn = 4, .Rt = 3, .I = B_SET,
         .imm = 3}},
-    {0xe28fc601, 0, "adr ip, #0x100000", {
+    {0xe28fc601, 0, "adr ip, #+0x100000", {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = C_AL,
         .S = B_UNSET, .U = B_SET, .I = B_SET, .imm = 0x100000, .Rd = 12}},
 

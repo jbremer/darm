@@ -57,6 +57,20 @@ int utoa(unsigned int value, char *out, int base)
     return counter;
 }
 
+int append_imm(char *arg, uint32_t imm)
+{
+    const char *start = arg;
+    if(imm > 0x1000) {
+        *arg++ = '0';
+        *arg++ = 'x';
+        arg += utoa(imm, arg, 16);
+    }
+    else {
+        arg += utoa(imm, arg, 10);
+    }
+    return arg - start;
+}
+
 int darm_str(const darm_t *d, darm_str_t *str)
 {
     if(d->instr == I_INVLD || d->instr >= ARRAYSIZE(darm_mnemonics)) {
@@ -158,14 +172,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
             if(d->I != B_SET) break;
 
             *args[arg]++ = '#';
-            if(d->imm > 0x1000) {
-                *args[arg]++ = '0';
-                *args[arg]++ = 'x';
-                args[arg] += utoa(d->imm, args[arg], 16);
-            }
-            else {
-                args[arg] += utoa(d->imm, args[arg], 10);
-            }
+            args[arg] += append_imm(args[arg], d->imm);
             arg++;
             continue;
 
@@ -317,8 +324,8 @@ int darm_str(const darm_t *d, darm_str_t *str)
             // if there's an immediate, append it
             else if(d->imm != 0) {
                 // negative offset?
-                APPEND(args[arg], d->U == B_UNSET ? "#-0x" : "#0x");
-                args[arg] += utoa(d->imm, args[arg], 16);
+                APPEND(args[arg], d->U == B_UNSET ? "#-" : "#");
+                args[arg] += append_imm(args[arg], d->imm);
             }
             else {
                 // there's no immediate, so we have to remove the ", " which
@@ -344,8 +351,19 @@ int darm_str(const darm_t *d, darm_str_t *str)
             // branch stuff has been initialized yet
             if(d->instr == I_BLX && d->H == B_INVLD) break;
 
-            APPEND(args[arg], "#0x");
-            args[arg] += utoa(d->imm, args[arg], 16);
+            // check whether the immediate is negative
+            int64_t imm = d->imm;
+            if(imm < 0) {
+                APPEND(args[arg], "#+-");
+                imm = -imm;
+            }
+            else if(d->U == B_UNSET) {
+                APPEND(args[arg], "#+-");
+            }
+            else {
+                APPEND(args[arg], "#+");
+            }
+            args[arg] += append_imm(args[arg], imm);
             continue;
 
         case 'M':
@@ -371,8 +389,8 @@ int darm_str(const darm_t *d, darm_str_t *str)
             }
             else {
                 // negative offset?
-                APPEND(args[arg], d->U == B_UNSET ? "#-0x" : "#0x");
-                args[arg] += utoa(d->imm, args[arg], 16);
+                APPEND(args[arg], d->U == B_UNSET ? "#-" : "#");
+                args[arg] += append_imm(args[arg], d->imm);
             }
 
             *args[arg]++ = ']';
