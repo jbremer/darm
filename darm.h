@@ -179,7 +179,7 @@ typedef struct _darm_str_t {
     char shift[12];
 
     // the entire instruction
-    char instr[64];
+    char total[64];
 } darm_str_t;
 
 // disassemble an armv7 instruction

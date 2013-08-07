@@ -261,7 +261,7 @@ int main()
         darm_str_t str;
         memset(&str, 0, sizeof(str));
         if(darm_str2(&d, &str, 1) == 0) {
-            printf("%s\n", str.instr);
+            printf("%s\n", str.total);
             fflush(stdout);
         }
         else if(ret == 0) {

@@ -400,7 +400,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
     *mnemonic = *args[0] = *args[1] = *args[2] = *args[3] = *shift = 0;
 
-    char *instr = str->instr;
+    char *instr = str->total;
     APPEND(instr, str->mnemonic);
 
     for (int i = 0; i < 4 && args[i] != str->arg[i]; i++) {
