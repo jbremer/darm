@@ -183,8 +183,14 @@ int darm_str(const darm_t *d, darm_str_t *str)
             if(d->Rs == R_INVLD) {
                 const char *type; uint32_t imm;
                 if(darm_immshift_decode(d, &type, &imm) == 0) {
-                    APPEND(shift, type);
-                    *shift++ = ' ';
+                    switch (d->instr) {
+                    case I_LSL: case I_LSR: case I_ROR: case I_RRX:
+                        break;
+
+                    default:
+                        APPEND(shift, type);
+                        *shift++ = ' ';
+                    }
                     *shift++ = '#';
                     shift += utoa(imm, shift, 10);
                 }
@@ -323,6 +329,11 @@ int darm_str(const darm_t *d, darm_str_t *str)
             // arg so we can alter it in the shift handler
             if(d->P == B_SET) {
                 *args[arg]++ = ']';
+
+                // if pre-indexed and write-back, then add an exclamation mark
+                if(d->W == B_SET) {
+                    *args[arg]++ = '!';
+                }
             }
             continue;
 
@@ -364,6 +375,12 @@ int darm_str(const darm_t *d, darm_str_t *str)
             }
 
             *args[arg]++ = ']';
+
+            // if index is true and write-back is true, then we add an
+            // exclamation mark
+            if(d->P == B_SET && d->W == B_SET) {
+                *args[arg]++ = '!';
+            }
             continue;
 
         case 'A':
