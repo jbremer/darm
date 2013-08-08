@@ -203,6 +203,9 @@ struct {
     {0xe28fc601, 0, "adr ip, #+0x100000", {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = C_AL,
         .S = B_UNSET, .U = B_SET, .I = B_SET, .imm = 0x100000, .Rd = 12}},
+    {0xee1d1f72, 0, "mrc 15, 0, r1, cr13, cr2, 3", {
+        .instr = I_MRC, .instr_type = T_ARM_MVCR, .cond = C_AL, .coproc = 15,
+        .opc1 = 0, .Rt = r1, .CRn = cr13, .CRm = cr2, .opc2 = 3}},
 
     // we switch to thumb (oboy)
     {0, 0, NULL, {.instr = I_INVLD}},
@@ -252,6 +255,9 @@ int main()
         if(p->RdLo == 0) p->RdLo = R_INVLD;
         if(p->Rs == 0) p->Rs = R_INVLD;
         if(p->option == 0) p->option = O_INVLD;
+        if(p->CRn == 0) p->CRn = R_INVLD;
+        if(p->CRm == 0) p->CRm = R_INVLD;
+        if(p->CRd == 0) p->CRd = R_INVLD;
 
         if(p->shift_type == S_LSL && p->Rs == R_INVLD && p->shift == 0) {
             p->shift_type = S_INVLD;
@@ -289,7 +295,8 @@ int main()
                 C(Rt) || C(RdHi) || C(RdLo) || F(I) || C(imm) ||
                 C(shift_type) || C(Rs) || C(shift) || C(lsb) ||
                 C(width) || C(reglist) || F(T) || F(M) || F(N) ||
-                C(Rt2) || F(B) || strcmp(str.total, tests[i].s)) {
+                C(Rt2) || F(B) || C(coproc) || C(opc1) || C(opc2) ||
+                C(CRn) || C(CRm) || C(CRd) || strcmp(str.total, tests[i].s)) {
             // leave ugly code
             printf("incorrect encoding for 0x%08x, ret %d\n", d.w, ret);
             darm_dump(&d);

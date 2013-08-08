@@ -168,6 +168,24 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         // add the H bit
         d->imm |= d->H << 1;
         return 0;
+
+    case b111:
+        d->CRn = (w >> 16) & b1111;
+        d->coproc = (w >> 8) & b1111;
+        d->opc2 = (w >> 5) & b111;
+        d->CRm = w & b1111;
+
+        if(((w >> 4) & 1) == 0) {
+            d->instr = I_CDP2;
+            d->CRd = (w >> 12) & b1111;
+            d->opc1 = (w >> 20) & b1111;
+        }
+        else {
+            d->instr = (w >> 20) & 1 ? I_MRC2 : I_MCR2;
+            d->opc1 = (w >> 21) & b111;
+            d->Rt = (w >> 12) & b1111;
+        }
+        return 0;
     }
     return -1;
 }
@@ -785,6 +803,23 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->Rd = (w >> 12) & b1111;
         d->Rm = w & b1111;
         return 0;
+
+    case T_ARM_MVCR:
+        d->CRn = (w >> 16) & b1111;
+        d->coproc = (w >> 8) & b1111;
+        d->opc2 = (w >> 5) & b111;
+        d->CRm = w & b1111;
+
+        if(((w >> 4) & 1) == 0) {
+            d->instr = I_CDP;
+            d->opc1 = (w >> 20) & b1111;
+            d->CRd = (w >> 12) & b1111;
+        }
+        else {
+            d->opc1 = (w >> 21) & b111;
+            d->Rt = (w >> 12) & b1111;
+        }
+        return 0;
     }
     return -1;
 }
@@ -806,6 +841,8 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
     d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
     d->option = O_INVLD;
+    // TODO set opc and coproc? to what value?
+    d->CRn = d->CRm = d->CRd = R_INVLD;
 
     if(d->cond == C_UNCOND) {
         ret = armv7_disas_uncond(d, w);

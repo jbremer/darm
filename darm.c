@@ -87,7 +87,10 @@ int darm_str(const darm_t *d, darm_str_t *str)
     uint32_t arg = 0;
 
     // pointers to the arguments
-    char *args[] = {str->arg[0], str->arg[1], str->arg[2], str->arg[3]};
+    char *args[] = {
+        str->arg[0], str->arg[1], str->arg[2],
+        str->arg[3], str->arg[4], str->arg[5],
+    };
 
     // ptr to the output mnemonic
     char *mnemonic = str->mnemonic;
@@ -409,6 +412,39 @@ int darm_str(const darm_t *d, darm_str_t *str)
             }
             continue;
 
+        case 'C':
+            args[arg] += utoa(d->coproc, args[arg], 10);
+            arg++;
+            continue;
+
+        case 'p':
+            args[arg] += utoa(d->opc1, args[arg], 10);
+            arg++;
+            continue;
+
+        case 'P':
+            args[arg] += utoa(d->opc2, args[arg], 10);
+            arg++;
+            continue;
+
+        case 'N':
+            APPEND(args[arg], "cr");
+            args[arg] += utoa(d->CRn, args[arg], 10);
+            arg++;
+            continue;
+
+        case 'J':
+            APPEND(args[arg], "cr");
+            args[arg] += utoa(d->CRm, args[arg], 10);
+            arg++;
+            continue;
+
+        case 'I':
+            APPEND(args[arg], "cr");
+            args[arg] += utoa(d->CRd, args[arg], 10);
+            arg++;
+            continue;
+
         default:
             return -1;
         }
@@ -417,12 +453,13 @@ int darm_str(const darm_t *d, darm_str_t *str)
         off--;
     }
 
-    *mnemonic = *args[0] = *args[1] = *args[2] = *args[3] = *shift = 0;
+    *mnemonic = *shift = 0;
+    *args[0] = *args[1] = *args[2] = *args[3] = *args[4] = *args[5] = 0;
 
     char *instr = str->total;
     APPEND(instr, str->mnemonic);
 
-    for (int i = 0; i < 4 && args[i] != str->arg[i]; i++) {
+    for (int i = 0; i < 6 && args[i] != str->arg[i]; i++) {
         if(i != 0) *instr++ = ',';
         *instr++ = ' ';
         APPEND(instr, str->arg[i]);
@@ -583,6 +620,15 @@ void darm_dump(const darm_t *d)
         darm_reglist(d->reglist, reglist);
         printf("reglist:       %s\n", reglist);
     }
+
+    if(d->opc1 != 0 || d->opc2 != 0 || d->coproc != 0) {
+        printf("opc1:          %d\n", d->opc1);
+        printf("opc2:          %d\n", d->opc2);
+        printf("coproc:        %d\n", d->coproc);
+    }
+    PRINT_REG(CRn);
+    PRINT_REG(CRm);
+    PRINT_REG(CRd);
 
     printf("\n");
 }

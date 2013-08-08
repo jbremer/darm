@@ -200,6 +200,18 @@ def generate_format_strings(arr):
         # the PKH instruction has either a TB or BT postfix, specified by
         # the T member of the darm object
         '<T>', 'T',
+
+        # coprocessor
+        '<coproc>', 'C',
+
+        # opc1 & opc2
+        '<opc1>', 'p',
+        '{,<opc2>}', 'P',
+
+        # Coprocessor registers CRn, CRm, CRd
+        '<CRn>', 'N',
+        '<CRm>', 'J',
+        '<CRd>', 'I',
     ]
 
     for row in arr:
@@ -352,6 +364,9 @@ instr_types = [
            'ins<c> <Rd>,<Rn>,<Rm>{,<rotation>}',
            'ins<c> <Rd>,<Rm>{,<rotation>}'],
           lambda x, y, z: x[1:6] == (0, 1, 1, 0, 1)),
+    armv7('MVCR', 'Move to/from Coprocessor to/from ARM core register',
+          ['ins<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>,{,<opc2>}'],
+          lambda x, y, z: x[1:5] == (1, 1, 1, 0)),
     thumb('ONLY_IMM8', 'Instructions which only take an 8-byte immediate',
           ['ins<c> #<imm8>'],
           lambda x, y, z: d2.imm8 in x and len(x) == 9),

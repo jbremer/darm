@@ -44,6 +44,9 @@ typedef enum _darm_reg_t {
     r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
     FP = b1011, IP = b1100, SP = b1101, LR = b1110, PC = b1111,
 
+    cr0 = 0, cr1, cr2, cr3, cr4, cr5, cr6, cr7,
+    cr8, cr9, cr10, cr11, cr12, cr13, cr14, cr15,
+
     R_INVLD = -1
 } darm_reg_t;
 
@@ -166,6 +169,14 @@ typedef struct _darm_t {
 
     // bitmask of registers affected by the STM/LDM/PUSH/POP instruction
     uint16_t        reglist;
+
+    // special registers and values for the MRC/MCR/etc instructions
+    uint8_t         coproc;
+    uint8_t         opc1;
+    uint8_t         opc2;
+    darm_reg_t      CRd;
+    darm_reg_t      CRn;
+    darm_reg_t      CRm;
 } darm_t;
 
 typedef struct _darm_str_t {
@@ -173,7 +184,7 @@ typedef struct _darm_str_t {
     char mnemonic[12];
 
     // a representation of each argument in a separate string
-    char arg[4][32];
+    char arg[6][32];
 
     // representation of shifting, if present
     char shift[12];

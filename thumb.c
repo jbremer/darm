@@ -58,6 +58,8 @@ int darm_thumb_disasm(darm_t *d, uint16_t w)
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
     d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
     d->option = O_INVLD;
+    // TODO set opc and coproc? to what value?
+    d->CRn = d->CRm = d->CRd = R_INVLD;
 
     switch (w >> 11) {
     case 0b11101: case 0b11110: case 0b11111:
