@@ -355,8 +355,8 @@ int darm_str(const darm_t *d, darm_str_t *str)
             if(d->instr == I_BLX && d->H == B_INVLD) break;
 
             // check whether the immediate is negative
-            int64_t imm = d->imm;
-            if(imm < 0) {
+            int32_t imm = d->imm;
+            if(imm < 0 && imm >= -0x1000) {
                 APPEND(args[arg], "#+-");
                 imm = -imm;
             }

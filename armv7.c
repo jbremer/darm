@@ -389,7 +389,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->instr_type = T_ARM_PUSR;
 
         // the (SX|UX)T(A)(B|H)(16) instructions
-            // op1 represents the upper three bits, and A = 0b1111 represents
+        // op1 represents the upper three bits, and A = 0b1111 represents
         if(op2 == b011) {
             // the lower bit
             d->instr = type_pusr_instr_lookup[(op1 << 1) | (A == b1111)];

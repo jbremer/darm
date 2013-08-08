@@ -41,9 +41,12 @@ struct {
     {0xeb00014e, 0, "bl #+1336", {
         .instr = I_BL, .instr_type = T_ARM_BRNCHSC, .cond = 0b1110,
         .imm = 1336, .I = B_SET}},
-    {0xeaffff00, 0, "b #+0xfffffc00", {
+    {0xeaffff00, 0, "b #+-1024", {
         .instr = I_B, .instr_type = T_ARM_BRNCHSC, .cond = 0b1110,
         .imm = -1024, .I = B_SET}},
+    {0xeafffe00, 0, "b #+-2048", {
+        .instr = I_B, .instr_type = T_ARM_BRNCHSC, .cond = 0b1110,
+        .imm = -2048, .I = B_SET}},
     {0xef000001, 0, "svc #1", {
         .instr = I_SVC, .instr_type = T_ARM_BRNCHSC, .cond = 0b1110,
         .imm = 1, .I = B_SET}},
@@ -213,6 +216,9 @@ struct {
     {0xbe03, 0, "bkpt #3", {
         .instr = I_BKPT, .instr_type = T_THUMB_ONLY_IMM8, .I = B_SET,
         .imm = 3}},
+
+    // we now switch to thumb2
+    {0, 0, NULL, {.instr = I_INVLD}},
 };
 
 static int _darm_thumb_disasm(darm_t *d, uint32_t w)
@@ -267,7 +273,7 @@ int main()
 
         darm_str_t str;
         memset(&str, 0, sizeof(str));
-        if(darm_str2(&d, &str, 1) == 0) {
+        if(ret == 0 && darm_str2(&d, &str, 1) == 0) {
             printf("%s\n", str.total);
             fflush(stdout);
         }
