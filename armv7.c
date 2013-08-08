@@ -64,6 +64,7 @@ static struct {
     {"GT", "Signed greater than", "Greater than"},
     {"LE", "Signed less than or equal", "Less than, equal, or unordered"},
     {"AL", "Always (unconditional)", "Always (unconditional)"},
+    {"",   "Unconditional", "Unconditional Instruction"},
 
     // alias for CS
     {"HS", "Carry Set", "Greater than, equal, or unordered"},
@@ -147,6 +148,12 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         else {
             d->I = B_SET;
             d->imm = w & BITMSK_12;
+        }
+
+        // if this instruction is PLD and the 22th bit is not set, then this
+        // is in fact PLDW
+        if(d->instr == I_PLD && ((w >> 22) & 1) == 0) {
+            d->instr = I_PLDW;
         }
         return 0;
 

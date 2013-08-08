@@ -206,6 +206,9 @@ struct {
     {0xe28fc601, 0, "adr ip, #+0x100000", {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = C_AL,
         .S = B_UNSET, .U = B_SET, .I = B_SET, .imm = 0x100000, .Rd = 12}},
+    {0xf5d3f000, 0, "pld [r3]", {
+        .instr = I_PLD, .instr_type = T_ARM_UNCOND, .cond = C_UNCOND,
+        .Rn = r3, .I = B_SET, .imm = 0, .U = B_SET}},
     {0xee1d1f72, 0, "mrc 15, 0, r1, cr13, cr2, 3", {
         .instr = I_MRC, .instr_type = T_ARM_MVCR, .cond = C_AL, .coproc = 15,
         .opc1 = 0, .Rt = r1, .CRn = cr13, .CRm = cr2, .opc2 = 3}},
@@ -277,7 +280,7 @@ int main()
             printf("%s\n", str.total);
             fflush(stdout);
         }
-        else if(ret == 0) {
+        else if(ret < 0) {
             printf("error decoding instr..\n");
         }
 
@@ -305,6 +308,8 @@ int main()
                 C(CRn) || C(CRm) || C(CRd) || strcmp(str.total, tests[i].s)) {
             // leave ugly code
             printf("incorrect encoding for 0x%08x, ret %d\n", d.w, ret);
+            printf("  %s = %s (%d)\n", str.total, tests[i].s,
+                strcmp(str.total, tests[i].s));
             darm_dump(&d);
             failure = 1;
         }

@@ -212,6 +212,10 @@ def generate_format_strings(arr):
         '<CRn>', 'N',
         '<CRm>', 'J',
         '<CRd>', 'I',
+
+        # postfix for PLD/PLDW which is handled already by using a different
+        # instruction (namely, PLDW instead of PLD)
+        '{W}', '',
     ]
 
     for row in arr:

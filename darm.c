@@ -372,25 +372,24 @@ int darm_str(const darm_t *d, darm_str_t *str)
         case 'M':
             *args[arg]++ = '[';
             APPEND(args[arg], darm_register_name(d->Rn));
-            *args[arg]++ = ',';
-            *args[arg]++ = ' ';
 
             // if the Rm operand is defined, then we use that optionally with
             // a shift, otherwise there might be an immediate value as offset
             if(d->Rm != R_INVLD) {
+                APPEND(args[arg], ", ");
                 APPEND(args[arg], darm_register_name(d->Rm));
 
                 const char *type; uint32_t imm;
                 if(darm_immshift_decode(d, &type, &imm) == 0) {
-                    *args[arg]++ = ',';
-                    *args[arg]++ = ' ';
+                    APPEND(args[arg], ", ");
                     APPEND(args[arg], type);
-                    *args[arg]++ = ' ';
-                    *args[arg]++ = '#';
+                    APPEND(args[arg], " #");
                     args[arg] += utoa(imm, args[arg], 10);
                 }
             }
-            else {
+            else if(d->imm != 0) {
+                APPEND(args[arg], ", ");
+
                 // negative offset?
                 APPEND(args[arg], d->U == B_UNSET ? "#-" : "#");
                 args[arg] += append_imm(args[arg], d->imm);
@@ -583,6 +582,7 @@ void darm_dump(const darm_t *d)
     PRINT_FLAG(T, "PKHTB form", "PKHBT form");
     PRINT_FLAG(R, "round the result", "do NOT round the result");
     PRINT_FLAG(W, "write-back", "do NOT write-back");
+    PRINT_FLAG(I, "immediate present", "no immediate present");
 
     if(d->option != O_INVLD) {
         printf("option:        %d\n", d->option);
