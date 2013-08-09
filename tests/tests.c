@@ -217,8 +217,54 @@ struct {
     {0, 0, NULL, {.instr = I_INVLD}},
 
     {0xbe03, 0, "bkpt #3", {
-        .instr = I_BKPT, .instr_type = T_THUMB_ONLY_IMM8, .I = B_SET,
-        .imm = 3}},
+        .instr = I_BKPT, .instr_type = T_THUMB_ONLY_IMM8, .cond = C_AL,
+        .I = B_SET, .imm = 3}},
+    {0xdf01, 0, "svc #1", {
+        .instr = I_SVC, .instr_type = T_THUMB_ONLY_IMM8, .cond = C_AL,
+        .I = B_SET, .imm = 1}},
+    {0xdd02, 0, "ble #+4", {
+        .instr = I_B, .instr_type = T_THUMB_COND_BRANCH, .cond = C_LE,
+        .I = B_SET, .imm = 4}},
+    {0xe7ff, 0, "b #+-2", {
+        .instr = I_B, .instr_type = T_THUMB_UNCOND_BRANCH, .cond = C_AL,
+        .I = B_SET, .imm = -2}},
+    {0x992c, 0, "ldr r1, [sp, #176]", {
+        .instr = I_LDR, .instr_type = T_THUMB_STACK, .cond = C_AL,
+        .I = B_SET, .imm = 176, .Rn = SP, .Rt = r1, .U = B_SET,
+        .W = B_UNSET, .P = B_SET}},
+    {0x4a04, 0, "ldr r2, [pc, #16]", {
+        .instr = I_LDR, .instr_type = T_THUMB_LDR_PC, .cond = C_AL,
+        .I = B_SET, .imm = 16, .Rn = PC, .Rt = r2, .U = B_SET,
+        .W = B_UNSET, .P = B_SET}},
+    {0x4253, 0, "rsb r3, r2, #0", {
+        .instr = I_RSB, .instr_type = T_THUMB_GPI, .cond = C_AL,
+        .I = B_SET, .imm = 0, .Rn = r2, .Rd = r3}},
+    {0x42a2, 0, "cmp r2, r4", {
+        .instr = I_CMP, .instr_type = T_THUMB_GPI, .cond = C_AL,
+        .Rn = r2, .Rm = r4}},
+    // TODO fix correct format string (i.e., unique format strings for thumb,
+    // so that the string representation of this instruction becomes
+    // "eor r4, r7" as described in the manual)
+    {0x407c, 0, "eor r4, r4, r7", {
+        .instr = I_EOR, .instr_type = T_THUMB_GPI, .cond = C_AL,
+        .Rd = r4, .Rn = r4, .Rm = r7}},
+    {0x431f, 0, "orr r7, r7, r3", {
+        .instr = I_ORR, .instr_type = T_THUMB_GPI, .cond = C_AL,
+        .Rd = r7, .Rn = r7, .Rm = r3}},
+    {0x47b8, 0, "blx r7", {
+        .instr = I_BLX, .instr_type = T_THUMB_BRANCH_REG, .cond = C_AL,
+        .Rm = r7}},
+    {0xbf10, 0, "yield", {
+        .instr = I_YIELD, .instr_type = T_THUMB_NO_OPERANDS, .cond = C_AL}},
+    {0x372a, 0, "add r7, r7, #42", {
+        .instr = I_ADD, .instr_type = T_THUMB_HAS_IMM8, .cond = C_AL,
+        .Rd = r7, .Rn = r7, .I = B_SET, .imm = 42}},
+    {0x2413, 0, "mov r4, #19", {
+        .instr = I_MOV, .instr_type = T_THUMB_HAS_IMM8, .cond = C_AL,
+        .Rd = r4, .I = B_SET, .imm = 19}},
+    {0xa110, 0, "adr r1, #+64", {
+        .instr = I_ADR, .instr_type = T_THUMB_HAS_IMM8, .cond = C_AL,
+        .Rd = r1, .I = B_SET, .imm = 64, .Rn = PC, .U = B_SET}},
 
     // we now switch to thumb2
     {0, 0, NULL, {.instr = I_INVLD}},

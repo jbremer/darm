@@ -43,6 +43,129 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->I = B_SET;
         d->imm = w & 0xff;
         return 0;
+
+    case T_THUMB_COND_BRANCH:
+        d->cond = (w >> 8) & b1111;
+        d->I = B_SET;
+        d->imm = (uint32_t)(int8_t)(w & 0xff) << 1;
+        return 0;
+
+    case T_THUMB_UNCOND_BRANCH:
+        d->I = B_SET;
+        d->imm = w & ((1 << 11) - 1);
+
+        // manually sign-extend it
+        if(((d->imm >> 10) & 1) != 0) {
+            d->imm |= ~((1 << 11) - 1);
+        }
+
+        // finally, shift it one byte to the left
+        d->imm <<= 1;
+        return 0;
+
+    case T_THUMB_SHIFT_IMM:
+        d->Rd = (w >> 0) & b111;
+        d->Rm = (w >> 3) & b111;
+        d->imm = (w >> 6) & b11111;
+
+        // if the immediate is zero, then this is actually a mov instruction
+        if(d->imm != 0) {
+            d->I = B_SET;
+        }
+        else {
+            d->instr = I_MOV;
+        }
+        return 0;
+
+    case T_THUMB_STACK:
+        d->I = B_SET;
+        d->imm = (w & 0xff) << 2;
+        d->Rn = SP;
+        d->Rt = (w >> 8) & b111;
+        d->U = B_SET;
+        d->W = B_UNSET;
+        d->P = B_SET;
+        return 0;
+
+    case T_THUMB_LDR_PC:
+        d->I = B_SET;
+        d->imm = (w & 0xff) << 2;
+        d->Rn = PC;
+        d->Rt = (w >> 8) & b111;
+        d->U = B_SET;
+        d->W = B_UNSET;
+        d->P = B_SET;
+        return 0;
+
+    case T_THUMB_GPI:
+        d->instr = type_gpi_instr_lookup[(w >> 6) & b1111];
+        switch ((uint32_t) d->instr) {
+        case I_AND: case I_EOR: case I_LSL: case I_LSR:
+        case I_ASR: case I_ADC: case I_SBC: case I_ROR:
+            d->Rd = d->Rn = w & b111;
+            d->Rm = (w >> 3) & b111;
+            return 0;
+
+        case I_TST: case I_CMP: case I_CMN:
+            d->Rn = w & b111;
+            d->Rm = (w >> 3) & b111;
+            return 0;
+
+        case I_RSB:
+            d->I = B_SET;
+            d->imm = 0;
+            d->Rd = w & b111;
+            d->Rn = (w >> 3) & b111;
+            return 0;
+
+        case I_ORR: case I_BIC:
+            d->Rn = w & b111;
+            // fall-through as the mvn handler is almost the same, except
+            // for parsing Rn
+
+        case I_MVN:
+            d->Rd = w & b111;
+            d->Rm = (w >> 3) & b111;
+            return 0;
+
+        case I_MUL:
+            d->Rd = d->Rm = w & b111;
+            d->Rn = (w >> 3) & b111;
+            return 0;
+        }
+
+    case T_THUMB_BRANCH_REG:
+        d->instr = (w >> 7) & 1 ? I_BLX : I_BL;
+        d->Rm = (w >> 3) & b1111;
+        return 0;
+
+    case T_THUMB_NO_OPERANDS:
+        d->instr = type_no_op_instr_lookup[(w >> 4) & b11];
+        return 0;
+
+    case T_THUMB_HAS_IMM8:
+        d->I = B_SET;
+        d->imm = w & 0xff;
+
+        switch ((uint32_t) d->instr) {
+        case I_ADD: case I_SUB:
+            d->Rd = d->Rn = (w >> 8) & b111;
+            return 0;
+
+        case I_ADR:
+            d->Rn = PC;
+            d->U = B_SET;
+            d->imm <<= 2;
+            // fall-through as adr also has to set Rd
+
+        case I_MOV:
+            d->Rd = (w >> 8) & b111;
+            return 0;
+
+        case I_CMP:
+            d->Rn = (w >> 8) & b111;
+            return 0;
+        }
     }
     return -1;
 }
@@ -50,6 +173,9 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 int darm_thumb_disasm(darm_t *d, uint16_t w)
 {
     memset(d, 0, sizeof(darm_t));
+    // we set all conditional flags to "execute always" by default, as most
+    // thumb instructions don't feature a conditional flag
+    d->cond = C_AL;
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
     d->shift_type = S_INVLD;

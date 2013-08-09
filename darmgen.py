@@ -374,6 +374,36 @@ instr_types = [
     thumb('ONLY_IMM8', 'Instructions which only take an 8-byte immediate',
           ['ins<c> #<imm8>'],
           lambda x, y, z: d2.imm8 in x and len(x) == 9),
+    thumb('COND_BRANCH', 'Conditional branch',
+          ['ins<c> <label>'],
+          lambda x, y, z: (y.split()[0] == 'B<c>' and x[4] == d2.cond and
+                           x[4:8] != (1, 1, 1, 1))),
+    thumb('UNCOND_BRANCH', 'Unconditional branch',
+          ['ins<c> <label>'],
+          lambda x, y, z: y.split()[0] == 'B<c>' and x[-1] == d2.imm11),
+    thumb('SHIFT_IMM', 'Shifting instructions which take an immediate',
+          ['ins<c> <Rd>, <Rm>, #<imm>'],
+          lambda x, y, z: x[-3:] == (d2.imm5, d2.Rm3, d2.Rd3)),
+    thumb('STACK', 'Load from and Store to the stack',
+          ['ins<c> <Rt>, [SP, #<imm>]'],
+          lambda x, y, z: 'SP' in y and x[-2:] == (d2.Rt3, d2.imm8)),
+    thumb('LDR_PC', 'Load a value relative to PC',
+          ['ins<c> <Rt>, <label>'],
+          lambda x, y, z: not 'SP' in y and x[-2:] == (d2.Rt3, d2.imm8)),
+    thumb('GPI', 'Various General Purpose Instructions',
+          ['ins<c> <Rdn>, <Rm>', 'ins<c> <Rn>, <Rm>',
+           'ins<c> <Rdm>, <Rn>, <Rdm>', 'ins<c> <Rd>, <Rm>'],
+          lambda x, y, z: x[:6] == (0, 1, 0, 0, 0, 0)),
+    thumb('BRANCH_REG', 'Branch (and optionally link) to a Register',
+          ['ins<c> <Rm>'], lambda x, y, z: x[-4] == d2.Rm and x[7] == 1),
+    thumb('NO_OPERANDS', 'Instructions without any operands',
+          ['ins<c>'], lambda x, y, z: len(x) == 16),
+    thumb('HAS_IMM8', 'Instructions with an 8bit immediate',
+          ['ins<c> <Rdn>, #<imm>', 'ins<c> <Rd>, SP, #<imm>',
+           'ins<c> <Rd>, <label>', 'ins<c> <Rn>, #<imm>',
+           'ins<c> <Rd>, #<imm>'],
+          lambda x, y, z: (x[-1] == d2.imm8 and not 'SP' in y and
+                           x[-2] in (d2.Rdn3, d2.Rd3, d2.Rn3))),
 ]
 
 if __name__ == '__main__':
@@ -433,8 +463,7 @@ if __name__ == '__main__':
         bits = description[1:]
 
         bitcount = sum(1 if isinstance(x, int) else x.bitsize for x in bits)
-        if bitcount in (16, 17, 18, 19):
-            # TODO fix >16
+        if bitcount == 16:
             identifier, remainder = [], []
             for x in range(len(bits)):
                 if isinstance(bits[x], int):
@@ -447,9 +476,14 @@ if __name__ == '__main__':
             for x in itertools.product(*identifier[:8]):
                 idx = sum(int(x[y])*2**(7-y) for y in range(8))
                 for y in (_ for _ in instr_types if _[0] == 2):
-                    if y[4](bits, instr, 0):
+                    if y[4](bits, instr, idx):
                         thumb_table[idx] = instruction_name(instr), y
                         y[-1].append(instr)
+                        break
+        elif bitcount == 32:
+            pass
+        else:
+            raise
 
     # make a list of unique instructions affected by each encoding type,
     # we remove the first item from the instruction names, as this is I_INVLD
@@ -492,6 +526,9 @@ if __name__ == '__main__':
 
     print('#endif')
 
+    def type_lut(name, bits):
+        print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
+
     #
     # thumb-tbl.h
     #
@@ -507,6 +544,9 @@ if __name__ == '__main__':
     # print some required definitions
     print('extern darm_enctype_t thumb_instr_types[256];')
     print('extern darm_instr_t thumb_instr_labels[256];')
+
+    type_lut('gpi', 4)
+    type_lut('no_op', 2)
 
     print('#endif')
 
@@ -525,9 +565,6 @@ if __name__ == '__main__':
     # print some required definitions
     print('extern darm_enctype_t armv7_instr_types[256];')
     print('extern darm_enctype_t thumb2_instr_types[256];')
-
-    def type_lut(name, bits):
-        print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
 
     print('extern darm_instr_t armv7_instr_labels[256];')
     type_lut('shift', 4)
@@ -575,6 +612,29 @@ if __name__ == '__main__':
 
     # print a table containing the instruction label for each entry
     print(instruction_names_index_table(thumb_table, 'thumb'))
+
+    t_gpi = {
+        0b0000: 'and',
+        0b0001: 'eor',
+        0b0010: 'lsl',
+        0b0011: 'lsr',
+        0b0100: 'asr',
+        0b0101: 'adc',
+        0b0110: 'sbc',
+        0b0111: 'ror',
+        0b1000: 'tst',
+        0b1001: 'rsb',
+        0b1010: 'cmp',
+        0b1011: 'cmn',
+        0b1100: 'orr',
+        0b1101: 'mul',
+        0b1110: 'bic',
+        0b1111: 'mvn'}
+
+    print(type_lookup_table('type_gpi',
+                            *[t_gpi[x] for x in range(16)]))
+
+    print(type_lookup_table('type_no_op', None, 'yield', 'wfe', 'wfi'))
 
     #
     # armv7-tbl.c
