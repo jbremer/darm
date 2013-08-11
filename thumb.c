@@ -140,7 +140,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         return 0;
 
     case T_THUMB_NO_OPERANDS:
-        d->instr = type_no_op_instr_lookup[(w >> 4) & b11];
+        d->instr = type_no_op_instr_lookup[(w >> 4) & b111];
         return 0;
 
     case T_THUMB_HAS_IMM8:
@@ -166,6 +166,98 @@ static int thumb_disasm(darm_t *d, uint16_t w)
             d->Rn = (w >> 8) & b111;
             return 0;
         }
+
+    case T_THUMB_EXTEND:
+        d->Rd = w & b111;
+        d->Rm = (w >> 3) & b111;
+        return 0;
+
+    case T_THUMB_MOD_SP_IMM:
+        d->instr = (w >> 7) & 1 ? I_SUB : I_ADD;
+        d->Rd = d->Rn = SP;
+        d->I = B_SET;
+        d->imm = w & 0x7f;
+        return 0;
+
+    case T_THUMB_3REG:
+        d->Rd = (w >> 0) & b111;
+        d->Rn = (w >> 3) & b111;
+        d->Rm = (w >> 6) & b111;
+        return 0;
+
+    case T_THUMB_2REG_IMM:
+        d->Rd = w & b111;
+        d->Rn = (w >> 3) & b111;
+        d->I = B_SET;
+        d->imm = (w >> 6) & b111;
+        return 0;
+
+    case T_THUMB_ADD_SP_IMM:
+        d->I = B_SET;
+        d->imm = w & 0xff;
+        d->Rn = SP;
+        d->Rd = (w >> 8) & b111;
+        return 0;
+
+    case T_THUMB_MOV4:
+        // D is the 8th bit and has to become the 3th bit, to function as
+        // highest bit for Rd
+        d->Rd = ((w >> 4) & 8) | (w & b111);
+        d->Rn = (w >> 3) & b1111;
+        return 0;
+
+    case T_THUMB_RW_MEMI:
+        d->Rt = w & b111;
+        d->Rn = (w >> 3) & b111;
+        d->I = B_SET;
+        d->imm = (w >> 6) & b11111;
+        d->P = B_SET;
+        d->U = B_SET;
+        d->W = B_UNSET;
+        return 0;
+
+    case T_THUMB_RW_MEMO:
+        d->Rt = (w >> 0) & b111;
+        d->Rn = (w >> 3) & b111;
+        d->Rm = (w >> 6) & b111;
+        d->P = B_SET;
+        d->U = B_SET;
+        d->W = B_UNSET;
+        return 0;
+
+    case T_THUMB_RW_REG:
+        // TODO write-back support for LDM
+        d->reglist = w & 0xff;
+        d->Rn = (w >> 8) & b111;
+        return 0;
+
+    case T_THUMB_REV:
+        d->Rd = (w >> 0) & b111;
+        d->Rm = (w >> 3) & b111;
+        return 0;
+
+    case T_THUMB_SETEND:
+        d->E = (w >> 4) & b1;
+        return 0;
+
+    case T_THUMB_PUSHPOP:
+        d->reglist = w & 0xff;
+
+        // for push we have to set the 14th bit
+        if(d->instr == I_PUSH) {
+            d->reglist |= ((w >> 8) & 1) << 14;
+        }
+        // for pop we have to set the 15th bit
+        else {
+            d->reglist |= ((w >> 8) & 1) << 15;
+        }
+        return 0;
+
+    case T_THUMB_CMP:
+        // the 4th bit for Rn is stored as the 7th bit
+        d->Rn = (w & b111) | ((w >> 4) & b1000);
+        d->Rm = (w >> 3) & b1111;
+        return 0;
     }
     return -1;
 }

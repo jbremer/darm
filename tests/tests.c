@@ -265,6 +265,46 @@ struct {
     {0xa110, 0, "adr r1, #+64", {
         .instr = I_ADR, .instr_type = T_THUMB_HAS_IMM8, .cond = C_AL,
         .Rd = r1, .I = B_SET, .imm = 64, .Rn = PC, .U = B_SET}},
+    {0xb2b2, 0, "uxth r2, r6", {
+        .instr = I_UXTH, .instr_type = T_THUMB_EXTEND, .cond = C_AL,
+        .Rd = r2, .Rm = r6}},
+    {0x1acd, 0, "sub r5, r1, r3", {
+        .instr = I_SUB, .instr_type = T_THUMB_3REG, .cond = C_AL,
+        .Rd = r5, .Rn = r1, .Rm = r3}},
+    {0x1ef4, 0, "sub r4, r6, #3", {
+        .instr = I_SUB, .instr_type = T_THUMB_2REG_IMM, .cond = C_AL,
+        .Rd = r4, .Rn = r6, .I = B_SET, .imm = 3}},
+    {0xad18, 0, "add r5, sp, #24", {
+        .instr = I_ADD, .instr_type = T_THUMB_ADD_SP_IMM, .cond = C_AL,
+        .Rd = r5, .Rn = SP, .I = B_SET, .imm = 24}},
+    {0x4676, 0, "mov r6, r14", {
+        .instr = I_MOV, .instr_type = T_THUMB_MOV4, .cond = C_AL,
+        .Rd = r6, .Rn = r14}},
+    {0x88f3, 0, "ldrh r3, [r6, #3]", {
+        .instr = I_LDRH, .instr_type= T_THUMB_RW_MEMI, .cond = C_AL,
+        .Rt = r3, .Rn = r6, .I = B_SET, .imm = 3, .U = B_SET,
+        .P = B_SET, .W = B_UNSET}},
+    {0x5073, 0, "str r3, [r6, r1]", {
+        .instr = I_STR, .instr_type = T_THUMB_RW_MEMO, .cond = C_AL,
+        .Rt = r3, .Rn = r6, .Rm = r1, .P = B_SET, .U = B_SET, .W = B_UNSET}},
+    {0xc124, 0, "stm r1, {r2,r5}", {
+        .instr = I_STM, .instr_type = T_THUMB_RW_REG, .cond = C_AL,
+        .Rn = r1, .reglist = 0x24}},
+    {0xb4ff, 0, "push {r0-r7}", {
+        .instr = I_PUSH, .instr_type = T_THUMB_PUSHPOP, .cond = C_AL,
+        .reglist = 0xff}},
+    {0xb5ff, 0, "push {r0-r7,lr}", {
+        .instr = I_PUSH, .instr_type = T_THUMB_PUSHPOP, .cond = C_AL,
+        .reglist = 0x40ff}},
+    {0xbcff, 0, "pop {r0-r7}", {
+        .instr = I_POP, .instr_type = T_THUMB_PUSHPOP, .cond = C_AL,
+        .reglist = 0xff}},
+    {0xbdff, 0, "pop {r0-r7,pc}", {
+        .instr = I_POP, .instr_type = T_THUMB_PUSHPOP, .cond = C_AL,
+        .reglist = 0x80ff}},
+    {0x4545, 0, "cmp r5, r8", {
+        .instr = I_CMP, .instr_type = T_THUMB_CMP, .cond = C_AL,
+        .Rn = r5, .Rm = r8}},
 
     // we now switch to thumb2
     {0, 0, NULL, {.instr = I_INVLD}},

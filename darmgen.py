@@ -397,13 +397,51 @@ instr_types = [
     thumb('BRANCH_REG', 'Branch (and optionally link) to a Register',
           ['ins<c> <Rm>'], lambda x, y, z: x[-4] == d2.Rm and x[7] == 1),
     thumb('NO_OPERANDS', 'Instructions without any operands',
-          ['ins<c>'], lambda x, y, z: len(x) == 16),
+          ['ins<c>'], lambda x, y, z: len(x) == 16 and y[:6] != 'SETEND'),
     thumb('HAS_IMM8', 'Instructions with an 8bit immediate',
           ['ins<c> <Rdn>, #<imm>', 'ins<c> <Rd>, SP, #<imm>',
            'ins<c> <Rd>, <label>', 'ins<c> <Rn>, #<imm>',
            'ins<c> <Rd>, #<imm>'],
           lambda x, y, z: (x[-1] == d2.imm8 and not 'SP' in y and
                            x[-2] in (d2.Rdn3, d2.Rd3, d2.Rn3))),
+    thumb('EXTEND', 'Bit Extension instructions',
+          ['ins<c> <Rd>, <Rm>'],
+          lambda x, y, z: x[:6] == (1, 0, 1, 1, 0, 0) and not 'SP' in y),
+    thumb('MOD_SP_IMM', 'Modifies the Stack Pointer by an Immediate',
+          ['ins<c> SP, SP, #<imm>'],
+          lambda x, y, z: y[:3] in ('ADD', 'SUB') and x[-1] == d2.imm7),
+    thumb('3REG', 'Instructions with 3 registers as operands',
+          ['ins<c> <Rd>, <Rn>, <Rm>'],
+          lambda x, y, z: x[-3:] == (d2.Rm3, d2.Rn3, d2.Rd3)),
+    thumb('2REG_IMM', 'Instructions with two registers and an immediate',
+          ['ins<c> <Rd>, <Rn>, #<imm>'],
+          lambda x, y, z: x[-3:] == (d2.imm3, d2.Rn3, d2.Rd3)),
+    thumb('ADD_SP_IMM', 'Add SP with an Immediate to a register',
+          ['ins<c> <Rd>, SP, #<imm>'],
+          lambda x, y, z: x[-2:] == (d2.Rd3, d2.imm8) and y[:3] == 'ADD'),
+    thumb('MOV4', 'Move operation with 4bit registers',
+          ['ins<c> <Rd>, <Rn>'],
+          lambda x, y, z: x[-3:] == (d2.D, d2.Rm, d2.Rd3)),
+    thumb('RW_MEMI', 'Instructions to manipulate memory',
+          ['ins<c> <Rt>, [<Rn>, #<imm>]'],
+          lambda x, y, z: x[-3:] == (d2.imm5, d2.Rn3, d2.Rt3)),
+    thumb('RW_MEMO', 'Instructions to manipulate memory',
+          ['ins<c> <Rt>, [<Rn>, <Rm>]'],
+          lambda x, y, z: x[-3:] == (d2.Rm3, d2.Rn3, d2.Rt3)),
+    thumb('RW_REG', 'Load and Store register lists',
+          ['ins<c> <Rn>{!}, <registers>'],
+          lambda x, y, z: x[-2:] == (d2.Rn3, d2.register_list8)),
+    thumb('REV', 'Various Reverse instructions',
+          ['ins<c> <Rd>, <Rm>'], lambda x, y, z: z == 0b10111010),
+    thumb('SETEND', 'Set Endian instruction',
+          ['ins <endian_specifier>'], lambda x, y, z: z == 0b10110110),
+    thumb('PUSHPOP', 'Push and Pop registers',
+          ['ins<c> <registers>'],
+          lambda x, y, z: (x[-1] == d2.register_list8 and
+                           y[:3] in ('PUS', 'POP'))),
+    thumb('CMP', 'Comparison instruction',
+          ['ins<c> <Rn>, <Rm>'],
+          lambda x, y, z: x[-3:] == (d2.N, d2.Rm, d2.Rn3)),
 ]
 
 if __name__ == '__main__':
@@ -546,7 +584,7 @@ if __name__ == '__main__':
     print('extern darm_instr_t thumb_instr_labels[256];')
 
     type_lut('gpi', 4)
-    type_lut('no_op', 2)
+    type_lut('no_op', 3)
 
     print('#endif')
 
@@ -634,7 +672,8 @@ if __name__ == '__main__':
     print(type_lookup_table('type_gpi',
                             *[t_gpi[x] for x in range(16)]))
 
-    print(type_lookup_table('type_no_op', None, 'yield', 'wfe', 'wfi'))
+    print(type_lookup_table('type_no_op',
+                            'nop', 'yield', 'wfe', 'wfi', 'sev'))
 
     #
     # armv7-tbl.c
