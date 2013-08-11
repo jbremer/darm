@@ -27,7 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 from ctypes import cdll, Structure, byref, POINTER, create_string_buffer
-from ctypes import c_uint16, c_int32, c_uint32, c_char_p, c_char
+from ctypes import c_uint8, c_uint16, c_int32, c_uint32, c_char_p, c_char
 
 
 class _Base:
@@ -167,6 +167,12 @@ class _Darm(Structure):
         ('lsb', c_uint32),
         ('width', c_uint32),
         ('reglist', c_uint16),
+        ('coproc', c_uint8),
+        ('opc1', c_uint8),
+        ('opc2', c_uint8),
+        ('CRd', c_int32),
+        ('CRn', c_int32),
+        ('CRm', c_int32),
     ]
 
 
@@ -177,8 +183,10 @@ class _DarmStr(Structure):
         ('arg1', c_char * 32),
         ('arg2', c_char * 32),
         ('arg3', c_char * 32),
+        ('arg4', c_char * 32),
+        ('arg5', c_char * 32),
         ('shift', c_char * 12),
-        ('instr', c_char * 64),
+        ('total', c_char * 64),
     ]
 
 
@@ -249,13 +257,19 @@ class Darm:
     def __str__(self):
         x = _DarmStr()
         if _lib.darm_str2(self.d, byref(x), True) == 0:
-            return x.instr
+            return x.total
         return ''
 
 
-def disasm(w):
+def disasm_armv7(w):
     d = _Darm()
     ret = _lib.darm_armv7_disasm(byref(d), w)
+    return Darm(d) if ret == 0 else None
+
+
+def disasm_thumb(w):
+    d = _Darm()
+    ret = _lib.darm_thumb_disasm(byref(d), w)
     return Darm(d) if ret == 0 else None
 
 
@@ -265,6 +279,7 @@ def _set_func(name, restype, *argtypes):
 
 _lib = cdll.LoadLibrary('libdarm.so')
 _set_func('darm_armv7_disasm', c_int32, POINTER(_Darm), c_uint32)
+_set_func('darm_thumb_disasm', c_int32, POINTER(_Darm), c_uint16)
 _set_func('darm_mnemonic_name', c_char_p, c_uint32)
 _set_func('darm_enctype_name', c_char_p, c_uint32)
 _set_func('darm_register_name', c_char_p, c_int32)
