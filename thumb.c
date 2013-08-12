@@ -33,6 +33,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "darm.h"
 #include "thumb-tbl.h"
 
+#define BITMSK_8 ((1 << 8) - 1)
+
 static int thumb_disasm(darm_t *d, uint16_t w)
 {
     d->instr = thumb_instr_labels[w >> 8];
@@ -41,13 +43,13 @@ static int thumb_disasm(darm_t *d, uint16_t w)
     switch ((uint32_t) d->instr_type) {
     case T_THUMB_ONLY_IMM8:
         d->I = B_SET;
-        d->imm = w & 0xff;
+        d->imm = w & BITMSK_8;
         return 0;
 
     case T_THUMB_COND_BRANCH:
         d->cond = (w >> 8) & b1111;
         d->I = B_SET;
-        d->imm = (uint32_t)(int8_t)(w & 0xff) << 1;
+        d->imm = (uint32_t)(int8_t)(w & BITMSK_8) << 1;
         return 0;
 
     case T_THUMB_UNCOND_BRANCH:
@@ -79,7 +81,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 
     case T_THUMB_STACK:
         d->I = B_SET;
-        d->imm = (w & 0xff) << 2;
+        d->imm = (w & BITMSK_8) << 2;
         d->Rn = SP;
         d->Rt = (w >> 8) & b111;
         d->U = B_SET;
@@ -89,7 +91,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 
     case T_THUMB_LDR_PC:
         d->I = B_SET;
-        d->imm = (w & 0xff) << 2;
+        d->imm = (w & BITMSK_8) << 2;
         d->Rn = PC;
         d->Rt = (w >> 8) & b111;
         d->U = B_SET;
@@ -145,7 +147,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 
     case T_THUMB_HAS_IMM8:
         d->I = B_SET;
-        d->imm = w & 0xff;
+        d->imm = w & BITMSK_8;
 
         switch ((uint32_t) d->instr) {
         case I_ADD: case I_SUB:
@@ -194,7 +196,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 
     case T_THUMB_ADD_SP_IMM:
         d->I = B_SET;
-        d->imm = w & 0xff;
+        d->imm = w & BITMSK_8;
         d->Rn = SP;
         d->Rd = (w >> 8) & b111;
         return 0;
@@ -227,7 +229,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 
     case T_THUMB_RW_REG:
         // TODO write-back support for LDM
-        d->reglist = w & 0xff;
+        d->reglist = w & BITMSK_8;
         d->Rn = (w >> 8) & b111;
         return 0;
 
@@ -241,7 +243,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         return 0;
 
     case T_THUMB_PUSHPOP:
-        d->reglist = w & 0xff;
+        d->reglist = w & BITMSK_8;
 
         // for push we have to set the 14th bit
         if(d->instr == I_PUSH) {
