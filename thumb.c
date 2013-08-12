@@ -280,7 +280,7 @@ int darm_thumb_disasm(darm_t *d, uint16_t w)
     d->CRn = d->CRm = d->CRd = R_INVLD;
 
     switch (w >> 11) {
-    case 0b11101: case 0b11110: case 0b11111:
+    case b11101: case b11110: case b11111:
         return -1;
 
     default:
