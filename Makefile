@@ -13,7 +13,7 @@ GENCODESRC = darm-tbl.c armv7-tbl.c thumb-tbl.c
 GENCODEOBJ = darm-tbl.o armv7-tbl.o thumb-tbl.o
 
 STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
-	tests/tests.exe libdarm.a libdarm.so
+	tests/tests.exe tests/blasty.exe libdarm.a libdarm.so
 
 default: $(STUFF)
 
