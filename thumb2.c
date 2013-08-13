@@ -31,6 +31,15 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <string.h>
 #include "darm.h"
+#include "thumb-tbl.h"
+
+#define BITMSK_8 ((1 << 8) - 1)
+
+static int thumb_disasm(darm_t *d, uint16_t w, uint16_t w2)
+{
+    d->instr = thumb_instr_labels[w >> 8];
+    d->instr_type = thumb_instr_types[w >> 8];
+}
 
 int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
@@ -57,6 +66,7 @@ int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
     default:
         d->w = w;
-        return thumb2_disasm(d, w);
+	d->w2 = w2;
+        return thumb2_disasm(d, w, w2);
     }
 }
