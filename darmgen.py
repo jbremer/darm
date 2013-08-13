@@ -585,6 +585,8 @@ if __name__ == '__main__':
 
     type_lut('gpi', 4)
     type_lut('no_op', 3)
+    type_lut('extend', 2)
+    type_lut('rev', 2)
 
     print('#endif')
 
@@ -674,6 +676,10 @@ if __name__ == '__main__':
 
     print(type_lookup_table('type_no_op',
                             'nop', 'yield', 'wfe', 'wfi', 'sev'))
+
+    print(type_lookup_table('type_extend', 'sxth', 'sxtb', 'uxth', 'uxtb'))
+
+    print(type_lookup_table('type_rev', 'rev', 'rev16', None, 'revsh'))
 
     #
     # armv7-tbl.c

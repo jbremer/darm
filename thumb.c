@@ -68,14 +68,28 @@ static int thumb_disasm(darm_t *d, uint16_t w)
     case T_THUMB_SHIFT_IMM:
         d->Rd = (w >> 0) & b111;
         d->Rm = (w >> 3) & b111;
-        d->imm = (w >> 6) & b11111;
+        d->shift = (w >> 6) & b11111;
 
-        // if the immediate is zero, then this is actually a mov instruction
-        if(d->imm != 0) {
-            d->I = B_SET;
+        // if the shift is zero and this is the lsl instruction, then this is
+        // actually a mov instruction
+        if(d->shift == 0 && d->instr == I_LSL) {
+            d->instr = I_MOV;
         }
         else {
-            d->instr = I_MOV;
+            // set the correct shift-type
+            switch ((uint32_t) d->instr) {
+            case I_ASR:
+                d->shift_type = S_ASR;
+                break;
+
+            case I_LSL:
+                d->shift_type = S_LSL;
+                break;
+
+            case I_LSR:
+                d->shift_type = S_LSR;
+                break;
+            }
         }
         return 0;
 
@@ -137,13 +151,13 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         }
 
     case T_THUMB_BRANCH_REG:
-        d->instr = (w >> 7) & 1 ? I_BLX : I_BL;
+        d->instr = (w >> 7) & 1 ? I_BLX : I_BX;
         d->Rm = (w >> 3) & b1111;
         return 0;
 
     case T_THUMB_NO_OPERANDS:
         d->instr = type_no_op_instr_lookup[(w >> 4) & b111];
-        return 0;
+        return d->instr == I_INVLD ? -1 : 0;
 
     case T_THUMB_HAS_IMM8:
         d->I = B_SET;
@@ -170,6 +184,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         }
 
     case T_THUMB_EXTEND:
+        d->instr = type_extend_instr_lookup[(w >> 6) & b11];
         d->Rd = w & b111;
         d->Rm = (w >> 3) & b111;
         return 0;
@@ -178,7 +193,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->instr = (w >> 7) & 1 ? I_SUB : I_ADD;
         d->Rd = d->Rn = SP;
         d->I = B_SET;
-        d->imm = w & 0x7f;
+        d->imm = (w & 0x7f) << 2;
         return 0;
 
     case T_THUMB_3REG:
@@ -196,7 +211,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 
     case T_THUMB_ADD_SP_IMM:
         d->I = B_SET;
-        d->imm = w & BITMSK_8;
+        d->imm = (w & BITMSK_8) << 2;
         d->Rn = SP;
         d->Rd = (w >> 8) & b111;
         return 0;
@@ -205,7 +220,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         // D is the 8th bit and has to become the 3th bit, to function as
         // highest bit for Rd
         d->Rd = ((w >> 4) & 8) | (w & b111);
-        d->Rn = (w >> 3) & b1111;
+        d->Rm = (w >> 3) & b1111;
         return 0;
 
     case T_THUMB_RW_MEMI:
@@ -246,6 +261,9 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         return 0;
 
     case T_THUMB_REV:
+        d->instr = type_rev_instr_lookup[(w >> 6) & b11];
+        if(d->instr == I_INVLD) return -1;
+
         d->Rd = (w >> 0) & b111;
         d->Rm = (w >> 3) & b111;
         return 0;
