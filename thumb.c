@@ -213,6 +213,18 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->Rn = (w >> 3) & b111;
         d->I = B_SET;
         d->imm = (w >> 6) & b11111;
+
+        // some instructions require some shifting for the immediate
+        switch ((uint32_t) d->instr) {
+        case I_LDR: case I_STR:
+            d->imm <<= 2;
+            break;
+
+        case I_LDRH: case I_STRH:
+            d->imm <<= 1;
+            break;
+        }
+
         d->P = B_SET;
         d->U = B_SET;
         d->W = B_UNSET;
