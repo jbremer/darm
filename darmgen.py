@@ -442,6 +442,14 @@ instr_types = [
     thumb('CMP', 'Comparison instruction',
           ['ins<c> <Rn>, <Rm>'],
           lambda x, y, z: x[-3:] == (d2.N, d2.Rm, d2.Rn3)),
+
+    thumb2('HAS_IMM8', 'Instructions with an 8bit immediate',
+          ['ins<c> <Rdn>, #<imm>', 'ins<c> <Rd>, SP, #<imm>',
+           'ins<c> <Rd>, <label>', 'ins<c> <Rn>, #<imm>',
+           'ins<c> <Rd>, #<imm>'],
+          lambda x, y, z: (x[-1] == d2.imm8 and not 'SP' in y and
+                           x[-2] in (d2.Rdn3, d2.Rd3, d2.Rn3))),
+
 ]
 
 if __name__ == '__main__':
@@ -519,7 +527,8 @@ if __name__ == '__main__':
                         y[-1].append(instr)
                         break
         elif bitcount == 32:
-            pass
+            #identifier, remainder = [], []
+	    pass
         else:
             raise
 

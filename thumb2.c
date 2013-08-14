@@ -32,13 +32,37 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include "darm.h"
 #include "thumb-tbl.h"
+//#include "thumb.h"
 
 #define BITMSK_8 ((1 << 8) - 1)
 
-static int thumb_disasm(darm_t *d, uint16_t w, uint16_t w2)
+static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
     d->instr = thumb_instr_labels[w >> 8];
     d->instr_type = thumb_instr_types[w >> 8];
+
+
+    switch ((uint32_t) d->instr_type) {
+	case T_THUMB_ONLY_IMM8:
+        	d->I = B_SET;
+        	d->imm = w & BITMSK_8;
+        	return 0;
+	case T_THUMB_GPI:
+		printf("GPI\n");
+        	d->instr = type_gpi_instr_lookup[(w >> 6) & b1111];
+        	switch ((uint32_t) d->instr) {
+        		case I_AND: case I_EOR: case I_LSL: case I_LSR:
+        		case I_ASR: case I_ADC: case I_SBC: case I_ROR:
+            			d->Rn = w & b111;
+				d->Rm = w2 & b111;
+				d->Rd = (w2 >> 8) & b111;
+            			return 0;
+		}
+	default:
+		return 0;
+
+    }
+
 }
 
 int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
@@ -61,12 +85,19 @@ int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     d->CRn = d->CRm = d->CRd = R_INVLD;
 
     switch (w >> 11) {
-    case b11101: case b11110: case b11111:
-        return -1;
 
-    default:
-        d->w = w;
-	d->w2 = w2;
-        return thumb2_disasm(d, w, w2);
+	    // Thumb2 32-bit
+	    case b11101: case b11110: case b11111:
+        	d->w = w | (w2 << 16);
+        	thumb2_disasm(d, w, w2);
+		return 2;
+
+    	    // Thumb 16-bit unconditional branch
+    	    case b11100:
+    	    // Thumb 16 bit
+    	    default:
+        	d->w = w;
+        	darm_thumb_disasm(d, w);
+		return 1;
     }
 }
