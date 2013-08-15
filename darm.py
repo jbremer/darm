@@ -123,6 +123,8 @@ class RegisterList:
     def __nonzero__(self):
         return self.reglist != 0
 
+    __bool__ = __nonzero__
+
 
 def flag(v):
     """Boolean flag.
@@ -152,7 +154,7 @@ class _Darm(Structure):
         ('T', c_uint32),
         ('W', c_uint32),
         ('I', c_uint32),
-        ('rotate', c_uint32),
+        ('rotate', c_int32),
         ('Rd', c_int32),
         ('Rn', c_int32),
         ('Rm', c_int32),
@@ -231,7 +233,7 @@ class Darm:
         args += ['%s=%s' % (r, g(r)) for r in self._flags if not g(r) is None]
 
         # other flags
-        if self.rotate:
+        if self.rotate != -1:
             args.append('rotate=%d' % self.rotate)
 
         if self.option != -1:
