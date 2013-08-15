@@ -504,13 +504,19 @@ if __name__ == '__main__':
                     y[-1].append(instr)
                     break
 
+
     for description in darmtbl2.thumbs:
         instr = description[0]
         bits = description[1:]
 
+	# calculate the number of bits for the instruction (16 == thumb, 32 == thumb2)
         bitcount = sum(1 if isinstance(x, int) else x.bitsize for x in bits)
+
+	# THUMB
         if bitcount == 16:
             identifier, remainder = [], []
+	    # iterate each argument in the instruction description to create a lookup identifier
+	    # all variable bits are replaced with 01
             for x in range(len(bits)):
                 if isinstance(bits[x], int):
                     identifier.append(str(bits[x]))
@@ -519,18 +525,45 @@ if __name__ == '__main__':
                     remainder = bits[x:]
                 else:
                     identifier += ['01'] * bits[x].bitsize
+
+	    # iterate all possible combinations of instructions
             for x in itertools.product(*identifier[:8]):
+		# convert list to integer
                 idx = sum(int(x[y])*2**(7-y) for y in range(8))
+		# for all thumb instruction types
                 for y in (_ for _ in instr_types if _[0] == 2):
+		    # if passes the instruction filter function, apply this type to that instruction
                     if y[4](bits, instr, idx):
                         thumb_table[idx] = instruction_name(instr), y
                         y[-1].append(instr)
                         break
+	# THUMB2
         elif bitcount == 32:
-            #identifier, remainder = [], []
-	    pass
-        else:
-            raise
+	    identifier = []
+            # iterate each argument in the instruction description to create a lookup identifier
+            # all variable bits are replaced with 01
+            for x in range(len(bits)):
+                if isinstance(bits[x], int):
+                    identifier.append(str(bits[x]))
+                elif len(identifier) + bits[x].bitsize > 10:
+                    identifier += ['01'] * (10-len(identifier))
+                else:
+                    identifier += ['01'] * bits[x].bitsize
+	    print identifier
+            # iterate all possible combinations of instructions
+            for x in itertools.product(*identifier[:10]):
+                # convert list to integer
+                idx = sum(int(x[y])*2**(7-y) for y in range(10))
+                # for all thumb2 instruction types
+                for y in (_ for _ in instr_types if _[0] == 3):
+                    # if passes the instruction filter function, apply this type to that instruction
+                    if y[4](bits, instr, idx):
+                        thumb2_table[idx] = instruction_name(instr), y
+                        y[-1].append(instr)
+                        break
+	else:
+	    raise
+
 
     # make a list of unique instructions affected by each encoding type,
     # we remove the first item from the instruction names, as this is I_INVLD
