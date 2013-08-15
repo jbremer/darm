@@ -214,6 +214,9 @@ struct {
     {0xee1d1f72, 0, "mrc 15, 0, r1, cr13, cr2, 3", {
         .instr = I_MRC, .instr_type = T_ARM_MVCR, .cond = C_AL, .coproc = 15,
         .opc1 = 0, .Rt = r1, .CRn = cr13, .CRm = cr2, .opc2 = 3}},
+    {0xe7f002fa, 0, "udf #42", {
+        .instr = I_UDF, .instr_type = T_ARM_UDF, .cond = C_AL,
+        .I = B_SET, .imm = 42}},
 
     // we switch to thumb (oboy)
     {0, 0, NULL, {.instr = I_INVLD}},
@@ -307,6 +310,9 @@ struct {
     {0x4545, 0, "cmp r5, r8", {
         .instr = I_CMP, .instr_type = T_THUMB_CMP, .cond = C_AL,
         .Rn = r5, .Rm = r8}},
+    {0xde2a, 0, "udf #42", {
+        .instr = I_UDF, .instr_type = T_THUMB_ONLY_IMM8, .cond = C_AL,
+        .I = B_SET, .imm = 42}},
 
     // we now switch to thumb2
     {0, 0, NULL, {.instr = I_INVLD}},

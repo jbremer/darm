@@ -827,6 +827,11 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->Rt = (w >> 12) & b1111;
         }
         return 0;
+
+    case T_ARM_UDF:
+        d->I = B_SET;
+        d->imm = (w & b1111) | ((w >> 4) & (BITMSK_12 << 4));
+        return 0;
     }
     return -1;
 }

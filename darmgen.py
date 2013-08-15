@@ -156,6 +156,7 @@ def generate_format_strings(arr):
         '#<const>', 'i',
         '#<imm4>', 'i',
         '#<imm5>', 'i',
+        '#<imm12>', 'i',
         '#<imm16>', 'i',
         '#<imm24>', 'i',
 
@@ -371,6 +372,8 @@ instr_types = [
     armv7('MVCR', 'Move to/from Coprocessor to/from ARM core register',
           ['ins<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>,{,<opc2>}'],
           lambda x, y, z: x[1:5] == (1, 1, 1, 0)),
+    armv7('UDF', 'Permanently Undefined Instruction',
+          ['ins<c> #<imm>'], lambda x, y, z: y[:3] == 'UDF'),
     thumb('ONLY_IMM8', 'Instructions which only take an 8-byte immediate',
           ['ins<c> #<imm8>'],
           lambda x, y, z: d2.imm8 in x and len(x) == 9),
