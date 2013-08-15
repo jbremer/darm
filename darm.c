@@ -30,6 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <string.h>
 #include "darm.h"
 
 #define APPEND(out, ptr) \
@@ -69,6 +70,23 @@ int append_imm(char *arg, uint32_t imm)
         arg += utoa(imm, arg, 10);
     }
     return arg - start;
+}
+
+void darm_init(darm_t *d)
+{
+    // initialize the entire darm state in order to make sure that no members
+    // contain undefined data
+    memset(d, 0, sizeof(darm_t));
+    d->instr = I_INVLD;
+    d->instr_type = T_INVLD;
+    d->shift_type = S_INVLD;
+    d->S = d->E = d->U = d->H = d->P = d->I = B_INVLD;
+    d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
+    d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
+    d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
+    d->option = O_INVLD;
+    // TODO set opc and coproc? to what value?
+    d->CRn = d->CRm = d->CRd = R_INVLD;
 }
 
 int darm_str(const darm_t *d, darm_str_t *str)

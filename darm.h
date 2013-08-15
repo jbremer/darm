@@ -193,6 +193,11 @@ typedef struct _darm_str_t {
     char total[64];
 } darm_str_t;
 
+// reset a darm object, this function is internally called right before using
+// any of the disassemble routines, hence a user is normally not required to
+// call this function beforehand
+void darm_init(darm_t *d);
+
 // disassemble an armv7 instruction
 int darm_armv7_disasm(darm_t *d, uint32_t w);
 
