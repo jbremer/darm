@@ -276,15 +276,15 @@ struct {
     {0x1ef4, 0, "sub r4, r6, #3", {
         .instr = I_SUB, .instr_type = T_THUMB_2REG_IMM, .cond = C_AL,
         .Rd = r4, .Rn = r6, .I = B_SET, .imm = 3}},
-    {0xad18, 0, "add r5, sp, #24", {
+    {0xad18, 0, "add r5, sp, #96", {
         .instr = I_ADD, .instr_type = T_THUMB_ADD_SP_IMM, .cond = C_AL,
-        .Rd = r5, .Rn = SP, .I = B_SET, .imm = 24}},
-    {0x4676, 0, "mov r6, r14", {
+        .Rd = r5, .Rn = SP, .I = B_SET, .imm = 96}},
+    {0x4676, 0, "mov r6, lr", {
         .instr = I_MOV, .instr_type = T_THUMB_MOV4, .cond = C_AL,
-        .Rd = r6, .Rn = r14}},
-    {0x88f3, 0, "ldrh r3, [r6, #3]", {
+        .Rd = r6, .Rm = LR}},
+    {0x88f3, 0, "ldrh r3, [r6, #6]", {
         .instr = I_LDRH, .instr_type= T_THUMB_RW_MEMI, .cond = C_AL,
-        .Rt = r3, .Rn = r6, .I = B_SET, .imm = 3, .U = B_SET,
+        .Rt = r3, .Rn = r6, .I = B_SET, .imm = 6, .U = B_SET,
         .P = B_SET, .W = B_UNSET}},
     {0x5073, 0, "str r3, [r6, r1]", {
         .instr = I_STR, .instr_type = T_THUMB_RW_MEMO, .cond = C_AL,
