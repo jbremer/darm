@@ -290,6 +290,11 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->Rn = (w & b111) | ((w >> 4) & b1000);
         d->Rm = (w >> 3) & b1111;
         return 0;
+
+    case T_THUMB_MOD_SP_REG:
+        d->Rd = d->Rn = SP;
+        d->Rm = (w >> 3) & b1111;
+        return 0;
     }
     return -1;
 }

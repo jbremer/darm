@@ -445,6 +445,9 @@ instr_types = [
     thumb('CMP', 'Comparison instruction',
           ['ins<c> <Rn>, <Rm>'],
           lambda x, y, z: x[-3:] == (d2.N, d2.Rm, d2.Rn3)),
+    thumb('MOD_SP_REG', 'Add a Register to the Stack Pointer',
+          ['ins<c> SP, <Rm>'],
+          lambda x, y, z: x[-3:] == (1, 0, 1) and x[-4] == d2.Rm),
 ]
 
 if __name__ == '__main__':

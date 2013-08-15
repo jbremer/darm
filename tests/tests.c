@@ -313,6 +313,9 @@ struct {
     {0xde2a, 0, "udf #42", {
         .instr = I_UDF, .instr_type = T_THUMB_ONLY_IMM8, .cond = C_AL,
         .I = B_SET, .imm = 42}},
+    {0x449b, 0, "add sp, sp, r3", {
+        .instr = I_ADD, .instr_type = T_THUMB_MOD_SP_REG, .cond = C_AL,
+        .Rd = SP, .Rn = SP, .Rm = r3}},
 
     // we now switch to thumb2
     {0, 0, NULL, {.instr = I_INVLD}},
