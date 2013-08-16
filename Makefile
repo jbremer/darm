@@ -12,8 +12,12 @@ OBJ = $(SRC:.c=.o)
 GENCODESRC = darm-tbl.c armv7-tbl.c thumb-tbl.c
 GENCODEOBJ = darm-tbl.o armv7-tbl.o thumb-tbl.o
 
-STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
-	tests/tests.exe libdarm.a libdarm.so
+# generated stuff
+GENR = $(GENCODESRC) $(GENCODEOBJ) $(OBJ)
+LIBS  = libdarm.a libdarm.so
+TOOLS = tests/tests.exe utils/elfdarm.exe
+
+STUFF = $(GENR) $(LIBS) $(TOOLS)
 
 default: $(STUFF)
 
@@ -23,8 +27,8 @@ $(GENCODESRC): darmgen.py darmtbl.py darmtbl2.py
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $^ $(PIC_FLAGS)
 
-%.exe: %.c $(OBJ) $(GENCODEOBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+%.exe: %.c
+	$(CC) $(CFLAGS) -o $@ $^ -L. -ldarm -I.
 
 %.so: $(OBJ) $(GENCODEOBJ)
 	$(CC) -shared $(CFLAGS) -o $@ $^
