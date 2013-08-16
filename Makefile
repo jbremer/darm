@@ -28,7 +28,7 @@ $(GENCODESRC): darmgen.py darmtbl.py darmtbl2.py
 	$(CC) $(CFLAGS) -o $@ -c $^ $(PIC_FLAGS)
 
 %.exe: %.c
-	$(CC) $(CFLAGS) -o $@ $^ -L. -ldarm -I.
+	$(CC) $(CFLAGS) -o $@ $^ libdarm.so -I.
 
 %.so: $(OBJ) $(GENCODEOBJ)
 	$(CC) -shared $(CFLAGS) -o $@ $^
