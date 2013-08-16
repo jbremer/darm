@@ -641,7 +641,7 @@ if __name__ == '__main__':
     print(instruction_names_table(open('instructions.txt')))
     print(type_encoding_table('darm_enctypes', instr_types))
 
-    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
+    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 SP LR PC'
     print(string_table('darm_registers', reg.split()))
 
     #

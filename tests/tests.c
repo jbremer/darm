@@ -61,7 +61,7 @@ struct {
     {0xe1140505, 0, "tst r4, r5, lsl #10", {
         .instr = I_TST, .instr_type = T_ARM_CMP_OP, .cond = C_AL, .Rn = 4,
         .Rm = 5, .shift_type = S_LSL, .shift = 10}},
-    {0xe15a017b, 0, "cmp r10, fp, ror r1", {
+    {0xe15a017b, 0, "cmp r10, r11, ror r1", {
         .instr = I_CMP, .instr_type = T_ARM_CMP_OP, .cond = C_AL, .Rn = 10,
         .Rm = 11, .shift_type = S_ROR, .Rs = 1}},
     {0xe35704f0, 0, "cmp r7, #0xf0000000", {
@@ -71,7 +71,7 @@ struct {
         .cond = C_AL}},
     {0xe320f003, 0, "wfi", {.instr = I_WFI, .instr_type = T_ARM_OPLESS,
         .cond = C_AL}},
-    {0xe1a0c064, 0, "rrx ip, r4", {
+    {0xe1a0c064, 0, "rrx r12, r4", {
         .instr = I_RRX, .instr_type = T_ARM_DST_SRC, .cond = C_AL, .S = 0,
         .Rd = 12, .shift = 0, .Rm = 4, .shift_type = S_ROR}},
     {0xe3a013e8, 0, "mov r1, #0xa0000003", {
@@ -205,7 +205,7 @@ struct {
         .instr = I_STR, .instr_type = T_ARM_STACK0, .cond = C_AL, .S = 0,
         .P = B_SET, .U = B_SET, .W = B_SET, .Rn = 4, .Rt = 3, .I = B_SET,
         .imm = 3}},
-    {0xe28fc601, 0, "adr ip, #+0x100000", {
+    {0xe28fc601, 0, "adr r12, #+0x100000", {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = C_AL,
         .S = B_UNSET, .U = B_SET, .I = B_SET, .imm = 0x100000, .Rd = 12}},
     {0xf5d3f000, 0, "pld [r3]", {
