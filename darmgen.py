@@ -470,6 +470,62 @@ instr_types = [
 	  [''],
           lambda x, y, z: (thumb2_regChk(x, [d2.Rt2]))
 	  ),
+    thumb2('RM_REG', 'Instructions that operate on the Rm register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rm]))
+	  ),
+    thumb2('RD_REG', 'Instructions that operate on the Rd register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rd]))
+	  ),
+    thumb2('RD_RM_RG', 'Instructions that operate on the Rd and Rm register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rd, d2.Rm]))
+	  ),
+    thumb2('RN_REG', 'Instructions that operate on the Rn register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn]))
+	  ),
+    thumb2('RN_RT_REG', 'Instructions that operate on the Rn and Rt register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rt]))
+	  ),
+    thumb2('RN_RT_RT2_REG', 'Instructions that operate on the Rn, Rt and Rt2 register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rt, d2.Rt2]))
+	  ),
+    thumb2('RN_RM_REG', 'Instructions that operate on the Rn and Rm register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rm]))
+	  ),
+    thumb2('RN_RM_RT_REG', 'Instructions that operate on the Rn, Rm and Rt register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rm, d2.Rt]))
+	  ),
+    thumb2('RN_RM_RA_REG', 'Instructions that operate on the Rn, Rm and Ra register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rm, d2.Ra]))
+	  ),
+    thumb2('RN_RD_REG', 'Instructions that operate on the Rn and Rd register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rd]))
+	  ),
+    thumb2('RN_RD_RT_REG', 'Instructions that operate on the Rn, Rd and Rt register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rd, d2.Rt]))
+	  ),
+    thumb2('RN_RD_RT_RT2_REG', 'Instructions that operate on the Rn, Rd, Rt and Rt2 register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rd, d2.Rt, d2.Rt2]))
+	  ),
+    thumb2('RN_RD_RM_REG', 'Instructions that operate on the Rn, Rd and Rm register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rd, d2.Rm]))
+	  ),
+    thumb2('RN_RD_RM_RA_REG', 'Instructions that operate on the Rn, Rd, Rm and Ra register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rd, d2.Rm, d2.Ra]))
+	  ),
 
 
 ]
