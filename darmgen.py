@@ -31,7 +31,7 @@ import darmtbl2
 import itertools
 import sys
 import textwrap
-
+import string
 
 def instruction_name(x):
     return x.split('{')[0].split('<')[0].split()[0]
@@ -81,12 +81,21 @@ def instruction_types_table(arr, kind):
            for x in range(256)]
     return typed_table('darm_enctype_t', '%s_instr_types' % kind, arr)
 
+def instruction_types_table_thumb2(arr, kind):
+    """Lookup table for the types of Thumb2 instructions."""
+    barr = map(lambda x: 'T_%s' % x[1][1], arr.values())
+    return typed_table('darm_enctype_t', '%s_instr_types' % kind, barr)
 
 def instruction_names_index_table(arr, kind):
     """Lookup table for instruction label for each instruction index."""
     arr = ['I_%s' % arr[x][0] if x in arr else 'I_INVLD'
            for x in range(256)]
     return typed_table('darm_instr_t', '%s_instr_labels' % kind, arr)
+
+def instruction_names_index_table_thumb2(arr, kind):
+    """Lookup table for instruction label for each Thumb2 instruction index."""
+    barr = map(lambda x: 'I_%s' % str(x[0]), arr.values())
+    return typed_table('darm_instr_t', '%s_instr_labels' % kind, barr)
 
 
 def type_lookup_table(name, *args):
@@ -269,6 +278,12 @@ def thumb2(*x):
     return (3,) + x
 
 
+def thumb2_regChk(instr, hasRegs):
+    regs = [d2.Rd, d2.Rd3, d2.Rs, d2.Rn, d2.Rn3,  d2.Rm, d2.Rm3, d2.Rt, d2.Rt2, d2.Rt3, d2.Ra, d2.Rdm, d2.Rm3, d2.Rdn, d2.Rdn3]
+    instrRegs = set(filter(lambda x: x in regs, instr))
+    return len(set(instrRegs).difference(hasRegs)) == 0
+
+
 # we specify various instruction types
 instr_types = [
     notype('INVLD', 'Invalid or non-existent type',
@@ -443,12 +458,19 @@ instr_types = [
           ['ins<c> <Rn>, <Rm>'],
           lambda x, y, z: x[-3:] == (d2.N, d2.Rm, d2.Rn3)),
 
-    thumb2('HAS_IMM8', 'Instructions with an 8bit immediate',
-          ['ins<c> <Rdn>, #<imm>', 'ins<c> <Rd>, SP, #<imm>',
-           'ins<c> <Rd>, <label>', 'ins<c> <Rn>, #<imm>',
-           'ins<c> <Rd>, #<imm>'],
-          lambda x, y, z: (x[-1] == d2.imm8 and not 'SP' in y and
-                           x[-2] in (d2.Rdn3, d2.Rd3, d2.Rn3))),
+    thumb2('NO_REG', 'Instructions that do not operate on a register',
+          [''],
+          lambda x, y, z: (thumb2_regChk(x, []))
+	  ),
+    thumb2('RT_REG', 'Instructions that operate on Rt register',
+	  [''],
+	  lambda x, y, z: (thumb2_regChk(x, [d2.Rt]))
+	  ),
+    thumb2('RT_RT2_REG', 'Instructions that operate on Rt and Rt2 register',
+	  [''],
+          lambda x, y, z: (thumb2_regChk(x, [d2.Rt2]))
+	  ),
+
 
 ]
 
@@ -545,11 +567,16 @@ if __name__ == '__main__':
             for x in range(len(bits)):
                 if isinstance(bits[x], int):
                     identifier.append(str(bits[x]))
-                elif len(identifier) + bits[x].bitsize > 10:
-                    identifier += ['01'] * (10-len(identifier))
                 else:
-                    identifier += ['01'] * bits[x].bitsize
-	    print identifier
+                    identifier += ['X'] * bits[x].bitsize
+
+	    idx_bin = string.replace(''.join(identifier), 'X', '0')
+	    idx = sum(int(idx_bin[y])*2**(31-y) for y in range(32))
+	    for y in instr_types:
+		if y[0] == 3 and y[4](bits, instr, idx):
+	    	    thumb2_table[idx] = instruction_name(instr), y
+		    break
+	    """
             # iterate all possible combinations of instructions
             for x in itertools.product(*identifier[:10]):
                 # convert list to integer
@@ -561,10 +588,12 @@ if __name__ == '__main__':
                         thumb2_table[idx] = instruction_name(instr), y
                         y[-1].append(instr)
                         break
+	    """
 	else:
 	    raise
 
 
+    print thumb2_table
     # make a list of unique instructions affected by each encoding type,
     # we remove the first item from the instruction names, as this is I_INVLD
     instr_types = [x[:5] + [instruction_names(x[5])[1:]] for x in instr_types]
@@ -631,6 +660,28 @@ if __name__ == '__main__':
     type_lut('rev', 2)
 
     print('#endif')
+
+    #
+    # thumb2-tbl.h
+    #
+
+    magic_open('thumb2-tbl.h')
+
+    # print required headers
+    print('#ifndef __THUMB2_TBL__')
+    print('#define __THUMB2_TBL__')
+    print('#include <stdint.h>')
+    print('#include "darm-tbl.h"')
+
+    # print some required definitions
+    print('extern darm_enctype_t thumb2_instr_types[256];')
+    print('extern darm_instr_t thumb2_instr_labels[256];')
+
+    type_lut('immediate', 4)
+    type_lut('flags', 3)
+
+    print('#endif')
+
 
     #
     # armv7-tbl.h
@@ -722,6 +773,21 @@ if __name__ == '__main__':
     print(type_lookup_table('type_extend', 'sxth', 'sxtb', 'uxth', 'uxtb'))
 
     print(type_lookup_table('type_rev', 'rev', 'rev16', None, 'revsh'))
+
+    #
+    # thumb2-tbl.c
+    #
+  
+    magic_open('thumb2-tbl.c')
+    print('#include <stdio.h>')
+    print('#include <stdint.h>')
+    print('#include "thumb2-tbl.h"')
+
+    # print a table containing all the types of instructions
+    print(instruction_types_table_thumb2(thumb2_table, 'thumb2'))
+
+    # print a table containing the instruction label for each entry
+    print(instruction_names_index_table_thumb2(thumb2_table, 'thumb2'))
 
     #
     # armv7-tbl.c
