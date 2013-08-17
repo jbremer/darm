@@ -295,6 +295,11 @@ def thumb2_immChk(instr, hasImm):
     instrImm = set(filter(lambda x: x in imm, instr))
     return len(set(instrImm).symmetric_difference(set(hasImm))) == 0
 
+# check if instruction affects same flags as instruction type
+def thumb2_flagChk(instr, hasFlags):
+    flags = [ d2.S, d2.register_list, d2.type_, d2.W, d2.P, d2.U]
+    instrFlags = set(filter(lambda x: x in flags, instr))
+    return len(set(instrFlags).symmetric_difference(set(hasFlags))) == 0
 
 # we specify various instruction types
 instr_types = [
@@ -578,6 +583,39 @@ instr_types = [
           [''],
           lambda x, y, z: (thumb2_immChk(x, [d2.i, d2.imm3, d2.imm8]))
           ),
+    thumb2_flags('NO_FLAG', 'Instructions that have no flags',
+          [''],
+          lambda x, y, z: (thumb2_flagChk(x, []))
+          ),
+    thumb2_flags('U_FLAG', 'Instructions that use the U flag',
+          [''],
+          lambda x, y, z: (thumb2_flagChk(x, [d2.U]))
+          ),
+    thumb2_flags('WUP_FLAG', 'Instructions that use the WUP flags',
+          [''],
+          lambda x, y, z: (thumb2_flagChk(x, [d2.W, d2.U, d2.P]))
+          ),
+    thumb2_flags('TYPE_FLAG', 'Instructions that use the shift type flag',
+          [''],
+          lambda x, y, z: (thumb2_flagChk(x, [d2.type_]))
+          ),
+    thumb2_flags('REGLIST_FLAG', 'Instructions that use the register list',
+          [''],
+          lambda x, y, z: (thumb2_flagChk(x, [d2.register_list]))
+          ),
+    thumb2_flags('WP_REGLIST_FLAG', 'Instructions that use the WP flags and register list',
+          [''],
+          lambda x, y, z: (thumb2_flagChk(x, [d2.W, d2.P, d2.register_list]))
+          ),
+    thumb2_flags('S_FLAG', 'Instructions that use the S flag',
+          [''],
+          lambda x, y, z: (thumb2_flagChk(x, [d2.S]))
+          ),
+    thumb2_flags('S_TYPE_FLAG', 'Instructions that use the S flag and shift type flag',
+          [''],
+          lambda x, y, z: (thumb2_flagChk(x, [d2.S, d2.type_]))
+          ),
+
 ]
 
 if __name__ == '__main__':
@@ -680,7 +718,7 @@ if __name__ == '__main__':
 	    idx = sum(int(idx_bin[y])*2**(31-y) for y in range(32))
 	    a = thumb2('INVLD','','','')
 	    b = thumb2_imm('INVLD','','','')
-	    c = None
+	    c = thumb2_flags('INVLD','','','')
 	    for y in instr_types:
 		if y[0] == 3 and y[4](bits, instr, idx):
 		    a = y
@@ -689,7 +727,7 @@ if __name__ == '__main__':
 		if y[0] == 32 and y[4](bits, instr, idx):
 		    c = y
 
-	    thumb2_table[idx] = instruction_name(instr), a, b
+	    thumb2_table[idx] = instruction_name(instr), a, b, c
 	    """
             # iterate all possible combinations of instructions
             for x in itertools.product(*identifier[:10]):
@@ -900,8 +938,11 @@ if __name__ == '__main__':
     # print a table containing all the types of instructions
     print(instruction_types_table_thumb2(thumb2_table, 1, 'thumb2'))
 
-    # print a table containing all the types of instructions
+    # print a table containing all the types of instructions (immediates)
     print(instruction_types_table_thumb2(thumb2_table, 2, 'thumb2_imm'))
+
+    # print a table containing all the types of instructions (flags)
+    print(instruction_types_table_thumb2(thumb2_table, 3, 'thumb2_flags'))
 
     # print a table containing the instruction label for each entry
     print(instruction_names_index_table_thumb2(thumb2_table, 'thumb2'))
