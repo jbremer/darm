@@ -81,9 +81,9 @@ def instruction_types_table(arr, kind):
            for x in range(256)]
     return typed_table('darm_enctype_t', '%s_instr_types' % kind, arr)
 
-def instruction_types_table_thumb2(arr, kind):
+def instruction_types_table_thumb2(arr, offset, kind):
     """Lookup table for the types of Thumb2 instructions."""
-    barr = map(lambda x: 'T_%s' % x[1][1], arr.values())
+    barr = map(lambda x: 'T_%s' % x[offset][1], arr.values())
     return typed_table('darm_enctype_t', '%s_instr_types' % kind, barr)
 
 def instruction_names_index_table(arr, kind):
@@ -277,11 +277,23 @@ def thumb(*x):
 def thumb2(*x):
     return (3,) + x
 
+def thumb2_imm(*x):
+    return (31,) + x
 
+def thumb2_flags(*x):
+    return (32,) + x
+
+# check if instruction affects same registers as instruction type
 def thumb2_regChk(instr, hasRegs):
     regs = [d2.Rd, d2.Rd3, d2.Rs, d2.Rn, d2.Rn3,  d2.Rm, d2.Rm3, d2.Rt, d2.Rt2, d2.Rt3, d2.Ra, d2.Rdm, d2.Rm3, d2.Rdn, d2.Rdn3]
     instrRegs = set(filter(lambda x: x in regs, instr))
-    return len(set(instrRegs).difference(hasRegs)) == 0
+    return len(set(instrRegs).symmetric_difference(set(hasRegs))) == 0
+
+# check if instruction affects same immediates as instruction type
+def thumb2_immChk(instr, hasImm):
+    imm = [ d2.imm2, d2.imm3, d2.imm4, d2.imm5, d2.imm6, d2.imm7, d2.imm8, d2.imm10, d2.imm11, d2.imm12, d2.imm10H, d2.imm10L, d2.imm24]
+    instrImm = set(filter(lambda x: x in imm, instr))
+    return len(set(instrImm).symmetric_difference(set(hasImm))) == 0
 
 
 # we specify various instruction types
@@ -468,7 +480,7 @@ instr_types = [
 	  ),
     thumb2('RT_RT2_REG', 'Instructions that operate on Rt and Rt2 register',
 	  [''],
-          lambda x, y, z: (thumb2_regChk(x, [d2.Rt2]))
+          lambda x, y, z: (thumb2_regChk(x, [d2.Rt, d2.Rt2]))
 	  ),
     thumb2('RM_REG', 'Instructions that operate on the Rm register',
 	  [''],
@@ -526,8 +538,46 @@ instr_types = [
 	  [''],
 	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rd, d2.Rm, d2.Ra]))
 	  ),
-
-
+    thumb2_imm('NO_IMM', 'Instructions that do not operate on an immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, []))
+          ),
+    thumb2_imm('IMM12', 'Instructions that use a 12 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.imm12]))
+          ),
+    thumb2_imm('IMM10', 'Instructions that use a 10 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.imm10]))
+          ),
+    thumb2_imm('IMM10_IMM11', 'Instructions that use a 10 and 11 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.imm10, d2.imm11]))
+          ),
+    thumb2_imm('IMM8', 'Instructions that use an 8 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.imm8]))
+          ),
+    thumb2_imm('IMM6_IMM11', 'Instructions that use a 6 and 11 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.imm6, d2.imm11]))
+          ),
+    thumb2_imm('IMM3_IMM8', 'Instructions that use a 3 and 8 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.imm3, d2.imm8]))
+          ),
+    thumb2_imm('IMM2', 'Instructions that use a 2 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.imm2]))
+          ),
+    thumb2_imm('IMM2_IMM3', 'Instructions that use a 2 and 3 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.imm2, d2.imm3]))
+          ),
+    thumb2_imm('IMM1_IMM3_IMM8', 'Instructions that use a 1, 3 and 8 bit immediate',
+          [''],
+          lambda x, y, z: (thumb2_immChk(x, [d2.i, d2.imm3, d2.imm8]))
+          ),
 ]
 
 if __name__ == '__main__':
@@ -536,9 +586,9 @@ if __name__ == '__main__':
     # the last item (a list) will contain the instructions affected by this
     # encoding type
     instr_types = [list(x) + [[]] for x in instr_types]
-
+    print instr_types
     # prepend the instruction set to the encoding types
-    insns_types = '', 'ARM_', 'THUMB_', 'THUMB2_'
+    insns_types = {0:'', 1:'ARM_', 2:'THUMB_', 3:'THUMB2_', 31:'THUMB2_',32:'THUMB2_'}
     instr_types = [[x[0]] + [insns_types[x[0]] + x[1]] + x[2:6]
                    for x in instr_types]
 
@@ -628,10 +678,18 @@ if __name__ == '__main__':
 
 	    idx_bin = string.replace(''.join(identifier), 'X', '0')
 	    idx = sum(int(idx_bin[y])*2**(31-y) for y in range(32))
+	    a = thumb2('INVLD','','','')
+	    b = thumb2_imm('INVLD','','','')
+	    c = None
 	    for y in instr_types:
 		if y[0] == 3 and y[4](bits, instr, idx):
-	    	    thumb2_table[idx] = instruction_name(instr), y
-		    break
+		    a = y
+                if y[0] == 31 and y[4](bits, instr, idx):
+                    b = y
+		if y[0] == 32 and y[4](bits, instr, idx):
+		    c = y
+
+	    thumb2_table[idx] = instruction_name(instr), a, b
 	    """
             # iterate all possible combinations of instructions
             for x in itertools.product(*identifier[:10]):
@@ -840,7 +898,10 @@ if __name__ == '__main__':
     print('#include "thumb2-tbl.h"')
 
     # print a table containing all the types of instructions
-    print(instruction_types_table_thumb2(thumb2_table, 'thumb2'))
+    print(instruction_types_table_thumb2(thumb2_table, 1, 'thumb2'))
+
+    # print a table containing all the types of instructions
+    print(instruction_types_table_thumb2(thumb2_table, 2, 'thumb2_imm'))
 
     # print a table containing the instruction label for each entry
     print(instruction_names_index_table_thumb2(thumb2_table, 'thumb2'))
