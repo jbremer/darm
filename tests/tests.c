@@ -405,7 +405,8 @@ int main()
     ((d.x == B_INVLD || d.x == B_UNSET) ? p->x != B_UNSET : p->x != B_SET)
 
         // enter ugly code
-        if(ret != tests[i].r || C(w) || C(instr) || C(instr_type) ||
+        int flags;
+        if((flags = ret != tests[i].r || C(w) || C(instr) || C(instr_type) ||
                 C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
                 C(Rt) || C(RdHi) || C(RdLo) || F(I) || C(imm) ||
@@ -415,10 +416,12 @@ int main()
                 C(CRn) || C(CRm) || C(CRd) || C(firstcond) || C(mask)) ||
                 strcmp(str.total, tests[i].s)) {
             // leave ugly code
-            printf("incorrect encoding for 0x%08x, ret %d\n", d.w, ret);
+            printf("incorrect %s for 0x%08x, ret %d\n",
+                flags ? "flags" : "string representation", d.w, ret);
             printf("  %s = %s (%d)\n", str.total, tests[i].s,
                 strcmp(str.total, tests[i].s));
             darm_dump(&d);
+            darm_dump(&tests[i].d);
             failure = 1;
         }
     }
