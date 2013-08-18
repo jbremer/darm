@@ -65,6 +65,27 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
 }
 
+
+
+// Parse the register instruction type
+void thumb2_parse_reg(darm_t *d, uint16_t w, uint16_t w2) {
+
+
+}
+// Parse the immediate instruction type
+void thumb2_parse_imm(darm_t *d, uint16_t w, uint16_t w2) {
+
+
+}
+// Parse the flag instruction type
+void thumb2_parse_flag(darm_t *d, uint16_t w, uint16_t w2) {
+
+
+}
+
+
+
+
 int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
     (void)d; (void) w; (void) w2;

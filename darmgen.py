@@ -714,11 +714,19 @@ if __name__ == '__main__':
                 else:
                     identifier += ['X'] * bits[x].bitsize
 
+	    # create bitmask for instruction	
+	    mask = string.replace(string.replace(''.join(identifier), '0', '1'), 'X', '0')
+	    mask = sum(int(mask[y])*2**(31-y) for y in range(32))
+
+	    # replace X with 0 and convert index to integer
 	    idx_bin = string.replace(''.join(identifier), 'X', '0')
 	    idx = sum(int(idx_bin[y])*2**(31-y) for y in range(32))
+
 	    a = thumb2('INVLD','','','')
 	    b = thumb2_imm('INVLD','','','')
 	    c = thumb2_flags('INVLD','','','')
+
+	    # find all three instruction types
 	    for y in instr_types:
 		if y[0] == 3 and y[4](bits, instr, idx):
 		    a = y
@@ -727,20 +735,7 @@ if __name__ == '__main__':
 		if y[0] == 32 and y[4](bits, instr, idx):
 		    c = y
 
-	    thumb2_table[idx] = instruction_name(instr), a, b, c
-	    """
-            # iterate all possible combinations of instructions
-            for x in itertools.product(*identifier[:10]):
-                # convert list to integer
-                idx = sum(int(x[y])*2**(7-y) for y in range(10))
-                # for all thumb2 instruction types
-                for y in (_ for _ in instr_types if _[0] == 3):
-                    # if passes the instruction filter function, apply this type to that instruction
-                    if y[4](bits, instr, idx):
-                        thumb2_table[idx] = instruction_name(instr), y
-                        y[-1].append(instr)
-                        break
-	    """
+	    thumb2_table[idx] = instruction_name(instr), a, b, c, idx, mask
 	else:
 	    raise
 
@@ -946,6 +941,15 @@ if __name__ == '__main__':
 
     # print a table containing the instruction label for each entry
     print(instruction_names_index_table_thumb2(thumb2_table, 'thumb2'))
+
+    # print a table that contains the numeric identifier for each instruction
+    id_list = map(lambda x: str(x[4]), thumb2_table.values())
+    print(typed_table('int', 'instruction_ids', id_list))
+
+    # print a table that contains masks for each instruction
+    mask_list = map(lambda x: str(x[5]), thumb2_table.values())
+    print(typed_table('int', 'instruction_masks', mask_list))
+    
 
     #
     # armv7-tbl.c
