@@ -820,9 +820,14 @@ if __name__ == '__main__':
     print('#include <stdint.h>')
     print('#include "darm-tbl.h"')
 
+    print('#define THUMB2_INSTRUCTION_COUNT ' + str(len(thumb2_table)) + '\n\n')
+
+
     # print some required definitions
     print('extern darm_enctype_t thumb2_instr_types[256];')
     print('extern darm_instr_t thumb2_instr_labels[256];')
+    print('extern int thumb2_instruction_ids[256];')
+    print('extern int thumb2_instruction_masks[256];')
 
     type_lut('immediate', 4)
     type_lut('flags', 3)
@@ -930,6 +935,7 @@ if __name__ == '__main__':
     print('#include <stdint.h>')
     print('#include "thumb2-tbl.h"')
 
+
     # print a table containing all the types of instructions
     print(instruction_types_table_thumb2(thumb2_table, 1, 'thumb2'))
 
@@ -944,11 +950,11 @@ if __name__ == '__main__':
 
     # print a table that contains the numeric identifier for each instruction
     id_list = map(lambda x: str(x[4]), thumb2_table.values())
-    print(typed_table('int', 'instruction_ids', id_list))
+    print(typed_table('int', 'thumb2_instruction_ids', id_list))
 
     # print a table that contains masks for each instruction
     mask_list = map(lambda x: str(x[5]), thumb2_table.values())
-    print(typed_table('int', 'instruction_masks', mask_list))
+    print(typed_table('int', 'thumb2_instruction_masks', mask_list))
     
 
     #

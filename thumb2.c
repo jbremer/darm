@@ -32,16 +32,20 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include "darm.h"
 #include "thumb-tbl.h"
-//#include "thumb.h"
+#include "thumb2-tbl.h"
 
 #define BITMSK_8 ((1 << 8) - 1)
 
+darm_instr_t thumb2_lookup_instr(uint16_t w, uint16_t w2);
+
 static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
-    d->instr = thumb_instr_labels[w >> 8];
+    d->instr = thumb2_lookup_instr(w, w2);
     d->instr_type = thumb_instr_types[w >> 8];
 
 
+
+/*
     switch ((uint32_t) d->instr_type) {
 	case T_THUMB_ONLY_IMM8:
         	d->I = B_SET;
@@ -62,10 +66,25 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 		return 0;
 
     }
-
+*/
+	return 0;
 }
 
 
+
+darm_instr_t thumb2_lookup_instr(uint16_t w, uint16_t w2) {
+// TODO: replace with binary search tree for speedup
+	uint32_t dw;
+	int i;
+	dw = (w << 16) | w2;
+	for (i = 0 ; i < THUMB2_INSTRUCTION_COUNT ; i++) {
+		printf("%x %x\n", thumb2_instruction_ids[i], thumb2_instruction_masks[i]);
+		if ((dw & thumb2_instruction_masks[i]) == thumb2_instruction_ids[i]) {
+			return thumb2_instr_labels[i];
+		}
+	}
+	return 0;
+}
 
 // Parse the register instruction type
 void thumb2_parse_reg(darm_t *d, uint16_t w, uint16_t w2) {
