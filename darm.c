@@ -87,6 +87,7 @@ void darm_init(darm_t *d)
     d->option = O_INVLD;
     // TODO set opc and coproc? to what value?
     d->CRn = d->CRm = d->CRd = R_INVLD;
+    d->firstcond = C_INVLD, d->mask = 0;
 }
 
 int darm_str(const darm_t *d, darm_str_t *str)

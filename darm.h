@@ -177,6 +177,10 @@ typedef struct _darm_t {
     darm_reg_t      CRd;
     darm_reg_t      CRn;
     darm_reg_t      CRm;
+
+    // condition and mask for the IT instruction
+    darm_cond_t     firstcond;
+    uint8_t         mask;
 } darm_t;
 
 typedef struct _darm_str_t {

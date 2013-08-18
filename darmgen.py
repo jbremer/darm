@@ -399,8 +399,8 @@ instr_types = [
           lambda x, y, z: x[:6] == (0, 1, 0, 0, 0, 0)),
     thumb('BRANCH_REG', 'Branch (and optionally link) to a Register',
           ['ins<c> <Rm>'], lambda x, y, z: x[-4] == d2.Rm and x[7] == 1),
-    thumb('NO_OPERANDS', 'Instructions without any operands',
-          ['ins<c>'], lambda x, y, z: len(x) == 16 and y[:6] != 'SETEND'),
+    thumb('IT_HINTS', 'If-Then and Hints',
+          ['ins<c>'], lambda x, y, z: x[:8] == (1, 0, 1, 1, 1, 1, 1, 1)),
     thumb('HAS_IMM8', 'Instructions with an 8bit immediate',
           ['ins<c> <Rdn>, #<imm>', 'ins<c> <Rd>, SP, #<imm>',
            'ins<c> <Rd>, <label>', 'ins<c> <Rn>, #<imm>',
@@ -448,6 +448,9 @@ instr_types = [
     thumb('MOD_SP_REG', 'Add a Register to the Stack Pointer',
           ['ins<c> SP, <Rm>'],
           lambda x, y, z: x[-3:] == (1, 0, 1) and x[-4] == d2.Rm),
+    thumb('CBZ', 'Compare and Branch on (Non)Zero',
+          ['ins<c> <Rn>, <label>'],
+          lambda x, y, z: x[-4:] == (d2.i, 1, d2.imm5, d2.Rn3)),
 ]
 
 if __name__ == '__main__':
@@ -590,7 +593,7 @@ if __name__ == '__main__':
     print('extern darm_instr_t thumb_instr_labels[256];')
 
     type_lut('gpi', 4)
-    type_lut('no_op', 3)
+    type_lut('hints', 3)
     type_lut('extend', 2)
     type_lut('rev', 2)
 
@@ -680,7 +683,7 @@ if __name__ == '__main__':
     print(type_lookup_table('type_gpi',
                             *[t_gpi[x] for x in range(16)]))
 
-    print(type_lookup_table('type_no_op',
+    print(type_lookup_table('type_hints',
                             'nop', 'yield', 'wfe', 'wfi', 'sev'))
 
     print(type_lookup_table('type_extend', 'sxth', 'sxtb', 'uxth', 'uxtb'))

@@ -260,7 +260,7 @@ struct {
         .instr = I_BLX, .instr_type = T_THUMB_BRANCH_REG, .cond = C_AL,
         .Rm = r7}},
     {0xbf10, 0, "yield", {
-        .instr = I_YIELD, .instr_type = T_THUMB_NO_OPERANDS, .cond = C_AL}},
+        .instr = I_YIELD, .instr_type = T_THUMB_IT_HINTS, .cond = C_AL}},
     {0x372a, 0, "add r7, r7, #42", {
         .instr = I_ADD, .instr_type = T_THUMB_HAS_IMM8, .cond = C_AL,
         .Rd = r7, .Rn = r7, .I = B_SET, .imm = 42}},
@@ -316,6 +316,15 @@ struct {
     {0x449b, 0, "add sp, sp, r3", {
         .instr = I_ADD, .instr_type = T_THUMB_MOD_SP_REG, .cond = C_AL,
         .Rd = SP, .Rn = SP, .Rm = r3}},
+    {0xb132, 0, "cbz r2, #+12", {
+        .instr = I_CBZ, .instr_type = T_THUMB_CBZ, .cond = C_AL,
+        .Rn = r2, .I = B_SET, .U = B_SET, .Rm = PC, .imm = 12}},
+    {0xbbbb, 0, "cbnz r3, #+110", {
+        .instr = I_CBNZ, .instr_type = T_THUMB_CBZ, .cond = C_AL,
+        .Rn = r3, .I = B_SET, .U = B_SET, .Rm = PC, .imm = 110}},
+    {0xbf34, 0, "", {
+        .instr = I_IT, .instr_type = T_THUMB_IT_HINTS, .cond = C_AL,
+        .firstcond = C_CC, .mask = 4}},
 
     // we now switch to thumb2
     {0, 0, NULL, {.instr = I_INVLD}},
@@ -364,6 +373,7 @@ int main()
         if(p->CRn == 0) p->CRn = R_INVLD;
         if(p->CRm == 0) p->CRm = R_INVLD;
         if(p->CRd == 0) p->CRd = R_INVLD;
+        if(p->firstcond == 0) p->firstcond = C_INVLD;
 
         if(p->shift_type == S_LSL && p->Rs == R_INVLD && p->shift == 0) {
             p->shift_type = S_INVLD;
@@ -402,7 +412,8 @@ int main()
                 C(shift_type) || C(Rs) || C(shift) || C(lsb) ||
                 C(width) || C(reglist) || F(T) || F(M) || F(N) ||
                 C(Rt2) || F(B) || C(coproc) || C(opc1) || C(opc2) ||
-                C(CRn) || C(CRm) || C(CRd) || strcmp(str.total, tests[i].s)) {
+                C(CRn) || C(CRm) || C(CRd) || C(firstcond) || C(mask)) ||
+                strcmp(str.total, tests[i].s)) {
             // leave ugly code
             printf("incorrect encoding for 0x%08x, ret %d\n", d.w, ret);
             printf("  %s = %s (%d)\n", str.total, tests[i].s,

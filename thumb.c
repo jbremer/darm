@@ -155,9 +155,19 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->Rm = (w >> 3) & b1111;
         return 0;
 
-    case T_THUMB_NO_OPERANDS:
-        d->instr = type_no_op_instr_lookup[(w >> 4) & b111];
-        return d->instr == I_INVLD ? -1 : 0;
+    case T_THUMB_IT_HINTS:
+        // one of the hints instructions (instructions that hint the cpu and
+        // don't take any operands)
+        if((w & b1111) == 0) {
+            d->instr = type_hints_instr_lookup[(w >> 4) & b111];
+            return d->instr == I_INVLD ? -1 : 0;
+        }
+
+        // if-then instruction
+        d->instr = I_IT;
+        d->mask = w & b1111;
+        d->firstcond = (w >> 4) & b1111;
+        return 0;
 
     case T_THUMB_HAS_IMM8:
         d->I = B_SET;
@@ -294,6 +304,15 @@ static int thumb_disasm(darm_t *d, uint16_t w)
     case T_THUMB_MOD_SP_REG:
         d->Rd = d->Rn = SP;
         d->Rm = (w >> 3) & b1111;
+        return 0;
+
+    case T_THUMB_CBZ:
+        d->instr = (w >> 11) & 1 ? I_CBNZ : I_CBZ;
+        d->Rn = w & b111;
+        d->Rm = PC;
+        d->U = B_SET;
+        d->I = B_SET;
+        d->imm = ((w >> 2) & (b11111 << 1)) | ((w >> 5) & (1 << 6));
         return 0;
     }
     return -1;
