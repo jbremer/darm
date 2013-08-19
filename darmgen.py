@@ -567,6 +567,10 @@ instr_types = [
           [''],
           lambda x, y, z: (thumb2_flagChk(x, []))
           ),
+    thumb2_flags('ROTATE_FLAG', 'Instructions that use the rotate flag',
+	  [''],
+	  lambda x, y, z: (thumb2_flagChk(x, [d2.rotate]))
+	  ),
     thumb2_flags('U_FLAG', 'Instructions that use the U flag',
           [''],
           lambda x, y, z: (thumb2_flagChk(x, [d2.U]))

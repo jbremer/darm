@@ -40,17 +40,19 @@ POSSIBILITY OF SUCH DAMAGE.
 
 int thumb2_lookup_instr(uint16_t w, uint16_t w2);
 void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2);
+void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2);
 
 
+// 12 -> 32 bit expansion function
 // See manual for this, A6-233
 // We don't care about the carry for the moment (should we?)
-static uint32_t ThumbExpandImm(uint16_t imm12_r) {
+static uint32_t thumb_expand_imm(uint16_t imm12_r) {
 
 	uint16_t imm12 = imm12_r & 0xFFF; // *snip*
 	uint32_t imm32, unrotated;
 
 	if ((imm12 & 0xC00) == 0) {
-	    switch((imm12&0x300) >> 8) {
+	    switch((imm12 & 0x300) >> 8) {
 		case 0:
 		    imm32 = ((imm12 & 0xFF) << 24);
 		    break;
@@ -80,9 +82,44 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     d->instr = thumb2_instr_labels[index];
 
     thumb2_parse_reg(index, d, w, w2);
+    thumb2_parse_imm(index, d, w, w2);
 
-
-
+    switch(thumb2_flags_instr_types[index]) {
+	case T_THUMB2_NO_FLAG:
+	    // No flag
+	    break;
+	case T_THUMB2_ROTATE_FLAG:
+	    // Rotate field
+	    d->rotate = (w2 & b110000) >> 4;
+	    break;
+	case T_THUMB2_U_FLAG:
+	    // U flag
+	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
+	    break;
+	case T_THUMB2_WUP_FLAG:
+	    // W, U and P flags
+	    d->W = (w2 >> 8) & 1 ? B_SET : B_UNSET;
+	    d->U = (w2 >> 9) & 1 ? B_SET : B_UNSET;
+	    d->U = (w2 >> 10) & 1 ? B_SET : B_UNSET;
+	case T_THUMB2_TYPE_FLAG:
+	    // Type field
+	    break;
+	case T_THUMB2_REGLIST_FLAG:
+	    // Reglist field
+	    break;
+	case T_THUMB2_WP_REGLIST_FLAG:
+	    // Reglist field and W, P flags
+	    break;
+	case T_THUMB2_S_FLAG:
+	    // S flag
+	    break;
+	case T_THUMB2_S_TYPE_FLAG:
+	    // S flag and type field
+	    break;
+	default:
+	    // Invalid.
+	    break;
+    }
 /*
     switch ((uint32_t) d->instr_type) {
 	case T_THUMB_ONLY_IMM8:
@@ -220,7 +257,6 @@ void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2) {
 void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
     d->I = B_SET;
 
-
     switch(thumb2_imm_instr_types[index]) {
 	case T_THUMB2_NO_IMM:
 		// No immediate
@@ -247,13 +283,12 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	case T_THUMB2_IMM1_IMM3_IMM8:
 		// 1, 3 and 8 bit immediates
 		// i:imm3:imm8 -> imm12 -> imm32
-		d->imm = ThumbExpandImm( ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF));
+		d->imm = thumb_expand_imm( ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF));
 		break;
 	default:
 		// Invalid.
 		break;
     }
-
 
 }
 // Parse the flag instruction type
