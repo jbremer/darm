@@ -35,10 +35,41 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "thumb2-tbl.h"
 
 #define BITMSK_8 ((1 << 8) - 1)
+#define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
+
 
 int thumb2_lookup_instr(uint16_t w, uint16_t w2);
 void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2);
 
+
+// See manual for this, A6-233
+// We don't care about the carry for the moment (should we?)
+static uint32_t ThumbExpandImm(uint16_t imm12_r) {
+
+	uint16_t imm12 = imm12_r & 0xFFF; // *snip*
+	uint32_t imm32, unrotated;
+
+	if ((imm12 & 0xC00) == 0) {
+	    switch((imm12&0x300) >> 8) {
+		case 0:
+		    imm32 = ((imm12 & 0xFF) << 24);
+		    break;
+		case 1:
+		    imm32 = ((imm12 & 0xFF) << 16) | (imm12 & 0xFF);
+		    break;
+		case 2:
+		    imm32 = ((imm12 & 0xFF) << 24) | ((imm12 & 0xFF) << 8);
+		    break;
+		case 3:
+		    imm32 = ((imm12 & 0xFF) << 24) | ((imm12 & 0xFF) << 16) | ((imm12 & 0xFF) << 8) | (imm12 & 0xFF); // Must be a more ninja way to do this
+	    }
+	} else {
+
+		unrotated = (0x80 | (imm12 & 0x7F)) << 24;
+		imm32 = ROR(unrotated, imm12 & 0xFC);
+	}
+	return imm32;
+}
 
 
 static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
@@ -50,7 +81,57 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
     thumb2_parse_reg(index, d, w, w2);
 
+    d->I = B_SET;
 
+
+    switch(thumb2_imm_instr_types[index]) {
+	case T_THUMB2_NO_IMM:
+		// No immediate
+		d->I = B_UNSET;
+		break;
+	case T_THUMB2_IMM12:
+		// 12 bit immediate
+		d->imm = w2 & 0xFFF;
+		break;
+	case T_THUMB2_IMM10:
+		// 10 bit immediate
+		// This is BLX, TODO remove this class
+		break;
+	case T_THUMB2_IMM10_IMM11:
+		// 10 and 11 bit immediates
+		// B/BL TODO fix later
+		break;
+	case T_THUMB2_IMM8:
+		// 8 bit immediate
+		d->imm = w2 & 0xFF;
+		// TODO: check which ones want zero extend to MSB!!
+		break;
+	case T_THUMB2_IMM6_IMM11:
+		// 6 and 11 bit immediates
+		// TODO: This is B T3, remove
+		break;
+	case T_THUMB2_IMM3_IMM8:
+		// 3 and 8 bit immediates
+		// TODO: doesnt exist
+		break;
+	case T_THUMB2_IMM2:
+		// 2 bit immediate
+		d->imm = (w2 >> 4) & b11;
+		break;
+	case T_THUMB2_IMM2_IMM3:
+		// 2 and 3 bit immediates
+		// (imm3:imm2)
+		d->imm = ((w2 >> 10) & b11100) | ((w2 >> 6) & b11);
+		break;
+	case T_THUMB2_IMM1_IMM3_IMM8:
+		// 1, 3 and 8 bit immediates
+		// i:imm3:imm8 -> imm12 -> imm32
+		d->imm = ThumbExpandImm( ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF));
+		break;
+	default:
+		// Invalid.
+		break;
+    }
 
 
 /*

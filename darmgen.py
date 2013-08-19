@@ -821,6 +821,8 @@ if __name__ == '__main__':
 
     # print some required definitions
     print('extern darm_enctype_t thumb2_instr_types[256];')
+    print('extern darm_enctype_t thumb2_imm_instr_types[256];')
+    print('extern darm_enctype_t thumb2_flags_instr_types[256];')
     print('extern darm_instr_t thumb2_instr_labels[256];')
     print('extern unsigned int thumb2_instruction_ids[256];')
     print('extern unsigned int thumb2_instruction_masks[256];')
