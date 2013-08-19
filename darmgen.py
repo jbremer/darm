@@ -495,7 +495,7 @@ instr_types = [
 	  [''],
 	  lambda x, y, z: (thumb2_regChk(x, [d2.Rd]))
 	  ),
-    thumb2('RD_RM_RG', 'Instructions that operate on the Rd and Rm register',
+    thumb2('RD_RM_REG', 'Instructions that operate on the Rd and Rm register',
 	  [''],
 	  lambda x, y, z: (thumb2_regChk(x, [d2.Rd, d2.Rm]))
 	  ),
@@ -518,10 +518,6 @@ instr_types = [
     thumb2('RN_RM_RT_REG', 'Instructions that operate on the Rn, Rm and Rt register',
 	  [''],
 	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rm, d2.Rt]))
-	  ),
-    thumb2('RN_RM_RA_REG', 'Instructions that operate on the Rn, Rm and Ra register',
-	  [''],
-	  lambda x, y, z: (thumb2_regChk(x, [d2.Rn, d2.Rm, d2.Ra]))
 	  ),
     thumb2('RN_RD_REG', 'Instructions that operate on the Rn and Rd register',
 	  [''],
@@ -826,8 +822,8 @@ if __name__ == '__main__':
     # print some required definitions
     print('extern darm_enctype_t thumb2_instr_types[256];')
     print('extern darm_instr_t thumb2_instr_labels[256];')
-    print('extern int thumb2_instruction_ids[256];')
-    print('extern int thumb2_instruction_masks[256];')
+    print('extern unsigned int thumb2_instruction_ids[256];')
+    print('extern unsigned int thumb2_instruction_masks[256];')
 
     type_lut('immediate', 4)
     type_lut('flags', 3)
@@ -950,11 +946,11 @@ if __name__ == '__main__':
 
     # print a table that contains the numeric identifier for each instruction
     id_list = map(lambda x: str(x[4]), thumb2_table.values())
-    print(typed_table('int', 'thumb2_instruction_ids', id_list))
+    print(typed_table('unsigned int', 'thumb2_instruction_ids', id_list))
 
     # print a table that contains masks for each instruction
     mask_list = map(lambda x: str(x[5]), thumb2_table.values())
-    print(typed_table('int', 'thumb2_instruction_masks', mask_list))
+    print(typed_table('unsigned int', 'thumb2_instruction_masks', mask_list))
     
 
     #

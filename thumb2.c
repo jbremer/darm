@@ -36,12 +36,20 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define BITMSK_8 ((1 << 8) - 1)
 
-darm_instr_t thumb2_lookup_instr(uint16_t w, uint16_t w2);
+int thumb2_lookup_instr(uint16_t w, uint16_t w2);
+void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2);
+
+
 
 static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
-    d->instr = thumb2_lookup_instr(w, w2);
-    d->instr_type = thumb_instr_types[w >> 8];
+
+    int index;
+    index = thumb2_lookup_instr(w, w2);
+    d->instr = thumb2_instr_labels[index];
+
+    thumb2_parse_reg(index, d, w, w2);
+
 
 
 
@@ -72,7 +80,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
 
 
-darm_instr_t thumb2_lookup_instr(uint16_t w, uint16_t w2) {
+int thumb2_lookup_instr(uint16_t w, uint16_t w2) {
 // TODO: replace with binary search tree for speedup
 	uint32_t dw;
 	int i;
@@ -80,15 +88,102 @@ darm_instr_t thumb2_lookup_instr(uint16_t w, uint16_t w2) {
 	for (i = 0 ; i < THUMB2_INSTRUCTION_COUNT ; i++) {
 		printf("%x %x\n", thumb2_instruction_ids[i], thumb2_instruction_masks[i]);
 		if ((dw & thumb2_instruction_masks[i]) == thumb2_instruction_ids[i]) {
-			return thumb2_instr_labels[i];
+			return i;
 		}
 	}
 	return 0;
 }
 
 // Parse the register instruction type
-void thumb2_parse_reg(darm_t *d, uint16_t w, uint16_t w2) {
+void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
+    switch(thumb2_instr_types[index]) {
+	case T_THUMB2_NO_REG:
+		// No registers
+		break;
+	case T_THUMB2_RT_REG:
+		// Rt register 
+		d->Rt = (w2 >> 12) & b1111;
+		break;
+	case T_THUMB2_RT_RT2_REG:
+		// Rt & Rt2 register
+		d->Rt = (w2 >> 12) & b1111;
+		d->Rt2 = (w2 >> 8) & b1111;
+		break;
+	case T_THUMB2_RM_REG:
+		// Rm register
+		d->Rm = (w & b1111);
+		break;
+	case T_THUMB2_RD_REG:
+		// Rd register
+		d->Rd = (w2 >> 8) & b1111;
+		break;
+	case T_THUMB2_RD_RM_REG:
+		// Rd & Rm register
+		d->Rd = (w2 >> 8) & b1111;
+		d->Rm = w2 & b1111;
+		break;
+	case T_THUMB2_RN_REG:
+		// Rn register
+		d->Rn = w & b1111;
+		break;
+	case T_THUMB2_RN_RT_REG:
+		// Rn & Rt register
+		d->Rn = w & b1111;
+		d->Rt = (w2 >> 12) & b1111;
+		break;
+	case T_THUMB2_RN_RT_RT2_REG:
+		// Rn & Rt & Rt2 register
+		d->Rn = w & b1111;
+		d->Rt = (w2 >> 12) & b1111;
+		d->Rt2 = (w2 >> 8) & b1111;
+		break;
+	case T_THUMB2_RN_RM_REG:
+		// Rn & Rm register
+		d->Rn = w & b1111;
+		d->Rm = w2 & b1111;
+		break;
+	case T_THUMB2_RN_RM_RT_REG:
+		// Rn & Rm & Rt register
+		d->Rn = w & b1111;
+		d->Rm = w2 & b1111;
+		d->Rt = (w2 >> 12) & b1111;
+		break;
+	case T_THUMB2_RN_RD_REG:
+		// Rn & Rd register
+		d->Rn = w & b1111;
+		d->Rd = (w2 >> 8) & b1111;
+		break;
+	case T_THUMB2_RN_RD_RT_REG:
+		// Rn & Rd & Rt register
+		d->Rn = (w & b1111);
+		d->Rd = (w2 & b1111);
+		d->Rt = (w2 >> 12) & b1111;
+		break;
+	case T_THUMB2_RN_RD_RT_RT2_REG:
+		// Rn & Rd & Rt & Rt2 register
+		d->Rn = (w & b1111);
+		d->Rd = (w2 & b1111);
+		d->Rt = (w2 >> 12) & b1111;
+		d->Rt2 = (w2 >> 8) & b1111;
+		break;
+	case T_THUMB2_RN_RD_RM_REG:
+		// Rn & Rd & Rm register
+		d->Rn = w & b1111;
+		d->Rm = w2 & b1111;
+		d->Rd = (w2 >> 8) & b1111;
+		break;
+	case T_THUMB2_RN_RD_RM_RA_REG:
+		// Rn & Rd & Rm & Ra register
+		d->Rn = w & b1111;
+		d->Rm = w2 & b1111;
+		d->Rd = (w2 >> 8) & b1111;
+		d->Ra = (w2 >> 12) & b1111;
+		break;
+	default:
+		// Invalid yo.
+		break;
+    }
 
 }
 // Parse the immediate instruction type
