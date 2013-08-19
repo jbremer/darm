@@ -547,25 +547,9 @@ instr_types = [
           [''],
           lambda x, y, z: (thumb2_immChk(x, [d2.imm12]))
           ),
-    thumb2_imm('IMM10', 'Instructions that use a 10 bit immediate',
-          [''],
-          lambda x, y, z: (thumb2_immChk(x, [d2.imm10]))
-          ),
-    thumb2_imm('IMM10_IMM11', 'Instructions that use a 10 and 11 bit immediate',
-          [''],
-          lambda x, y, z: (thumb2_immChk(x, [d2.imm10, d2.imm11]))
-          ),
     thumb2_imm('IMM8', 'Instructions that use an 8 bit immediate',
           [''],
           lambda x, y, z: (thumb2_immChk(x, [d2.imm8]))
-          ),
-    thumb2_imm('IMM6_IMM11', 'Instructions that use a 6 and 11 bit immediate',
-          [''],
-          lambda x, y, z: (thumb2_immChk(x, [d2.imm6, d2.imm11]))
-          ),
-    thumb2_imm('IMM3_IMM8', 'Instructions that use a 3 and 8 bit immediate',
-          [''],
-          lambda x, y, z: (thumb2_immChk(x, [d2.imm3, d2.imm8]))
           ),
     thumb2_imm('IMM2', 'Instructions that use a 2 bit immediate',
           [''],

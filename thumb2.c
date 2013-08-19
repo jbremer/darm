@@ -81,57 +81,6 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
     thumb2_parse_reg(index, d, w, w2);
 
-    d->I = B_SET;
-
-
-    switch(thumb2_imm_instr_types[index]) {
-	case T_THUMB2_NO_IMM:
-		// No immediate
-		d->I = B_UNSET;
-		break;
-	case T_THUMB2_IMM12:
-		// 12 bit immediate
-		d->imm = w2 & 0xFFF;
-		break;
-	case T_THUMB2_IMM10:
-		// 10 bit immediate
-		// This is BLX, TODO remove this class
-		break;
-	case T_THUMB2_IMM10_IMM11:
-		// 10 and 11 bit immediates
-		// B/BL TODO fix later
-		break;
-	case T_THUMB2_IMM8:
-		// 8 bit immediate
-		d->imm = w2 & 0xFF;
-		// TODO: check which ones want zero extend to MSB!!
-		break;
-	case T_THUMB2_IMM6_IMM11:
-		// 6 and 11 bit immediates
-		// TODO: This is B T3, remove
-		break;
-	case T_THUMB2_IMM3_IMM8:
-		// 3 and 8 bit immediates
-		// TODO: doesnt exist
-		break;
-	case T_THUMB2_IMM2:
-		// 2 bit immediate
-		d->imm = (w2 >> 4) & b11;
-		break;
-	case T_THUMB2_IMM2_IMM3:
-		// 2 and 3 bit immediates
-		// (imm3:imm2)
-		d->imm = ((w2 >> 10) & b11100) | ((w2 >> 6) & b11);
-		break;
-	case T_THUMB2_IMM1_IMM3_IMM8:
-		// 1, 3 and 8 bit immediates
-		// i:imm3:imm8 -> imm12 -> imm32
-		d->imm = ThumbExpandImm( ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF));
-		break;
-	default:
-		// Invalid.
-		break;
-    }
 
 
 /*
@@ -268,7 +217,42 @@ void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 }
 // Parse the immediate instruction type
-void thumb2_parse_imm(darm_t *d, uint16_t w, uint16_t w2) {
+void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
+    d->I = B_SET;
+
+
+    switch(thumb2_imm_instr_types[index]) {
+	case T_THUMB2_NO_IMM:
+		// No immediate
+		d->I = B_UNSET;
+		break;
+	case T_THUMB2_IMM12:
+		// 12 bit immediate
+		d->imm = w2 & 0xFFF;
+		break;
+	case T_THUMB2_IMM8:
+		// 8 bit immediate
+		d->imm = w2 & 0xFF;
+		// TODO: check which ones want zero extend to MSB!!
+		break;
+	case T_THUMB2_IMM2:
+		// 2 bit immediate
+		d->imm = (w2 >> 4) & b11;
+		break;
+	case T_THUMB2_IMM2_IMM3:
+		// 2 and 3 bit immediates
+		// (imm3:imm2)
+		d->imm = ((w2 >> 10) & b11100) | ((w2 >> 6) & b11);
+		break;
+	case T_THUMB2_IMM1_IMM3_IMM8:
+		// 1, 3 and 8 bit immediates
+		// i:imm3:imm8 -> imm12 -> imm32
+		d->imm = ThumbExpandImm( ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF));
+		break;
+	default:
+		// Invalid.
+		break;
+    }
 
 
 }
