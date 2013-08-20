@@ -183,6 +183,13 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    d->CRd = (w2 >> 12) & b1111; // enum index
 	    break;
 
+	case I_POP: case I_PUSH:
+	    if (w == 0xF85D || w == 0xF84D) // no flags
+		break;
+	    if (w == 0xE8BD) // P flag
+	    	d->P = (w2 >> 15) & 1 ? B_SET : B_UNSET; 
+	    // dont insert break here
+
 	// M-flag bit 14:
 	case I_LDM: case I_LDMDB:
 	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
@@ -190,6 +197,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
 	// co-processor move to
 	case I_MCR: case I_MCR2:
+	case I_MRC: case I_MRC2:
 	    d->CRm = (w2 & b1111);
 	    d->CRn = (w & b1111);
 	    d->coproc = (w2 >> 8) & b1111;
@@ -200,6 +208,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
 	// co-proc move to 2 reg
 	case I_MCRR: case I_MCRR2:
+	case I_MRRC: case I_MRRC2:
 	    d->coproc = (w2 >> 8) & b1111;
 	    d->Rt = (w2 >> 12) & b1111;
 	    d->opc1 = (w2 >> 4) & b1111;
@@ -213,8 +222,22 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 		d->I = B_SET;
 		d->imm = (uint32_t) ((w << 12) & 0xF00) | ((w << 2) & 0x800) | ((w2 >> 4) & 0xF00) | (w2 & 0xFF);
 	    }
+	    break;
 
-	
+	case I_MSR:
+	    d->mask = (w2 >> 10) & b11;
+	    break;
+
+	case I_PKH:
+	    // S flag and immediate already set
+	    d->T = (w2 >> 4) & 1;
+	    thumb2_decode_immshift(d, (w2 >> 4) & 2, d->imm);
+	    break;
+	case I_PLD:
+	    d->W = ((w & b1111) != b1111) ? ((w >> 5) & 1) : B_INVLD;
+	    break;
+
+
 	default:
 	break;
     }
