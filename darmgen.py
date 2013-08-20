@@ -165,6 +165,7 @@ def generate_format_strings(arr):
         '#<const>', 'i',
         '#<imm4>', 'i',
         '#<imm5>', 'i',
+        '#<imm12>', 'i',
         '#<imm16>', 'i',
         '#<imm24>', 'i',
 
@@ -403,6 +404,8 @@ instr_types = [
     armv7('MVCR', 'Move to/from Coprocessor to/from ARM core register',
           ['ins<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>,{,<opc2>}'],
           lambda x, y, z: x[1:5] == (1, 1, 1, 0)),
+    armv7('UDF', 'Permanently Undefined Instruction',
+          ['ins<c> #<imm>'], lambda x, y, z: y[:3] == 'UDF'),
     thumb('ONLY_IMM8', 'Instructions which only take an 8-byte immediate',
           ['ins<c> #<imm8>'],
           lambda x, y, z: d2.imm8 in x and len(x) == 9),
@@ -428,8 +431,8 @@ instr_types = [
           lambda x, y, z: x[:6] == (0, 1, 0, 0, 0, 0)),
     thumb('BRANCH_REG', 'Branch (and optionally link) to a Register',
           ['ins<c> <Rm>'], lambda x, y, z: x[-4] == d2.Rm and x[7] == 1),
-    thumb('NO_OPERANDS', 'Instructions without any operands',
-          ['ins<c>'], lambda x, y, z: len(x) == 16 and y[:6] != 'SETEND'),
+    thumb('IT_HINTS', 'If-Then and Hints',
+          ['ins<c>'], lambda x, y, z: x[:8] == (1, 0, 1, 1, 1, 1, 1, 1)),
     thumb('HAS_IMM8', 'Instructions with an 8bit immediate',
           ['ins<c> <Rdn>, #<imm>', 'ins<c> <Rd>, SP, #<imm>',
            'ins<c> <Rd>, <label>', 'ins<c> <Rn>, #<imm>',
@@ -474,6 +477,12 @@ instr_types = [
     thumb('CMP', 'Comparison instruction',
           ['ins<c> <Rn>, <Rm>'],
           lambda x, y, z: x[-3:] == (d2.N, d2.Rm, d2.Rn3)),
+    thumb('MOD_SP_REG', 'Add a Register to the Stack Pointer',
+          ['ins<c> SP, <Rm>'],
+          lambda x, y, z: x[-3:] == (1, 0, 1) and x[-4] == d2.Rm),
+    thumb('CBZ', 'Compare and Branch on (Non)Zero',
+          ['ins<c> <Rn>, <label>'],
+          lambda x, y, z: x[-4:] == (d2.i, 1, d2.imm5, d2.Rn3)),
 
     thumb2('NO_REG', 'Instructions that do not operate on a register',
           [''],
@@ -786,7 +795,7 @@ if __name__ == '__main__':
     print('extern darm_instr_t thumb_instr_labels[256];')
 
     type_lut('gpi', 4)
-    type_lut('no_op', 3)
+    type_lut('hints', 3)
     type_lut('extend', 2)
     type_lut('rev', 2)
 
@@ -866,7 +875,7 @@ if __name__ == '__main__':
     print(instruction_names_table(open('instructions.txt')))
     print(type_encoding_table('darm_enctypes', instr_types))
 
-    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 FP IP SP LR PC'
+    reg = 'r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 SP LR PC'
     print(string_table('darm_registers', reg.split()))
 
     #
@@ -905,7 +914,7 @@ if __name__ == '__main__':
     print(type_lookup_table('type_gpi',
                             *[t_gpi[x] for x in range(16)]))
 
-    print(type_lookup_table('type_no_op',
+    print(type_lookup_table('type_hints',
                             'nop', 'yield', 'wfe', 'wfi', 'sev'))
 
     print(type_lookup_table('type_extend', 'sxth', 'sxtb', 'uxth', 'uxtb'))

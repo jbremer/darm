@@ -155,9 +155,19 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->Rm = (w >> 3) & b1111;
         return 0;
 
-    case T_THUMB_NO_OPERANDS:
-        d->instr = type_no_op_instr_lookup[(w >> 4) & b111];
-        return d->instr == I_INVLD ? -1 : 0;
+    case T_THUMB_IT_HINTS:
+        // one of the hints instructions (instructions that hint the cpu and
+        // don't take any operands)
+        if((w & b1111) == 0) {
+            d->instr = type_hints_instr_lookup[(w >> 4) & b111];
+            return d->instr == I_INVLD ? -1 : 0;
+        }
+
+        // if-then instruction
+        d->instr = I_IT;
+        d->mask = w & b1111;
+        d->firstcond = (w >> 4) & b1111;
+        return 0;
 
     case T_THUMB_HAS_IMM8:
         d->I = B_SET;
@@ -275,13 +285,13 @@ static int thumb_disasm(darm_t *d, uint16_t w)
     case T_THUMB_PUSHPOP:
         d->reglist = w & BITMSK_8;
 
-        // for push we have to set the 14th bit
+        // for push we have to set LR
         if(d->instr == I_PUSH) {
-            d->reglist |= ((w >> 8) & 1) << 14;
+            d->reglist |= ((w >> 8) & 1) << LR;
         }
-        // for pop we have to set the 15th bit
+        // for pop we have to set PC
         else {
-            d->reglist |= ((w >> 8) & 1) << 15;
+            d->reglist |= ((w >> 8) & 1) << PC;
         }
         return 0;
 
@@ -290,33 +300,38 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->Rn = (w & b111) | ((w >> 4) & b1000);
         d->Rm = (w >> 3) & b1111;
         return 0;
+
+    case T_THUMB_MOD_SP_REG:
+        d->Rd = d->Rn = SP;
+        d->Rm = (w >> 3) & b1111;
+        return 0;
+
+    case T_THUMB_CBZ:
+        d->instr = (w >> 11) & 1 ? I_CBNZ : I_CBZ;
+        d->Rn = w & b111;
+        d->Rm = PC;
+        d->U = B_SET;
+        d->I = B_SET;
+        d->imm = ((w >> 2) & (b11111 << 1)) | ((w >> 5) & (1 << 6));
+        return 0;
     }
     return -1;
 }
 
 int darm_thumb_disasm(darm_t *d, uint16_t w)
 {
-    memset(d, 0, sizeof(darm_t));
+    darm_init(d);
+    d->w = w;
+
     // we set all conditional flags to "execute always" by default, as most
     // thumb instructions don't feature a conditional flag
     d->cond = C_AL;
-    d->instr = I_INVLD;
-    d->instr_type = T_INVLD;
-    d->shift_type = S_INVLD;
-    d->S = d->E = d->U = d->H = d->P = d->I = B_INVLD;
-    d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
-    d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
-    d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
-    d->option = O_INVLD;
-    // TODO set opc and coproc? to what value?
-    d->CRn = d->CRm = d->CRd = R_INVLD;
 
     switch (w >> 11) {
     case b11101: case b11110: case b11111:
         return -1;
 
     default:
-        d->w = w;
         return thumb_disasm(d, w);
     }
 }

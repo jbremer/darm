@@ -41,18 +41,22 @@ POSSIBILITY OF SUCH DAMAGE.
 #define B_INVLD 2
 
 typedef enum _darm_reg_t {
-    r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
+    r0 = 0, r1 = 1, r2 = 2, r3 = 3, r4 = 4, r5 = 5, r6 = 6, r7 = 7, r8 = 8,
+    r9 = 9, r10 = 10, r11 = 11, r12 = 12, r13 = 13, r14 = 14, r15 = 15,
+
     FP = b1011, IP = b1100, SP = b1101, LR = b1110, PC = b1111,
 
-    cr0 = 0, cr1, cr2, cr3, cr4, cr5, cr6, cr7,
-    cr8, cr9, cr10, cr11, cr12, cr13, cr14, cr15,
+    cr0 = 0, cr1 = 1, cr2 = 2, cr3 = 3, cr4 = 4, cr5 = 5, cr6 = 6, cr7 = 7,
+    cr8 = 8, cr9 = 9, cr10 = 10, cr11 = 11, cr12 = 12, cr13 = 13, cr14 = 14,
+    cr15 = 15,
 
     R_INVLD = -1
 } darm_reg_t;
 
 typedef enum _darm_cond_t {
-    C_EQ, C_NE, C_CS, C_CC, C_MI, C_PL, C_VS,
-    C_VC, C_HI, C_LS, C_GE, C_LT, C_GT, C_LE, C_AL,
+    C_EQ = b0000, C_NE = b0001, C_CS = b0010, C_CC = b0011, C_MI = b0100,
+    C_PL = b0101, C_VS = b0110, C_VC = b0111, C_HI = b1000, C_LS = b1001,
+    C_GE = b1010, C_LT = b1011, C_GT = b1100, C_LE = b1101, C_AL = b1110,
 
     C_HS = C_CS, C_LO = C_CC,
     C_UNCOND = b1111,
@@ -61,7 +65,7 @@ typedef enum _darm_cond_t {
 } darm_cond_t;
 
 typedef enum _darm_shift_type_t {
-    S_LSL, S_LSR, S_ASR, S_ROR,
+    S_LSL = 0, S_LSR = 1, S_ASR = 2, S_ROR = 3,
 
     S_INVLD = -1,
 } darm_shift_type_t;
@@ -161,10 +165,11 @@ typedef struct _darm_t {
     darm_reg_t      Rs;
     uint32_t        shift;
 
-    // certain instructions operate on bits, they specify the lowest
+    // certain instructions operate on bits, they specify the lowest or highest
     // significant bit to be used, as well as the width, the amount of bits
     // that are affected
     uint32_t        lsb;
+    uint32_t	    msb;
     uint32_t        width;
 
     // bitmask of registers affected by the STM/LDM/PUSH/POP instruction
@@ -181,6 +186,9 @@ typedef struct _darm_t {
     // Flags for branch instruction
     uint32_t	    J1, J2;
 
+    // condition and mask for the IT instruction
+    darm_cond_t     firstcond;
+    uint8_t         mask;
 } darm_t;
 
 typedef struct _darm_str_t {
@@ -196,6 +204,11 @@ typedef struct _darm_str_t {
     // the entire instruction
     char total[64];
 } darm_str_t;
+
+// reset a darm object, this function is internally called right before using
+// any of the disassemble routines, hence a user is normally not required to
+// call this function beforehand
+void darm_init(darm_t *d);
 
 // disassemble an armv7 instruction
 int darm_armv7_disasm(darm_t *d, uint32_t w);

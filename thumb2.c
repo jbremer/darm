@@ -44,7 +44,7 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2);
 
 
 // 12 -> 32 bit expansion function
-// See manual for this, A6-233
+// See manual for this
 // We don't care about the carry for the moment (should we?)
 static uint32_t thumb_expand_imm(uint16_t imm12_r) {
 
@@ -113,20 +113,33 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     thumb2_parse_flag(index, d, w, w2);
 
 
+
     // Misc. cases
     switch(d->instr) {
+	// Branch
         case I_B:
+	    d->I = B_SET;
             d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
             d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
-	    d->J2 = (w2 >> 110) & 1 ? B_SET : B_UNSET;
+	    d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
 	    if (w2 & 0x1000 == 0) {
 		// T3
+		// sign_extend(S:J2:J1:imm6:imm11:0, 32)
+		d->imm = (uint32_t) ((w & 0x400) << 10) | ((w2 & 0x800) << 8) | ((w2 & 0x2000) << 5) | ((w & 3F) << 12) | ((w2 & 0x7FF) << 1);
+		d->cond = (w >> 6) & b1111; // directly indexing the enum
 	    } else {
 		// T4
+		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
+		d->imm = (uint32_t) (w << 14) | ((~(w2 >> 13) ^ (w >> 10) & 1) << 23) | ((~(w2 >> 11) ^ (w >> 10) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
 	    }
-
+	    break;
+	// Bit Field Insert
+	case I_BFI:
+	    d->msb = w2 & 0x1F;
+	    break;
 
     }
+
 /*
     switch ((uint32_t) d->instr_type) {
 	case T_THUMB_ONLY_IMM8:
@@ -365,7 +378,7 @@ int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     d->instr = I_INVLD;
     d->instr_type = T_INVLD;
     d->shift_type = S_INVLD;
-    d->S = d->E = d->U = d->H = d->P = d->I = B_INVLD;
+    d->S = d->E = d->U = d->H = d->P = d->I = d->J1 = d->J2 = B_INVLD;
     d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
     d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;

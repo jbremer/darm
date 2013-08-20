@@ -827,6 +827,11 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             d->Rt = (w >> 12) & b1111;
         }
         return 0;
+
+    case T_ARM_UDF:
+        d->I = B_SET;
+        d->imm = (w & b1111) | ((w >> 4) & (BITMSK_12 << 4));
+        return 0;
     }
     return -1;
 }
@@ -835,21 +840,9 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
 {
     int ret = -1;
 
-    // initialize the entire darm state, in order to make sure that no members
-    // contain undefined data
-    memset(d, 0, sizeof(darm_t));
+    darm_init(d);
     d->w = w;
     d->cond = (w >> 28) & b1111;
-    d->instr = I_INVLD;
-    d->instr_type = T_INVLD;
-    d->shift_type = S_INVLD;
-    d->S = d->E = d->U = d->H = d->P = d->I = B_INVLD;
-    d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
-    d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
-    d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
-    d->option = O_INVLD;
-    // TODO set opc and coproc? to what value?
-    d->CRn = d->CRm = d->CRd = R_INVLD;
 
     if(d->cond == C_UNCOND) {
         ret = armv7_disas_uncond(d, w);
