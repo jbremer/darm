@@ -128,6 +128,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    d->W = (w2 >> 8) & 1 ? B_SET : B_UNSET;
 	    d->U = (w2 >> 9) & 1 ? B_SET : B_UNSET;
 	    d->P = (w2 >> 10) & 1 ? B_SET : B_UNSET;
+	    break;
 	case T_THUMB2_TYPE_FLAG:
 	    // Type field
 	    // This is always a T_THUMB2_IMM2_IMM3 type
@@ -140,17 +141,17 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	case T_THUMB2_WP_REGLIST_FLAG:
 	    // Reglist field and W, P flags
 	    d->reglist = w2 & 0x1FFF;
-	    d->W = w & 0x20;
-	    d->P = w & 0x8000;
+	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
+	    d->P = (w >> 15) & 1 ? B_SET : B_UNSET;
 	    break;
 	case T_THUMB2_S_FLAG:
 	    // S flag
 	    // TODO: different bit on branches
-	    d->S = w & 0x10;
+	    d->S = (w >> 4) & 1 ? B_SET : B_UNSET;
 	    break;
 	case T_THUMB2_S_TYPE_FLAG:
 	    // S flag and type field
-	    d->S = w & 0x10;
+	    d->S = (w >> 4) & 1 ? B_SET : B_UNSET;
 	    thumb2_decode_immshift(d, (w2 >> 4) & 3, d->imm);
 	    break;
 	default:
