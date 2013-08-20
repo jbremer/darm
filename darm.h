@@ -177,6 +177,10 @@ typedef struct _darm_t {
     darm_reg_t      CRd;
     darm_reg_t      CRn;
     darm_reg_t      CRm;
+
+    // Flags for branch instruction
+    uint32_t	    J1, J2;
+
 } darm_t;
 
 typedef struct _darm_str_t {

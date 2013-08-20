@@ -110,53 +110,22 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
     thumb2_parse_reg(index, d, w, w2);
     thumb2_parse_imm(index, d, w, w2);
+    thumb2_parse_flag(index, d, w, w2);
 
-    switch(thumb2_flags_instr_types[index]) {
-	case T_THUMB2_NO_FLAG:
-	    // No flag
-	    break;
-	case T_THUMB2_ROTATE_FLAG:
-	    // Rotate field
-	    d->rotate = (w2 & b110000) >> 4;
-	    break;
-	case T_THUMB2_U_FLAG:
-	    // U flag
-	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
-	    break;
-	case T_THUMB2_WUP_FLAG:
-	    // W, U and P flags
-	    d->W = (w2 >> 8) & 1 ? B_SET : B_UNSET;
-	    d->U = (w2 >> 9) & 1 ? B_SET : B_UNSET;
-	    d->P = (w2 >> 10) & 1 ? B_SET : B_UNSET;
-	    break;
-	case T_THUMB2_TYPE_FLAG:
-	    // Type field
-	    // This is always a T_THUMB2_IMM2_IMM3 type
-	    thumb2_decode_immshift(d, (w2 >> 4) & 3, d->imm);
-	    break;
-	case T_THUMB2_REGLIST_FLAG:
-	    // Reglist field
-	    d->reglist = w2 & 0x1FFF;
-	    break;
-	case T_THUMB2_WP_REGLIST_FLAG:
-	    // Reglist field and W, P flags
-	    d->reglist = w2 & 0x1FFF;
-	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
-	    d->P = (w >> 15) & 1 ? B_SET : B_UNSET;
-	    break;
-	case T_THUMB2_S_FLAG:
-	    // S flag
-	    // TODO: different bit on branches
-	    d->S = (w >> 4) & 1 ? B_SET : B_UNSET;
-	    break;
-	case T_THUMB2_S_TYPE_FLAG:
-	    // S flag and type field
-	    d->S = (w >> 4) & 1 ? B_SET : B_UNSET;
-	    thumb2_decode_immshift(d, (w2 >> 4) & 3, d->imm);
-	    break;
-	default:
-	    // Invalid.
-	    break;
+
+    // Misc. cases
+    switch(d->instr) {
+        case I_B:
+            d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
+            d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
+	    d->J2 = (w2 >> 110) & 1 ? B_SET : B_UNSET;
+	    if (w2 & 0x1000 == 0) {
+		// T3
+	    } else {
+		// T4
+	    }
+
+
     }
 /*
     switch ((uint32_t) d->instr_type) {
@@ -330,8 +299,55 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 }
 // Parse the flag instruction type
-void thumb2_parse_flag(darm_t *d, uint16_t w, uint16_t w2) {
+void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
+    switch(thumb2_flags_instr_types[index]) {
+	case T_THUMB2_NO_FLAG:
+	    // No flag
+	    break;
+	case T_THUMB2_ROTATE_FLAG:
+	    // Rotate field
+	    d->rotate = (w2 & b110000) >> 4;
+	    break;
+	case T_THUMB2_U_FLAG:
+	    // U flag
+	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
+	    break;
+	case T_THUMB2_WUP_FLAG:
+	    // W, U and P flags
+	    d->W = (w2 >> 8) & 1 ? B_SET : B_UNSET;
+	    d->U = (w2 >> 9) & 1 ? B_SET : B_UNSET;
+	    d->P = (w2 >> 10) & 1 ? B_SET : B_UNSET;
+	    break;
+	case T_THUMB2_TYPE_FLAG:
+	    // Type field
+	    // This is always a T_THUMB2_IMM2_IMM3 type
+	    thumb2_decode_immshift(d, (w2 >> 4) & 3, d->imm);
+	    break;
+	case T_THUMB2_REGLIST_FLAG:
+	    // Reglist field
+	    d->reglist = w2 & 0x1FFF;
+	    break;
+	case T_THUMB2_WP_REGLIST_FLAG:
+	    // Reglist field and W, P flags
+	    d->reglist = w2 & 0x1FFF;
+	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
+	    d->P = (w >> 15) & 1 ? B_SET : B_UNSET;
+	    break;
+	case T_THUMB2_S_FLAG:
+	    // S flag
+	    // TODO: different bit on branches
+	    d->S = (w >> 4) & 1 ? B_SET : B_UNSET;
+	    break;
+	case T_THUMB2_S_TYPE_FLAG:
+	    // S flag and type field
+	    d->S = (w >> 4) & 1 ? B_SET : B_UNSET;
+	    thumb2_decode_immshift(d, (w2 >> 4) & 3, d->imm);
+	    break;
+	default:
+	    // Invalid.
+	    break;
+    }
 
 }
 
