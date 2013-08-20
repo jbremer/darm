@@ -285,13 +285,13 @@ static int thumb_disasm(darm_t *d, uint16_t w)
     case T_THUMB_PUSHPOP:
         d->reglist = w & BITMSK_8;
 
-        // for push we have to set the 14th bit
+        // for push we have to set LR
         if(d->instr == I_PUSH) {
-            d->reglist |= ((w >> 8) & 1) << 14;
+            d->reglist |= ((w >> 8) & 1) << LR;
         }
-        // for pop we have to set the 15th bit
+        // for pop we have to set PC
         else {
-            d->reglist |= ((w >> 8) & 1) << 15;
+            d->reglist |= ((w >> 8) & 1) << PC;
         }
         return 0;
 
