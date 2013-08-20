@@ -159,6 +159,7 @@ typedef struct _darm_t {
 
     // immediate operand
     uint32_t        imm;
+    uint32_t	    sat_imm;
 
     // register shift info
     darm_shift_type_t shift_type;

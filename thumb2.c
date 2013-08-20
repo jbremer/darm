@@ -164,6 +164,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    break;
 
 	// co-proc data processing
+	// TODO: not implemented
 	//case I_CPD: case I_CPD2:
 	//break;
 
@@ -195,7 +196,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
 	    break;
 
-	// co-processor move to
+	// co-processor move
 	case I_MCR: case I_MCR2:
 	case I_MRC: case I_MRC2:
 	    d->CRm = (w2 & b1111);
@@ -206,7 +207,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    d->opc2 = (w2 >> 5) & b111;
 	    break;
 
-	// co-proc move to 2 reg
+	// co-proc move 2 reg
 	case I_MCRR: case I_MCRR2:
 	case I_MRRC: case I_MRRC2:
 	    d->coproc = (w2 >> 8) & b1111;
@@ -233,13 +234,49 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    d->T = (w2 >> 4) & 1;
 	    thumb2_decode_immshift(d, (w2 >> 4) & 2, d->imm);
 	    break;
+
 	case I_PLD:
 	    d->W = ((w & b1111) != b1111) ? ((w >> 5) & 1) : B_INVLD;
 	    break;
 
+	case I_SBFX:
+	    d->width = (w2 & 0x1F);
+	    break;
+
+	// N, M flags
+	case I_SMLABB: case I_SMLABT: case I_SMLATB: case I_SMLATT:
+	case I_SMULBB: case I_SMULBT: case I_SMULTB: case I_SMULTT:
+	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
+	/* case I_SMLAWB: case I_SMLAWT: */ case I_SMLSD: case I_SMUAD:
+	/* case I_SMULWB: case I_SMULWT: */ case I_SMUSD:
+	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	// N, M, Rdhi, Rdlo flags
+	case I_SMLALBB: case I_SMLALBT: case I_SMLALTB: case I_SMLALTT:
+	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
+	case I_SMLSLD:
+	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	case I_SMLAL: case I_SMLALD: case I_SMULL:
+	    d->RdHi = (w2 >> 8) & b1111;
+	    d->RdLo = (w2 >> 12) & b1111;
+	    break;
+
+	// R flag
+	case I_SMMLA: case I_SMMLS: case I_SMMUL:
+	    d->R = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	case I_SSAT:
+	    thumb2_decode_immshift(d, (w >> 4) & 2, d->imm);
+	    d->sat_imm = w2 & 0x1F;
+	    break;
+	case I_SSAT16:
+	    d->sat_imm = w2 & 0xF;
+	    break;
 
 	default:
-	break;
+	    break;
     }
 
 /*
