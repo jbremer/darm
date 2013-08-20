@@ -169,8 +169,44 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
 	// co-proc load memory
 	case I_LDC: case I_LDC2:
-	    break;	
+	    d->P = (w >> 8) & 1 ? B_SET : B_UNSET;
+	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
+	    d->D = (w >> 6) & 1 ? B_SET : B_UNSET;
+	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
 
+	    // literal or immediate
+	    d->Rn = ((w & b1111) == b1111) ? R_INVLD : (w & b1111);
+
+	    d->I = B_SET;
+	    d->imm = (w2 & 0xFF);
+	    d->coproc = (w2 >> 8) & b1111;
+	    d->CRd = (w2 >> 12) & b1111; // enum index
+	    break;
+
+	// M-flag bit 14:
+	case I_LDM: case I_LDMDB:
+	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	// co-processor move to
+	case I_MCR: case I_MCR2:
+	    d->CRm = (w2 & b1111);
+	    d->CRn = (w & b1111);
+	    d->coproc = (w2 >> 8) & b1111;
+	    d->Rt = (w2 >> 12) & b1111;
+	    d->opc1 = (w >> 5) & b111;
+	    d->opc2 = (w2 >> 5) & b111;
+	    break;
+
+	// co-proc move to 2 reg
+	case I_MCRR: case I_MCRR2:
+	    d->coproc = (w2 >> 8) & b1111;
+	    d->Rt = (w2 >> 12) & b1111;
+	    d->opc1 = (w2 >> 4) & b1111;
+	    d->CRm = (w2 & b1111);
+	    d->Rt2 = w & b1111;
+	    break;
+	
 	default:
 	break;
     }
@@ -414,7 +450,7 @@ int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     d->instr_type = T_INVLD;
     d->shift_type = S_INVLD;
     d->S = d->E = d->U = d->H = d->P = d->I = d->J1 = d->J2 = B_INVLD;
-    d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
+    d->R = d->T = d->W = d->M = d->N = d->B = d->D = B_INVLD;
     d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
     d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
     d->option = O_INVLD;
