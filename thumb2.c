@@ -75,7 +75,7 @@ static uint32_t thumb_expand_imm(uint16_t imm12_r) {
 
 
 // Can replace this later on
-static uint32_t thumb2_decode_immshift(darm_t *d, uint8_t type, uint8_t imm5) 
+static void thumb2_decode_immshift(darm_t *d, uint8_t type, uint8_t imm5) 
 {
 	switch(type) {
 	    case 0:
@@ -92,7 +92,7 @@ static uint32_t thumb2_decode_immshift(darm_t *d, uint8_t type, uint8_t imm5)
 		break;
 	    case 3:
 		d->shift_type = S_ROR;
-		d->shift = (imm5 == 0) ? 1 : imm5 // RRX! :)
+		d->shift = (imm5 == 0) ? 1 : imm5; // RRX! :)
 		break;
 	    default:
 		d->shift_type = S_INVLD;
@@ -131,19 +131,27 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	case T_THUMB2_TYPE_FLAG:
 	    // Type field
 	    // This is always a T_THUMB2_IMM2_IMM3 type
-	    thumb2_decode_immshift(d, (w2 >> 4) & 3, d->imm)
+	    thumb2_decode_immshift(d, (w2 >> 4) & 3, d->imm);
 	    break;
 	case T_THUMB2_REGLIST_FLAG:
 	    // Reglist field
+	    d->reglist = w2 & 0x1FFF;
 	    break;
 	case T_THUMB2_WP_REGLIST_FLAG:
 	    // Reglist field and W, P flags
+	    d->reglist = w2 & 0x1FFF;
+	    d->W = w & 0x20;
+	    d->P = w & 0x8000;
 	    break;
 	case T_THUMB2_S_FLAG:
 	    // S flag
+	    // TODO: different bit on branches
+	    d->S = w & 0x10;
 	    break;
 	case T_THUMB2_S_TYPE_FLAG:
 	    // S flag and type field
+	    d->S = w & 0x10;
+	    thumb2_decode_immshift(d, (w2 >> 4) & 3, d->imm);
 	    break;
 	default:
 	    // Invalid.
