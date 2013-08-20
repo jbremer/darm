@@ -41,6 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 int thumb2_lookup_instr(uint16_t w, uint16_t w2);
 void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2);
 void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2);
+void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2);
 
 
 // 12 -> 32 bit expansion function
@@ -122,7 +123,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
             d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
             d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
 	    d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
-	    if (w2 & 0x1000 == 0) {
+	    if ((w2 & 0x1000) == 0) {
 		// T3
 		// sign_extend(S:J2:J1:imm6:imm11:0, 32)
 		d->imm = (uint32_t) ((w & 0x400) << 10) | ((w2 & 0x800) << 8) | ((w2 & 0x2000) << 5) | ((w & 0x3F) << 12) | ((w2 & 0x7FF) << 1);
@@ -130,7 +131,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    } else {
 		// T4
 		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
-		d->imm = (uint32_t) ((w & 0x400) << 14) | ((~(w2 >> 13) ^ (w >> 10) & 1) << 23) | ((~(w2 >> 11) ^ (w >> 10) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
+		d->imm = (uint32_t) ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
 	    }
 	    break;
 	// Bit Field Insert
@@ -139,20 +140,39 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    break;
 	// Branch with Link
 	case I_BL: case I_BLX:
-	    d-I = B_SET;
+	    d->I = B_SET;
             d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
             d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
 	    d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
-	    if (w2 & 0x1000 == 0) {
+	    if ((w2 & 0x1000) == 0) {
 		// BLX
 		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10H:imm10L:00, 32)
-		d->imm = (uint32_t)  (w & 0x400 << 14) | ((~(w2 >> 13) ^ (w >> 10) & 1) << 23) | ((~(w2 >> 11) ^ (w >> 10) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FE) << 1);
+		d->imm = (uint32_t)  (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FE) << 1);
 		d->H = (w & 1) ? B_SET : B_UNSET;
 	    } else {
 		// BL
 		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
-		d->imm = (uint32_t) (w & 0x400 << 14) | ((~(w2 >> 13) ^ (w >> 10) & 1) << 23) | ((~(w2 >> 11) ^ (w >> 10) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
+		d->imm = (uint32_t) (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
 	    }
+	    break;
+
+
+	// option field
+	case I_DBG: case I_DMB: case I_DSB:
+	case I_ISB:
+	    d->option = w2 & b1111; // directly index enum
+	    break;
+
+	// co-proc data processing
+	//case I_CPD: case I_CPD2:
+	//break;
+
+	// co-proc load memory
+	case I_LDC: case I_LDC2:
+	    break;	
+
+	default:
+	break;
     }
 
 /*
