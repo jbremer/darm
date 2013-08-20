@@ -42,7 +42,7 @@ int thumb2_lookup_instr(uint16_t w, uint16_t w2);
 void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2);
 void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2);
 void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2);
-
+void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2);
 
 // 12 -> 32 bit expansion function
 // See manual for this
@@ -112,213 +112,8 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     thumb2_parse_reg(index, d, w, w2);
     thumb2_parse_imm(index, d, w, w2);
     thumb2_parse_flag(index, d, w, w2);
-
-
-
-    // Misc. cases
-    switch(d->instr) {
-	// Branch
-        case I_B:
-	    d->I = B_SET;
-            d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
-            d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
-	    d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
-	    if ((w2 & 0x1000) == 0) {
-		// T3
-		// sign_extend(S:J2:J1:imm6:imm11:0, 32)
-		d->imm = (int32_t) ((w & 0x400) << 10) | ((w2 & 0x800) << 8) | ((w2 & 0x2000) << 5) | ((w & 0x3F) << 12) | ((w2 & 0x7FF) << 1);
-		d->cond = (w >> 6) & b1111; // directly indexing the enum
-	    } else {
-		// T4
-		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
-		d->imm = (int32_t) ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
-	    }
-	    break;
-	// Bit Field Insert
-	case I_BFI:
-	    d->msb = w2 & 0x1F;
-	    break;
-	// Branch with Link
-	case I_BL: case I_BLX:
-	    d->I = B_SET;
-            d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
-            d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
-	    d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
-	    if ((w2 & 0x1000) == 0) {
-		// BLX
-		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10H:imm10L:00, 32)
-		d->imm = (int32_t)  (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FE) << 1);
-		d->H = (w & 1) ? B_SET : B_UNSET;
-	    } else {
-		// BL
-		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
-		d->imm = (int32_t) (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
-	    }
-	    break;
-
-
-	// option field
-	case I_DBG: case I_DMB: case I_DSB:
-	case I_ISB:
-	    d->option = w2 & b1111; // directly index enum
-	    break;
-
-	// co-proc data processing
-	// TODO: not implemented
-	//case I_CPD: case I_CPD2:
-	//break;
-
-	// co-proc load/store memory
-	case I_LDC: case I_LDC2:
-	case I_STC: case I_STC2:
-	    d->P = (w >> 8) & 1 ? B_SET : B_UNSET;
-	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
-	    d->D = (w >> 6) & 1 ? B_SET : B_UNSET;
-	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
-
-	    // literal or immediate
-	    d->Rn = ((w & b1111) == b1111) ? R_INVLD : (w & b1111);
-
-	    d->I = B_SET;
-	    d->imm = (w2 & 0xFF);
-	    d->coproc = (w2 >> 8) & b1111;
-	    d->CRd = (w2 >> 12) & b1111; // enum index
-	    break;
-
-	case I_POP: case I_PUSH:
-	    if (w == 0xF85D || w == 0xF84D) // no flags
-		break;
-	    if (w == 0xE8BD) // P flag
-	    	d->P = (w2 >> 15) & 1 ? B_SET : B_UNSET; 
-	    // dont insert break here
-
-
-	// M-flag bit 14:
-	case I_LDM: case I_LDMDB:
-	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
-	    break;
-
-	// co-processor move
-	case I_MCR: case I_MCR2:
-	case I_MRC: case I_MRC2:
-	    d->CRm = (w2 & b1111);
-	    d->CRn = (w & b1111);
-	    d->coproc = (w2 >> 8) & b1111;
-	    d->Rt = (w2 >> 12) & b1111;
-	    d->opc1 = (w >> 5) & b111;
-	    d->opc2 = (w2 >> 5) & b111;
-	    break;
-
-	// co-proc move 2 reg
-	case I_MCRR: case I_MCRR2:
-	case I_MRRC: case I_MRRC2:
-	    d->coproc = (w2 >> 8) & b1111;
-	    d->Rt = (w2 >> 12) & b1111;
-	    d->opc1 = (w2 >> 4) & b1111;
-	    d->CRm = (w2 & b1111);
-	    d->Rt2 = w & b1111;
-	    break;
-
-	// MOV with imm4
-	case I_MOV: case I_MOVT:
-	    if ((w & 0xFC8F) == 0x24) {
-		d->I = B_SET;
-		d->imm = (uint32_t) ((w << 12) & 0xF00) | ((w << 2) & 0x800) | ((w2 >> 4) & 0xF00) | (w2 & 0xFF);
-	    }
-	    break;
-
-	case I_MSR:
-	    d->mask = (w2 >> 10) & b11;
-	    break;
-
-	case I_PKH:
-	    // S flag and immediate already set
-	    d->T = (w2 >> 4) & 1;
-	    thumb2_decode_immshift(d, (w2 >> 4) & 2, d->imm);
-	    break;
-
-	case I_PLD:
-	    d->W = ((w & b1111) != b1111) ? ((w >> 5) & 1) : B_INVLD;
-	    break;
-
-	case I_SBFX: case I_UBFX:
-	    d->width = (w2 & 0x1F);
-	    break;
-
-	// N, M flags
-	// TODO: fix smlaw and smulw
-	case I_SMLABB: case I_SMLABT: case I_SMLATB: case I_SMLATT:
-	case I_SMULBB: case I_SMULBT: case I_SMULTB: case I_SMULTT:
-	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
-	/* case I_SMLAWB: case I_SMLAWT: */ case I_SMLSD: case I_SMUAD:
-	/* case I_SMULWB: case I_SMULWT: */ case I_SMUSD:
-	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
-	    break;
-
-	// N, M, Rdhi, Rdlo flags
-	case I_SMLALBB: case I_SMLALBT: case I_SMLALTB: case I_SMLALTT:
-	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
-	case I_SMLSLD:
-	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
-	case I_SMLAL: case I_SMLALD: case I_SMULL:
-	case I_UMAAL: case I_UMLAL: case I_UMULL:
-	    d->RdHi = (w2 >> 8) & b1111;
-	    d->RdLo = (w2 >> 12) & b1111;
-	    break;
-
-	// R flag
-	case I_SMMLA: case I_SMMLS: case I_SMMUL:
-	    d->R = (w2 >> 4) & 1 ? B_SET : B_UNSET;
-	    break;
-
-	case I_SSAT: case I_USAT:
-	    thumb2_decode_immshift(d, (w >> 4) & 2, d->imm);
-	    d->sat_imm = w2 & 0x1F;
-	    break;
-
-	case I_SSAT16: case I_USAT16:
-	    d->sat_imm = w2 & 0xF;
-	    break;
-
-	// WM flags
-	case I_STM: case I_STMDB:
-	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
-	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
-	    break;
-
-	// H flag
-	case I_TBB: case I_TBH:
-	    d->H = (w2 >> 4) & 1 ? B_SET : B_UNSET;
-	    break;
-
-
-	default:
-	    break;
-    }
-
-/*
-    switch ((uint32_t) d->instr_type) {
-	case T_THUMB_ONLY_IMM8:
-        	d->I = B_SET;
-        	d->imm = w & BITMSK_8;
-        	return 0;
-	case T_THUMB_GPI:
-		printf("GPI\n");
-        	d->instr = type_gpi_instr_lookup[(w >> 6) & b1111];
-        	switch ((uint32_t) d->instr) {
-        		case I_AND: case I_EOR: case I_LSL: case I_LSR:
-        		case I_ASR: case I_ADC: case I_SBC: case I_ROR:
-            			d->Rn = w & b111;
-				d->Rm = w2 & b111;
-				d->Rd = (w2 >> 8) & b111;
-            			return 0;
-		}
-	default:
-		return 0;
-
-    }
-*/
-	return 0;
+    thumb2_parse_misc(index, d, w, w2);
+    return 0;
 }
 
 
@@ -520,7 +315,192 @@ void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 }
 
+// Parse misc instruction cases
+void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
+    // Misc. cases
+    switch(d->instr) {
+	// Branch
+        case I_B:
+	    d->I = B_SET;
+            d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
+            d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
+	    d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
+	    if ((w2 & 0x1000) == 0) {
+		// T3
+		// sign_extend(S:J2:J1:imm6:imm11:0, 32)
+		d->imm = (int32_t) ((w & 0x400) << 10) | ((w2 & 0x800) << 8) | ((w2 & 0x2000) << 5) | ((w & 0x3F) << 12) | ((w2 & 0x7FF) << 1);
+		d->cond = (w >> 6) & b1111; // directly indexing the enum
+	    } else {
+		// T4
+		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
+		d->imm = (int32_t) ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
+	    }
+	    break;
+	// Bit Field Insert
+	case I_BFI:
+	    d->msb = w2 & 0x1F;
+	    break;
+	// Branch with Link
+	case I_BL: case I_BLX:
+	    d->I = B_SET;
+            d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
+            d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
+	    d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
+	    if ((w2 & 0x1000) == 0) {
+		// BLX
+		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10H:imm10L:00, 32)
+		d->imm = (int32_t)  (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FE) << 1);
+		d->H = (w & 1) ? B_SET : B_UNSET;
+	    } else {
+		// BL
+		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
+		d->imm = (int32_t) (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
+	    }
+	    break;
+
+
+	// option field
+	case I_DBG: case I_DMB: case I_DSB:
+	case I_ISB:
+	    d->option = w2 & b1111; // directly index enum
+	    break;
+
+	// co-proc data processing
+	// TODO: not implemented
+	//case I_CPD: case I_CPD2:
+	//break;
+
+	// co-proc load/store memory
+	case I_LDC: case I_LDC2:
+	case I_STC: case I_STC2:
+	    d->P = (w >> 8) & 1 ? B_SET : B_UNSET;
+	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
+	    d->D = (w >> 6) & 1 ? B_SET : B_UNSET;
+	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
+
+	    // literal or immediate
+	    d->Rn = ((w & b1111) == b1111) ? R_INVLD : (w & b1111);
+
+	    d->I = B_SET;
+	    d->imm = (w2 & 0xFF);
+	    d->coproc = (w2 >> 8) & b1111;
+	    d->CRd = (w2 >> 12) & b1111; // enum index
+	    break;
+
+	case I_POP: case I_PUSH:
+	    if (w == 0xF85D || w == 0xF84D) // no flags
+		break;
+	    if (w == 0xE8BD) // P flag
+	    	d->P = (w2 >> 15) & 1 ? B_SET : B_UNSET; 
+	    // dont insert break here
+
+
+	// M-flag bit 14:
+	case I_LDM: case I_LDMDB:
+	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	// co-processor move
+	case I_MCR: case I_MCR2:
+	case I_MRC: case I_MRC2:
+	    d->CRm = (w2 & b1111);
+	    d->CRn = (w & b1111);
+	    d->coproc = (w2 >> 8) & b1111;
+	    d->Rt = (w2 >> 12) & b1111;
+	    d->opc1 = (w >> 5) & b111;
+	    d->opc2 = (w2 >> 5) & b111;
+	    break;
+
+	// co-proc move 2 reg
+	case I_MCRR: case I_MCRR2:
+	case I_MRRC: case I_MRRC2:
+	    d->coproc = (w2 >> 8) & b1111;
+	    d->Rt = (w2 >> 12) & b1111;
+	    d->opc1 = (w2 >> 4) & b1111;
+	    d->CRm = (w2 & b1111);
+	    d->Rt2 = w & b1111;
+	    break;
+
+	// MOV with imm4
+	case I_MOV: case I_MOVT:
+	    if ((w & 0xFC8F) == 0x24) {
+		d->I = B_SET;
+		d->imm = (uint32_t) ((w << 12) & 0xF00) | ((w << 2) & 0x800) | ((w2 >> 4) & 0xF00) | (w2 & 0xFF);
+	    }
+	    break;
+
+	case I_MSR:
+	    d->mask = (w2 >> 10) & b11;
+	    break;
+
+	case I_PKH:
+	    // S flag and immediate already set
+	    d->T = (w2 >> 4) & 1;
+	    thumb2_decode_immshift(d, (w2 >> 4) & 2, d->imm);
+	    break;
+
+	case I_PLD:
+	    d->W = ((w & b1111) != b1111) ? ((w >> 5) & 1) : B_INVLD;
+	    break;
+
+	case I_SBFX: case I_UBFX:
+	    d->width = (w2 & 0x1F);
+	    break;
+
+	// N, M flags
+	// TODO: fix smlaw and smulw
+	case I_SMLABB: case I_SMLABT: case I_SMLATB: case I_SMLATT:
+	case I_SMULBB: case I_SMULBT: case I_SMULTB: case I_SMULTT:
+	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
+	/* case I_SMLAWB: case I_SMLAWT: */ case I_SMLSD: case I_SMUAD:
+	/* case I_SMULWB: case I_SMULWT: */ case I_SMUSD:
+	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	// N, M, Rdhi, Rdlo flags
+	case I_SMLALBB: case I_SMLALBT: case I_SMLALTB: case I_SMLALTT:
+	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
+	case I_SMLSLD:
+	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	case I_SMLAL: case I_SMLALD: case I_SMULL:
+	case I_UMAAL: case I_UMLAL: case I_UMULL:
+	    d->RdHi = (w2 >> 8) & b1111;
+	    d->RdLo = (w2 >> 12) & b1111;
+	    break;
+
+	// R flag
+	case I_SMMLA: case I_SMMLS: case I_SMMUL:
+	    d->R = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	case I_SSAT: case I_USAT:
+	    thumb2_decode_immshift(d, (w >> 4) & 2, d->imm);
+	    d->sat_imm = w2 & 0x1F;
+	    break;
+
+	case I_SSAT16: case I_USAT16:
+	    d->sat_imm = w2 & 0xF;
+	    break;
+
+	// WM flags
+	case I_STM: case I_STMDB:
+	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
+	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	// H flag
+	case I_TBB: case I_TBH:
+	    d->H = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	default:
+	    // Nothing happens
+	    break;
+    }
+
+
+}
 
 
 int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
