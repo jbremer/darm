@@ -126,12 +126,12 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    if ((w2 & 0x1000) == 0) {
 		// T3
 		// sign_extend(S:J2:J1:imm6:imm11:0, 32)
-		d->imm = (uint32_t) ((w & 0x400) << 10) | ((w2 & 0x800) << 8) | ((w2 & 0x2000) << 5) | ((w & 0x3F) << 12) | ((w2 & 0x7FF) << 1);
+		d->imm = (int32_t) ((w & 0x400) << 10) | ((w2 & 0x800) << 8) | ((w2 & 0x2000) << 5) | ((w & 0x3F) << 12) | ((w2 & 0x7FF) << 1);
 		d->cond = (w >> 6) & b1111; // directly indexing the enum
 	    } else {
 		// T4
 		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
-		d->imm = (uint32_t) ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
+		d->imm = (int32_t) ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
 	    }
 	    break;
 	// Bit Field Insert
@@ -147,12 +147,12 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    if ((w2 & 0x1000) == 0) {
 		// BLX
 		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10H:imm10L:00, 32)
-		d->imm = (uint32_t)  (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FE) << 1);
+		d->imm = (int32_t)  (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FE) << 1);
 		d->H = (w & 1) ? B_SET : B_UNSET;
 	    } else {
 		// BL
 		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
-		d->imm = (uint32_t) (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
+		d->imm = (int32_t) (w & 0x400 << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
 	    }
 	    break;
 
@@ -206,6 +206,14 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    d->CRm = (w2 & b1111);
 	    d->Rt2 = w & b1111;
 	    break;
+
+	// MOV with imm4
+	case I_MOV: case I_MOVT:
+	    if ((w & 0xFC8F) == 0x24) {
+		d->I = B_SET;
+		d->imm = (uint32_t) ((w << 12) & 0xF00) | ((w << 2) & 0x800) | ((w2 >> 4) & 0xF00) | (w2 & 0xFF);
+	    }
+
 	
 	default:
 	break;
