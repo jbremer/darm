@@ -168,8 +168,9 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	//case I_CPD: case I_CPD2:
 	//break;
 
-	// co-proc load memory
+	// co-proc load/store memory
 	case I_LDC: case I_LDC2:
+	case I_STC: case I_STC2:
 	    d->P = (w >> 8) & 1 ? B_SET : B_UNSET;
 	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
 	    d->D = (w >> 6) & 1 ? B_SET : B_UNSET;
@@ -190,6 +191,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    if (w == 0xE8BD) // P flag
 	    	d->P = (w2 >> 15) & 1 ? B_SET : B_UNSET; 
 	    // dont insert break here
+
 
 	// M-flag bit 14:
 	case I_LDM: case I_LDMDB:
@@ -239,11 +241,12 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    d->W = ((w & b1111) != b1111) ? ((w >> 5) & 1) : B_INVLD;
 	    break;
 
-	case I_SBFX:
+	case I_SBFX: case I_UBFX:
 	    d->width = (w2 & 0x1F);
 	    break;
 
 	// N, M flags
+	// TODO: fix smlaw and smulw
 	case I_SMLABB: case I_SMLABT: case I_SMLATB: case I_SMLATT:
 	case I_SMULBB: case I_SMULBT: case I_SMULTB: case I_SMULTT:
 	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
@@ -258,6 +261,7 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	case I_SMLSLD:
 	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
 	case I_SMLAL: case I_SMLALD: case I_SMULL:
+	case I_UMAAL: case I_UMLAL: case I_UMULL:
 	    d->RdHi = (w2 >> 8) & b1111;
 	    d->RdLo = (w2 >> 12) & b1111;
 	    break;
@@ -267,13 +271,26 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 	    d->R = (w2 >> 4) & 1 ? B_SET : B_UNSET;
 	    break;
 
-	case I_SSAT:
+	case I_SSAT: case I_USAT:
 	    thumb2_decode_immshift(d, (w >> 4) & 2, d->imm);
 	    d->sat_imm = w2 & 0x1F;
 	    break;
-	case I_SSAT16:
+
+	case I_SSAT16: case I_USAT16:
 	    d->sat_imm = w2 & 0xF;
 	    break;
+
+	// WM flags
+	case I_STM: case I_STMDB:
+	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
+	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
+	    break;
+
+	// H flag
+	case I_TBB: case I_TBH:
+	    d->H = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	    break;
+
 
 	default:
 	    break;
