@@ -31,5 +31,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #define __THUMB2_H__
 
 uint32_t thumb_expand_imm(uint16_t imm12_r);
+void thumb2_decode_immshift(darm_t *d, uint8_t type, uint8_t imm5);
 
 #endif

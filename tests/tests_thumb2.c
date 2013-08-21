@@ -20,12 +20,16 @@ struct {
 
 };
 
+
+
+
 // Test the internal functions of thumb2
 int test_thumb2_functions() {
 
     int failure = 0;
 
     uint16_t value1 = 0xFE;
+    darm_t d, d2;
 
     // Zero extend to 32 bits
     if (thumb_expand_imm(value1) != value1) {
@@ -51,8 +55,40 @@ int test_thumb2_functions() {
         failure = 1;
     }
 
+    // Bit 0:6 rotated
     if (thumb_expand_imm(0xC55) != 0xD500) {
         print_failure("Bit rotate in thumb_expand_imm failed");
+        failure = 1;
+    }
+
+    // shift immediate case LSL
+    thumb2_decode_immshift(&d, 0, 15); 
+    if (d.shift_type != S_LSL || d.shift != 15) {
+        print_failure("Shift immediate test LSL failed");
+        failure = 1;
+    }
+
+    // shift immediate case LSR
+    thumb2_decode_immshift(&d, 1, 15);
+    thumb2_decode_immshift(&d2, 1, 0);
+    if (d.shift_type != S_LSR || d.shift != 15 || d2.shift_type != S_LSR || d2.shift != 32) {
+        print_failure("Shift immediate test LSR failed");
+        failure = 1;
+    }
+
+    // shift immediate case ASR
+    thumb2_decode_immshift(&d, 2, 15);
+    thumb2_decode_immshift(&d2, 2, 0);
+    if (d.shift_type != S_ASR || d.shift != 15 || d2.shift_type != S_ASR || d2.shift != 32) {
+        print_failure("Shift immediate test ASR failed");
+        failure = 1;
+    }
+
+    // shift immediate case ROR
+    thumb2_decode_immshift(&d, 3, 15);
+    thumb2_decode_immshift(&d2, 3, 0);
+    if (d.shift_type != S_ROR || d.shift != 15 || d2.shift_type != S_ROR || d2.shift != 1) {
+        print_failure("Shift immediate test ROR failed");
         failure = 1;
     }
 
