@@ -146,7 +146,11 @@ int main(int argc, char *argv[])
         goto error;
     }
 
-    fread(buf, 1, g_len, fp);
+    if(fread(buf, 1, g_len, fp) != g_len) {
+        fprintf(stderr, "[-] Error reading the entire file into memory!\n");
+        goto error;
+    }
+
     fclose(fp);
 
     parse_elf_header(g_buf = buf);
