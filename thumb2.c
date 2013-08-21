@@ -68,9 +68,9 @@ uint32_t thumb_expand_imm(uint16_t imm12_r) {
 		    imm32 = ((imm12 & 0xFF) << 24) | ((imm12 & 0xFF) << 16) | ((imm12 & 0xFF) << 8) | (imm12 & 0xFF); // Must be a more ninja way to do this
 	    }
 	} else {
+		printf("unrotated %x %x\n", unrotated, (imm12 & 0xF80) >> 7);
 
-		unrotated = (0x80 | (imm12 & 0x7F)) << 24;
-		imm32 = ROR(unrotated, imm12 & 0xFC);
+		imm32 = ROR(unrotated, (imm12 & 0xF80) >> 7);
 	}
 	return imm32;
 }

@@ -51,6 +51,10 @@ int test_thumb2_functions() {
         failure = 1;
     }
 
+    if (thumb_expand_imm(0xC55) != 0xD500) {
+        print_failure("Bit rotate in thumb_expand_imm failed");
+        failure = 1;
+    }
 
 
     if (failure == 0) 
@@ -58,3 +62,4 @@ int test_thumb2_functions() {
     
     return failure;
 }
+
