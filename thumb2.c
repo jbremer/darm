@@ -33,6 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "darm.h"
 #include "thumb-tbl.h"
 #include "thumb2-tbl.h"
+#include "thumb2.h"
 
 #define BITMSK_8 ((1 << 8) - 1)
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
@@ -47,7 +48,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2);
 // 12 -> 32 bit expansion function
 // See manual for this
 // We don't care about the carry for the moment (should we?)
-static uint32_t thumb_expand_imm(uint16_t imm12_r) {
+uint32_t thumb_expand_imm(uint16_t imm12_r) {
 
 	uint16_t imm12 = imm12_r & 0xFFF; // *snip*
 	uint32_t imm32, unrotated;
@@ -55,7 +56,7 @@ static uint32_t thumb_expand_imm(uint16_t imm12_r) {
 	if ((imm12 & 0xC00) == 0) {
 	    switch((imm12 & 0x300) >> 8) {
 		case 0:
-		    imm32 = ((imm12 & 0xFF) << 24);
+		    imm32 = (uint32_t) imm12 & 0xFF;
 		    break;
 		case 1:
 		    imm32 = ((imm12 & 0xFF) << 16) | (imm12 & 0xFF);

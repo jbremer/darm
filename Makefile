@@ -6,7 +6,7 @@ ifneq ($(OS),Windows_NT)
 	PIC_FLAGS = -fPIC
 endif
 
-SRC = $(wildcard *.c)
+SRC = $(wildcard *.c tests/tests_thumb2.c)
 OBJ = $(SRC:.c=.o)
 
 GENCODESRC = darm-tbl.c armv7-tbl.c thumb-tbl.c
@@ -28,7 +28,7 @@ $(GENCODESRC): darmgen.py darmtbl.py darmtbl2.py
 	$(CC) $(CFLAGS) -o $@ -c $^ $(PIC_FLAGS)
 
 %.exe: %.c
-	$(CC) $(CFLAGS) -o $@ $^ libdarm.a -I.
+	$(CC) $(CFLAGS) -o $@ $^ libdarm.a -I. -Itests
 
 %.so: $(OBJ) $(GENCODEOBJ)
 	$(CC) -shared $(CFLAGS) -o $@ $^

@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include <string.h>
 #include "../darm.h"
+#include "../thumb2.h"
+#include "tests.h"
+
+void print_failure(char *failreason) {
+    printf("[\x01b[1;31;49mFAILED\x01b[0;39;49m] %s\n", failreason);
+}
+
+void print_success(char *operation) {
+    printf("[\x01b[1;32;49mSUCCESS\x01b[0;39;49m] %s\n", operation);
+}
+
 
 struct {
     uint32_t w;
@@ -340,6 +351,8 @@ static int _darm_thumb2_disasm(darm_t *d, uint32_t w)
     return darm_thumb2_disasm(d, w >> 16, w & 0xffff);
 }
 
+
+
 int main()
 {
     int failure = 0;
@@ -425,6 +438,10 @@ int main()
             failure = 1;
         }
     }
+
+    // Run some tests on utility functions
+    failure += test_thumb2_functions();
+
     if(failure == 0) {
         printf("[x] unittests were successful\n");
     }
