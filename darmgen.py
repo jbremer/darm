@@ -292,7 +292,7 @@ def thumb2_regChk(instr, hasRegs):
 
 # check if instruction affects same immediates as instruction type
 def thumb2_immChk(instr, hasImm):
-    imm = [ d2.imm2, d2.imm3, d2.imm4, d2.imm5, d2.imm6, d2.imm7, d2.imm8, d2.imm10, d2.imm11, d2.imm12, d2.imm10H, d2.imm10L, d2.imm24]
+    imm = [ d2.i, d2.imm2, d2.imm3, d2.imm4, d2.imm5, d2.imm6, d2.imm7, d2.imm8, d2.imm10, d2.imm11, d2.imm12, d2.imm10H, d2.imm10L, d2.imm24]
     instrImm = set(filter(lambda x: x in imm, instr))
     return len(set(instrImm).symmetric_difference(set(hasImm))) == 0
 
@@ -823,6 +823,7 @@ if __name__ == '__main__':
     print('extern darm_instr_t thumb2_instr_labels[256];')
     print('extern unsigned int thumb2_instruction_ids[256];')
     print('extern unsigned int thumb2_instruction_masks[256];')
+    print('extern const char * thumb2_instruction_strings[256];')
 
     type_lut('immediate', 4)
     type_lut('flags', 3)
@@ -942,6 +943,10 @@ if __name__ == '__main__':
 
     # print a table containing the instruction label for each entry
     print(instruction_names_index_table_thumb2(thumb2_table, 'thumb2'))
+
+    # print a table containing the instruction string for each entry
+    string_list = map(lambda x: "\"" + str(x[0]) + "\"", thumb2_table.values())
+    print(typed_table('const char *', 'thumb2_instruction_strings', string_list))
 
     # print a table that contains the numeric identifier for each instruction
     id_list = map(lambda x: str(x[4]), thumb2_table.values())

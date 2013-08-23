@@ -11,15 +11,75 @@ struct {
     darm_t d;
 } thumb2_tests[] = {
 
-    // we switch to thumb2
-    {0, 0, NULL, {.instr = I_INVLD}},
-
-    {0xbe03, 0, "adc", {
-        .instr = I_BKPT, .instr_type = T_THUMB_ONLY_IMM8, .cond = C_AL,
-        .I = B_SET, .imm = 3}},
+    {0xF55152AA, 0, "adc r2, r1 #0", {
+        .instr = I_ADC, .I = B_SET, .imm = (0x1540), .S = 1, .Rn = 1, .Rd = 2, .cond = C_AL}},
 
 };
 
+
+int test_thumb2_instructions() {
+    for (uint32_t i = 0; i < ARRAYSIZE(thumb2_tests); i++) {
+        darm_t d; int ret = 0;
+        char buf[100];
+
+	printf("Testing instruction: %s\n", thumb2_tests[i].s);
+        // update the registers in the tests in order not to be 0, but R_INVLD
+        // instead
+
+        darm_t *p = &thumb2_tests[i].d;
+
+        if(p->Rd == 0) p->Rd = R_INVLD;
+        if(p->Rn == 0) p->Rn = R_INVLD;
+        if(p->Rm == 0) p->Rm = R_INVLD;
+        if(p->Ra == 0) p->Ra = R_INVLD;
+        if(p->Rt == 0) p->Rt = R_INVLD;
+        if(p->Rt2 == 0) p->Rt2 = R_INVLD;
+        if(p->RdHi == 0) p->RdHi = R_INVLD;
+        if(p->RdLo == 0) p->RdLo = R_INVLD;
+        if(p->Rs == 0) p->Rs = R_INVLD;
+        if(p->option == 0) p->option = O_INVLD;
+        if(p->CRn == 0) p->CRn = R_INVLD;
+        if(p->CRm == 0) p->CRm = R_INVLD;
+        if(p->CRd == 0) p->CRd = R_INVLD;
+        if(p->firstcond == 0) p->firstcond = C_INVLD;
+
+        if(p->shift_type == S_LSL && p->Rs == R_INVLD && p->shift == 0) {
+            p->shift_type = S_INVLD;
+        }
+
+	if ((ret = darm_thumb2_disasm(&d, (thumb2_tests[i].w & 0xFFFF0000) >> 16, thumb2_tests[i].w & 0xFFFF)) == -1) {
+            sprintf(buf,"Test failed on instruction %i:%s", i, thumb2_tests[i].s);
+            print_failure(buf);
+	    return 1;
+        }
+
+        // so we don't have to hardcode all of these
+        d.w = thumb2_tests[i].d.w;
+
+        int flags; ret = 0;
+        if(C(w) || C(instr) || C(instr_type) ||
+                C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
+                F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
+                C(Rt) || C(RdHi) || C(RdLo) || F(I) || C(imm) || 
+                C(shift_type) || C(Rs) || C(shift) || C(lsb) ||
+                C(width) || C(reglist) || F(T) || F(M) || F(N) ||
+                C(Rt2) || F(B) || C(coproc) || C(opc1) || C(opc2) ||
+                C(CRn) || C(CRm) || C(CRd) /*|| C(firstcond)*/ || C(mask)
+
+                ) {
+
+
+	    print_failure("FAILED");
+            darm_dump(&d);
+            darm_dump(&thumb2_tests[i].d);
+	    return 1;
+
+
+        }
+    }
+
+
+}
 
 
 

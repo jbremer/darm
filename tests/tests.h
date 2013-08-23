@@ -30,6 +30,15 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef __TESTS_H__
 #define __TESTS_H__
 
+#define C(x) p->x != d.x
+
+    // if d.x, the output from the disasm, is invalid or unset, then the set
+    // value must be unset, otherwise, it must be set (this is because we
+    // can't specify B_INVLD in the unittests without making everything
+    // unreadable)
+#define F(x) ((d.x == B_INVLD || d.x == B_UNSET) ? p->x != B_UNSET : p->x != B_SET)
+
+
 void print_failure(char *failreason);
 void print_success(char *operation);
 

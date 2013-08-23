@@ -102,19 +102,6 @@ void thumb2_decode_immshift(darm_t *d, uint8_t type, uint8_t imm5)
 }
 
 
-static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
-{
-
-    int index;
-    index = thumb2_lookup_instr(w, w2);
-    d->instr = thumb2_instr_labels[index];
-
-    thumb2_parse_reg(index, d, w, w2);
-    thumb2_parse_imm(index, d, w, w2);
-    thumb2_parse_flag(index, d, w, w2);
-    thumb2_parse_misc(index, d, w, w2);
-    return 0;
-}
 
 
 
@@ -243,6 +230,7 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		// TODO: check which ones want zero extend to MSB!!
 		break;
 	case T_THUMB2_IMM2:
+	        // TODO: check for missed shifts, see LDR
 		// 2 bit immediate
 		d->imm = (w2 >> 4) & b11;
 		break;
@@ -424,6 +412,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	// MOV with imm4
 	case I_MOV: case I_MOVT:
+	    // TODO: explain
 	    if ((w & 0xFC8F) == 0x24) {
 		d->I = B_SET;
 		d->imm = (uint32_t) ((w << 12) & 0xF00) | ((w << 2) & 0x800) | ((w2 >> 4) & 0xF00) | (w2 & 0xFF);
@@ -503,9 +492,65 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 }
 
 
+static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
+{
+
+    int index;
+    index = thumb2_lookup_instr(w, w2);
+    d->instr = thumb2_instr_labels[index];
+
+    thumb2_parse_reg(index, d, w, w2);
+    thumb2_parse_imm(index, d, w, w2);
+    thumb2_parse_flag(index, d, w, w2);
+    thumb2_parse_misc(index, d, w, w2);
+    return 0;
+}
+
+
+
+// placeholder function for printing out thumb2 instructions
+// This is here until the format string problem is resolved
+// This lacks a lot of functionality, for debug only
+char *darm_thumb2_str(darm_t *d) {
+
+    int index, offset=0;
+    static char stringbuf[512];
+
+    // Such a great idea
+    // TODO: fix
+    for (int i = 0 ; i < THUMB2_INSTRUCTION_COUNT ; i++) {
+	if (d->instr == thumb2_instr_labels[i]) {
+	    index = i;
+	    break;
+	}
+    }
+
+    offset += sprintf(stringbuf+offset, "%s", thumb2_instruction_strings[index]);
+
+    if (d->Rd != R_INVLD)
+      offset += sprintf(stringbuf+offset, "rd%i,", d->Rd);
+
+    if (d->Rt != R_INVLD)
+      offset += sprintf(stringbuf+offset, "rt%i,", d->Rt2);
+    if (d->Rt2 != R_INVLD)
+      offset += sprintf(stringbuf+offset, "rt2%i,", d->Rt);
+
+    if (d->Rn != R_INVLD) 
+      offset += sprintf(stringbuf+offset, "rn%i,", d->Rn);
+
+    if (d->Rm != R_INVLD)
+      offset += sprintf(stringbuf+offset, "rm%i ", d->Rm);
+
+    if (d->I == B_SET)
+      offset += sprintf(stringbuf+offset, "#0x%x", d->imm);
+
+    return stringbuf;
+}
+
+
 int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
-    (void)d; (void) w; (void) w2;
+    (void) d; (void) w; (void) w2;
 
     memset(d, 0, sizeof(darm_t));
     // we set all conditional flags to "execute always" by default, as most
