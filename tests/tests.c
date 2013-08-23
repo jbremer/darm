@@ -5,11 +5,11 @@
 #include "tests.h"
 
 void print_failure(char *failreason) {
-    printf("[\x01b[1;31;49mFAILED\x01b[0;39;49m] %s\n", failreason);
+    printf("[\x01b[1;31;49mFAILED\x01b[0;39;49m] %s", failreason);
 }
 
 void print_success(char *operation) {
-    printf("[\x01b[1;32;49mSUCCESS\x01b[0;39;49m] %s\n", operation);
+    printf("[\x01b[1;32;49mSUCCESS\x01b[0;39;49m] %s", operation);
 }
 
 
@@ -442,7 +442,7 @@ int main()
     if(failure == 0) {
         printf("[x] unittests were successful\n");
     } else {
-	print_failure("Failed unittests");
+	print_failure("Failed unittests\n");
     }
     return failure;
 }

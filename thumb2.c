@@ -111,7 +111,7 @@ int thumb2_lookup_instr(uint16_t w, uint16_t w2) {
 	int i;
 	dw = (w << 16) | w2;
 	for (i = 0 ; i < THUMB2_INSTRUCTION_COUNT ; i++) {
-		printf("%x %x\n", thumb2_instruction_ids[i], thumb2_instruction_masks[i]);
+		//printf("%x %x\n", thumb2_instruction_ids[i], thumb2_instruction_masks[i]);
 		if ((dw & thumb2_instruction_masks[i]) == thumb2_instruction_ids[i]) {
 			return i;
 		}

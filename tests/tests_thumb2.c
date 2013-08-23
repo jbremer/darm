@@ -11,8 +11,10 @@ struct {
     darm_t d;
 } thumb2_tests[] = {
 
-    {0xF55152AA, 0, "adc r2, r1 #0", {
+    {0xF55152AA, 0, "adc r2, r1 #0xDAA", {
         .instr = I_ADC, .I = B_SET, .imm = (0x1540), .S = 1, .Rn = 1, .Rd = 2, .cond = C_AL}},
+    {0xF14102CC, 0, "adc r2, r1 #0xCC", {
+        .instr = I_ADC, .I = B_SET, .imm = (0xCC), .S = 0, .Rn = 1, .Rd = 2, .cond = C_AL}},
 
 };
 
@@ -22,7 +24,6 @@ int test_thumb2_instructions() {
         darm_t d; int ret = 0;
         char buf[100];
 
-	printf("Testing instruction: %s\n", thumb2_tests[i].s);
         // update the registers in the tests in order not to be 0, but R_INVLD
         // instead
 
@@ -69,13 +70,18 @@ int test_thumb2_instructions() {
                 ) {
 
 
-	    print_failure("FAILED");
+	    print_failure("");
+            printf("Testing instruction: %s\n", thumb2_tests[i].s);
+
             darm_dump(&d);
             darm_dump(&thumb2_tests[i].d);
 	    return 1;
 
 
-        }
+        } else {
+	   print_success("");
+           printf("Testing instruction: %s\n", thumb2_tests[i].s);
+	}
     }
 
 
@@ -93,38 +99,38 @@ int test_thumb2_functions() {
 
     // Zero extend to 32 bits
     if (thumb_expand_imm(value1) != value1) {
-        print_failure("Zero expand in thumb_expand_imm failed");
+        print_failure("Zero expand in thumb_expand_imm failed\n");
         failure = 1;
     }
 
     // Bit 0:7 interleaved with 0
     if (thumb_expand_imm(0x155) != 0x550055) {
-        print_failure("Bit interleaving in thumb_expand_imm failed");
+        print_failure("Bit interleaving in thumb_expand_imm failed\n");
         failure = 1;
     }
 
     // Bit 0:7 interleaved with 0
     if (thumb_expand_imm(0x255) != 0x55005500) {
-        print_failure("Bit interleaving in thumb_expand_imm failed");
+        print_failure("Bit interleaving in thumb_expand_imm failed\n");
         failure = 1;
     }
 
     // Bit 0:7 concatenated
     if (thumb_expand_imm(0x355) != 0x55555555) {
-        print_failure("Bit concatenation in thumb_expand_imm failed");
+        print_failure("Bit concatenation in thumb_expand_imm failed\n");
         failure = 1;
     }
 
     // Bit 0:6 rotated
     if (thumb_expand_imm(0xC55) != 0xD500) {
-        print_failure("Bit rotate in thumb_expand_imm failed");
+        print_failure("Bit rotate in thumb_expand_imm failed\n");
         failure = 1;
     }
 
     // shift immediate case LSL
     thumb2_decode_immshift(&d, 0, 15); 
     if (d.shift_type != S_LSL || d.shift != 15) {
-        print_failure("Shift immediate test LSL failed");
+        print_failure("Shift immediate test LSL failed\n");
         failure = 1;
     }
 
@@ -132,7 +138,7 @@ int test_thumb2_functions() {
     thumb2_decode_immshift(&d, 1, 15);
     thumb2_decode_immshift(&d2, 1, 0);
     if (d.shift_type != S_LSR || d.shift != 15 || d2.shift_type != S_LSR || d2.shift != 32) {
-        print_failure("Shift immediate test LSR failed");
+        print_failure("Shift immediate test LSR failed\n");
         failure = 1;
     }
 
@@ -140,7 +146,7 @@ int test_thumb2_functions() {
     thumb2_decode_immshift(&d, 2, 15);
     thumb2_decode_immshift(&d2, 2, 0);
     if (d.shift_type != S_ASR || d.shift != 15 || d2.shift_type != S_ASR || d2.shift != 32) {
-        print_failure("Shift immediate test ASR failed");
+        print_failure("Shift immediate test ASR failed\n");
         failure = 1;
     }
 
@@ -148,13 +154,13 @@ int test_thumb2_functions() {
     thumb2_decode_immshift(&d, 3, 15);
     thumb2_decode_immshift(&d2, 3, 0);
     if (d.shift_type != S_ROR || d.shift != 15 || d2.shift_type != S_ROR || d2.shift != 1) {
-        print_failure("Shift immediate test ROR failed");
+        print_failure("Shift immediate test ROR failed\n");
         failure = 1;
     }
 
 
     if (failure == 0) 
-        print_success("Passed thumb2 helper function tests");
+        print_success("Passed thumb2 helper function tests\n");
     
     return failure;
 }
