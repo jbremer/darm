@@ -56,6 +56,10 @@ struct {
         .instr = I_ASR, .I = B_SET, .S = 1, .imm = 0x6, .Rd = r1, .Rm = r2, .shift = 6, .shift_type = S_ASR, .cond = C_AL}},
     {0xFA42F104, 0, "asr.w r1, r2, r4", {
         .instr = I_ASR, .I = B_UNSET, .S = 0, .Rd = r1, .Rn = r2, .Rm = r4, .cond = C_AL}},
+    {0xF43F8801, 0, "beq.w #-266238", {
+        .instr = I_B, .I = B_SET, .S = 1, .imm = 0xFFFBF002, .J1 = 0, .J2 = 1,  .cond = C_EQ}},
+    {0xF30AAFF6, 0, "bgt.w #0xcafec", {
+        .instr = I_B, .I = B_SET, .S = 0, .imm = 0xcafec, .J1 = 1, .J2 = 1,  .cond = C_GT}},
 
 
 
@@ -108,8 +112,8 @@ int test_thumb2_instructions() {
                 C(shift_type) || C(Rs) || C(shift) || C(lsb) ||
                 C(width) || C(reglist) || F(T) || F(M) || F(N) ||
                 C(Rt2) || F(B) || C(coproc) || C(opc1) || C(opc2) ||
-                C(CRn) || C(CRm) || C(CRd) /*|| C(firstcond)*/ || C(mask)
-
+                C(CRn) || C(CRm) || C(CRd) /*|| C(firstcond)*/ || C(mask) ||
+		F(J1) || F(J2)
                 ) {
 
 

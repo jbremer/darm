@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define BITMSK_8 ((1 << 8) - 1)
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
-
+#define SIGN_EXTEND32(v, len) ((v << (32 - len)) >> (32 - len))
 
 int thumb2_lookup_instr(uint16_t w, uint16_t w2);
 void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2);
@@ -321,12 +321,13 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    if ((w2 & 0x1000) == 0) {
 		// T3
 		// sign_extend(S:J2:J1:imm6:imm11:0, 32)
-		d->imm = (int32_t) ((w & 0x400) << 10) | ((w2 & 0x800) << 8) | ((w2 & 0x2000) << 5) | ((w & 0x3F) << 12) | ((w2 & 0x7FF) << 1);
+		d->imm = SIGN_EXTEND32( ( ((w & 0x400) << 10) | ((w2 & 0x800) << 8) | ((w2 & 0x2000) << 5) | ((w & 0x3F) << 12) | ((w2 & 0x7FF) << 1)), 21 );
 		d->cond = (w >> 6) & b1111; // directly indexing the enum
 	    } else {
 		// T4
 		// I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
-		d->imm = (int32_t) ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
+		d->imm = SIGN_EXTEND32( ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1), 21);
+		//d->imm = (int32_t) ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
 	    }
 	    break;
 

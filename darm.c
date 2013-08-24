@@ -602,6 +602,8 @@ void darm_dump(const darm_t *d)
     PRINT_FLAG(R, "round the result", "do NOT round the result");
     PRINT_FLAG(W, "write-back", "do NOT write-back");
     PRINT_FLAG(I, "immediate present", "no immediate present");
+    PRINT_FLAG(J1, "branch flag set", "branch flag not set");
+    PRINT_FLAG(J2, "branch flag set", "branch flag not set");
 
     if(d->option != O_INVLD) {
         printf("option:        %d\n", d->option);
