@@ -1,6 +1,6 @@
 from darmtbl2 import Bitsize, Rn, Rm, Rt, Rt2
 from darmtbl2 import i, imm3, imm4, imm6, imm8, imm4H, imm4L
-from darmtbl2 import opc1, opc2, P, W, D, N, M, cond
+from darmtbl2 import P, W, D, N, M, cond
 
 
 Vd      = Bitsize('Vd', 4, 'Vector Destination Register')
@@ -23,7 +23,13 @@ cmode   = Bitsize('cmode', 4, 'SIMD Expand Mode')
 align   = Bitsize('align', 2, 'Memory Alignment')
 index_align = Bitsize('index_align', 4, 'Memory Index Alignment')
 a       = Bitsize('a', 1, 'Memory Alignment')
-op      = Bitsize('op', 1, 'Operation for VAC{GE,GT,LE,LT}')
+op      = Bitsize('op', 1, '1-bit Operation')
+op2     = Bitsize('op2', 2, '2-bit Operation')
+type_   = Bitsize('type', 4, 'Some Type')
+len_    = Bitsize('len', 2, 'Length for Vector Table Lookup')
+opc1    = Bitsize('opc1', 2, 'opc1')
+opc2    = Bitsize('opc2', 3, 'opc2')
+opc2_2  = Bitsize('opc2', 2, 'opc2')
 
 
 VFP_ARMv7 = [
@@ -43,7 +49,7 @@ VFP_ARMv7 = [
     ('VAND<c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, 0, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm),
     ('VBIC<c>.<dt> <Qd>,#<imm>', 1, 1, 1, 1, 0, 0, 1, i, 1, D, 0, 0, 0, imm3, Vd, cmode, 0, Q, 1, 1, imm4),
     ('VBIC<c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, 1, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm),
-    ('V<op><c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 0, D, op, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm),
+    ('V<op><c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 0, D, op2, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm),
     ('VCEQ<c>.<dt> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 1, Vm),
     ('VCEQ<c>.F32 <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, sz, Vn, Vd, 1, 1, 1, 0, N, Q, M, 0, Vm),
     ('VCEQ<c>.<dt> <Qd>,<Qm>,#0', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 0, 1, 0, Q, M, 0, Vm),
@@ -60,7 +66,7 @@ VFP_ARMv7 = [
     ('VCMP{E}<c>.F64 <Dd>,<Dm>', cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 1, 0, 0, Vd, 1, 0, 1, sz, E, 1, M, 0, Vm),
     ('VCMP{E}<c>.F64 <Dd>,#0.0', cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 1, 0, 1, Vd, 1, 0, 1, sz, E, 1, (0), 0, (0), (0), (0), (0)),
     ('VCNT<c>.8 <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 0, 1, 0, Q, M, 0, Vm),
-    ('VCVT<c>.<Td>.<Tm> <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 1, op, Q, M, 0, Vm),
+    ('VCVT<c>.<Td>.<Tm> <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 1, op2, Q, M, 0, Vm),
     ('VCVT{R}<c>.S32.F64 <Sd>,<Dm>', cond, 1, 1, 1, 0, 1, D, 1, 1, 1, opc2, Vd, 1, 0, 1, sz, op, 1, M, 0, Vm),
     ('VCVT<c>.<Td>.<Tm> <Qd>,<Qm>,#<fbits>', 1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 1, 1, 1, op, 0, Q, M, 1, Vm),
     ('VCVT<c>.<Td>.F64 <Dd>,<Dd>,#<fbits>', cond, 1, 1, 1, 0, 1, D, 1, 1, 1, op, 1, U, Vd, 1, 0, 1, sf, sx, 1, i, 0, imm4),
@@ -76,16 +82,16 @@ VFP_ARMv7 = [
     ('VFM<y><c>.F64 <Dd>,<Dn>,<Dm>', cond, 1, 1, 1, 0, 1, D, 1, 0, Vn, Vd, 1, 0, 1, sz, N, op, M, 0, Vm),
     ('VFNM<y><c>.F64 <Dd>,<Dn>,<Dm>', cond, 1, 1, 1, 0, 1, D, 0, 1, Vn, Vd, 1, 0, 1, sz, N, op, M, 0, Vm),
     ('VH<op><c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, op, 0, N, Q, M, 0, Vm),
-    ('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type, size, align, Rm),
+    ('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm),
     ('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 0, 0, index_align, Rm),
     ('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 0, 0, size, T, a, Rm),
-    ('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type, size, align, Rm),
+    ('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm),
     ('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 0, 1, index_align, Rm),
     ('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 0, 1, size, T, a, Rm),
-    ('VLD3<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type, size, align, Rm),
+    ('VLD3<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm),
     ('VLD3<c>.<size> <list>,[<Rn>]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 1, 0, index_align, Rm),
     ('VLD3<c>.<size> <list>,[<Rn>]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 1, 0, size, T, a, Rm),
-    ('VLD4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type, size, align, Rm),
+    ('VLD4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm),
     ('VLD4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 1, 1, index_align, Rm),
     ('VLD4<c>.<size> <list>,[<Rn>{ :<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 1, 1, size, T, a, Rm),
     ('VLDM{mode}<c> <Rn>{!},<list>', cond, 1, 1, 0, P, U, D, W, 1, Rn, Vd, 1, 0, 1, 1, imm8),
@@ -104,8 +110,8 @@ VFP_ARMv7 = [
     ('VMOV<c>.F64 <Dd>,#<imm>', cond, 1, 1, 1, 0, 1, D, 1, 1, imm4H, Vd, 1, 0, 1, sz, (0), 0, (0), 0, imm4L),
     ('VMOV<c> <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 0, 0, D, 1, 0, Vm, Vd, 0, 0, 0, 1, M, Q, M, 1, Vm),
     ('VMOV<c>.F64 <Dd>,<Dm>', cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 0, Vd, 1, 0, 1, sz, 0, 1, M, 0, Vm),
-    ('VMOV<c>.<size> <Dd[x]>,<Rt>', cond, 1, 1, 1, 0, 0, opc1, 0, Vd, Rt, 1, 0, 1, 1, D, opc2, 1, (0), (0), (0), (0)),
-    ('VMOV<c>.<dt> <Rt>,<Dn[x]>', cond, 1, 1, 1, 0, U, opc1, 1, Vn, Rt, 1, 0, 1, 1, N, opc2, 1, (0), (0), (0), (0)),
+    ('VMOV<c>.<size> <Dd[x]>,<Rt>', cond, 1, 1, 1, 0, 0, opc1, 0, Vd, Rt, 1, 0, 1, 1, D, opc2_2, 1, (0), (0), (0), (0)),
+    ('VMOV<c>.<dt> <Rt>,<Dn[x]>', cond, 1, 1, 1, 0, U, opc1, 1, Vn, Rt, 1, 0, 1, 1, N, opc2_2, 1, (0), (0), (0), (0)),
     ('VMOV<c> <Sn>,<Rt>', cond, 1, 1, 1, 0, 0, 0, 0, op, Vn, Rt, 1, 0, 1, 0, N, (0), (0), 1, (0), (0), (0), (0)),
     ('VMOV<c> <Sm>,<Sm1>,<Rt>,<Rt2>', cond, 1, 1, 0, 0, 0, 1, 0, op, Rt2, Rt, 1, 0, 1, 0, 0, 0, M, 1, Vm),
     ('VMOV<c> <Dm>,<Rt>,<Rt2>', cond, 1, 1, 0, 0, 0, 1, 0, op, Rt2, Rt, 1, 0, 1, 1, 0, 0, M, 1, Vm),
@@ -146,7 +152,7 @@ VFP_ARMv7 = [
     ('VQDMULH<c>.<dt> <Qd>,<Qn>,<Dm[x]>', 1, 1, 1, 1, 0, 0, 1, Q, 1, D, size, Vn, Vd, 1, 1, 0, 0, N, 1, M, 0, Vm),
     ('VQDMULL<c>.<dt> <Qd>,<Dn>,<Dm>', 1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 1, 1, 0, 1, N, 0, M, 0, Vm),
     ('VQDMULL<c>.<dt> <Qd>,<Dn>,<Dm[x]>', 1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 1, 0, 1, 1, N, 1, M, 0, Vm),
-    ('VQMOV{U}N<c>.<type><size> <Dd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 1, 0, op, M, 0, Vm),
+    ('VQMOV{U}N<c>.<type><size> <Dd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 1, 0, op2, M, 0, Vm),
     ('VQNEG<c>.<dt> <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 1, 1, 1, Q, M, 0, Vm),
     ('VQRDMULH<c>.<dt> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 0, D, size, Vn, Vd, 1, 0, 1, 1, N, Q, M, 0, Vm),
     ('VQRDMULH<c>.<dt> <Qd>,<Qn>,<Dm[x]>', 1, 1, 1, 1, 0, 0, 1, Q, 1, D, size, Vn, Vd, 1, 1, 0, 1, N, 1, M, 0, Vm),
@@ -159,7 +165,7 @@ VFP_ARMv7 = [
     ('VRADDHN<c>.<dt> <Dd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, size, Vn, Vd, 0, 1, 0, 0, N, 0, M, 0, Vm),
     ('VRECPE<c>.<dt> <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 0, F, 0, Q, M, 0, Vm),
     ('VRECPS<c>.F32 <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, sz, Vn, Vd, 1, 1, 1, 1, N, Q, M, 1, Vm),
-    ('VREV<n><c>.<size> <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 0, 0, op, Q, M, 0, Vm),
+    ('VREV<n><c>.<size> <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 0, 0, op2, Q, M, 0, Vm),
     ('VRHADD<c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 0, 1, N, Q, M, 0, Vm),
     ('VRSHL<c>.<type><size> <Qd>,<Qm>,<Qn>', 1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 1, N, Q, M, 0, Vm),
     ('VRSHR<c>.<type><size> <Qd>,<Qm>,#<imm>', 1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 0, L, Q, M, 1, Vm),
@@ -178,13 +184,13 @@ VFP_ARMv7 = [
     ('VSQRT<c>.F64 <Dd>,<Dm>', cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 1, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm),
     ('VSRA<c>.<type><size> <Qd>,<Qm>,#<imm>', 1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 1, L, Q, M, 1, Vm),
     ('VSRI<c>.<size> <Qd>,<Qm>,#<imm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 0, L, Q, M, 1, Vm),
-    ('VST1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type, size, align, Rm),
+    ('VST1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm),
     ('VST1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 0, 0, index_align, Rm),
-    ('VST2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type, size, align, Rm),
+    ('VST2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm),
     ('VST2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 0, 1, index_align, Rm),
-    ('VST3<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type, size, align, Rm),
+    ('VST3<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm),
     ('VST3<c>.<size> <list>,[<Rn>]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 1, 0, index_align, Rm),
-    ('VST4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type, size, align, Rm),
+    ('VST4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm),
     ('VST4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 1, 1, index_align, Rm),
     ('VSTM{mode}<c> <Rn>{!},<list>', cond, 1, 1, 0, P, U, D, W, 0, Rn, Vd, 1, 0, 1, 1, imm8),
     ('VSTM{mode}<c> <Rn>{!},<list>', cond, 1, 1, 0, P, U, D, W, 0, Rn, Vd, 1, 0, 1, 0, imm8),
@@ -196,7 +202,7 @@ VFP_ARMv7 = [
     ('VSUBHN<c>.<dt> <Dd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 0, 1, 1, 0, N, 0, M, 0, Vm),
     ('VSUBL<c>.<dt> <Qd>,<Dn>,<Dm>', 1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 0, 0, 1, op, N, 0, M, 0, Vm),
     ('VSWP<c> <Qd>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 0, 0, 0, Q, M, 0, Vm),
-    ('V<op><c>.8 <Dd>,<list>,<Dm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, Vn, Vd, 1, 0, len, N, op, M, 0, Vm),
+    ('V<op><c>.8 <Dd>,<list>,<Dm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, Vn, Vd, 1, 0, len_, N, op, M, 0, Vm),
     ('VTRN<c>.<size>', 1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 0, 0, 1, Q, M, 0, Vm),
     ('VTST<c>.<size> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 0, 0, 1, 0, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 1, Vm),
 ]
@@ -218,7 +224,7 @@ VFP_Thumb = [
     ('VAND<c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 0, 1, 1, 1, 1, 0, D, 0, 0, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm),
     ('VBIC<c>.<dt> <Qd>,#<imm>', 1, 1, 1, i, 1, 1, 1, 1, 1, D, 0, 0, 0, imm3, Vd, cmode, 0, Q, 1, 1, imm4),
     ('VBIC<c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 0, 1, 1, 1, 1, 0, D, 0, 1, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm),
-    ('V<op><c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 0, D, op, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm),
+    ('V<op><c> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 0, D, op2, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm),
     ('VCEQ<c>.<dt> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 1, Vm),
     ('VCEQ<c>.F32 <Qd>,<Qn>,<Qm>', 1, 1, 1, 0, 1, 1, 1, 1, 0, D, 0, sz, Vn, Vd, 1, 1, 1, 0, N, Q, M, 0, Vm),
     ('VCEQ<c>.<dt> <Qd>,<Qm>,#0', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 0, 1, 0, Q, M, 0, Vm),
@@ -235,7 +241,7 @@ VFP_Thumb = [
     ('VCMP{E}<c>.F64 <Dd>,<Dm>', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 1, 1, 0, 1, 0, 0, Vd, 1, 0, 1, sz, E, 1, M, 0, Vm),
     ('VCMP{E}<c>.F64 <Dd>,#0.0', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 1, 1, 0, 1, 0, 1, Vd, 1, 0, 1, sz, E, 1, (0), 0, (0), (0), (0), (0)),
     ('VCNT<c>.8 <Qd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 0, 1, 0, Q, M, 0, Vm),
-    ('VCVT<c>.<Td>.<Tm> <Qd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 1, op, Q, M, 0, Vm),
+    ('VCVT<c>.<Td>.<Tm> <Qd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 1, op2, Q, M, 0, Vm),
     ('VCVT{R}<c>.S32.F64 <Sd>,<Dm>', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 1, 1, 1, opc2, Vd, 1, 0, 1, sz, op, 1, M, 0, Vm),
     ('VCVT<c>.<Td>.<Tm> <Qd>,<Qm>,#<fbits>', 1, 1, 1, U, 1, 1, 1, 1, 1, D, imm6, Vd, 1, 1, 1, op, 0, Q, M, 1, Vm),
     ('VCVT<c>.<Td>.F64 <Dd>,<Dd>,#<fbits>', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 1, 1, 1, op, 1, U, Vd, 1, 0, 1, sf, sx, 1, i, 0, imm4),
@@ -251,16 +257,16 @@ VFP_Thumb = [
     ('VFM<y><c>.F64 <Dd>,<Dn>,<Dm>', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 1, 0, Vn, Vd, 1, 0, 1, sz, N, op, M, 0, Vm),
     ('VFNM<y><c>.F64 <Dd>,<Dn>,<Dm>', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 0, 1, Vn, Vd, 1, 0, 1, sz, N, op, M, 0, Vm),
     ('VH<op><c> <Qd>,<Qn>,<Qm>', 1, 1, 1, U, 1, 1, 1, 1, 0, D, size, Vn, Vd, 0, 0, op, 0, N, Q, M, 0, Vm),
-    ('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 1, 0, Rn, Vd, type, size, align, Rm),
+    ('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm),
     ('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 1, 0, Rn, Vd, size, 0, 0, index_align, Rm),
     ('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 1, 0, Rn, Vd, 1, 1, 0, 0, size, T, a, Rm),
-    ('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 1, 0, Rn, Vd, type, size, align, Rm),
+    ('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm),
     ('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 1, 0, Rn, Vd, size, 0, 1, index_align, Rm),
     ('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 1, 0, Rn, Vd, 1, 1, 0, 1, size, T, a, Rm),
-    ('VLD3<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 1, 0, Rn, Vd, type, size, align, Rm),
+    ('VLD3<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm),
     ('VLD3<c>.<size> <list>,[<Rn>]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 1, 0, Rn, Vd, size, 1, 0, index_align, Rm),
     ('VLD3<c>.<size> <list>,[<Rn>]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 1, 0, Rn, Vd, 1, 1, 1, 0, size, T, a, Rm),
-    ('VLD4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 1, 0, Rn, Vd, type, size, align, Rm),
+    ('VLD4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm),
     ('VLD4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 1, 0, Rn, Vd, size, 1, 1, index_align, Rm),
     ('VLD4<c>.<size> <list>,[<Rn>{ :<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 1, 0, Rn, Vd, 1, 1, 1, 1, size, T, a, Rm),
     ('VLDM{mode}<c> <Rn>{!},<list>', 1, 1, 1, 0, 1, 1, 0, P, U, D, W, 1, Rn, Vd, 1, 0, 1, 1, imm8),
@@ -279,8 +285,8 @@ VFP_Thumb = [
     ('VMOV<c>.F64 <Dd>,#<imm>', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 1, 1, imm4H, Vd, 1, 0, 1, sz, (0), 0, (0), 0, imm4L),
     ('VMOV<c> <Qd>,<Qm>', 1, 1, 1, 0, 1, 1, 1, 1, 0, D, 1, 0, Vm, Vd, 0, 0, 0, 1, M, Q, M, 1, Vm),
     ('VMOV<c>.F64 <Dd>,<Dm>', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 0, Vd, 1, 0, 1, sz, 0, 1, M, 0, Vm),
-    ('VMOV<c>.<size> <Dd[x]>,<Rt>', 1, 1, 1, 0, 1, 1, 1, 0, 0, opc1, 0, Vd, Rt, 1, 0, 1, 1, D, opc2, 1, (0), (0), (0), (0)),
-    ('VMOV<c>.<dt> <Rt>,<Dn[x]>', 1, 1, 1, 0, 1, 1, 1, 0, U, opc1, 1, Vn, Rt, 1, 0, 1, 1, N, opc2, 1, (0), (0), (0), (0)),
+    ('VMOV<c>.<size> <Dd[x]>,<Rt>', 1, 1, 1, 0, 1, 1, 1, 0, 0, opc1, 0, Vd, Rt, 1, 0, 1, 1, D, opc2_2, 1, (0), (0), (0), (0)),
+    ('VMOV<c>.<dt> <Rt>,<Dn[x]>', 1, 1, 1, 0, 1, 1, 1, 0, U, opc1, 1, Vn, Rt, 1, 0, 1, 1, N, opc2_2, 1, (0), (0), (0), (0)),
     ('VMOV<c> <Sn>,<Rt>', 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, op, Vn, Rt, 1, 0, 1, 0, N, (0), (0), 1, (0), (0), (0), (0)),
     ('VMOV<c> <Sm>,<Sm1>,<Rt>,<Rt2>', 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, op, Rt2, Rt, 1, 0, 1, 0, 0, 0, M, 1, Vm),
     ('VMOV<c> <Dm>,<Rt>,<Rt2>', 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, op, Rt2, Rt, 1, 0, 1, 1, 0, 0, M, 1, Vm),
@@ -321,7 +327,7 @@ VFP_Thumb = [
     ('VQDMULH<c>.<dt> <Qd>,<Qn>,<Dm[x]>', 1, 1, 1, Q, 1, 1, 1, 1, 1, D, size, Vn, Vd, 1, 1, 0, 0, N, 1, M, 0, Vm),
     ('VQDMULL<c>.<dt> <Qd>,<Dn>,<Dm>', 1, 1, 1, 0, 1, 1, 1, 1, 1, D, size, Vn, Vd, 1, 1, 0, 1, N, 0, M, 0, Vm),
     ('VQDMULL<c>.<dt> <Qd>,<Dn>,<Dm[x]>', 1, 1, 1, 0, 1, 1, 1, 1, 1, D, size, Vn, Vd, 1, 0, 1, 1, N, 1, M, 0, Vm),
-    ('VQMOV{U}N<c>.<type><size> <Dd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 1, 0, op, M, 0, Vm),
+    ('VQMOV{U}N<c>.<type><size> <Dd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 1, 0, op2, M, 0, Vm),
     ('VQNEG<c>.<dt> <Qd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 1, 1, 1, Q, M, 0, Vm),
     ('VQRDMULH<c>.<dt> <Qd>,<Qn>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 0, D, size, Vn, Vd, 1, 0, 1, 1, N, Q, M, 0, Vm),
     ('VQRDMULH<c>.<dt> <Qd>,<Qn>,<Dm[x]>', 1, 1, 1, Q, 1, 1, 1, 1, 1, D, size, Vn, Vd, 1, 1, 0, 1, N, 1, M, 0, Vm),
@@ -334,7 +340,7 @@ VFP_Thumb = [
     ('VRADDHN<c>.<dt> <Dd>,<Qn>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, size, Vn, Vd, 0, 1, 0, 0, N, 0, M, 0, Vm),
     ('VRECPE<c>.<dt> <Qd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 0, F, 0, Q, M, 0, Vm),
     ('VRECPS<c>.F32 <Qd>,<Qn>,<Qm>', 1, 1, 1, 0, 1, 1, 1, 1, 0, D, 0, sz, Vn, Vd, 1, 1, 1, 1, N, Q, M, 1, Vm),
-    ('VREV<n><c>.<size> <Qd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 0, 0, op, Q, M, 0, Vm),
+    ('VREV<n><c>.<size> <Qd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 0, 0, op2, Q, M, 0, Vm),
     ('VRHADD<c> <Qd>,<Qn>,<Qm>', 1, 1, 1, U, 1, 1, 1, 1, 0, D, size, Vn, Vd, 0, 0, 0, 1, N, Q, M, 0, Vm),
     ('VRSHL<c>.<type><size> <Qd>,<Qm>,<Qn>', 1, 1, 1, U, 1, 1, 1, 1, 0, D, size, Vn, Vd, 0, 1, 0, 1, N, Q, M, 0, Vm),
     ('VRSHR<c>.<type><size> <Qd>,<Qm>,#<imm>', 1, 1, 1, U, 1, 1, 1, 1, 1, D, imm6, Vd, 0, 0, 1, 0, L, Q, M, 1, Vm),
@@ -353,13 +359,13 @@ VFP_Thumb = [
     ('VSQRT<c>.F64 <Dd>,<Dm>', 1, 1, 1, 0, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 1, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm),
     ('VSRA<c>.<type><size> <Qd>,<Qm>,#<imm>', 1, 1, 1, U, 1, 1, 1, 1, 1, D, imm6, Vd, 0, 0, 0, 1, L, Q, M, 1, Vm),
     ('VSRI<c>.<size> <Qd>,<Qm>,#<imm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 0, L, Q, M, 1, Vm),
-    ('VST1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 0, 0, Rn, Vd, type, size, align, Rm),
+    ('VST1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm),
     ('VST1<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 0, 0, Rn, Vd, size, 0, 0, index_align, Rm),
-    ('VST2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 0, 0, Rn, Vd, type, size, align, Rm),
+    ('VST2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm),
     ('VST2<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 0, 0, Rn, Vd, size, 0, 1, index_align, Rm),
-    ('VST3<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 0, 0, Rn, Vd, type, size, align, Rm),
+    ('VST3<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm),
     ('VST3<c>.<size> <list>,[<Rn>]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 0, 0, Rn, Vd, size, 1, 0, index_align, Rm),
-    ('VST4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 0, 0, Rn, Vd, type, size, align, Rm),
+    ('VST4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm),
     ('VST4<c>.<size> <list>,[<Rn>{:<align>}]{!}', 1, 1, 1, 1, 1, 0, 0, 1, 1, D, 0, 0, Rn, Vd, size, 1, 1, index_align, Rm),
     ('VSTM{mode}<c> <Rn>{!},<list>', 1, 1, 1, 0, 1, 1, 0, P, U, D, W, 0, Rn, Vd, 1, 0, 1, 1, imm8),
     ('VSTM{mode}<c> <Rn>{!},<list>', 1, 1, 1, 0, 1, 1, 0, P, U, D, W, 0, Rn, Vd, 1, 0, 1, 0, imm8),
@@ -371,9 +377,18 @@ VFP_Thumb = [
     ('VSUBHN<c>.<dt> <Dd>,<Qn>,<Qm>', 1, 1, 1, 0, 1, 1, 1, 1, 1, D, size, Vn, Vd, 0, 1, 1, 0, N, 0, M, 0, Vm),
     ('VSUBL<c>.<dt> <Qd>,<Dn>,<Dm>', 1, 1, 1, U, 1, 1, 1, 1, 1, D, size, Vn, Vd, 0, 0, 1, op, N, 0, M, 0, Vm),
     ('VSWP<c> <Qd>,<Qm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 0, 0, 0, Q, M, 0, Vm),
-    ('V<op><c>.8 <Dd>,<list>,<Dm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, Vn, Vd, 1, 0, len, N, op, M, 0, Vm),
+    ('V<op><c>.8 <Dd>,<list>,<Dm>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, Vn, Vd, 1, 0, len_, N, op, M, 0, Vm),
     ('VTRN<c>.<size>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 0, 0, 1, Q, M, 0, Vm),
     ('VTST<c>.<size> <Qd>,<Qn>,<Qm>', 1, 1, 1, 0, 1, 1, 1, 1, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 1, Vm),
     ('VUZP<c>.<size>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 0, 1, 0, Q, M, 0, Vm),
     ('VZIP<c>.<size>', 1, 1, 1, 1, 1, 1, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 0, 1, 1, Q, M, 0, Vm),
 ]
+
+if __name__ == '__main__':
+    for description in (VFP_ARMv7 + VFP_Thumb):
+        instr = description[0]
+        bits = description[1:]
+
+        bits = [1 if type(x) == int else x.bitsize for x in bits]
+        if sum(bits) != 32:
+            print(instr, bits, sum(bits))
