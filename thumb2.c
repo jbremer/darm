@@ -241,7 +241,12 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	case T_THUMB2_IMM1_IMM3_IMM8:
 		// 1, 3 and 8 bit immediates
 		// i:imm3:imm8 -> imm12 -> imm32
-		d->imm = thumb_expand_imm( ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF));
+
+		// if bits 9:8 == '10' then zero extend, otherwise thumb expand
+		if ((w & 0x300) == 0x200)
+		    d->imm = (uint32_t) ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF);
+		else
+		    d->imm = thumb_expand_imm( ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF));
 		break;
 	default:
 		// Invalid.
@@ -384,9 +389,9 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->CRd = (w2 >> 12) & b1111; // enum index
 	    break;
 
-	// zeroextend corner case with '00' appended
-	case I_LDRD: case LDREX:
-        case I_STRD: case STREX:
+	// zero-extend corner case with '00' appended
+	case I_LDRD: case I_LDREX:
+        case I_STRD: case I_STREX:
 	    d->imm = (uint32_t) ((w2 & 0xFF) << 2);
 	    break;
 
