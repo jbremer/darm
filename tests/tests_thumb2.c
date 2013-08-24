@@ -15,8 +15,23 @@ struct {
         .instr = I_ADC, .I = B_SET, .imm = (0x1540), .S = 1, .Rn = 1, .Rd = 2, .cond = C_AL}},
     {0xF14102CC, 0, "adc r2, r1 #0xCC", {
         .instr = I_ADC, .I = B_SET, .imm = (0xCC), .S = 0, .Rn = 1, .Rd = 2, .cond = C_AL}},
-    {0xEB4354F8, 0, "adc r4, r3, r8 ror #0x7", {
-        .instr = I_ADC, .I = B_SET, .imm = 0x7, .S = 0, .Rd = 4, .Rn = 3, .Rm = 8, .cond = C_AL, .shift_type = S_ROR, .shift = 0x7}},
+    {0xEB4211F3, 0, "adc.w r1, r2, r3 ror #7", {
+        .instr = I_ADC, .I = B_SET, .imm = 0x7, .S = 0, .Rd = 1, .Rn = 2, .Rm = 3, .cond = C_AL, .shift_type = S_ROR, .shift = 0x7}},
+    {0xF51251AF, 0, "adds.w r1, r2 #0xDAF", {
+        .instr = I_ADD, .I = B_SET, .imm = 5600, .S = 1, .Rd = 1, .Rn = 2, .cond = C_AL}},
+    // exception in ADD function -> CMN
+    {0xF5125FAF, 0, "cmn r2 #0xDAF", {
+        .instr = I_CMN, .I = B_SET, .imm = 5600, .S = 0, .Rd = PC, .Rn = 2, .cond = C_AL}},
+    // exception in ADD function -> ADD (SP plus imm)
+    {0xF51D51AF, 0, "adds.w r1, SP #0xDAF", {
+        .instr = I_ADD, .I = B_SET, .imm = 5600, .S = 1, .Rd = 1, .Rn = SP, .cond = C_AL}},
+    // exception in ADD (SP plus imm) function -> CMN
+    {0xF51D5FAF, 0, "cmn SP #0xDAF", {
+        .instr = I_CMN, .I = B_SET, .imm = 5600, .S = 0, .Rd = PC, .Rn = SP, .cond = C_AL}},
+    {0xF60271AB, 0, "addw r1, r2, #0xfab", {
+        .instr = I_ADDW, .I = B_SET, .imm = 0xFAB, .Rd = r1, .Rn = r2, .cond = C_AL}},
+
+
 
 };
 

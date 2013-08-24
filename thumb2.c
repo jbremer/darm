@@ -227,7 +227,6 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	case T_THUMB2_IMM8:
 		// 8 bit immediate
 		d->imm = w2 & 0xFF;
-		// TODO: check which ones want zero extend to MSB!!
 		break;
 	case T_THUMB2_IMM2:
 	        // TODO: check for missed shifts, see LDR
@@ -325,10 +324,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->imm = (int32_t) ((w & 0x400) << 14) | ((~((w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1);
 	    }
 	    break;
-	// Bit Field Insert
-	case I_BFI:
-	    d->msb = w2 & 0x1F;
-	    break;
+
 	// Branch with Link
 	case I_BL: case I_BLX:
 	    d->I = B_SET;
@@ -347,6 +343,18 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    }
 	    break;
 
+	// Bit Field Insert
+	case I_BFI:
+	    d->msb = w2 & 0x1F;
+	    break;
+
+	case I_ADD:
+	    // Set to CMN instruction
+	    if (d->Rd == PC) {
+		d->instr = I_CMN;
+		d->S = 0;
+	    }
+	    break;
 
 	// option field
 	case I_DBG: case I_DMB: case I_DSB:
@@ -371,9 +379,15 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->Rn = ((w & b1111) == b1111) ? R_INVLD : (w & b1111);
 
 	    d->I = B_SET;
-	    d->imm = (w2 & 0xFF);
+	    d->imm = (uint32_t) ((w2 & 0xFF) << 2); // append '00' and zero extend
 	    d->coproc = (w2 >> 8) & b1111;
 	    d->CRd = (w2 >> 12) & b1111; // enum index
+	    break;
+
+	// zeroextend corner case with '00' appended
+	case I_LDRD: case LDREX:
+        case I_STRD: case STREX:
+	    d->imm = (uint32_t) ((w2 & 0xFF) << 2);
 	    break;
 
 	case I_POP: case I_PUSH:
