@@ -357,14 +357,40 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    // Set to CMN/CMP instruction
 	    if (d->Rd == PC && d->S == B_SET) {
 		d->instr = (d->instr == I_ADD) ? I_CMN : I_CMP;
-		d->S = B_UNSET;
+		d->Rd = R_INVLD; // If you want to set Rd to PC, don't forget to enforce for normal CMN as well.
+		d->S = B_INVLD;
+	    }
+
+	    // Check if we are dealing with SP variant
+	    if (d->Rd != R_INVLD && d->Rm != R_INVLD && d->Rn == R_INVLD) {
+		d->Rn = SP;
 	    }
 	    break;
 
 	case I_ADDW: case I_SUBW:
             // Set to ADR instruction
-	    if (d->Rn == PC)
-		d->instr = I_ADR; 
+	    if (d->Rn == PC) {
+		d->instr = I_ADR;
+		d->S = B_INVLD;
+		d->Rn = R_INVLD;
+	    }
+	    break;
+
+	case I_AND:
+	    // Set to TST instruction
+	    if (d->Rd == PC && d->S == 1) {
+		d->instr = I_TST;
+		d->Rd = R_INVLD;
+		d->S = B_INVLD;
+	    }
+	    break;
+
+	case I_ASR:
+	    // TODO: fetch shift type from opcode so this can be more generic
+	    if (d->I == B_SET) {
+		d->shift = d->imm;
+		d->shift_type = S_ASR;
+	    }
 	    break;
 
 	// option field

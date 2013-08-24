@@ -21,17 +21,41 @@ struct {
         .instr = I_ADD, .I = B_SET, .imm = 5600, .S = 1, .Rd = 1, .Rn = 2, .cond = C_AL}},
     // exception in ADD function -> CMN
     {0xF5125FAF, 0, "cmn r2 #0xdaf", {
-        .instr = I_CMN, .I = B_SET, .imm = 5600, .S = 0, .Rd = PC, .Rn = 2, .cond = C_AL}},
+        .instr = I_CMN, .I = B_SET, .imm = 5600, .S = 0, .Rn = 2, .cond = C_AL}},
     // exception in ADD function -> ADD (SP plus imm)
     {0xF51D51AF, 0, "adds.w r1, SP #0xdaf", {
         .instr = I_ADD, .I = B_SET, .imm = 5600, .S = 1, .Rd = 1, .Rn = SP, .cond = C_AL}},
     // exception in ADD (SP plus imm) function -> CMN
     {0xF51D5FAF, 0, "cmn SP #0xdaf", {
-        .instr = I_CMN, .I = B_SET, .imm = 5600, .S = 0, .Rd = PC, .Rn = SP, .cond = C_AL}},
+        .instr = I_CMN, .I = B_SET, .imm = 5600, .S = 0, .Rn = SP, .cond = C_AL}},
     {0xF60271AB, 0, "addw r1, r2, #0xfab", {
         .instr = I_ADDW, .I = B_SET, .imm = 0xFAB, .Rd = r1, .Rn = r2, .cond = C_AL}},
     {0xF60F71AC, 0, "adr r1 #0xfac", {
-        .instr = I_ADR, .I = B_SET, .imm = 0xFAC, .Rd = r1, .Rn = PC, .cond = C_AL}},
+        .instr = I_ADR, .I = B_SET, .imm = 0xFAC, .Rd = r1, .cond = C_AL}},
+    {0xEB0211D3, 0, "add.w r1, r2, r3 lsr #7", {
+        .instr = I_ADD, .I = B_SET, .imm = 7, .Rd = r1, .Rn = r2, .Rm = r3, .shift = 7, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEB121FD3, 0, "cmn r2, r3, lsr #7", {
+        .instr = I_CMN, .I = B_SET, .imm = 7, .Rn = r2, .Rm = r3, .shift = 7, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEB1D13D3, 0, "adds.w r3, SP, r3 lsr #7", {
+        .instr = I_ADD, .I = B_SET, .S = 1, .imm = 7, .Rd = r3, .Rn = SP, .Rm = r3, .shift = 7, .shift_type = S_LSR, .cond = C_AL}},
+    // add is false
+    {0xF6AF37AD, 0, "adr.w r7 #0xbad", {
+        .instr = I_ADR, .I = B_SET, .imm = 0xBAD, .Rd = r7, .cond = C_AL}},
+    // add is true
+    {0xF60F37AD, 0, "adr.w r7 #0xbad", {
+        .instr = I_ADR, .I = B_SET, .imm = 0xBAD, .Rd = r7, .cond = C_AL}},
+    {0xF41221BC, 0, "and r1, r2 #0xabc", {
+        .instr = I_AND, .I = B_SET, .S = 1, .imm = 0x5E000, .Rd = r1, .Rn = r2, .cond = C_AL}},
+    {0xF4122FBC, 0, "tst r2 #0xabc", {
+        .instr = I_TST, .I = B_SET, .imm = 0x5E000, .Rn = r2, .cond = C_AL}},
+    {0xEA121143, 0, "ands.w r1, r2, r3 lsl #5", {
+        .instr = I_AND, .I = B_SET, .S = 1, .imm = 0x5, .Rd = r1, .Rn = r2, .Rm = r3, .shift = 5, .shift_type = S_LSL, .cond = C_AL}},
+    {0xEA121F43, 0, "tst r2, r3 lsl #5", {
+        .instr = I_TST, .I = B_SET, .imm = 0x5, .Rn = r2, .Rm = r3, .shift = 5, .shift_type = S_LSL, .cond = C_AL}},
+    {0xEA5F11A2, 0, "asrs.w r1, r2, #6", {
+        .instr = I_ASR, .I = B_SET, .S = 1, .imm = 0x6, .Rd = r1, .Rm = r2, .shift = 6, .shift_type = S_ASR, .cond = C_AL}},
+    {0xFA42F104, 0, "asr.w r1, r2, r4", {
+        .instr = I_ASR, .I = B_UNSET, .S = 0, .Rd = r1, .Rn = r2, .Rm = r4, .cond = C_AL}},
 
 
 
