@@ -353,12 +353,18 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->msb = w2 & 0x1F;
 	    break;
 
-	case I_ADD:
-	    // Set to CMN instruction
-	    if (d->Rd == PC) {
-		d->instr = I_CMN;
-		d->S = 0;
+	case I_ADD: case I_SUB:
+	    // Set to CMN/CMP instruction
+	    if (d->Rd == PC && d->S == B_SET) {
+		d->instr = (d->instr == I_ADD) ? I_CMN : I_CMP;
+		d->S = B_UNSET;
 	    }
+	    break;
+
+	case I_ADDW: case I_SUBW:
+            // Set to ADR instruction
+	    if (d->Rn == PC)
+		d->instr = I_ADR; 
 	    break;
 
 	// option field
