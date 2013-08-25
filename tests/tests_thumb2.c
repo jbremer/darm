@@ -59,7 +59,11 @@ struct {
     {0xF43F8801, 0, "beq.w #-266238", {
         .instr = I_B, .I = B_SET, .S = 1, .imm = 0xFFFBF002, .J1 = 0, .J2 = 1,  .cond = C_EQ}},
     {0xF30AAFF6, 0, "bgt.w #0xcafec", {
-        .instr = I_B, .I = B_SET, .S = 0, .imm = 0xcafec, .J1 = 1, .J2 = 1,  .cond = C_GT}},
+        .instr = I_B, .I = B_SET, .S = 0, .imm = 0xCAFEC, .J1 = 1, .J2 = 1,  .cond = C_GT}},
+    {0xF0AF975D, 0, "bal.w #0xcafeba", {
+        .instr = I_B, .I = B_SET, .S = 0, .imm = 0xCAFEBA, .J1 = 0, .J2 = 0,  .cond = C_AL}},
+    {0xF55FB6BA, 0, "bal.w #-6947468", {
+        .instr = I_B, .I = B_SET, .S = 1, .imm = 0xFF95FD74, .J1 = 1, .J2 = 0,  .cond = C_AL}},
 
 
 
