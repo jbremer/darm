@@ -348,10 +348,15 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    }
 	    break;
 
-	// Bit Field Insert
-	case I_BFI:
+	// Bit field clear/insert
+	case I_BFC: case I_BFI:
+	    d->lsb = d->imm & 0x1F;
 	    d->msb = w2 & 0x1F;
+	    d->width = d->msb + 1 - d->lsb;
+	    if (d->Rn == b1111)
+		d->instr = I_BFC;
 	    break;
+
 
 	case I_ADD: case I_SUB:
 	    // Set to CMN/CMP instruction

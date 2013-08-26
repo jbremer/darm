@@ -64,6 +64,12 @@ struct {
         .instr = I_B, .I = B_SET, .S = 0, .imm = 0xCAFEBA, .J1 = 0, .J2 = 0,  .cond = C_AL}},
     {0xF55FB6BA, 0, "bal.w #-6947468", {
         .instr = I_B, .I = B_SET, .S = 1, .imm = 0xFF95FD74, .J1 = 1, .J2 = 0,  .cond = C_AL}},
+    {0xF36F535C, 0, "bfcal r3, #21, #8", {
+        .instr = I_BFC, .I = B_SET, .imm = 21, .Rd = r3, .msb = 28, .width = 8, .lsb = 21,  .cond = C_AL}},
+    {0xF36251DF, 0, "bfial r1, r2, #23, #9", {
+        .instr = I_BFI, .I = B_SET, .imm = 23, .Rd = r1, .Rn = r2, .msb = 31, .width = 9, .lsb = 23,  .cond = C_AL}},
+    {0xF36F51DF, 0, "bfcal r1, #23, #9", {
+        .instr = I_BFC, .I = B_SET, .imm = 23, .Rd = r1, .msb = 31, .width = 9, .lsb = 23,  .cond = C_AL}},
 
 
 
