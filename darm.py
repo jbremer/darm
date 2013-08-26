@@ -91,7 +91,7 @@ class Shift:
         self.shift = shift
 
     def type_name(self):
-        return _lib.darm_shift_type_name(self.type_)
+        return 'S_' + _lib.darm_shift_type_name(self.type_)
 
     def __str__(self):
         type_name = self.type_name()
