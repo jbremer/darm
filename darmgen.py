@@ -598,7 +598,7 @@ instr_types = [
           ),
     thumb2_flags('WP_REGLIST_FLAG', 'Instructions that use the WP flags and register list',
           [''],
-          lambda x, y, z: (thumb2_flagChk(x, [d2.W, d2.P, d2.register_list]))
+          lambda x, y, z: (thumb2_flagChk(x, [d2.W, d2.register_list]))
           ),
     thumb2_flags('S_FLAG', 'Instructions that use the S flag',
           [''],

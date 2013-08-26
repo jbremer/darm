@@ -256,6 +256,7 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 }
 // Parse the flag instruction type
 void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
+    //printf("FLAG TYPE: %i\n", thumb2_flags_instr_types[index]);
 
     switch(thumb2_flags_instr_types[index]) {
 	case T_THUMB2_NO_FLAG:
@@ -282,13 +283,14 @@ void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 	case T_THUMB2_REGLIST_FLAG:
 	    // Reglist field
-	    d->reglist = w2 & 0x1FFF;
+	    //d->reglist = w2 & 0x1FFF;
+	    d->reglist = w2 & 0xFFFF;
 	    break;
 	case T_THUMB2_WP_REGLIST_FLAG:
 	    // Reglist field and W, P flags
-	    d->reglist = w2 & 0x1FFF;
+	    d->reglist = w2 & 0xFFFF;
 	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
-	    d->P = (w >> 15) & 1 ? B_SET : B_UNSET;
+	    //d->P = (w >> 15) & 1 ? B_SET : B_UNSET;
 	    break;
 	case T_THUMB2_S_FLAG:
 	    // S flag
@@ -528,7 +530,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	// M-flag bit 14:
 	case I_LDM: case I_LDMDB:
-	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
+	    //d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
 	    break;
 
 	// co-processor move
