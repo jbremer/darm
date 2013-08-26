@@ -362,6 +362,10 @@ int parse_branch_misc_cases(darm_t *d, uint16_t w, uint16_t w2) {
 		break;
 	    case 6:
 		// ISB
+		d->instr = I_ISB;
+		d->S = B_INVLD;
+		d->I = B_INVLD;
+		d->option = w2 & b1111;
 		break;
 	    default:
 		break;
@@ -483,6 +487,14 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	//case I_CPD: case I_CPD2:
 	//break;
 
+	// EOR exception
+	case I_EOR:
+	    if (d->Rd == PC && d->S == B_SET) {
+		d->instr = I_TEQ;
+		d->Rd = R_INVLD;
+		d->S = B_UNSET;
+	    }
+	    break;
 	// co-proc load/store memory
 	case I_LDC: case I_LDC2:
 	case I_STC: case I_STC2:

@@ -112,7 +112,24 @@ struct {
         .instr = I_DMB, .option = 12, .cond = C_AL}},
     {0xF3BF8F4B, 0, "dsbal #11", {
         .instr = I_DSB, .option = 11, .cond = C_AL}},
-	
+    {0xF48241AD, 0, "eoral r1, r2, #0x5680", {
+        .instr = I_EOR, .S = B_UNSET, .I = B_SET, .imm = 0x5680, .Rd = r1, .Rn = r2, .cond = C_AL}},
+    {0xF49342AD, 0, "eorsal r2, r3, #0x5680", {
+        .instr = I_EOR, .S = B_SET, .I = B_SET, .imm = 0x5680, .Rd = r2, .Rn = r3, .cond = C_AL}},
+    {0xF4824FAD, 0, "eoral PC, r2, #0x5680", {
+        .instr = I_EOR, .S = B_UNSET, .I = B_SET, .imm = 0x5680, .Rd = PC, .Rn = r2, .cond = C_AL}},
+    {0xF4925FAC, 0, "teqal r2, #0x1580", {
+        .instr = I_TEQ, .S = B_UNSET, .I = B_SET, .imm = 0x1580, .Rn = r2, .cond = C_AL}},
+    {0xEA8241B3, 0, "eoral.w r1, r2, r3, ror #18", {
+        .instr = I_EOR, .S = B_UNSET, .I = B_SET, .imm = 18, .Rd = r1, .Rn = r2, .Rm = r3, .shift = 18, .shift_type = S_ROR, .cond = C_AL}},
+    {0xEA9241B3, 0, "eorsal.w r1, r2, r3, ror #18", {
+        .instr = I_EOR, .S = B_SET, .I = B_SET, .imm = 18, .Rd = r1, .Rn = r2, .Rm = r3, .shift = 18, .shift_type = S_ROR, .cond = C_AL}},
+    {0xEA824F83, 0, "eoral.w pc, r2, r3, lsl #18", {
+        .instr = I_EOR, .S = B_UNSET, .I = B_SET, .imm = 18, .Rd = PC, .Rn = r2, .Rm = r3, .shift = 18, .shift_type = S_LSL, .cond = C_AL}},
+    {0xEA924F93, 0, "teqal.w r2, r3, lsr #18", {
+        .instr = I_TEQ, .S = B_UNSET, .I = B_SET, .imm = 18, .Rn = r2, .Rm = r3, .shift = 18, .shift_type = S_LSR, .cond = C_AL}},
+    {0xF3BF8F6A, 0, "isb #10", {
+        .instr = I_ISB, .option = 10, .cond = C_AL}},
 
 
 };
