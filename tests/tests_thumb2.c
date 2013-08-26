@@ -86,6 +86,8 @@ struct {
         .instr = I_BLX, .I = B_SET, .S = B_UNSET, .imm = 0xc0ff1c, .J1 = B_UNSET, .J2 = B_UNSET, .H = B_SET, .cond = C_AL}},
     {0xF40FEF8E, 0, "blxal #-4128996", {
         .instr = I_BLX, .I = B_SET, .S = B_SET, .imm = 0xffc0ff1c, .J1 = B_SET, .J2 = B_SET, .H = B_SET, .cond = C_AL}},
+    {0xF3C58F00, 0, "bxjal r5", {
+        .instr = I_BXJ, .I = B_UNSET, .Rm = r5, .cond = C_AL}},
 
 
 
