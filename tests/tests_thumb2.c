@@ -89,6 +89,30 @@ struct {
     {0xF3C58F00, 0, "bxjal r5", {
         .instr = I_BXJ, .I = B_UNSET, .Rm = r5, .cond = C_AL}},
 
+    /* TODO: tests for CPD, CPD2
+    {0x, 0, "cdpal p7 #14  r1, r2, r3 #5", {
+        .instr = I_BXJ, .I = B_UNSET, .Rm = r5, .cond = C_AL}},
+    */
+
+    {0xF3BF8F2F, 0, "clrex", {
+        .instr = I_CLREX, .cond = C_AL}},
+    {0xFAB2F182, 0, "clzal r1, r2", {
+        .instr = I_CLZ, .Rd = r1, .Rm = r2, .cond = C_AL}},
+    {0xF5112FBC, 0, "cmnal r1, #0x5e000", {
+        .instr = I_CMN, .I = B_SET, .Rn = r1, .imm = 0x5e000, .cond = C_AL}},
+    {0xEB115F42, 0, "cmnal.w r1, r2, lsl #21", {
+        .instr = I_CMN, .I = B_SET, .Rn = r1, .Rm = r2, .imm = 21, .shift = 21, .shift_type = S_LSL, .cond = C_AL}},
+    {0xF5B15FAF, 0, "cmpal.w r1, #5600", {
+        .instr = I_CMP, .I = B_SET, .Rn = r1, .imm = 5600, .cond = C_AL}},
+    {0xEBB17F12, 0, "cmpal.w r1, r2, lsr #28", {
+        .instr = I_CMP, .I = B_SET, .Rn = r1, .Rm = r2, .imm = 28, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+    {0xF3AF80FD, 0, "dbgal #13", {
+        .instr = I_DBG, .option = 13, .cond = C_AL}},
+    {0xF3BF8F5C, 0, "dmbal #12", {
+        .instr = I_DMB, .option = 12, .cond = C_AL}},
+    {0xF3BF8F4B, 0, "dsbal #11", {
+        .instr = I_DSB, .option = 11, .cond = C_AL}},
+	
 
 
 };
