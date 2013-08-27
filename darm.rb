@@ -142,7 +142,7 @@ class Darm
   end
 
   def register_list
-    buf = FFI::MemoryPointer.new(:string, 16)
+    buf = FFI::MemoryPointer.new(32)
     darm_reglist(@dinst[:reglist], buf)
     buf.null? ? nil : buf.read_string
   end
