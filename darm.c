@@ -90,6 +90,49 @@ void darm_init(darm_t *d)
     d->firstcond = C_INVLD, d->mask = 0;
 }
 
+int darm_disasm(darm_t *d, uint16_t w, uint16_t w2, uint32_t addr)
+{
+    // if the least significant bit is not set, then this is
+    // an ARMv7 instruction
+    if((addr & 1) == 0) {
+
+        // disassemble and check for error return values
+        if(darm_armv7_disasm(d, (w2 << 16) | w) < 0) {
+            return 0;
+        }
+        else {
+            return 2;
+        }
+    }
+
+    // magic table constructed based on section A6.1 of the ARM manual
+    static uint8_t is_thumb2[0x20] = {
+        [b11101] = 1,
+        [b11110] = 1,
+        [b11111] = 1,
+    };
+
+    // check whether this is a Thumb or Thumb2 instruction
+    if(is_thumb2[w >> 11] == 0) {
+
+        // this is a Thumb instruction
+        if(darm_thumb_disasm(d, w) < 0) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
+    }
+
+    // this is a Thumb2 instruction
+    if(darm_thumb2_disasm(d, w, w2) < 0) {
+        return 0;
+    }
+    else {
+        return 2;
+    }
+}
+
 int darm_str(const darm_t *d, darm_str_t *str)
 {
     if(d->instr == I_INVLD || d->instr >= ARRAYSIZE(darm_mnemonics)) {

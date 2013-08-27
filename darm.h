@@ -215,6 +215,29 @@ int darm_thumb_disasm(darm_t *d, uint16_t w);
 // disassemble a thumb2 instruction
 int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2);
 
+//
+// Disassembles an instruction - determines instruction set
+// (ARMv7 or Thumb/Thumb2) based on the address and determines Thumb or
+// Thumb2 mode based on the instruction itself.
+//
+// Takes two 16 bit words as input, the first representing the lower 16 bits
+// and the second 16 bit word representing the upper 16 bits of the possibly
+// full 32 bits.
+//
+// Returns 0 on failure, 1 for Thumb, 2 for Thumb2, and 2 for ARMv7. In other
+// words, the function returns the amount of 16 bit words that were used to
+// disassemble this instruction.
+//
+// Note that, in order to instruct the disassembler to disassemble a Thumb or
+// Thumb2 instruction, the address has to have the least significant bit set.
+// That is, given a 4-byte aligned addr, addr is disassembled as 32bit ARMv7
+// instruction, addr+1 is disassembled as Thumb or Thumb2 instruction, and
+// addr+3 is also disassembled as Thumb/Thumb2. Furthermore, addr+2 is
+// disassembled as ARMv7, but do not rely on this being defined behavior in
+// the ARM CPU.
+//
+int darm_disasm(darm_t *d, uint16_t w, uint16_t w2, uint32_t addr);
+
 int darm_immshift_decode(const darm_t *d, const char **type,
     uint32_t *immediate);
 
