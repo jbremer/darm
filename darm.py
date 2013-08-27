@@ -176,6 +176,8 @@ class _Darm(Structure):
         ('CRd', c_int32),
         ('CRn', c_int32),
         ('CRm', c_int32),
+        ('firstcond', c_int32),
+        ('mask', c_uint8),
     ]
 
 
