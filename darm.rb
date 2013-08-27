@@ -1,5 +1,4 @@
 =begin
-Copyright (c) 2013, Rohit Kumar
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,14 +32,9 @@ module FFI
   module Darm
     extend FFI::Library
 
-    ffi_lib './libdarm.so'
-
-    module Constants
-      FLAGS = ['B', 'S', 'E', 'M', 'N', 'U', 'H', 'P', 'R', 'T', 'W', 'I']
-      REGS = ['Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'Rt2', 'RdHi', 'RdLo']
-    end
-
-    include Constants
+    darm_dir = File.dirname(__FILE__)
+    lib_name = FFI.map_library_name('darm')
+    ffi_lib File.join(darm_dir, lib_name)
 
     class DarmInst < FFI::Struct
       layout :w, :uint32,
@@ -60,7 +54,7 @@ module FFI
              :T, :uint32,
              :W, :uint32,
              :I, :uint32,
-             :rotate, :uint32,
+             :rotate, :int32,
              :Rd, :int32,
              :Rn, :int32,
              :Rm, :int32,
@@ -70,12 +64,20 @@ module FFI
              :RdHi, :int32,
              :RdLo, :int32,
              :imm, :uint32,
-             :shift_type, :int32,
+             :type_, :int32,
              :Rs, :int32,
              :shift, :uint32,
              :lsb, :uint32,
              :width, :uint32,
-             :reglist, :uint32
+             :reglist, :uint16,
+             :coproc, :uint8,
+             :opc1, :uint8,
+             :opc2, :uint8,
+             :CRd, :int32,
+             :CRn, :int32,
+             :CRm, :int32,
+             :firstcond, :int32,
+             :mask, :uint8
     end
 
     class DarmStr < FFI::Struct
@@ -84,8 +86,10 @@ module FFI
              :arg1, [:char, 32],
              :arg2, [:char, 32],
              :arg3, [:char, 32],
+             :arg4, [:char, 32],
+             :arg5, [:char, 32],
              :shift, [:char, 12],
-             :instr, [:char, 64]
+             :total, [:char, 64]
     end
 
     attach_function :darm_armv7_disasm, [:pointer, :uint32], :int32
@@ -105,23 +109,58 @@ end
 class Darm
   include FFI::Darm
 
-  attr_reader :d, :instr, :instr_type, :cond, :shift_type
+  attr_reader :dinst, :instr, :instr_type, :cond
 
-  def initialize(blob)
-    @d = DarmInst.new
-    darm_armv7_disasm( @d, blob )
+  def initialize
+    @dinst = DarmInst.new
   end
 
-  def disasm()
-    @instr = "I_" + darm_mnemonic_name( @d[:instr] )
-    @instr_type = "T_" + darm_enctype_name( @d[:instr_type] )
-    @cond = "C_" + darm_condition_name( @d[:cond], 0 )
-    @shift_type = darm_shift_type_name( @d[:shift_type] )
+  # TODO: use a wrapper function for all disasm_*
+  # logic to identify instruction type and call appropriate function
+  # will be implemented natively in darm 
+
+  def disasm_armv7(blob)
+    darm_armv7_disasm( @dinst, blob )
+    details()
+  end
+
+  def disasm_thumb(blob)
+    darm_thumb_disasm( @dinst, blob )
+    details()
+  end
+
+  # not yet implemented
+  def disasm_thumb2(blob)
+    darm_thumb2_disasm( @dinst, blob )
+    details()
+  end
+
+  def details
+    @instr = "I_" + darm_mnemonic_name( @dinst[:instr] )
+    @instr_type = "T_" + darm_enctype_name( @dinst[:instr_type] )
+    @cond = "C_" + darm_condition_name( @dinst[:cond], 0 )
+  end
+
+  def register_list
+    buf = FFI::MemoryPointer.new(:string, 16)
+    darm_reglist(@dinst[:reglist], buf)
+    buf.null? ? nil : buf.read_string
+  end
+
+  def shift_type
+    return if darm_shift_type_name( @dinst[:type_] ).nil?
+    type_name = "S_" + darm_shift_type_name( @dinst[:type_] )
+
+    if @dinst[:Rs] >= 0
+      printf "type_=%s, Rs=%s", type_name, @dinst[:Rs]
+    else
+      printf "type_=%s, shift=%d", type_name, @dinst[:shift]
+    end
   end
 
   def to_s
     dstr = DarmStr.new
-    darm_str2(@d, dstr, true)
-    puts dstr[:instr]
+    darm_str2(@dinst, dstr, true)
+    dstr[:total].to_str
   end
 end
