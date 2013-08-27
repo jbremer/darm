@@ -35,7 +35,7 @@ binary without caring too much about messed up ELF header files.
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include "darm.h"
 #include "elfdarm.h"
 
