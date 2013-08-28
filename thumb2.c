@@ -526,9 +526,9 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->Rn = R_INVLD;
 		d->P = B_INVLD;
 	    }
-	    if (d->P == B_SET && d->U == B_UNSET && d->W == B_UNSET) {
-		d->instr = I_LDRBT;
-		d->
+	    //if (d->P == B_SET && d->U == B_UNSET && d->W == B_UNSET) {
+	    //	d->instr = I_LDRBT;
+	     //	d->
 	    break;
 
 	// zero-extend corner case with '00' appended
