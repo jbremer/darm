@@ -309,6 +309,137 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
     }
 }
 
+darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op, Rn;
+    op = (w >> 4) & 0x1F;
+    Rn = w & b1111;
+
+    // Immediate stuff
+
+    switch(op) {
+	case 0:
+	    if (Rn == b1111)
+		return I_ADR;
+	    else
+		return I_ADDW;
+	case 4:
+	    return I_MOVW;
+	case 10:
+	    if (Rn = b1111)
+		return I_ADR;
+	    else
+		return I_SUB;
+	case 12:
+	    return I_MOVT;
+	case 16:
+	    return I_SSAT;
+	case 18:
+	    if ((w2 & 0x70C0) == 0)
+		return I_SSAT16;
+	    else
+		return I_SSAT;
+	case 20:
+	    return I_SBFX;
+	case 22:
+	    if (Rn == b1111)
+		return I_BFC;
+	    else
+		return I_BFI;
+	case 24:
+	    return I_USAT;
+	case 26:
+	    if ((w2 & 0x70C0) == 0)
+		return I_SSAT16;
+	    else
+		return I_SSAT;
+	case 28:
+	    return I_UBFX;
+
+    }
+
+
+}
+
+darm_instr_t thumb2_proc_state(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op1, op2;
+    op1 = (w2 >> 8) & b111;
+    op2 = w2 & 0xFF;
+
+    if (op1 == 0) {
+        switch(op2) {
+	    case 0:
+		return I_NOP;
+	    case 1:
+		return I_YIELD;
+	    case 2:
+		return I_WFE;
+	    case 3:
+		return I_WFI;
+	    case 4:
+		return I_SEV;
+	    default:
+		if (((op2 >> 4) & b1111) == b1111)
+		    return I_DBG;
+        }
+
+    } else
+        return I_CPS;
+}
+
+darm_instr_t thumb2_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op;
+    op = (w2 >> 4) & b111;
+    switch(op) {
+        case 0:
+	case 1:
+	    // TODO: ENTERX, LEAVEX
+	    return I_NOP;
+	case 2:
+	    return I_CLREX;
+	case 4:
+	    return I_DSB;
+	case 5:
+	    return I_DMB;
+	case 6:
+	    return I_ISB;
+    }
+    return I_INVLD;
+}
+
+
+darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op, op1, op2, imm8;
+    op = (w >> 4) & 0x7F;
+    op1 = (w2 >> 12) & b111;
+    op2 = (w2 >> 8) & b1111;
+    imm8 = w2 & 0xFF;
+    if (op1 == 0 && op == 0xFE)
+	//TODO: return I_HVC;
+	return I_NOP;
+    else if (op1 == 0 && op == 0xFF)
+	return I_SMC;
+    else if ((op1&b101) == 1)
+	return I_B;
+    else if (op1 == 2 && op == 0xFF)
+	return I_UDF;
+    else if ((op1&b101) == 0) {
+	if ((op & 0x38) != 0x38)
+	    return I_B;
+	else if ((op & 0x7E) == 0x38 && (imm8 & 0x10) == 0x10)
+	    return I_MSR;	// banked register
+	else if (op == 0x38 && (imm8 & 0x10) == 0)
+	    return I_MSR;	// register 
+	else if (op == 0x3A)
+	    return thumb2_proc_state(d, w, w2);
+	else if (op == 0x3B)
+	    return thumb2_misc_ctrl(d, w, w2);
+	else if (op == 0x3C)
+	    return I_BXJ;
+	else if (op == 0x3E && (imm8 & 0x10) == 0)
+	    return I_MRS;
+
+    }
+}
 
 
 darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2) {
