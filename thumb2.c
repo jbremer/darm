@@ -229,9 +229,10 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->imm = w2 & 0xFF;
 		break;
 	case T_THUMB2_IMM2:
-	        // TODO: check for missed shifts, see LDR
 		// 2 bit immediate
 		d->imm = (w2 >> 4) & b11;
+		d->shift = d->imm;
+		d->shift_type = S_LSL;
 		break;
 	case T_THUMB2_IMM2_IMM3:
 		// 2 and 3 bit immediates
@@ -512,6 +513,22 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->imm = (uint32_t) ((w2 & 0xFF) << 2); // append '00' and zero extend
 	    d->coproc = (w2 >> 8) & b1111;
 	    d->CRd = (w2 >> 12) & b1111; // enum index
+	    break;
+	case I_LDRB:
+	    // PLD,PLDW exception
+	    if (d->Rt == b1111 && d->P == B_SET && d->U == B_UNSET && d->W == B_UNSET) {
+		d->instr = I_PLD;
+		d->Rt = R_INVLD;
+		d->W = B_UNSET;
+	    }
+	    if (d->Rn == b1111) {
+		d->imm = w2 & 0xfff;
+		d->Rn = R_INVLD;
+		d->P = B_INVLD;
+	    }
+	    if (d->P == B_SET && d->U == B_UNSET && d->W == B_UNSET) {
+		d->instr = I_LDRBT;
+		d->
 	    break;
 
 	// zero-extend corner case with '00' appended
