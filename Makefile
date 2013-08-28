@@ -9,7 +9,8 @@ endif
 SRC = $(wildcard *.c tests/tests_thumb2.c)
 OBJ = $(SRC:.c=.o)
 
-GENCODESRC = darm-tbl.c armv7-tbl.c thumb-tbl.c
+GENCODESRC = darm-tbl.c darm-tbl.h armv7-tbl.c armv7-tbl.h \
+	thumb-tbl.c thumb-tbl.h
 GENCODEOBJ = darm-tbl.o armv7-tbl.o thumb-tbl.o
 
 # generated stuff

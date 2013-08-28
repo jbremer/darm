@@ -91,7 +91,7 @@ class Shift:
         self.shift = shift
 
     def type_name(self):
-        return _lib.darm_shift_type_name(self.type_)
+        return 'S_' + _lib.darm_shift_type_name(self.type_)
 
     def __str__(self):
         type_name = self.type_name()
@@ -176,6 +176,8 @@ class _Darm(Structure):
         ('CRd', c_int32),
         ('CRn', c_int32),
         ('CRm', c_int32),
+        ('firstcond', c_int32),
+        ('mask', c_uint8),
     ]
 
 
