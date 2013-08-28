@@ -182,3 +182,138 @@ darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2) {
 	}
     }
 }
+
+darm_instr_t thumb2_move_shift(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t type, imm3_imm2;
+    type = (w2>>4) & b11;
+    imm3_imm2 = ((w2>>10) & 0x1C) | ((w2>>6) & b11);
+
+    switch(type) {
+	case 0:
+	    if (imm3_imm2 == 0)
+		return I_MOV;
+	    else
+		return I_LSL;
+	case 1:
+	    return I_LSR;
+	case 2:
+	    return I_ASR;
+	case 3:
+	    if (imm3_imm2 == 0)
+		return I_RRX;
+	    else
+		return I_ROR;
+    }
+
+}
+
+darm_instr_t thumb2_data_shifted_reg(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op, Rn, Rd_S;
+    op = (w >> 5) & b1111;
+    Rn = w & b1111;
+    Rd_S = ((w2 >> 7) & 0x1E) | (w >> 4);
+
+    // These all operate on registers
+
+    switch(op) {
+	case 0:
+	    if (Rd_S == 0x1F)
+		return I_TST;
+	    else
+		return I_AND;
+	case 1:
+	    return I_BIC;
+	case 2:
+	    if (Rn == 0x1F)
+		return thumb2_move_shift(d, w, w2);
+	    else
+		return I_ORR;
+	case 3:
+	    if (Rn == 0x1F)
+		return I_MVN;
+	    else
+		return I_ORN;
+	case 4:
+	    if (Rd_S == 0x1F)
+		return I_TEQ;
+	    else
+		return I_EOR;
+	case 6:
+	    return I_PKH;
+	case 8:
+	    if (Rd_S == 0x1F)
+		return I_CMN;
+	    else
+		return I_ADD;
+	case 10:
+	    return I_ADC;
+	case 11:
+	    return I_SBC;
+	case 13:
+	    if (Rd_S == 0x1F)
+		return I_CMP;
+	    else
+		return I_SUB;
+	case 14:
+	    return I_RSB;
+    }
+
+}
+
+darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op, Rn, Rd_S;
+    op = (w >> 5) & b1111;
+    Rn = w & b1111;
+    Rd_S = ((w2 >> 7) & 0x1E) | (w >> 4);
+
+    // These all operate on immediates
+    switch(op) {
+	case 0:
+	    if (Rd_S == 0x1F)
+		return I_TST;
+	    else
+		return I_AND;
+	case 1:
+	    return I_BIC;
+	case 2:
+	    if (Rn == 0x1F)
+		return I_MOV;
+	    else
+		return I_ORR;
+	case 3:
+	    if (Rn == 0x1F)
+		return I_MVN;
+	    else
+		return I_ORN;
+	case 4:
+	    if (Rd_S == 0x1F)
+		return I_TEQ;
+	    else
+		return I_EOR;
+	case 8:
+	    if (Rd_S == 0x1F)
+		return I_CMN;
+	    else
+		return I_ADD;
+	case 10:
+	    return I_ADC;
+	case 11:
+	    return I_SBC;
+	case 13:
+	    if (Rd_S == 0x1F)
+		return I_CMP;
+	    else
+		return I_SUB;
+	case 14:
+	    return I_RSB;
+    }
+}
+
+
+
+darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2) {
+
+    /* TODO: implement */
+    return -1;
+
+}
