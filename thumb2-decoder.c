@@ -442,6 +442,48 @@ darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2) {
 }
 
 
+darm_instr_t thumb2_store_single_item(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op1, op2;
+    op1 = (w >> 5) & b111;
+    op2 = (w2 >> 6) & 0x3F;
+
+    switch(op1) {
+        case 0:
+	    if (op2 == 0)
+		return I_STRB;	// register
+	    else if ((op2 & 0x3C) == 0x38)
+		return I_STRBT;
+	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24)
+		return I_STRB;  // immediate
+	    break;
+	case 1:
+	    if (op2 == 0)
+		return I_STRH;	// register
+	    else if ((op2 & 0x3C) == 0x38)
+		return I_STRHT;
+	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24)
+		return I_STRH;  // immediate	
+	    break;
+	case 2:
+	    if (op2 == 0)
+		return I_STR;	// register
+	    else if ((op2 & 0x3C) == 0x38)
+		return I_STRT;
+	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24)
+		return I_STR;  // immediate
+	    break;
+	case 4:
+	    return I_STRB;  // immediate
+	case 5:
+	    return I_STRH;  // immediate
+	case 6:
+	    return I_STR;  // immediate
+    }
+
+    return I_INVLD;
+
+}
+
 darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2) {
 
     /* TODO: implement */
