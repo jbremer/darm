@@ -35,8 +35,24 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "thumb2-tbl.h"
 #include "thumb2.h"
 
+darm_instr_t thumb2_load_store_multiple(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_data_shifted_reg(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_store_single_item(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2);
+darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2);
 
-void thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2) {
+
+
+darm_instr_t thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2) {
 
     static int op2;
     op2 = (w >> 4) & 0x7F;
@@ -47,12 +63,16 @@ void thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2) {
             op2 &= 0x64;
             if (op2 == 0) {
                 // load, store multiple
+		return thumb2_load_store_multiple(d, w, w2);
             } else if (op2 == b100) {
                 // load/store dual, load/store exclusive, table branch
+		return thumb2_load_store_dual(d, w, w2);
             } else if (((op2 >> 5) & b11) == b1) {
 	        // dataprocessing (shifted register)
+		return thumb2_data_shifted_reg(d, w, w2);
             } else if (((op2 >> 6) & b1) == b1) {
                 // coproc, simd, fpu
+		return thumb2_coproc_simd(d, w, w2);
             }
             break;
 
@@ -60,10 +80,13 @@ void thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2) {
 	    op2 = (op2 & 0x20) >> 5;
             if (op2 == 0 && (w2&0x8000) == 0) {
                 // dataprocessing (modified immediate)
+		return thumb2_modified_immediate(d, w, w2);
             } else if (op2 == 1 && (w2&0x8000) == 0) {
                 // dataprocessing (plain binary immediate)
+		return thumb2_plain_immediate(d, w, w2);
             } else if ((w2 & 0x8000) == 0x8000) {
                 // branches and miscellaneous control
+		return thumb2_branch_misc_ctrl(d, w, w2);
 	    }
             break;
 
@@ -71,23 +94,32 @@ void thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2) {
 
 	    if ((op2 & 0x71) == 0) {
                 // store single data item
+		return thumb2_store_single_item(d, w, w2);
 	    } else if ((op2 & 0x71) == 0x10) {
 		// Advanced SIMD element or structure load/store instructions
+		// TODO: implement
+		return I_INVLD;
 	    } else if ((op2 & 0x70) == 0x20) {
 		// data-processing (register)
+		return thumb2_data_reg(d, w, w2);
 	    } else if ((op2 & 0x78) == 0x30) {
 		// multiply, multiply accumulate, and absolute difference
+		return  thumb2_mult_acc_diff(d, w, w2);
             } else if ((op2 & 0x78) == 0x38) {
 		// long multiply, long multiply accumulate, and divide
+		return thumb2_long_mult_acc(d, w, w2);
 	    } else {
 
 	        switch (op2 & 0x67) {
 		    case 1:
 			// load byte, memory hints
+			return thumb2_load_byte_hints(d, w, w2);
 		    case 3:
 			// load halfword, memory hints
+			return thumb2_load_halfword_hints(d, w, w2);
                     case 5:
 			// load word
+			return thumb2_load_word(d, w, w2);
                     case 7:
                     default:
                         // undefined
@@ -98,7 +130,9 @@ void thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2) {
 	default:
 	    break;
     }
+	// TODO: handle other co-proc case
 
+    return I_INVLD;
 }
 
 
@@ -868,7 +902,7 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
 	    else if (op2 == 0 && Ra != b1111)
 		return I_MLA;
 	    else if (op2 == 1)
-		return MLS;
+		return I_MLS;
 	    break;
 	case 2:
 	    if (Ra == b1111)
@@ -876,10 +910,13 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
 	    else
 		return I_SMLAD;
 	case 3:
+	    /* TODO: broken
 	    if (Ra == b1111)
 		return I_SMULWB;
 	    else
 		return I_SMLAWB;
+	    */
+	    return I_INVLD;
 	case 4:
 	    if (Ra == b1111)
 		return I_SMUSD;
