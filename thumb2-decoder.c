@@ -844,6 +844,63 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
     }
 }
 
+darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op1, op2, Ra;
+    op1 = (w >> 4) & b111;
+    op2 = (w2 >> 4) & b11;
+    Ra = (w2 >> 12) & b1111;
+
+    if (((w2 >> 6) & b11) != 0)
+	return I_INVLD;
+
+    if (op1 == 1 && Ra == b1111)
+	return I_SMULBB;
+    else
+	return I_SMLABB;
+
+    if ((op2&2) != 0)
+	return I_INVLD;
+
+    switch(op1) {
+	case 0:
+	    if (op2 == 0 && Ra == b1111)
+		return I_MUL;
+	    else if (op2 == 0 && Ra != b1111)
+		return I_MLA;
+	    else if (op2 == 1)
+		return MLS;
+	    break;
+	case 2:
+	    if (Ra == b1111)
+		return I_SMUAD;
+	    else
+		return I_SMLAD;
+	case 3:
+	    if (Ra == b1111)
+		return I_SMULWB;
+	    else
+		return I_SMLAWB;
+	case 4:
+	    if (Ra == b1111)
+		return I_SMUSD;
+	    else
+		return I_SMLSD;
+	case 5:
+	    if (Ra == b1111)
+		return I_SMMUL;
+	    else
+		return I_SMMLA;
+	case 6:
+	    return I_SMMLS;
+	case 7:
+	    if (op2 == 0 && Ra == b1111)
+		return I_USAD8;
+	    else if (op2 == 0)
+		return I_USADA8;
+    }
+    return I_INVLD;
+}
+
 
 darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2) {
 
