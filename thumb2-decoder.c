@@ -635,6 +635,156 @@ darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2) {
 }
 
 
+darm_instr_t thumb2_parallel_signed(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op1, op2, Rn;
+    op1 = (w >> 4) & b111;
+    op2 = (w2 >> 4) & b11;
+
+    if (op2 == 0) {
+	switch (op1) {
+	    case 0:
+		return I_SADD8;
+	    case 1:
+		return I_SADD16;
+	    case 2:
+		return I_SASX;
+	    case 4:
+		return I_SSUB8;
+	    case 5:
+		return I_SSUB16;
+	    case 6:
+		return I_SSAX;
+	}
+    } else if (op2 == 1) {
+	switch (op1) {
+	    case 0:
+		return I_QADD8;
+	    case 1:
+		return I_QADD16;
+	    case 2:
+		return I_QASX;
+	    case 4:
+		return I_QSUB8;
+	    case 5:
+		return I_QSUB16;
+	    case 6:
+		return I_QSAX;
+	}
+    } else if (op2 == 2) {
+	switch (op1) {
+	    case 0:
+		return I_SHADD8;
+	    case 1:
+		return I_SHADD16;
+	    case 2:
+		return I_SHASX;
+	    case 4:
+		return I_SHSUB8;
+	    case 5:
+		return I_SHSUB16;
+	    case 6:
+		return I_SHSAX;
+        }
+    }
+
+}
+
+darm_instr_t thumb2_parallel_unsigned(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op1, op2, Rn;
+    op1 = (w >> 4) & b111;
+    op2 = (w2 >> 4) & b11;
+
+    if (op2 == 0) {
+	switch (op1) {
+	    case 0:
+		return I_UADD8;
+	    case 1:
+		return I_UADD16;
+	    case 2:
+		return I_UASX;
+	    case 4:
+		return I_USUB8;
+	    case 5:
+		return I_USUB16;
+	    case 6:
+		return I_USAX;
+	}
+    } else if (op2 == 1) {
+	switch (op1) {
+	    case 0:
+		return I_UQADD8;
+	    case 1:
+		return I_UQADD16;
+	    case 2:
+		return I_UQASX;
+	    case 4:
+		return I_UQSUB8;
+	    case 5:
+		return I_UQSUB16;
+	    case 6:
+		return I_UQSAX;
+	}
+    } else if (op2 == 2) {
+	switch (op1) {
+	    case 0:
+		return I_UHADD8;
+	    case 1:
+		return I_UHADD16;
+	    case 2:
+		return I_UHASX;
+	    case 4:
+		return I_UHSUB8;
+	    case 5:
+		return I_UHSUB16;
+	    case 6:
+		return I_UHSAX;
+        }
+    }
+
+}
+
+darm_instr_t thumb2_misc_op(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op1, op2;
+    op1 = (w >> 4) & b11;
+    op2 = (w2 >> 4) & b11;
+    if ((w2 >> 12) & b1111 != b1111)
+	return I_INVLD;
+
+    switch(op1) {
+	case 0:
+	    switch(op2) {
+		case 0:
+		    return I_QADD;
+		case 1:
+		    return I_QDADD;
+		case 2:
+		    return I_QSUB;
+		case 3:
+		    return I_QDSUB;
+	    }
+	case 1:
+	    switch(op2) {
+		case 0:
+		    return I_REV;
+		case 1:
+		    return I_REV16;
+		case 2:
+		    return I_RBIT;
+		case 3:
+		    return I_REVSH;
+	    }
+	case 2:
+	    if (op2 == 0)
+		return I_SEL;
+	    break;
+	case 3:
+	    if (op2 == 0)
+		return I_CLZ;
+    }
+
+    return I_INVLD;
+
+}
 darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op1, op2, Rn;
     op1 = (w >> 4) & b1111;
@@ -693,114 +843,6 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
 	thumb2_misc_op(d, w, w2);
     }
 }
-
-
-darm_instr_t thumb2_parallel_signed(darm_t *d, uint16_t w, uint16_t w2) {
-    static uint8_t op1, op2, Rn;
-    op1 = (w >> 4) & b111;
-    op2 = (w2 >> 4) & b11;
-
-    if (op2 == 0) {
-	switch (op1) {
-	    case 0:
-		return I_SADD8;
-	    case 1:
-		return I_SADD16;
-	    case 2:
-		return I_SASX;
-	    case 4:
-		return I_SSUB8;
-	    case 5:
-		return I_SSUB16;
-	    case 6:
-		return I_SSAX;
-	}
-    } else if (op2 == 1) {
-	switch (op1) {
-	    case 0:
-		return I_QADD8;
-	    case 1:
-		return I_QADD16;
-	    case 2:
-		return I_QASX;
-	    case 4:
-		return I_QSUB8;
-	    case 5:
-		return I_QSUB16;
-	    case 6:
-		return I_QSAX;
-    } else if (op2 == 2) {
-	switch (op1) {
-	    case 0:
-		return I_SHADD8;
-	    case 1:
-		return I_SHADD16;
-	    case 2:
-		return I_SHASX'
-	    case 4:
-		return I_SHSUB8;
-	    case 5:
-		return I_SHSUB16;
-	    case 6:
-		return I_SHSAX;
-        }
-    }
-
-}
-
-darm_instr_t thumb2_parallel_unsigned(darm_t *d, uint16_t w, uint16_t w2) {
-    static uint8_t op1, op2, Rn;
-    op1 = (w >> 4) & b111;
-    op2 = (w2 >> 4) & b11;
-
-    if (op2 == 0) {
-	switch (op1) {
-	    case 0:
-		return I_UADD8;
-	    case 1:
-		return I_UADD16;
-	    case 2:
-		return I_UASX;
-	    case 4:
-		return I_USUB8;
-	    case 5:
-		return I_USUB16;
-	    case 6:
-		return I_USAX;
-	}
-    } else if (op2 == 1) {
-	switch (op1) {
-	    case 0:
-		return I_UQADD8;
-	    case 1:
-		return I_UQADD16;
-	    case 2:
-		return I_UQASX;
-	    case 4:
-		return I_UQSUB8;
-	    case 5:
-		return I_UQSUB16;
-	    case 6:
-		return I_UQSAX;
-    } else if (op2 == 2) {
-	switch (op1) {
-	    case 0:
-		return I_UHADD8;
-	    case 1:
-		return I_UHADD16;
-	    case 2:
-		return I_UHASX'
-	    case 4:
-		return I_UHSUB8;
-	    case 5:
-		return I_UHSUB16;
-	    case 6:
-		return I_UHSAX;
-        }
-    }
-
-}
-
 
 
 darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2) {
