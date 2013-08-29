@@ -902,6 +902,55 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
 }
 
 
+darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op1, op2;
+    op1 = (w >> 4) & b111;
+    op2 = (w2 >> 4) & b1111;
+
+    switch (op1) {
+	case 0:
+	    if (op2 == 0)
+		return I_SMULL;
+	    break;
+	case 1:
+	    if (op2 == b1111)
+		return I_SDIV;
+	    break;
+	case 2:
+	    if (op2 == 0)
+		return I_UMULL;
+	    break;
+	case 3:
+	    if (op2 == b1111)
+		return I_UDIV;
+	    break;
+	case 4:
+	    if (op2 == 0)
+		return I_SMLAL;
+	    else if ((op2&b1100) == b1000)
+		return I_SMLALBB;
+	    else if ((op2&b1110) == b1100)
+		return I_SMLALD;
+	    break;
+	case 5:
+	    if ((op2&b1110) == b1100)
+		return I_SMLSLD;
+	    break;
+	case 6:
+	    if (op2 == 0)
+		return I_UMLAL;
+	    else if (op2 == b110)
+		return I_UMAAL;
+	    break;
+	default:
+	    break;
+    }
+    return I_INVLD;
+
+
+}
+
+
 darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2) {
 
     /* TODO: implement */
