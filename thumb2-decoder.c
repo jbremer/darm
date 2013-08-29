@@ -484,6 +484,72 @@ darm_instr_t thumb2_store_single_item(darm_t *d, uint16_t w, uint16_t w2) {
 
 }
 
+darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2) {
+    static uint8_t op1, op2, Rn, Rt;
+    op1 = (w >> 7) & b11;
+    op2 = (w >> 6) & 0x3F;
+    Rn = w & b1111;
+    Rt = (w2 >> 12) & b1111;
+
+    if ((op1&2) == 0 && Rn == b1111) {
+	if (Rt == b1111)
+	    return I_PLD;  // literal
+	else
+	    return I_LDRB; // literal
+    } else if ((op1&2) == 2 && Rn == b1111) {
+        if (Rt == b1111)
+	    return I_PLI; // immediate, literal
+	else
+	    return I_LDRSB; // literal
+    } else if (op1 == 0) {
+	if (op2 == 0) {
+	    if (Rt == b1111)
+		return I_PLD;  // PLD,PLDW register
+	    else
+		return I_LDRB;  // register
+	} else if ((op2 & 0x24) == 0x24) {
+	    return I_LDRB;  // immediate
+	} else if ((op2 & 0x3C) == 0x30) {
+	    if (Rt == b1111)
+		return I_PLD;  // PLD,PLDW immediate
+	    else
+		return I_LDRB;  // immediate
+	} else if ((op2 & 0x3C) == 0x38) {
+	    return I_LDRBT;
+	}
+
+    } else if (op1 == 1) {
+	if (Rt == b1111)
+	    return I_PLD;  // PLD,PLDW immediate
+	else
+	    return I_LDRB;  // immediate
+    } else if (op1 == 2) {
+	if (op2 == 0) {
+	    if (Rt == b1111)
+		return I_PLI;  // PLI register
+	    else
+		return I_LDRSB;  // register
+	} else if ((op2 & 0x24) == 0x24) {
+	    return I_LDRSB;  // immediate
+	} else if ((op2 & 0x3C) == 0x30) {
+	    if (Rt == b1111)
+		return I_PLI;  // PLI immediate,literal
+	    else
+		return I_LDRSB;  // immediate
+	} else if ((op2 & 0x3C) == 0x38) {
+	    return I_LDRSBT;
+	}
+    } else if (op1 == 3) {
+	if (Rt == b1111)
+	    return I_PLI;  // PLI literal,immediate
+	else
+	    return I_LDRSB;  // immediate
+    }
+
+}
+
+
+
 darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2) {
 
     /* TODO: implement */
