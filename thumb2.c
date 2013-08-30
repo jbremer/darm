@@ -315,8 +315,10 @@ void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 // Handle weird branch cases
 int parse_branch_misc_cases(darm_t *d, uint16_t w, uint16_t w2) {
 
-    // Check if op field is BXJ b0111100
-    if ((w & 0x7F0) == 0x3C0) {
+
+    // Check if op field is BXJ b0111000
+    if (((w >> 4) & 0x7F) == 0x3C) {
+	printf("BXJ!!!!\n");
         d->instr = I_BXJ;
 	d->Rm = w & b1111;
 	d->S = B_INVLD;
@@ -388,6 +390,14 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
     // Misc. cases
     switch(d->instr) {
+
+	// Branch and exchange Jazelle
+	case I_BXJ:
+            d->Rm = w & b1111;
+	    d->S = B_INVLD;
+            d->I = B_INVLD;
+	    break;
+
 	// Branch
         case I_B:
 	    // Handle exceptions
@@ -442,12 +452,13 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	case I_ADD: case I_SUB:
 	    // Set to CMN/CMP instruction
+	    /*
 	    if (d->Rd == PC && d->S == B_SET) {
 		d->instr = (d->instr == I_ADD) ? I_CMN : I_CMP;
 		d->Rd = R_INVLD; // If you want to set Rd to PC, don't forget to enforce for normal CMN as well.
 		d->S = B_INVLD;
 	    }
-
+	    */
 	    // Check if we are dealing with SP variant
 	    if (d->Rd != R_INVLD && d->Rm != R_INVLD && d->Rn == R_INVLD) {
 		d->Rn = SP;
@@ -465,11 +476,30 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	case I_AND:
 	    // Set to TST instruction
+	    /*
 	    if (d->Rd == PC && d->S == 1) {
 		d->instr = I_TST;
 		d->Rd = R_INVLD;
 		d->S = B_INVLD;
 	    }
+	    */
+	    break;
+
+	// Weird corner case not handled by decoder (in manual)
+	// TODO: this needs less magic
+	case I_LDR:
+	    if ((w & 0xFFF0) == 0xF850 && (w2 & 0xFFF) == 0xB04)
+		d->instr = I_POP;
+	    break;
+
+	case I_LDRBT:
+	    d->P = B_UNSET;
+	    d->U = B_UNSET;
+	    d->W = B_UNSET;
+	    break;
+
+	case I_TST:
+	    d->S = B_INVLD;
 	    break;
 
 	case I_ASR:
@@ -480,9 +510,21 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    }
 	    break;
 
+	case I_CLREX:
+            d->S = B_INVLD;
+	    d->I = B_INVLD;
+	    break;
+
+	case I_CMP: case I_CMN: case I_TEQ:
+	    d->Rd = PC;
+	    d->S = B_INVLD;
+	    break;
+
 	// option field
 	case I_DBG: case I_DMB: case I_DSB:
 	case I_ISB:
+	    d->S = B_INVLD;
+	    d->I = B_INVLD;
 	    d->option = w2 & b1111; // directly index enum
 	    break;
 
@@ -517,11 +559,13 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 	case I_LDRB:
 	    // PLD,PLDW exception
+	    /*
 	    if (d->Rt == b1111 && d->P == B_SET && d->U == B_UNSET && d->W == B_UNSET) {
 		d->instr = I_PLD;
 		d->Rt = R_INVLD;
 		d->W = B_UNSET;
 	    }
+	    */
 	    if (d->Rn == b1111) {
 		d->imm = w2 & 0xfff;
 		d->Rn = R_INVLD;
@@ -592,6 +636,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 
 	case I_PLD:
+	    d->Rt = R_INVLD;
 	    d->W = ((w & b1111) != b1111) ? ((w >> 5) & 1) : B_INVLD;
 	    break;
 
