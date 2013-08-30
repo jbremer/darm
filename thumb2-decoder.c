@@ -310,12 +310,12 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	case 1:
 	    return I_BIC;
 	case 2:
-	    if (Rn == 0x1F)
+	    if (Rn == b1111)
 		return I_MOV;
 	    else
 		return I_ORR;
 	case 3:
-	    if (Rn == 0x1F)
+	    if (Rn == b1111)
 		return I_MVN;
 	    else
 		return I_ORN;
