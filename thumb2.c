@@ -116,6 +116,7 @@ int thumb2_lookup_instr(uint16_t w, uint16_t w2) {
 			return i;
 		}
 	}
+	
 	return 0;
 }
 
@@ -659,11 +660,18 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     int index;
     index = thumb2_lookup_instr(w, w2);
     d->instr = thumb2_instr_labels[index];
+    d->instr_type = thumb2_instr_types[index];
+    d->instr_imm_type = thumb2_imm_instr_types[index];
+    d->instr_flag_type = thumb2_flags_instr_types[index];
+
+    d->instr = thumb2_decode_instruction(d, w, w2);
+
 
     thumb2_parse_reg(index, d, w, w2);
     thumb2_parse_imm(index, d, w, w2);
     thumb2_parse_flag(index, d, w, w2);
     thumb2_parse_misc(index, d, w, w2);
+    d->instr_type = I_INVLD;
     return 0;
 }
 

@@ -245,7 +245,7 @@ darm_instr_t thumb2_data_shifted_reg(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op, Rn, Rd_S;
     op = (w >> 5) & b1111;
     Rn = w & b1111;
-    Rd_S = ((w2 >> 7) & 0x1E) | (w >> 4);
+    Rd_S = ((w2 >> 7) & 0x1E) | ((w >> 4) & 1);
 
     // These all operate on registers
 

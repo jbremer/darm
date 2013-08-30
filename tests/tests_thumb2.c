@@ -31,7 +31,7 @@ struct {
     {0xF60271AB, 0, "addwal r1, r2, #0xfab", {
         .instr = I_ADDW, .I = B_SET, .imm = 0xFAB, .Rd = r1, .Rn = r2, .cond = C_AL}},
     {0xF60F71AC, 0, "adral r1 #0xfac", {
-        .instr = I_ADR, .I = B_SET, .imm = 0xFAC, .Rd = r1, .cond = C_AL}},
+        .instr = I_ADR, .I = B_SET, .imm = 0xFAC, .Rd = r1, .Rn = PC, .cond = C_AL}},
     {0xEB0211D3, 0, "addal.w r1, r2, r3 lsr #7", {
         .instr = I_ADD, .I = B_SET, .imm = 7, .Rd = r1, .Rn = r2, .Rm = r3, .shift = 7, .shift_type = S_LSR, .cond = C_AL}},
     {0xEB121FD3, 0, "cmnal r2, r3, lsr #7", {
@@ -40,10 +40,12 @@ struct {
         .instr = I_ADD, .I = B_SET, .S = B_SET, .imm = 7, .Rd = r3, .Rn = SP, .Rm = r3, .shift = 7, .shift_type = S_LSR, .cond = C_AL}},
     // add is false
     {0xF6AF37AD, 0, "adral.w r7 #0xbad", {
-        .instr = I_ADR, .I = B_SET, .imm = 0xBAD, .Rd = r7, .cond = C_AL}},
+        .instr = I_ADR, .I = B_SET, .imm = 0xBAD, .Rd = r7, .Rn = PC, .cond = C_AL}},
     // add is true
     {0xF60F37AD, 0, "adral.w r7 #0xbad", {
-        .instr = I_ADR, .I = B_SET, .imm = 0xBAD, .Rd = r7, .cond = C_AL}},
+        .instr = I_ADR, .I = B_SET, .imm = 0xBAD, .Rd = r7, .Rn = PC, .cond = C_AL}},
+
+    /* AND */
     {0xF41221BC, 0, "andal r1, r2 #0x5e00", {
         .instr = I_AND, .I = B_SET, .S = B_SET, .imm = 0x5E000, .Rd = r1, .Rn = r2, .cond = C_AL}},
     {0xF4122FBC, 0, "tstal r2 #0x5e00", {
@@ -56,6 +58,8 @@ struct {
         .instr = I_ASR, .I = B_SET, .S = B_SET, .imm = 0x6, .Rd = r1, .Rm = r2, .shift = 6, .shift_type = S_ASR, .cond = C_AL}},
     {0xFA42F104, 0, "asral.w r1, r2, r4", {
         .instr = I_ASR, .I = B_UNSET, .S = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r4, .cond = C_AL}},
+
+    /* Branch */
     {0xF43F8801, 0, "beq.w #-266238", {
         .instr = I_B, .I = B_SET, .S = B_SET, .imm = 0xFFFBF002, .J1 = B_UNSET, .J2 = B_SET,  .cond = C_EQ}},
     {0xF30AAFF6, 0, "bgt.w #0xcafec", {

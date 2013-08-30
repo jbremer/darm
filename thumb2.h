@@ -32,5 +32,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 uint32_t thumb_expand_imm(uint16_t imm12_r);
 void thumb2_decode_immshift(darm_t *d, uint8_t type, uint8_t imm5);
+darm_instr_t thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2);
 
 #endif

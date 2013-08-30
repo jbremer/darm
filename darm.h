@@ -90,6 +90,8 @@ typedef struct _darm_t {
     // the instruction label
     darm_instr_t    instr;
     darm_enctype_t  instr_type;
+    darm_enctype_t  instr_imm_type;	// thumb32 immediate type
+    darm_enctype_t  instr_flag_type;	// thumb32 flag type
 
     // conditional flags, if any
     darm_cond_t     cond;
