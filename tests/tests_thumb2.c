@@ -250,6 +250,26 @@ struct {
     {0xF8321EFF, 0, "ldrhtal r1, [r2, #0xff]", {
         .instr = I_LDRHT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
 
+    // literal
+    {0xF83F1E0F, 0, "ldrhal r1, [PC, -#0xe0f]", {
+        .instr = I_LDRH, .I = B_SET, .U = B_UNSET, .Rt = r1, .imm = 0xe0f, .cond = C_AL}},
+    {0xF8BFFE0F, 0, "pldal [PC, #0xe0f]", {
+        .instr = I_PLD, .I = B_SET, .U = B_SET, .imm = 0xe0f, .cond = C_AL}},
+
+    // register
+    {0xF8321023, 0, "ldrhal.w r1, [r2, r3, lsl #2]", {
+        .instr = I_LDRH, .I = B_SET, .Rt = r1, .Rn = r2, .Rm = r3, .imm = 0x2, .shift = 2, .shift_type = S_LSL, .cond = C_AL}},
+    {0xF83F1023, 0, "ldrhal r1, [PC, #-0x23]", {
+        .instr = I_LDRH, .I = B_SET, .Rt = r1, .imm = 0x23, .cond = C_AL}},
+    {0xF832F023, 0, "pldwal [r2, r3, lsl #2]", {
+        .instr = I_PLD, .I = B_SET, .Rn = r2, .Rm = r3, .W = B_SET, .imm = 2, .shift = 2, .shift_type = S_LSL, .cond = C_AL}},
+
+    // LDRHT
+    {0xF8321EFF, 0, "ldrhtal r1, [r2, #0xff]", {
+        .instr = I_LDRHT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+    {0xF83F1EFF, 0, "ldrhal r1, [PC, #-0xeff]", {
+        .instr = I_LDRH, .I = B_SET, .Rt = r1, .U = B_UNSET, .imm = 0xeff, .cond = C_AL}},
+    
 
 
 };
