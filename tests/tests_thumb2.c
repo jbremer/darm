@@ -287,7 +287,16 @@ struct {
         .instr = I_PLI, .I = B_SET, .Rn = r2, .imm = 0xff, .cond = C_AL}},
     {0xF91F1CFF, 0, "ldrsbal r1, [pc, #-0xcff]", {
         .instr = I_LDRSB, .I = B_SET, .Rt = r1, .U = B_UNSET, .imm = 0xcff, .cond = C_AL}},
+    {0xF9121EFF, 0, "ldrsbtal r1, [r2, #0xff]", {
+        .instr = I_LDRSBT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
 
+    // literal
+    {0xF91F1B2B, 0, "ldrsbal r1, [PC, #-0xb2b]", {
+        .instr = I_LDRSB, .I = B_SET, .Rt = r1, .imm = 0xb2b, .cond = C_AL}},
+    {0xF91FFB2B, 0, "plial [PC, #-0xb2b]", {
+        .instr = I_PLI, .I = B_SET, .imm = 0xb2b, .cond = C_AL}},
+
+    
 
 };
 

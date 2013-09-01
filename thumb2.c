@@ -492,7 +492,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->instr = I_POP;
 	    break;
 
-	case I_LDRBT: case I_LDRHT:
+	case I_LDRBT: case I_LDRHT: case I_LDRSBT:
 	    d->P = B_UNSET;
 	    d->U = B_UNSET;
 	    d->W = B_UNSET;
@@ -564,6 +564,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->Rm = R_INVLD;
 		d->P = B_INVLD;
 		d->U = ((w >> 7) & 1) ? B_SET : B_UNSET;
+		d->W = B_INVLD;
 		d->shift_type = S_INVLD;
 		d->shift = 0;
 	    }
@@ -641,6 +642,12 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	case I_PLI:
 	    d->Rt = R_INVLD;
 	    d->P = B_INVLD;
+	    d->W = B_INVLD;
+	    if (d->Rn == b1111) {
+		d->Rn = R_INVLD;
+		d->imm = (w2 & 0xFFF);
+		d->U = ((w >> 7) & 1) ? B_SET : B_UNSET;
+	    }
 	    break;
 
 	case I_PLD:
