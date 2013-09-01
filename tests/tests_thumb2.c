@@ -269,7 +269,24 @@ struct {
         .instr = I_LDRHT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
     {0xF83F1EFF, 0, "ldrhal r1, [PC, #-0xeff]", {
         .instr = I_LDRH, .I = B_SET, .Rt = r1, .U = B_UNSET, .imm = 0xeff, .cond = C_AL}},
-    
+
+    // LDRSB
+    {0xF9921FED, 0, "ldrsbal r1, [r2, #0xfed]", {
+        .instr = I_LDRSB, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xfed, .cond = C_AL}},
+    {0xF992FFED, 0, "plial [r2, #0xfed]", {
+        .instr = I_PLI, .I = B_SET, .Rn = r2, .imm = 0xfed, .cond = C_AL}},
+    {0xF99F1FED, 0, "ldrsbal r1, [PC, #0xfed]", {
+        .instr = I_LDRSB, .I = B_SET, .Rt = r1, .U = B_SET, .imm = 0xfed, .cond = C_AL}},
+    {0xF99FFFED, 0, "plial [PC, #0xfed]", {
+        .instr = I_PLI, .I = B_SET, .U = B_SET, .imm = 0xfed, .cond = C_AL}},
+    {0xF9121CFF, 0, "ldrsbal r1, [r2, #-0xff]", {
+        .instr = I_LDRSB, .I = B_SET, .Rt = r1, .Rn = r2, .P = B_SET, .U = B_UNSET, .W = B_UNSET, .imm = 0xff, .cond = C_AL}},
+    {0xF9121FFF, 0, "ldrsbal r1, [r2, #0xff]!", {
+        .instr = I_LDRSB, .I = B_SET, .Rt = r1, .Rn = r2, .P = B_SET, .U = B_SET, .W = B_SET, .imm = 0xff, .cond = C_AL}},
+    {0xF912FCFF, 0, "plial [r2, #-0xff]", {
+        .instr = I_PLI, .I = B_SET, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+    {0xF91F1CFF, 0, "ldrsbal r1, [pc, #-0xcff]", {
+        .instr = I_LDRSB, .I = B_SET, .Rt = r1, .U = B_UNSET, .imm = 0xcff, .cond = C_AL}},
 
 
 };
