@@ -557,7 +557,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->coproc = (w2 >> 8) & b1111;
 	    d->CRd = (w2 >> 12) & b1111; // enum index
 	    break;
-	case I_LDRB: case I_LDRSB:
+	case I_LDRB: case I_LDRSB: case I_LDRSH:
 	    if (d->Rn == b1111) {
 		d->imm = w2 & 0xfff;
 		d->Rn = R_INVLD;

@@ -333,6 +333,20 @@ struct {
     // register
     {0xF9321033, 0, "ldrshal.w r1, [r2, r3, lsl #3]", {
         .instr = I_LDRSH, .I = B_SET, .Rt = r1, .Rn = r2, .Rm = r3, .imm = 3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+    {0xF93F1012, 0, "ldrshal r1, [pc, #-0x12]", {
+        .instr = I_LDRSH, .I = B_SET, .U = B_UNSET, .Rt = r1, .imm = 0x12, .cond = C_AL}},
+
+    // LDRSHT
+    {0xF9321EFF, 0, "ldrshtal r1, [r2, #0xff]", {
+        .instr = I_LDRSHT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+    {0xF93F1EFF, 0, "ldrshal r1, [pc, #-0xeff]", {
+        .instr = I_LDRSH, .I = B_SET, .U = B_UNSET, .Rt = r1, .imm = 0xeff, .cond = C_AL}},
+
+    // LDRT
+    {0xF8521EFF, 0, "ldrtal r1, [r2, #0xff]", {
+        .instr = I_LDRT, .I = B_SET, .Rn = r2, .Rt = r1, .imm = 0xff, .cond = C_AL}},
+    {0xF85F1EF0, 0, "ldral.w r1, [pc, #-0xef0]", {
+        .instr = I_LDR, .I = B_SET, .U = B_UNSET, .Rt = r1, .imm = 0xef0, .cond = C_AL}},
 
 
 };
