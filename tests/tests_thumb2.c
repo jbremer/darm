@@ -326,7 +326,13 @@ struct {
     {0xF9321EFF, 0, "ldrshtal r1, [r2, #0xff]", {
         .instr = I_LDRSHT, .I = B_SET, .U = B_UNSET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
 
+    // literal
+    {0xF9BF1BAD, 0, "ldrshal r1, [pc, #0xbad]", {
+        .instr = I_LDRSH, .I = B_SET, .U = B_SET, .Rt = r1, .imm = 0xbad, .cond = C_AL}},
 
+    // register
+    {0xF9321033, 0, "ldrshal.w r1, [r2, r3, lsl #3]", {
+        .instr = I_LDRSH, .I = B_SET, .Rt = r1, .Rn = r2, .Rm = r3, .imm = 3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
 
 
 };
