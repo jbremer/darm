@@ -578,6 +578,13 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->P = (w >> 8) & 1 ? B_SET : B_UNSET;
 	    break;
 
+	case I_LDREXB:
+	    d->imm = 0;
+	    d->I = B_INVLD;
+	    d->Rt2 = R_INVLD;
+	    d->W = d->U = d->P = B_INVLD;
+	    break;
+
 	case I_POP: case I_PUSH:
 	    if (w == 0xF85D || w == 0xF84D) // no flags
 		break;

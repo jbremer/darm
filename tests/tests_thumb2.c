@@ -220,6 +220,16 @@ struct {
     {0xE8FF12FF, 0, "ldrdal r1, r2, #0x3fc", {
         .instr = I_LDRD, .I = B_SET, .U = B_SET, .P = B_UNSET, .W = B_SET, .Rt = r1, .Rt2 = r2, .imm = 0x3fc, .cond = C_AL}},
 
+    // LDREX
+    {0xE8521F55, 0, "ldrexal r1, [r2, #0x154]", {
+        .instr = I_LDREX, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0x154, .cond = C_AL}},
+    {0xE8D21F4F, 0, "ldrexbal r1, [r2]", {
+        .instr = I_LDREXB, .I = B_UNSET, .Rt = r1, .Rn = r2, .cond = C_AL}},
+    {0xE8D3127F, 0, "ldrexdal r1, r2, [r3]", {
+        .instr = I_LDREXD, .I = B_UNSET, .Rt = r1, .Rt2 = r2, .Rn = r3, .cond = C_AL}},
+    {0xE8D21F5F, 0, "ldrexhal r1, [r2]", {
+        .instr = I_LDREXH, .I = B_UNSET, .Rt = r1, .Rn = r2, .cond = C_AL}},
+
 
 };
 
