@@ -230,6 +230,27 @@ struct {
     {0xE8D21F5F, 0, "ldrexhal r1, [r2]", {
         .instr = I_LDREXH, .I = B_UNSET, .Rt = r1, .Rn = r2, .cond = C_AL}},
 
+    // LDRH
+    {0xF8B21B0B, 0, "ldrhal.w r1, [r2, #0xb0b]", {
+        .instr = I_LDRH, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xb0b, .cond = C_AL}},
+    {0xF8BF1B0B, 0, "ldrhal r1, #0xb0b", {
+        .instr = I_LDRH, .I = B_SET, .U = B_SET, .Rt = r1, .imm = 0xb0b, .cond = C_AL}},
+    {0xF8B2FB0B, 0, "pldwal [r2, #0xb0b]", {
+        .instr = I_PLD, .I = B_SET, .W = B_SET, .Rn = r2, .imm = 0xb0b, .cond = C_AL}},
+    {0xF8BFFB0B, 0, "pldal #0xb0b", {
+        .instr = I_PLD, .I = B_SET, .U = B_SET, .imm = 0xb0b, .cond = C_AL}},
+    {0xF8321DFF, 0, "ldrhal r1, [r2], #-0xff", {
+        .instr = I_LDRH, .I = B_SET, .P = B_SET, .W = B_SET, .U = B_UNSET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+    {0xF8321CFF, 0, "ldrhal r1, [r2, #-0xff]", {
+        .instr = I_LDRH, .I = B_SET, .P = B_SET, .W = B_UNSET, .U = B_UNSET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+    {0xF83219FF, 0, "ldrhal r1, [r2, #-0xff]!", {
+        .instr = I_LDRH, .I = B_SET, .P = B_UNSET, .W = B_SET, .U = B_UNSET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+    {0xF83F1FFF, 0, "ldrhal r1, #0xfff", {
+        .instr = I_LDRH, .I = B_SET, .U = B_UNSET, .Rt = r1, .imm = 0xfff, .cond = C_AL}},
+    {0xF8321EFF, 0, "ldrhtal r1, [r2, #0xff]", {
+        .instr = I_LDRHT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+
+
 
 };
 

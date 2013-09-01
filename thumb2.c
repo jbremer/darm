@@ -492,7 +492,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->instr = I_POP;
 	    break;
 
-	case I_LDRBT:
+	case I_LDRBT: case I_LDRHT:
 	    d->P = B_UNSET;
 	    d->U = B_UNSET;
 	    d->W = B_UNSET;
