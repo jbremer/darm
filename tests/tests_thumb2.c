@@ -187,19 +187,38 @@ struct {
     // literal
     {0xF81F1CFF, 0, "ldrbal r1, #0xcff", {
         .instr = I_LDRB, .I = B_SET, .Rt = r1, .U = B_UNSET, .imm = 0xcff, .cond = C_AL}},
-
     {0xF8121EFF, 0, "ldrbtal r1, [r2, #0xff]", {
         .instr = I_LDRBT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
-
-
     {0xF89F3FEC, 0, "ldrbal r3, #0xfec", {
         .instr = I_LDRB, .I = B_SET, .Rt = r3, .U = B_SET, .imm = 0xfec, .cond = C_AL}},
+    {0xF81FF880, 0, "pldal #0x880", {
+        .instr = I_PLD, .I = B_SET, .U = B_UNSET, .imm = 0x880, .cond = C_AL}},
 
+    // register
+    {0xF8121033, 0, "ldrbal.w r1, [r2, r3, lsl 3]", {
+        .instr = I_LDRB, .I = B_SET, .Rt = r1, .Rn = r2, .Rm = r3, .imm = 3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+    {0xF812F033, 0, "pldal [r2, r3, lsl #3]", {
+        .instr = I_PLD, .I = B_SET, .Rn = r2, .Rm = r3, .imm = 3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+    {0xF81F1033, 0, "ldrbal r1, #0x33", {
+        .instr = I_LDRB, .I = B_SET, .U = B_UNSET, .Rt = r1,.imm = 0x33, .cond = C_AL}},
+    {0xF81FF033, 0, "pldal #0x33", {
+        .instr = I_PLD, .I = B_SET, .U = B_UNSET, .imm = 0x33, .cond = C_AL}},
 
-/*
-    {0xF81F3FAF, 0, "ldrbal r3, #0xfaf", {
-        .instr = I_LDRB, .I = B_SET, .Rt = r3, .U = B_UNSET, .imm = 0xfaf, .cond = C_AL}},
-*/
+    // LDRBT
+    {0xF8121EAB, 0, "ldrbtal r1, [r2, #0xab]", {
+        .instr = I_LDRBT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xab, .cond = C_AL}},
+    {0xF81F1EAB, 0, "ldrbal r1, #0xeab", {
+        .instr = I_LDRB, .I = B_SET, .U = B_UNSET, .Rt = r1,.imm = 0xeab, .cond = C_AL}},
+
+    // LDRD
+    {0xE95312FF, 0, "ldrdal r1, r2, [r3, #-0x3fc]", {
+        .instr = I_LDRD, .I = B_SET, .U = B_UNSET, .P = B_SET, .W = B_UNSET, .Rt = r1, .Rt2 = r2, .Rn = r3, .imm = 0x3fc, .cond = C_AL}},
+    {0xE9F312FF, 0, "ldrdal r1, r2, [r3, #0x3fc]!", {
+        .instr = I_LDRD, .I = B_SET, .U = B_SET, .P = B_SET, .W = B_SET, .Rt = r1, .Rt2 = r2, .Rn = r3, .imm = 0x3fc, .cond = C_AL}},
+    {0xE8F312FF, 0, "ldrdal r1, r2, [r3], #0x3fc", {
+        .instr = I_LDRD, .I = B_SET, .U = B_SET, .P = B_UNSET, .W = B_SET, .Rt = r1, .Rt2 = r2, .Rn = r3, .imm = 0x3fc, .cond = C_AL}},
+    {0xE8FF12FF, 0, "ldrdal r1, r2, #0x3fc", {
+        .instr = I_LDRD, .I = B_SET, .U = B_SET, .P = B_UNSET, .W = B_SET, .Rt = r1, .Rt2 = r2, .imm = 0x3fc, .cond = C_AL}},
 
 
 };

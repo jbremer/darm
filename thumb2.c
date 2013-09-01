@@ -558,28 +558,24 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->CRd = (w2 >> 12) & b1111; // enum index
 	    break;
 	case I_LDRB:
-	    // PLD,PLDW exception
-	    /*
-	    if (d->Rt == b1111 && d->P == B_SET && d->U == B_UNSET && d->W == B_UNSET) {
-		d->instr = I_PLD;
-		d->Rt = R_INVLD;
-		d->W = B_UNSET;
-	    }
-	    */
 	    if (d->Rn == b1111) {
 		d->imm = w2 & 0xfff;
 		d->Rn = R_INVLD;
+		d->Rm = R_INVLD;
 		d->P = B_INVLD;
+		d->U = ((w >> 7) & 1) ? B_SET : B_UNSET;
+		d->shift_type = S_INVLD;
+		d->shift = 0;
 	    }
-	    //if (d->P == B_SET && d->U == B_UNSET && d->W == B_UNSET) {
-	    //	d->instr = I_LDRBT;
-	     //	d->
 	    break;
 
 	// zero-extend corner case with '00' appended
 	case I_LDRD: case I_LDREX:
         case I_STRD: case I_STREX:
 	    d->imm = (uint32_t) ((w2 & 0xFF) << 2);
+	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
+	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
+	    d->P = (w >> 8) & 1 ? B_SET : B_UNSET;
 	    break;
 
 	case I_POP: case I_PUSH:
@@ -636,8 +632,16 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 
 	case I_PLD:
-	    d->Rt = R_INVLD;
-	    d->W = ((w & b1111) != b1111) ? ((w >> 5) & 1) : B_INVLD;
+    	    d->Rt = R_INVLD;
+	    if (d->Rn == b1111) {
+		d->Rn = R_INVLD;
+		d->imm = (w2 & 0xFFF);
+		d->shift_type = S_INVLD;
+		d->shift = 0;
+		d->Rm = R_INVLD;
+		d->U = ((w >> 7) & 1) ? B_SET : B_UNSET;
+	    }
+            d->W = ((w & b1111) != b1111) ? ((w >> 5) & 1) : B_INVLD;
 	    break;
 
 	case I_SBFX: case I_UBFX:
