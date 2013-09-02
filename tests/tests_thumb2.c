@@ -430,6 +430,21 @@ struct {
     {0xF3AF8000, 0, "nopal.w", {
         .instr = I_NOP, .I = B_UNSET, .cond = C_AL}},
 
+    // ORN
+    {0xF46172FF, 0, "ornal r2, r1, #0x1fe", {
+        .instr = I_ORN, .I = B_SET, .S = B_UNSET, .Rd = r2, .Rn = r1, .imm = 0x1fe, .cond = C_AL}},
+    {0xF47172FF, 0, "ornsal r2, r1, #0x1fe", {
+        .instr = I_ORN, .I = B_SET, .S = B_SET, .Rd = r2, .Rn = r1, .imm = 0x1fe, .cond = C_AL}},
+    {0xF47F72FF, 0, "mvnsal r2, r1, #0x1fe", {
+        .instr = I_MVN, .I = B_SET, .S = B_SET, .Rd = r2, .imm = 0x1fe, .cond = C_AL}},
+
+    // register
+    {0xEA6271C3, 0, "ornal r1, r2, r3, lsl #31", {
+        .instr = I_ORN, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 31, .shift = 31, .shift_type = S_LSL, .cond = C_AL}},
+    {0xEA7271C3, 0, "ornsal r1, r2, r3, lsl #31", {
+        .instr = I_ORN, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 31, .shift = 31, .shift_type = S_LSL, .cond = C_AL}},
+    {0xEA6F71C3, 0, "mvnal r1, r3, lsl #31", {
+        .instr = I_MVN, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r3, .imm = 31, .shift = 31, .shift_type = S_LSL, .cond = C_AL}},
 
 
 };
