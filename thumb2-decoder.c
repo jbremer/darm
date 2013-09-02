@@ -891,10 +891,12 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
     if (((w2 >> 6) & b11) != 0)
 	return I_INVLD;
 
-    if (op1 == 1 && Ra == b1111)
-	return I_SMULBB;
-    else
-	return I_SMLABB;
+    if (op1 == 1) {
+	if (Ra == b1111)
+            return I_SMULBB;
+        else
+	    return I_SMLABB;
+    }
 
     if ((op2&2) != 0)
 	return I_INVLD;

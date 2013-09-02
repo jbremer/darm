@@ -351,28 +351,84 @@ struct {
     // TODO: LEAVEX
 
     // LSL
-    {0xEA4F7102, 0, "lsl.w r1, r2, #0x1c", {
+    {0xEA4F7102, 0, "lslal.w r1, r2, #0x1c", {
         .instr = I_LSL, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r2, .imm = 0x1c, .shift = 0x1c, .shift_type = S_LSL, .cond = C_AL}},
-    {0xEA5F0102, 0, "movs.w r1, r2", {
+    {0xEA5F0102, 0, "movsal.w r1, r2", {
         .instr = I_MOV, .I = B_SET, .S = B_SET, .Rd = r1, .Rm = r2, .cond = C_AL}},
-    {0xFA12F103, 0, "lsls.w r1, r2, r3", {
+    {0xFA12F103, 0, "lslsal.w r1, r2, r3", {
         .instr = I_LSL, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
 
     // LSR we enabled shift/type even though the manual does not.
-    {0xEA5F11D2, 0, "lsrs.w r1, r2, #7", {
+    {0xEA5F11D2, 0, "lsrsal.w r1, r2, #7", {
         .instr = I_LSR, .I = B_SET, .S = B_SET, .Rd = r1, .Rm = r2, .imm = 7, .shift = 7, .shift_type = S_LSR, .cond = C_AL}},
-    {0xEA4F1112, 0, "lsr.w r1, r2, #4", {
+    {0xEA4F1112, 0, "lsral.w r1, r2, #4", {
         .instr = I_LSR, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r2, .imm = 4, .shift = 4, .shift_type = S_LSR, .cond = C_AL}},
 
-    {0xFA32F103, 0, "lsrs.w r1, r2, r3", {
+    {0xFA32F103, 0, "lsrsal.w r1, r2, r3", {
         .instr = I_LSR, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rm = r3, .Rn = r2,  .cond = C_AL}},
-    {0xFA22F107, 0, "lsrs.w r1, r2, r7", {
+    {0xFA22F107, 0, "lsrsal.w r1, r2, r7", {
         .instr = I_LSR, .I = B_UNSET, .S = B_UNSET, .Rd = r1, .Rm = r7, .Rn = r2,  .cond = C_AL}},
 
 
     /* TODO: MCR, MCR2, MCRR, MCRR2 tests */
 
-   
+    // MLA
+    {0xFB024103, 0, "mlaal r1, r2, r3, r4", {
+        .instr = I_MLA, .I = B_UNSET, .Rd = r1, .Rm = r3, .Rn = r2, .Ra = r4, .cond = C_AL}},
+    {0xFB02F103, 0, "mulal r1, r2, r3", {
+        .instr = I_MUL, .I = B_UNSET, .Rd = r1, .Rm = r3, .Rn = r2, .cond = C_AL}},
+
+    // MLS
+    {0xFB024113, 0, "mlsal r1, r2, r3, r4", {
+        .instr = I_MLS, .I = B_UNSET, .Ra = r4, .Rd = r1, .Rm = r3, .Rn = r2, .cond = C_AL}},
+
+    // MOV immediate
+    {0xF44F21AA, 0, "moval.w r1, #0x55000", {
+        .instr = I_MOV, .I = B_SET, .S = B_UNSET, .Rd = r1, .imm = 0x55000, .cond = C_AL}},
+    {0xF45F21AA, 0, "moval.w r1, #0x55000", {
+        .instr = I_MOV, .I = B_SET, .S = B_SET, .Rd = r1, .imm = 0x55000, .cond = C_AL}},
+    {0xF64A21AA, 0, "movwal r1, #0xaaaa", {
+        .instr = I_MOVW, .I = B_SET, .Rd = r1, .imm = 0xaaaa, .cond = C_AL}},
+
+    // register
+    {0xEA4F0102, 0, "moval.w r1, r2", {
+        .instr = I_MOV, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+    {0xEA5F0102, 0, "movsal.w r1, r2", {
+        .instr = I_MOV, .I = B_SET, .S = B_SET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+
+    // MOVT
+    {0xF6CF7100, 0, "movtal r1, #0xff00", {
+        .instr = I_MOVT, .I = B_SET, .Rd = r1, .imm = 0xff00, .cond = C_AL}},
+
+    /* TODO: tests for MRC, MRC2, MRRC, MRRC2 */
+
+    // MRS
+    {0xF3EF8100, 0, "mrsal r1, apsr", {
+        .instr = I_MRS, .I = B_UNSET, .Rd = r1, .cond = C_AL}},
+
+    // MSR
+    {0xF3818C00, 0, "msral apsr, r1", {
+        .instr = I_MSR, .I = B_SET, .Rn = r1, .mask = 3, .imm = 3, .cond = C_AL}},
+
+    // MUL
+    {0xFB02F103, 0, "mulal r1, r2, r3", {
+        .instr = I_MUL, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // MVN immediate
+    {0xF46F27AA, 0, "mvnal r7, #0x55000", {
+        .instr = I_MVN, .I = B_SET, .S = B_UNSET, .Rd = r7, .imm = 0x55000, .cond = C_AL}},
+    {0xF47F24AA, 0, "mvnsal r4, #0x55000", {
+        .instr = I_MVN, .I = B_SET, .S = B_SET, .Rd = r4, .imm = 0x55000, .cond = C_AL}},
+
+    // register
+    {0xEA6F7112, 0, "mvnal.w r1, r2, lsr #7", {
+        .instr = I_MVN, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r2, .imm = 28, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEA7F7102, 0, "mvnsal.w r1, r2, lsl #7", {
+        .instr = I_MVN, .I = B_SET, .S = B_SET, .Rd = r1, .Rm = r2, .imm = 28, .shift = 28, .shift_type = S_LSL, .cond = C_AL}},
+
+    // NOP
+    {0xF3AF8000, 0, "nopal.w", {
+        .instr = I_NOP, .I = B_UNSET, .cond = C_AL}},
 
 
 

@@ -485,6 +485,14 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    }
 	    break;
 
+	case I_MUL:
+	    d->Ra = R_INVLD;
+	    break;
+
+	case I_MOVW: case I_MOVT:
+	    d->imm = (uint32_t) ((w & b1111) << 12) | ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF);
+	    break;
+
 	case I_AND:
 	    // Set to TST instruction
 	    /*
@@ -632,12 +640,14 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 
 	// MOV with imm4
-	case I_MOV: case I_MOVT:
+	case I_MOV:
 	    // TODO: explain
+	    /*
 	    if ((w & 0xFC8F) == 0x24) {
 		d->I = B_SET;
 		d->imm = (uint32_t) ((w << 12) & 0xF00) | ((w << 2) & 0x800) | ((w2 >> 4) & 0xF00) | (w2 & 0xFF);
 	    }
+	    */
 
 	    if (d->Rn == b1111) {
 		d->shift = 0;
@@ -646,8 +656,15 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    }
 	    break;
 
+	case I_MRS:
+            d->Rd = (w2 >> 8) & b1111;
+	    d->I = B_UNSET;
+	    break;
+
 	case I_MSR:
-	    d->mask = (w2 >> 10) & b11;
+	    d->I = B_SET;
+	    d->Rn = w & b1111;
+	    d->mask = d->imm = (w2 >> 10) & b11;
 	    break;
 
 	case I_PKH:
