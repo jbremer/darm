@@ -449,6 +449,10 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->instr = I_BFC;
 	    break;
 
+	case I_LSL:
+	    if (d->Rn == b1111)
+	        d->Rn = R_INVLD;
+	    break;
 
 	case I_ADD: case I_SUB:
 	    // Set to CMN/CMP instruction
@@ -626,6 +630,12 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    if ((w & 0xFC8F) == 0x24) {
 		d->I = B_SET;
 		d->imm = (uint32_t) ((w << 12) & 0xF00) | ((w << 2) & 0x800) | ((w2 >> 4) & 0xF00) | (w2 & 0xFF);
+	    }
+
+	    if (d->Rn == b1111) {
+		d->shift = 0;
+		d->shift_type = S_INVLD;
+		d->Rn = R_INVLD;
 	    }
 	    break;
 
