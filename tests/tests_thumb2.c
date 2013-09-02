@@ -358,6 +358,23 @@ struct {
     {0xFA12F103, 0, "lsls.w r1, r2, r3", {
         .instr = I_LSL, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
 
+    // LSR we enabled shift/type even though the manual does not.
+    {0xEA5F11D2, 0, "lsrs.w r1, r2, #7", {
+        .instr = I_LSR, .I = B_SET, .S = B_SET, .Rd = r1, .Rm = r2, .imm = 7, .shift = 7, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEA4F1112, 0, "lsr.w r1, r2, #4", {
+        .instr = I_LSR, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r2, .imm = 4, .shift = 4, .shift_type = S_LSR, .cond = C_AL}},
+
+    {0xFA32F103, 0, "lsrs.w r1, r2, r3", {
+        .instr = I_LSR, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rm = r3, .Rn = r2,  .cond = C_AL}},
+    {0xFA22F107, 0, "lsrs.w r1, r2, r7", {
+        .instr = I_LSR, .I = B_UNSET, .S = B_UNSET, .Rd = r1, .Rm = r7, .Rn = r2,  .cond = C_AL}},
+
+
+    /* TODO: MCR, MCR2, MCRR, MCRR2 tests */
+
+   
+
+
 
 };
 
