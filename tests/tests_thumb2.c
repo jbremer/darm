@@ -447,6 +447,25 @@ struct {
         .instr = I_MVN, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r3, .imm = 31, .shift = 31, .shift_type = S_LSL, .cond = C_AL}},
 
 
+    // ORR
+    {0xF44221BC, 0, "orral r1, r2, #0x5e000", {
+        .instr = I_ORR, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .imm = 0x5e000, .cond = C_AL}},
+    {0xF45221BC, 0, "orral r1, r2, #0x5e000", {
+        .instr = I_ORR, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .imm = 0x5e000, .cond = C_AL}},
+    {0xF45F21BC, 0, "movsal.w r1, #0x5e000", {
+        .instr = I_MOV, .I = B_SET, .S = B_SET, .Rd = r1, .imm = 0x5e000, .cond = C_AL}},
+
+
+    // register
+    {0xEA520143, 0, "orrsal.w r1, r2, r3, lsl #1", {
+        .instr = I_ORR, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 1, .shift = 1, .shift_type = S_LSL, .cond = C_AL}},
+    {0xEA420143, 0, "orral.w r1, r2, r3, lsl #1", {
+        .instr = I_ORR, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 1, .shift = 1, .shift_type = S_LSL, .cond = C_AL}},
+
+    // PKH
+
+
+
 };
 
 
