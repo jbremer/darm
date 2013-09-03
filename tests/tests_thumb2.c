@@ -482,6 +482,22 @@ struct {
     {0xF83FFCF0, 0, "pldal [pc, #-0xcf0]", {
         .instr = I_PLD, .I = B_SET, .U = B_UNSET, .imm = 0xcf0, .cond = C_AL}},
 
+    // literal
+    {0xF81FFFEE, 0, "pldal [pc, #0xfee]", {
+        .instr = I_PLD, .I = B_SET, .U = B_UNSET, .imm = 0xfee, .cond = C_AL}},
+    {0xF89FFFED, 0, "pldal [pc, #0xfed]", {
+        .instr = I_PLD, .I = B_SET, .U = B_SET, .imm = 0xfed, .cond = C_AL}},
+
+
+    // register
+    {0xF811F022, 0, "pldal [r1, r2, lsl #2]", {
+        .instr = I_PLD, .I = B_SET, .W = B_UNSET, .Rn = r1, .Rm = r2, .imm = 0x2, .shift = 2, .shift_type = S_LSL, .cond = C_AL}},
+    {0xF831F022, 0, "pldwal [r1, r2, lsl #2]", {
+        .instr = I_PLD, .I = B_SET, .W = B_SET, .Rn = r1, .Rm = r2, .imm = 0x2, .shift = 2, .shift_type = S_LSL, .cond = C_AL}},
+    {0xF81FF022, 0, "pldal [pc, #-0x22]", {
+        .instr = I_PLD, .I = B_SET, .U = B_UNSET, .imm = 0x22, .cond = C_AL}},
+
+
 
 
 };
