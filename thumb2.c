@@ -686,6 +686,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	case I_PLD:
     	    d->Rt = R_INVLD;
+	    d->P = B_INVLD;
 	    if (d->Rn == b1111) {
 		d->Rn = R_INVLD;
 		d->imm = (w2 & 0xFFF);

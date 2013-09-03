@@ -182,7 +182,7 @@ struct {
     {0xF8121DFF, 0, "ldrbal r1, [r2], #-0xff", {
         .instr = I_LDRB, .I = B_SET, .Rt = r1, .Rn = r2, .U = B_UNSET, .P = B_SET, .W = B_SET, .imm = 0xff, .cond = C_AL}},
     {0xF812FCFF, 0, "pldal [r2, #-0xff]", {
-        .instr = I_PLD, .I = B_SET, .Rn = r2, .U = B_UNSET, .P = B_SET, .W = B_UNSET, .imm = 0xff, .cond = C_AL}},
+        .instr = I_PLD, .I = B_SET, .Rn = r2, .U = B_UNSET, .W = B_UNSET, .imm = 0xff, .cond = C_AL}},
 
     // literal
     {0xF81F1CFF, 0, "ldrbal r1, #0xcff", {
@@ -463,6 +463,24 @@ struct {
         .instr = I_ORR, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 1, .shift = 1, .shift_type = S_LSL, .cond = C_AL}},
 
     // PKH
+    /* TODO: PKH test
+    {0xEAC201C3, 0, "pkhbt r1, r2, r3, lsl #3", {
+        .instr = I_PKH, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+    */
+
+    // PLD, PLDW (immediate)
+    {0xF891FF0F, 0, "pldal [r1, #0xf0f]", {
+        .instr = I_PLD, .I = B_SET, .W = B_UNSET, .Rn = r1, .imm = 0xf0f, .cond = C_AL}},
+    {0xF8B1FF0F, 0, "pldwal [r1, #0xf0f]", {
+        .instr = I_PLD, .I = B_SET, .W = B_SET, .Rn = r1, .imm = 0xf0f, .cond = C_AL}},
+    {0xF89FFF0F, 0, "pldwal [pc, #0xf0f]", {
+        .instr = I_PLD, .I = B_SET, .U = B_SET, .imm = 0xf0f, .cond = C_AL}},
+    {0xF811FCF0, 0, "pldal [r1, #-0xf0]", {
+        .instr = I_PLD, .I = B_SET, .W = B_UNSET, .Rn = r1, .imm = 0xf0, .cond = C_AL}},
+    {0xF831FCF0, 0, "pldal [r1, #-0xf0]", {
+        .instr = I_PLD, .I = B_SET, .W = B_SET, .Rn = r1, .imm = 0xf0, .cond = C_AL}},
+    {0xF83FFCF0, 0, "pldal [pc, #-0xcf0]", {
+        .instr = I_PLD, .I = B_SET, .U = B_UNSET, .imm = 0xcf0, .cond = C_AL}},
 
 
 
