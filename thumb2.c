@@ -610,7 +610,8 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		break;
 	    if (w == 0xE8BD) // P flag
 	    	d->P = (w2 >> 15) & 1 ? B_SET : B_UNSET; 
-	    // dont insert break here
+	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
+	    break;
 
 
 	// M-flag bit 14:

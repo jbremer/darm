@@ -142,7 +142,7 @@ struct {
     {0xE8B14AA9, 0, "ldmal.w r1!, lr,r11,r9,r7,r5,r3,r0", {
         .instr = I_LDM, .Rn = r1, .W = B_SET, .reglist = 0x4AA9, .cond = C_AL}},
     {0xE8BD4AA9, 0, "popal.w lr,r11,r9,r7,r5,r3,r0", {
-        .instr = I_POP, .reglist = 0x4AA9, .cond = C_AL}},
+        .instr = I_POP, .M = B_SET, .P = B_UNSET, .reglist = 0x4AA9, .cond = C_AL}},
     {0xE9119555, 0, "ldmdbal r1, pc,r12,r10,r8,r6,r4,r2,r0", {
         .instr = I_LDMDB, .W = B_UNSET, .Rn = r1, .reglist = 0x9555, .cond = C_AL}},
 
@@ -518,6 +518,25 @@ struct {
     {0xF91FF032, 0, "plial [pc, #-0x32]", {
         .instr = I_PLI, .I = B_SET, .U = B_UNSET, .imm = 0x32, .cond = C_AL}},
 
+
+    // POP
+    {0xE8BD8001, 0, "popal.w r0, pc", {
+        .instr = I_POP, .I = B_UNSET, .P = B_SET, .M = B_UNSET, .reglist = (1|(1 << 15)), .cond = C_AL}},
+    {0xE8BD4002, 0, "popal.w r1, lr", {
+        .instr = I_POP, .I = B_UNSET, .P = B_UNSET, .M = B_SET, .reglist = (2|(1 << 14)), .cond = C_AL}},
+    {0xF85D3B04, 0, "popal.w r3", {
+        .instr = I_POP, .I = B_UNSET, .Rt = r3, .cond = C_AL}},
+
+    // PUSH
+    {0xE92D0003, 0, "pushal.w r0, r1", {
+        .instr = I_PUSH, .I = B_UNSET, .M = B_UNSET, .reglist = 3, .cond = C_AL}},
+    {0xE92D4003, 0, "pushal.w lr, r0, r1", {
+        .instr = I_PUSH, .I = B_UNSET, .M = B_SET, .reglist = (3|(1<<14)), .cond = C_AL}},
+
+    /* TODO: uncomment this when STR has been fixed
+    {0xF84D9D04, 0, "pushal.w r9", {
+        .instr = I_PUSH, .I = B_UNSET, .Rt = r9, .cond = C_AL}},
+    */
 
 
 };
