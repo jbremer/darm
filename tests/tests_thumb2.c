@@ -498,6 +498,26 @@ struct {
         .instr = I_PLD, .I = B_SET, .U = B_UNSET, .imm = 0x22, .cond = C_AL}},
 
 
+    // PLI
+    {0xF991FF00, 0, "plial [r1, #0xf00]", {
+        .instr = I_PLI, .I = B_SET, .Rn = r1, .imm = 0xf00, .cond = C_AL}},
+    {0xF99FFF00, 0, "plial [pc, #0xf00]", {
+        .instr = I_PLI, .I = B_SET, .U = B_SET, .imm = 0xf00, .cond = C_AL}},
+    {0xF911FCFF, 0, "plial [r1, #-0xff]", {
+        .instr = I_PLI, .I = B_SET, .Rn = r1, .imm = 0xff, .cond = C_AL}},
+    {0xF91FFCFF, 0, "plial [pc, #-0xcff]", {
+        .instr = I_PLI, .I = B_SET, .U = B_UNSET, .imm = 0xcff, .cond = C_AL}},
+    {0xF91FFBBB, 0, "plial [pc, #0xbbb]", {
+        .instr = I_PLI, .I = B_SET, .U = B_UNSET, .imm = 0xbbb, .cond = C_AL}},
+    {0xF99FFBBB, 0, "plial [pc, #-0xbbb]", {
+        .instr = I_PLI, .I = B_SET, .U = B_SET, .imm = 0xbbb, .cond = C_AL}},
+
+    // PLI register
+    {0xF911F032, 0, "plial [r1, r2, lsl #3]", {
+        .instr = I_PLI, .I = B_SET, .Rn = r1, .Rm = r2, .imm = 0x3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+    {0xF91FF032, 0, "plial [pc, #-0x32]", {
+        .instr = I_PLI, .I = B_SET, .U = B_UNSET, .imm = 0x32, .cond = C_AL}},
+
 
 
 };
