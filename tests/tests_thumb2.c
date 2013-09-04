@@ -593,6 +593,13 @@ struct {
     {0xEBD27113, 0, "rsbsal r1, r2, r3, lsr #28", {
         .instr = I_RSB, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 28, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
 
+    {0xFA92F103, 0, "sadd16al r1, r2, r3", {
+        .instr = I_SADD16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFA82F103, 0, "sadd8al r1, r2, r3", {
+        .instr = I_SADD8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFAA2F103, 0, "sasxal r1, r2, r3", {
+        .instr = I_SASX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
 
 
 };
