@@ -613,6 +613,31 @@ struct {
         .instr = I_SBFX, .I = B_SET, .Rd = r1, .Rn = r2, .imm = 0x1f, .lsb = 0x1f, .width = 0x15, .cond = C_AL}},
     {0xFB92F1F3, 0, "sdival r1, r2, r3", {
         .instr = I_SDIV, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFAA2F183, 0, "selal r1, r2, r3", {
+        .instr = I_SEL, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xF3AF8004, 0, "seval.w", {
+        .instr = I_SEV, .I = B_UNSET, .cond = C_AL}},
+    {0xFA92F123, 0, "shadd16al r1, r2, r3", {
+        .instr = I_SHADD16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFA82F123, 0, "shadd8al r1, r2, r3", {
+        .instr = I_SHADD8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFAA2F123, 0, "shasxal r1, r2, r3", {
+        .instr = I_SHASX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFAE2F123, 0, "shsaxal r1, r2, r3", {
+        .instr = I_SHSAX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFAD2F123, 0, "shsub16al r1, r2, r3", {
+        .instr = I_SHSUB16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFAC2F123, 0, "shsub8al r1, r2, r3", {
+        .instr = I_SHSUB8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    {0xFB124103, 0, "smlabbal r1, r2, r3, r4", {
+        .instr = I_SMLABB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .N = B_UNSET, .M = B_UNSET, .cond = C_AL}},
+    {0xFB124113, 0, "smlabtal r1, r2, r3, r4", {
+        .instr = I_SMLABT, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .N = B_UNSET, .M = B_SET, .cond = C_AL}},
+    {0xFB124123, 0, "smlatbal r1, r2, r3, r4", {
+        .instr = I_SMLATB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .N = B_SET, .M = B_UNSET, .cond = C_AL}},
+    {0xFB124133, 0, "smlattal r1, r2, r3, r4", {
+        .instr = I_SMLATT, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .N = B_SET, .M = B_SET, .cond = C_AL}},
 
 
 

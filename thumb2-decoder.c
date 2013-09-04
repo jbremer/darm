@@ -882,6 +882,26 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
     }
 }
 
+darm_instr_t thumb2_smla_decoder(darm_t *d, uint16_t w, uint16_t w2) {
+
+    static uint8_t n,m;
+    n = (w2 >> 5) & 1;
+    m = (w2 >> 4) & 1;
+
+    if (n == 1) {
+	if (m == 1)
+	    return I_SMLATT;
+	else
+	    return I_SMLATB;
+    } else {
+	if (m == 1)
+	    return I_SMLABT;
+	else
+	    return I_SMLABB;
+    }
+
+} 
+
 darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op1, op2, Ra;
     op1 = (w >> 4) & b111;
@@ -895,7 +915,7 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
 	if (Ra == b1111)
             return I_SMULBB;
         else
-	    return I_SMLABB;
+	    return thumb2_smla_decoder(d, w, w2);
     }
 
     if ((op2&2) != 0)
