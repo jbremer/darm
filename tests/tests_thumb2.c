@@ -600,6 +600,20 @@ struct {
     {0xFAA2F103, 0, "sasxal r1, r2, r3", {
         .instr = I_SASX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
 
+    {0xF56271FF, 0, "sbcal r1, r2, #0x1fe", {
+        .instr = I_SBC, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .imm = 0x1fe, .cond = C_AL}},
+    {0xF57271FF, 0, "sbcal r1, r2, #0x1fe", {
+        .instr = I_SBC, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .imm = 0x1fe, .cond = C_AL}},
+    {0xEB6201C3, 0, "sbcal.w r1, r2, r3, lsl #3", {
+        .instr = I_SBC, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 0x3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+    {0xEB7201C3, 0, "sbcal.w r1, r2, r3, lsl #3", {
+        .instr = I_SBC, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 0x3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+
+    {0xF34271D5, 0, "sbfxal r1, r2, #0x1f, #0x15", {
+        .instr = I_SBFX, .I = B_SET, .Rd = r1, .Rn = r2, .imm = 0x1f, .lsb = 0x1f, .width = 0x15, .cond = C_AL}},
+    {0xFB92F1F3, 0, "sdival r1, r2, r3", {
+        .instr = I_SDIV, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
 
 
 };

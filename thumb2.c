@@ -700,6 +700,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 
 	case I_SBFX: case I_UBFX:
+	    d->lsb = d->imm;
 	    d->width = (w2 & 0x1F);
 	    break;
 
