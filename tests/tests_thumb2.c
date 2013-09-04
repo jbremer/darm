@@ -579,6 +579,14 @@ struct {
     {0xFA72F103, 0, "roral.w r1, r2, r3", {
         .instr = I_ROR, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
 
+    {0xEA4F0132, 0, "rrxal r1, r2", {
+        .instr = I_RRX, .I = B_UNSET, .S = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+    {0xEA5F0132, 0, "rrxal r1, r2", {
+        .instr = I_RRX, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+
+    {0xF5C271FF, 0, "rsbal.w r1, r2, #0x1fe", {
+        .instr = I_RSB, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .imm = 0x1fe, .cond = C_AL}},
+
 
 
 };
