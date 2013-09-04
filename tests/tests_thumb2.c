@@ -538,6 +538,28 @@ struct {
         .instr = I_PUSH, .I = B_UNSET, .Rt = r9, .cond = C_AL}},
     */
 
+    {0xFA83F182, 0, "qaddal r1, r2, r3", {
+        .instr = I_QADD, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFA93F112, 0, "qadd16al r1, r2, r3", {
+        .instr = I_QADD16, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFA83F112, 0, "qadd8al r1, r2, r3", {
+        .instr = I_QADD8, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFAA3F112, 0, "qasxal r1, r2, r3", {
+        .instr = I_QASX, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFA83F192, 0, "qdaddal r1, r2, r3", {
+        .instr = I_QDADD, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFA83F1B2, 0, "qdsubal r1, r2, r3", {
+        .instr = I_QDSUB, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFAE3F112, 0, "qsaxal r1, r2, r3", {
+        .instr = I_QSAX, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFA83F1A2, 0, "qsub r1, r2, r3", {
+        .instr = I_QSUB, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFAD3F112, 0, "qsub16 r1, r2, r3", {
+        .instr = I_QSUB16, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+    {0xFAC3F112, 0, "qsub8 r1, r2, r3", {
+        .instr = I_QSUB8, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
+
+
 
 };
 
