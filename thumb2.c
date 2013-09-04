@@ -449,7 +449,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->instr = I_BFC;
 	    break;
 
-	case I_LSL:
+	case I_LSL: case I_ROR:
 	    if (d->Rn == b1111)
 	        d->Rn = R_INVLD;
 	    break;

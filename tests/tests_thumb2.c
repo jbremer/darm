@@ -559,6 +559,26 @@ struct {
     {0xFAC3F112, 0, "qsub8 r1, r2, r3", {
         .instr = I_QSUB8, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
 
+    {0xFA92F1A2, 0, "rbital r1, r2", {
+        .instr = I_RBIT, .I = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+    {0xFA92F182, 0, "reval.w r1, r2", {
+        .instr = I_REV, .I = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+    {0xFA92F192, 0, "rev16al.w r1, r2", {
+        .instr = I_REV16, .I = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+    {0xFA92F1B2, 0, "revshal.w r1, r2", {
+        .instr = I_REVSH, .I = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+
+    {0xEA4F01F2, 0, "roral r1, r2, #3", {
+        .instr = I_ROR, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r2, .imm = 3, .shift = 3, .shift_type = S_ROR, .cond = C_AL}},
+    {0xEA4F0132, 0, "rrxal r1, r2", {
+        .instr = I_RRX, .I = B_UNSET, .S = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+    {0xEA5F01F2, 0, "rorsal r1, r2, #3", {
+        .instr = I_ROR, .I = B_SET, .S = B_SET, .Rd = r1, .Rm = r2, .imm = 3, .shift = 3, .shift_type = S_ROR, .cond = C_AL}},
+    {0xFA62F103, 0, "roral.w r1, r2, r3", {
+        .instr = I_ROR, .I = B_UNSET, .S = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    {0xFA72F103, 0, "roral.w r1, r2, r3", {
+        .instr = I_ROR, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
 
 
 };
