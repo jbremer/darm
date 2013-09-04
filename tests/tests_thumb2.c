@@ -586,6 +586,12 @@ struct {
 
     {0xF5C271FF, 0, "rsbal.w r1, r2, #0x1fe", {
         .instr = I_RSB, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .imm = 0x1fe, .cond = C_AL}},
+    {0xF5D271FF, 0, "rsbsal.w r1, r2, #0x1fe", {
+        .instr = I_RSB, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .imm = 0x1fe, .cond = C_AL}},
+    {0xEBC27113, 0, "rsbal r1, r2, r3, lsr #28", {
+        .instr = I_RSB, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 28, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEBD27113, 0, "rsbsal r1, r2, r3, lsr #28", {
+        .instr = I_RSB, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 28, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
 
 
 
