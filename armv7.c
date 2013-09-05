@@ -496,7 +496,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         // the bfi and bfc instructions specify the MSB, whereas the SBFX and
         // UBFX instructions specify the width minus one
         if(d->instr == I_BFI) {
-            d->width = ((w >> 16) & b11111) - d->lsb;
+            d->width = ((w >> 16) & b11111) - d->lsb + 1;
 
             // if Rn is 0b1111, then this is in fact the BFC instruction
             if(d->Rn == b1111) {
