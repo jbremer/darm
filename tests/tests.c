@@ -126,9 +126,12 @@ struct {
         .instr = I_LDRD, .instr_type = T_ARM_STACK2, .cond = C_AL, .U = 1,
         .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff, .I = B_SET}},
     // TODO is correct?
-    {0xe7c8411f, 0, "bfc r4, #2, #6", {
+    {0xe7c8411f, 0, "bfc r4, #2, #7", {
         .instr = I_BFC, .instr_type = T_ARM_BITS, .cond = C_AL, .Rd = 4,
-        .lsb = 2, .width = 6}},
+        .lsb = 2, .width = 7}},
+    {0xe7de3312, 0, "bfi r3, r2, #6, #25", {
+        .instr = I_BFI, .instr_type = T_ARM_BITS, .cond = C_AL,
+        .Rd = r3, .Rn = r2, .lsb = 6, .width = 25}},
     {0xe7e42153, 0, "ubfx r2, r3, #2, #5", {
         .instr = I_UBFX, .instr_type = T_ARM_BITS, .cond = C_AL, .Rd = 2,
         .Rn = 3, .lsb = 2, .width = 5}},
