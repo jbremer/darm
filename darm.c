@@ -684,6 +684,9 @@ void darm_dump(const darm_t *d)
         darm_reglist(d->reglist, reglist);
         printf("reglist:       %s\n", reglist);
     }
+    if (d->sat_imm != 0) {
+        printf("sat_imm:           0x%08x  %d\n", d->sat_imm, d->sat_imm);
+    }
 
     if(d->opc1 != 0 || d->opc2 != 0 || d->coproc != 0) {
         printf("opc1:          %d\n", d->opc1);

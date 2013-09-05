@@ -692,6 +692,79 @@ struct {
         .instr = I_SMLSLD, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .M = B_SET, .cond = C_AL}},
 
     // SMMLA
+    {0xFB524103, 0, "smmlaal r1, r2, r3, r4", {
+        .instr = I_SMMLA, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .R = B_UNSET, .cond = C_AL}},
+    {0xFB524113, 0, "smmlaral r1, r2, r3, r4", {
+        .instr = I_SMMLA, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .R = B_SET, .cond = C_AL}},
+    {0xFB52F103, 0, "smmul r1, r2, r3, r4", {
+        .instr = I_SMMUL, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .R = B_UNSET, .cond = C_AL}},
+
+    // SMMLS
+    {0xFB624103, 0, "smmlsal r1, r2, r3, r4", {
+        .instr = I_SMMLS, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .R = B_UNSET, .cond = C_AL}},
+    {0xFB624113, 0, "smmlsral r1, r2, r3, r4", {
+        .instr = I_SMMLS, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .R = B_SET, .cond = C_AL}},
+
+    // SMMUL
+    {0xFB52F103, 0, "smmulal r1, r2, r3", {
+        .instr = I_SMMUL, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .R = B_UNSET, .cond = C_AL}},
+    {0xFB52F113, 0, "smmulral r1, r2, r3", {
+        .instr = I_SMMUL, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .R = B_SET, .cond = C_AL}},
+
+    // SMUAD
+    {0xFB22F103, 0, "smuadal r1, r2, r3", {
+        .instr = I_SMUAD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .M = B_UNSET, .cond = C_AL}},
+    {0xFB22F113, 0, "smuadxal r1, r2, r3", {
+        .instr = I_SMUAD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .M = B_SET, .cond = C_AL}},
+
+    // SMULXY
+    {0xFB12F103, 0, "smulbbal r1, r2, r3", {
+        .instr = I_SMULBB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .N = B_UNSET, .M = B_UNSET, .cond = C_AL}},
+    {0xFB12F113, 0, "smulbtal r1, r2, r3", {
+        .instr = I_SMULBT, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .N = B_UNSET, .M = B_SET, .cond = C_AL}},
+    {0xFB12F123, 0, "smultbal r1, r2, r3", {
+        .instr = I_SMULTB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .N = B_SET, .M = B_UNSET, .cond = C_AL}},
+    {0xFB12F133, 0, "smulttal r1, r2, r3", {
+        .instr = I_SMULTT, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .N = B_SET, .M = B_SET, .cond = C_AL}},
+
+    // SMULL
+    {0xFB831204, 0, "smullal r1, r2, r3, r4", {
+        .instr = I_SMULL, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .cond = C_AL}},
+
+    // SMULWB/T
+    {0xFB32F103, 0, "smulwb r1, r2, r3", {
+        .instr = I_SMULW, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .M = B_UNSET, .cond = C_AL}},
+    {0xFB32F113, 0, "smulwt r1, r2, r3", {
+        .instr = I_SMULW, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .M = B_SET, .cond = C_AL}},
+
+    // SMUSD
+    {0xFB42F103, 0, "smusdal r1, r2, r3", {
+        .instr = I_SMUSD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .M = B_UNSET, .cond = C_AL}},
+    {0xFB42F113, 0, "smusdxal r1, r2, r3", {
+        .instr = I_SMUSD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .M = B_SET, .cond = C_AL}},
+
+    // SSAT, SSAT16
+    /* TODO: fix it fix it fix it
+    {0xF30301D5, 0, "ssatal r1, #21, r3, lsl #3", {
+        .instr = I_SSAT, .I = B_SET, .sat_imm = 21, .Rd = r1, .Rn = r3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+    */
+
+    // SSAX
+    {0xFAE2F103, 0, "ssaxal r1, r2, r3", {
+        .instr = I_SSAX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // SSUB16
+    {0xFAD2F103, 0, "ssub16al r1, r2, r3", {
+        .instr = I_SSUB16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // SSUB8
+    {0xFAC2F103, 0, "ssub8al r1, r2, r3", {
+        .instr = I_SSUB8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+
+    /* TODO: tests for STC, STC2 */
+
+
 
 
 };
@@ -744,7 +817,7 @@ int test_thumb2_instructions() {
                 C(width) || C(reglist) || F(T) || F(M) || F(N) ||
                 C(Rt2) || F(B) || C(coproc) || C(opc1) || C(opc2) ||
                 C(CRn) || C(CRm) || C(CRd) /*|| C(firstcond)*/ || C(mask) ||
-		F(J1) || F(J2)
+		F(J1) || F(J2) || C(sat_imm)
                 ) {
 
 
