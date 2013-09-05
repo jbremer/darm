@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <string.h>
 #include "darm.h"
+#include "darm-tbl.h"
 #include "thumb-tbl.h"
 #include "thumb2-tbl.h"
 #include "thumb2.h"
@@ -882,7 +883,7 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
     }
 }
 
-darm_instr_t thumb2_smla_decoder(darm_t *d, uint16_t w, uint16_t w2) {
+darm_instr_t thumb2_nm_decoder(darm_t *d, uint16_t w, uint16_t w2, darm_instr_t i1, darm_instr_t i2, darm_instr_t i3, darm_instr_t i4) {
 
     static uint8_t n,m;
     n = (w2 >> 5) & 1;
@@ -890,14 +891,14 @@ darm_instr_t thumb2_smla_decoder(darm_t *d, uint16_t w, uint16_t w2) {
 
     if (n == 1) {
 	if (m == 1)
-	    return I_SMLATT;
+	    return i4;
 	else
-	    return I_SMLATB;
+	    return i3;
     } else {
 	if (m == 1)
-	    return I_SMLABT;
+	    return i2;
 	else
-	    return I_SMLABB;
+	    return i1;
     }
 
 } 
@@ -913,9 +914,9 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
 
     if (op1 == 1) {
 	if (Ra == b1111)
-            return I_SMULBB;
+	    return thumb2_nm_decoder(d, w, w2, I_SMULBB, I_SMULBT, I_SMULTB, I_SMULTT);
         else
-	    return thumb2_smla_decoder(d, w, w2);
+	    return thumb2_nm_decoder(d, w, w2, I_SMLABB, I_SMLABT, I_SMLATB, I_SMLATT);
     }
 
     if ((op2&2) != 0)
@@ -936,12 +937,11 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
 	    else
 		return I_SMLAD;
 	case 3:
-	    /* TODO: broken
+	    // B or T variant indicated by M bit but not encoded in instruction name
 	    if (Ra == b1111)
-		return I_SMULWB;
+		return I_SMULW;
 	    else
-		return I_SMLAWB;
-	    */
+		return I_SMLAW;
 	    return I_INVLD;
 	case 4:
 	    if (Ra == b1111)
@@ -991,7 +991,7 @@ darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2) {
 	    if (op2 == 0)
 		return I_SMLAL;
 	    else if ((op2&b1100) == b1000)
-		return I_SMLALBB;
+		return thumb2_nm_decoder(d, w, w2, I_SMLALBB, I_SMLALBT, I_SMLALTB, I_SMLALTT);
 	    else if ((op2&b1110) == b1100)
 		return I_SMLALD;
 	    break;

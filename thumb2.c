@@ -709,17 +709,20 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	case I_SMLABB: case I_SMLABT: case I_SMLATB: case I_SMLATT:
 	case I_SMULBB: case I_SMULBT: case I_SMULTB: case I_SMULTT:
 	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
-	/* case I_SMLAWB: case I_SMLAWT: */ case I_SMLSD: case I_SMUAD:
-	/* case I_SMULWB: case I_SMULWT: */ case I_SMUSD:
+	case I_SMLAD:
+	case I_SMLAW: case I_SMLSD: case I_SMUAD:
+	case I_SMULW: case I_SMUSD:
 	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
+	    if (d->Ra == b1111)
+		d->Ra = R_INVLD;
 	    break;
 
 	// N, M, Rdhi, Rdlo flags
 	case I_SMLALBB: case I_SMLALBT: case I_SMLALTB: case I_SMLALTT:
 	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
-	case I_SMLSLD:
+	case I_SMLSLD: case I_SMLALD:
 	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
-	case I_SMLAL: case I_SMLALD: case I_SMULL:
+	case I_SMLAL: case I_SMULL:
 	case I_UMAAL: case I_UMLAL: case I_UMULL:
 	    d->RdHi = (w2 >> 8) & b1111;
 	    d->RdLo = (w2 >> 12) & b1111;

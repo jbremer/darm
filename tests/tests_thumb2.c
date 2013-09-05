@@ -630,6 +630,7 @@ struct {
     {0xFAC2F123, 0, "shsub8al r1, r2, r3", {
         .instr = I_SHSUB8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
 
+    // SMLA
     {0xFB124103, 0, "smlabbal r1, r2, r3, r4", {
         .instr = I_SMLABB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .N = B_UNSET, .M = B_UNSET, .cond = C_AL}},
     {0xFB124113, 0, "smlabtal r1, r2, r3, r4", {
@@ -638,7 +639,59 @@ struct {
         .instr = I_SMLATB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .N = B_SET, .M = B_UNSET, .cond = C_AL}},
     {0xFB124133, 0, "smlattal r1, r2, r3, r4", {
         .instr = I_SMLATT, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .N = B_SET, .M = B_SET, .cond = C_AL}},
+    {0xFB12F123, 0, "smultbal r1, r2, r3", {
+        .instr = I_SMULTB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .N = B_SET, .M = B_UNSET, .cond = C_AL}},
 
+    // SMLAD
+    {0xFB224103, 0, "smladal r1, r2, r3, r4", {
+        .instr = I_SMLAD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .M = B_UNSET, .cond = C_AL}},
+    {0xFB224113, 0, "smladxal r1, r2, r3, r4", {
+        .instr = I_SMLAD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .M = B_SET, .cond = C_AL}},
+    {0xFB22F103, 0, "smuadal r1, r2, r3", {
+        .instr = I_SMUAD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .M = B_UNSET, .cond = C_AL}},
+
+    // SMLAL
+    {0xFBC31204, 0, "smlalal r1, r2, r3, r4", {
+        .instr = I_SMLAL, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .cond = C_AL}},
+
+    // SMLALXY
+    {0xFBC31284, 0, "smlalbbal r1, r2, r3, r4", {
+        .instr = I_SMLALBB, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .N = B_UNSET, .M = B_UNSET, .cond = C_AL}},
+    {0xFBC31294, 0, "smlalbtal r1, r2, r3, r4", {
+        .instr = I_SMLALBT, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .N = B_UNSET, .M = B_SET, .cond = C_AL}},
+    {0xFBC312A4, 0, "smlaltbal r1, r2, r3, r4", {
+        .instr = I_SMLALTB, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .N = B_SET, .M = B_UNSET, .cond = C_AL}},
+    {0xFBC312B4, 0, "smlalttal r1, r2, r3, r4", {
+        .instr = I_SMLALTT, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .N = B_SET, .M = B_SET, .cond = C_AL}},
+
+    // SMLALD
+    {0xFBC312C4, 0, "smlaldal r1, r2, r3, r4", {
+        .instr = I_SMLALD, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .M = B_UNSET, .cond = C_AL}},
+    {0xFBC312D4, 0, "smlaldxal r1, r2, r3, r4", {
+        .instr = I_SMLALD, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .M = B_SET, .cond = C_AL}},
+
+    // SMLAWB, SMLAWT
+    {0xFB324103, 0, "smlawbal r1, r2, r3, r4", {
+        .instr = I_SMLAW, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .M = B_UNSET, .cond = C_AL}},
+    {0xFB324113, 0, "smlawtal r1, r2, r3, r4", {
+        .instr = I_SMLAW, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .M = B_SET, .cond = C_AL}},
+
+
+    // SMLSD
+    {0xFB424103, 0, "smlsdal r1, r2, r3, r4", {
+        .instr = I_SMLSD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .M = B_UNSET, .cond = C_AL}},
+    {0xFB424113, 0, "smlsdxal r1, r2, r3, r4", {
+        .instr = I_SMLSD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .M = B_SET, .cond = C_AL}},
+    {0xFB42F103, 0, "smusdal r1, r2, r3, r4", {
+        .instr = I_SMUSD, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .M = B_UNSET, .cond = C_AL}},
+
+    // SMLSLD
+    {0xFBD312C4, 0, "smlsldal r1, r2, r3, r4", {
+        .instr = I_SMLSLD, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .M = B_UNSET, .cond = C_AL}},
+    {0xFBD312D4, 0, "smlsldxal r1, r2, r3, r4", {
+        .instr = I_SMLSLD, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .M = B_SET, .cond = C_AL}},
+
+    // SMMLA
 
 
 };
