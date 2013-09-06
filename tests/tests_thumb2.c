@@ -764,6 +764,24 @@ struct {
 
     /* TODO: tests for STC, STC2 */
 
+    // STM
+    {0xE8810007, 0, "stmal.w r1, r0, r1, r2", {
+        .instr = I_STM, .I = B_UNSET, .Rn = r1, .reglist = 7, .W = B_UNSET, .cond = C_AL}},
+    {0xE8A10007, 0, "stmal.w r1!, r0, r1, r2", {
+        .instr = I_STM, .I = B_UNSET, .Rn = r1, .reglist = 7, .W = B_SET, .cond = C_AL}},
+    {0xE8A18007, 0, "stmal.w r1!, r0, r1, r2", {
+        .instr = I_STM, .I = B_UNSET, .Rn = r1, .reglist = ((1 << 15)|7), .W = B_SET, .cond = C_AL}},
+
+    // STMDB
+    {0xE9050007, 0, "stmdbal r5, r0, r1, r2", {
+        .instr = I_STMDB, .I = B_UNSET, .Rn = r5, .reglist = 7, .W = B_UNSET, .cond = C_AL}},
+    {0xE9250007, 0, "stmdbal r5!, r0, r1, r2", {
+        .instr = I_STMDB, .I = B_UNSET, .Rn = r5, .reglist = 7, .W = B_SET, .cond = C_AL}},
+    {0xE9258007, 0, "stmdbal r5!, r0, r1, r2", {
+        .instr = I_STMDB, .I = B_UNSET, .Rn = r5, .reglist = ((1 << 15)|7), .W = B_SET, .cond = C_AL}},
+    {0xE92D0007, 0, "pushal.w r0, r1, r2", {
+        .instr = I_PUSH, .I = B_UNSET, .reglist = 7, .cond = C_AL}},
+
 
 
 
