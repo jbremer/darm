@@ -602,9 +602,14 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->W = B_INVLD;
 	    break;
 
+	case I_STREX:
+            d->Rd = ((w2 >> 8) & b1111);
+	    d->imm = (uint32_t) ((w2 & 0xFF) << 2);
+	    break;
+
 	// zero-extend corner case with '00' appended
 	case I_LDRD: case I_LDREX:
-        case I_STRD: case I_STREX:
+        case I_STRD:
 	    d->imm = (uint32_t) ((w2 & 0xFF) << 2);
 	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
 	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;

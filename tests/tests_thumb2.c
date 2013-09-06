@@ -822,6 +822,21 @@ struct {
     {0xE94312F0, 0, "strdal r1, r2, [r3, #-0x3c0]", {
         .instr = I_STRD, .I = B_SET, .Rt = r1, .Rt2 = r2, .Rn = r3, .imm = 0x3c0, .P = B_SET, .U = B_UNSET, .W = B_UNSET, .cond = C_AL}},
 
+    // STREX
+    {0xE84321FF, 0, "strexal r1, r2, [r3, #0x3fc]", {
+        .instr = I_STREX, .I = B_SET, .Rd = r1, .Rt = r2, .Rn = r3, .imm = 0x3fc,  .cond = C_AL}},
+
+    // STREXB
+    {0xE8C32F41, 0, "strexbal r1, r2, [r3]", {
+        .instr = I_STREXB, .I = B_UNSET, .Rd = r1, .Rt = r2, .Rn = r3,  .cond = C_AL}},
+
+    // STREXD
+    {0xE8C42371, 0, "strexdal r1, r2, r3, [r4]", {
+        .instr = I_STREXD, .I = B_UNSET, .Rd = r1, .Rt = r2, .Rt2 = r3, .Rn = r4,  .cond = C_AL}},
+
+    // STREXH
+    {0xE8C32F51, 0, "strexhal r1, r2, [r3]", {
+        .instr = I_STREXH, .I = B_UNSET, .Rd = r1, .Rt = r2, .Rn = r3,  .cond = C_AL}},
 
 };
 
