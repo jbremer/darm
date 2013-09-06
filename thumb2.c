@@ -589,6 +589,14 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    }
 	    break;
 
+        // STR -> PUSH single register pseudo instruction
+        case I_STR:
+	    if ((w&0xF) == b1101 && (w2&0xFFF) == 0xD04) {
+		d->instr = I_PUSH;
+            }
+	    break;
+
+
 	// zero-extend corner case with '00' appended
 	case I_LDRD: case I_LDREX:
         case I_STRD: case I_STREX:

@@ -782,6 +782,20 @@ struct {
     {0xE92D0007, 0, "pushal.w r0, r1, r2", {
         .instr = I_PUSH, .I = B_UNSET, .reglist = 7, .cond = C_AL}},
 
+    // STR
+    {0xF8C21BEA, 0, "stral.w r1, [r2, #0xbea]", {
+        .instr = I_STR, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xbea , .cond = C_AL}},
+    {0xF8421CF0, 0, "stral r1, [r2, #-0xf0]", {
+        .instr = I_STR, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xf0, .P = B_SET, .W = B_UNSET, .U = B_UNSET, .cond = C_AL}},
+    {0xF8421DF0, 0, "stral r1, [r2, #-0xf0]!", {
+        .instr = I_STR, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xf0, .P = B_SET, .W = B_SET, .U = B_UNSET, .cond = C_AL}},
+    {0xF8421BF0, 0, "stral r1, [r2], #0xf0", {
+        .instr = I_STR, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xf0, .P = B_UNSET, .W = B_SET, .U = B_SET, .cond = C_AL}},
+    {0xF8421EF0, 0, "strtal r1, [r2, #0xf0]", {
+        .instr = I_STRT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xf0, .cond = C_AL}},
+    {0xF84D1D04, 0, "pushal.w r1", {
+        .instr = I_PUSH, .I = B_UNSET, .Rt = r1, .cond = C_AL}},
+
 
 
 
