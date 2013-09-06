@@ -123,7 +123,7 @@ int thumb2_lookup_instr(uint16_t w, uint16_t w2) {
 // Parse the register instruction type
 void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
-    switch(thumb2_instr_types[index]) {
+    switch(d->instr_type) {
 	case T_THUMB2_NO_REG:
 		// No registers
 		break;
@@ -216,7 +216,7 @@ void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2) {
 void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
     d->I = B_SET;
 
-    switch(thumb2_imm_instr_types[index]) {
+    switch(d->instr_imm_type) {
 	case T_THUMB2_NO_IMM:
 		// No immediate
 		d->I = B_UNSET;
@@ -260,7 +260,7 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
     //printf("FLAG TYPE: %i\n", thumb2_flags_instr_types[index]);
 
-    switch(thumb2_flags_instr_types[index]) {
+    switch(d->instr_flag_type) {
 	case T_THUMB2_NO_FLAG:
 	    // No flag
 	    break;
@@ -596,6 +596,11 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
             }
 	    break;
 
+	case I_STRBT:
+	    d->P = B_INVLD;
+	    d->U = B_INVLD;
+	    d->W = B_INVLD;
+	    break;
 
 	// zero-extend corner case with '00' appended
 	case I_LDRD: case I_LDREX:
@@ -781,7 +786,6 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     d->instr_flag_type = thumb2_flags_instr_types[index];
 
     d->instr = thumb2_decode_instruction(d, w, w2);
-
 
     thumb2_parse_reg(index, d, w, w2);
     thumb2_parse_imm(index, d, w, w2);

@@ -532,11 +532,9 @@ struct {
         .instr = I_PUSH, .I = B_UNSET, .M = B_UNSET, .reglist = 3, .cond = C_AL}},
     {0xE92D4003, 0, "pushal.w lr, r0, r1", {
         .instr = I_PUSH, .I = B_UNSET, .M = B_SET, .reglist = (3|(1<<14)), .cond = C_AL}},
-
-    /* TODO: uncomment this when STR has been fixed
     {0xF84D9D04, 0, "pushal.w r9", {
         .instr = I_PUSH, .I = B_UNSET, .Rt = r9, .cond = C_AL}},
-    */
+
 
     {0xFA83F182, 0, "qaddal r1, r2, r3", {
         .instr = I_QADD, .I = B_UNSET, .Rd = r1, .Rm = r2, .Rn = r3, .cond = C_AL}},
@@ -796,7 +794,33 @@ struct {
     {0xF84D1D04, 0, "pushal.w r1", {
         .instr = I_PUSH, .I = B_UNSET, .Rt = r1, .cond = C_AL}},
 
+    // register
+    {0xF8421023, 0, "stral.w r1, [r2, r3, lsl #2]", {
+        .instr = I_STR, .I = B_SET, .Rt = r1, .Rn = r2, .Rm = r3, .imm = 2, .shift = 2, .shift_type = S_LSL, .cond = C_AL}},
 
+    // STRB
+    {0xF8821CAB, 0, "strbal.w r1, [r2, #0xcab]", {
+        .instr = I_STRB, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xcab , .cond = C_AL}},
+    {0xF8021C0F, 0, "strbal r1, [r2, #-0x0f]", {
+        .instr = I_STRB, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xf, .P = B_SET, .U = B_UNSET, .W = B_UNSET, .cond = C_AL}},
+    {0xF8021D0F, 0, "strbal r1, [r2, #-0x0f]!", {
+        .instr = I_STRB, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xf, .P = B_SET, .U = B_UNSET, .W = B_SET, .cond = C_AL}},
+    {0xF8021B0F, 0, "strbal r1, [r2], #0x0f", {
+        .instr = I_STRB, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xf, .P = B_UNSET, .U = B_SET, .W = B_SET, .cond = C_AL}},
+    {0xF8021E0F, 0, "strbtal r1, [r2, #0x0f]", {
+        .instr = I_STRBT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xf, .cond = C_AL}},
+
+    // STRB register
+    {0xF8021033, 0, "strbal.w r1, [r2, r3, lsl #3]", {
+        .instr = I_STRB, .I = B_SET, .Rt = r1, .Rn = r2, .Rm = r3, .imm = 0x3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
+
+    // STRBT
+    {0xF8021ECC, 0, "strbtal r1, [r2, #0xcc]", {
+        .instr = I_STRBT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xcc, .cond = C_AL}},
+
+    // STRD
+    {0xE94312F0, 0, "strdal r1, r2, [r3, #-0x3c0]", {
+        .instr = I_STRD, .I = B_SET, .Rt = r1, .Rt2 = r2, .Rn = r3, .imm = 0x3c0, .P = B_SET, .U = B_UNSET, .W = B_UNSET, .cond = C_AL}},
 
 
 };

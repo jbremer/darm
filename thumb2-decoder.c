@@ -185,13 +185,17 @@ darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2) {
         return I_STREX;
     else if (op1 == 0 && op2 == 1)
         return I_LDREX;
-    else if ((op1&2) == 0 && op2 == 2)
+    else if ((op1&2) == 0 && op2 == 2) {
+	d->instr_type = T_THUMB2_RN_RT_RT2_REG;
+	d->instr_imm_type = T_THUMB2_IMM8;
         return I_STRD;  // immediate
-    else if ((op1&2) == 0 && op2 == 3)
+    } else if ((op1&2) == 0 && op2 == 3)
         return I_LDRD;	// literal and immediate
-    else if ((op1&2) == 2 && (op2&1) == 0)
+    else if ((op1&2) == 2 && (op2&1) == 0) {
+	d->instr_type = T_THUMB2_RN_RT_RT2_REG;
+	d->instr_imm_type = T_THUMB2_IMM8;
 	return I_STRD;	// immediate
-    else if ((op1&2) == 2 && (op2&1) == 1)
+    } else if ((op1&2) == 2 && (op2&1) == 1)
 	return I_LDRD; // literal and immediate
     else if (op1 == 1 && op2 == 0) {
 	switch(op3) {
@@ -786,7 +790,7 @@ darm_instr_t thumb2_misc_op(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op1, op2;
     op1 = (w >> 4) & b11;
     op2 = (w2 >> 4) & b11;
-    if ((w2 >> 12) & b1111 != b1111)
+    if (((w2 >> 12) & b1111) != b1111)
 	return I_INVLD;
 
     switch(op1) {
