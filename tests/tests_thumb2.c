@@ -838,6 +838,32 @@ struct {
     {0xE8C32F51, 0, "strexhal r1, r2, [r3]", {
         .instr = I_STREXH, .I = B_UNSET, .Rd = r1, .Rt = r2, .Rn = r3,  .cond = C_AL}},
 
+    // STRH
+    {0xF8A21BEB, 0, "strhal.w r1, [r2, #0xbeb]", {
+        .instr = I_STRH, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xbeb,  .cond = C_AL}},
+    {0xF8221CFF, 0, "strhal r1, [r2, #-0xff]", {
+        .instr = I_STRH, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .P = B_SET, .U = B_UNSET, .W = B_UNSET, .cond = C_AL}},
+    {0xF8221DFF, 0, "strhal r1, [r2, #-0xff]!", {
+        .instr = I_STRH, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .P = B_SET, .U = B_UNSET, .W = B_SET, .cond = C_AL}},
+    {0xF8221BFF, 0, "strhal r1, [r2], #0xff", {
+        .instr = I_STRH, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .P = B_UNSET, .U = B_SET, .W = B_SET, .cond = C_AL}},
+    {0xF8221EFF, 0, "strhtal r1, [r2, #0xff]", {
+        .instr = I_STRHT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+
+    // register
+    {0xF8221013, 0, "strhal.w r1, [r2, r3, lsl #1]", {
+        .instr = I_STRH, .I = B_SET, .Rt = r1, .Rn = r2, .Rm = r3, .imm = 0x1, .shift = 1, .shift_type = S_LSL,  .cond = C_AL}},
+
+    // STRHT
+    {0xF8221EFF, 0, "strhtal r1, [r2, #0xff]", {
+        .instr = I_STRHT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0xff, .cond = C_AL}},
+
+    // STRT
+    {0xF8421E33, 0, "strtal r1, [r2, #0x33]", {
+        .instr = I_STRT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0x33, .cond = C_AL}},
+
+
+
 };
 
 
