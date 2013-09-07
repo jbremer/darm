@@ -721,7 +721,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	case I_SBFX: case I_UBFX:
 	    d->lsb = d->imm;
-	    d->width = (w2 & 0x1F);
+	    d->width = (w2 & 0x1F) + 1;
 	    break;
 
 	// N, M flags
@@ -762,7 +762,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->sat_imm = w2 & 0xF;
 	    break;
 
-	case I_SXTB: case I_SXTB16: case I_SXTH:
+	case I_SXTB: case I_SXTB16: case I_SXTH: case I_UXTH:
 	    d->Rn = R_INVLD;
 	    break;
 
@@ -796,9 +796,9 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     d->instr_imm_type = thumb2_imm_instr_types[index];
     d->instr_flag_type = thumb2_flags_instr_types[index];
 
-    printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
+    //printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
     d->instr = thumb2_decode_instruction(d, w, w2);
-    printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
+    //printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
 
     thumb2_parse_reg(index, d, w, w2);
     thumb2_parse_imm(index, d, w, w2);

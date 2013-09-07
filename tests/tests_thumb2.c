@@ -607,8 +607,9 @@ struct {
     {0xEB7201C3, 0, "sbcal.w r1, r2, r3, lsl #3", {
         .instr = I_SBC, .I = B_SET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 0x3, .shift = 3, .shift_type = S_LSL, .cond = C_AL}},
 
-    {0xF34271D5, 0, "sbfxal r1, r2, #0x1f, #0x15", {
-        .instr = I_SBFX, .I = B_SET, .Rd = r1, .Rn = r2, .imm = 0x1f, .lsb = 0x1f, .width = 0x15, .cond = C_AL}},
+    // SBFX width encoded as width - 1
+    {0xF34271D5, 0, "sbfxal r1, r2, #0x1f, #0x16", {
+        .instr = I_SBFX, .I = B_SET, .Rd = r1, .Rn = r2, .imm = 0x1f, .lsb = 0x1f, .width = (0x16), .cond = C_AL}},
     {0xFB92F1F3, 0, "sdival r1, r2, r3", {
         .instr = I_SDIV, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
     {0xFAA2F183, 0, "selal r1, r2, r3", {
@@ -961,6 +962,138 @@ struct {
     {0xEA117F32, 0, "tstal r1, r2, ror #28", {
         .instr = I_TST, .I = B_SET, .Rd = PC, .Rn = r1, .Rm = r2, .imm = 28, .shift = 28, .shift_type = S_ROR, .cond = C_AL}},
 
+    // UADD16
+    {0xFA92F143, 0, "uadd16al r1, r2, r3", {
+        .instr = I_UADD16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UADD8
+    {0xFA82F143, 0, "uadd8al r1, r2, r3", {
+        .instr = I_UADD8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UASX
+    {0xFAA2F143, 0, "uasxal r1, r2, r3", {
+        .instr = I_UASX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // UBFX, width is encoded as width - 1 (???)
+    {0xF3C271CA, 0, "ubfxal r1, r2, #31, #11", {
+        .instr = I_UBFX, .I = B_SET, .Rd = r1, .Rn = r2, .width = 11, .imm = 31, .lsb = 31, .cond = C_AL}},
+
+    // UDF
+    /* TODO: broken
+    {0xF7FFA000, 0, "udfal.w #0xf000", {
+        .instr = I_UDF, .I = B_SET, .imm = 0xf000, .cond = C_AL}},
+    */
+
+    // UDIV
+    {0xFBB2F1F3, 0, "udival r1, r2, r3", {
+        .instr = I_UDIV, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // UHADD16
+    {0xFA92F163, 0, "uhadd16 r1, r2, r3", {
+        .instr = I_UHADD16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UHADD8
+    {0xFA82F163, 0, "uhadd8 r1, r2, r3", {
+        .instr = I_UHADD8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UHASX
+    {0xFAA2F163, 0, "uhasx r1, r2, r3", {
+        .instr = I_UHASX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UHSAX
+    {0xFAE2F163, 0, "uhsax r1, r2, r3", {
+        .instr = I_UHSAX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UHSUB16
+    {0xFAD2F163, 0, "uhsub16 r1, r2, r3", {
+        .instr = I_UHSUB16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UHSUB8
+    {0xFAC2F163, 0, "uhsub8 r1, r2, r3", {
+        .instr = I_UHSUB8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // UMAAL
+    {0xFBE31264, 0, "umaalal r1, r2, r3, r4", {
+        .instr = I_UMAAL, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .cond = C_AL}},
+    // UMLAL
+    {0xFBE31204, 0, "umlalal r1, r2, r3, r4", {
+        .instr = I_UMLAL, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .cond = C_AL}},
+    // UMULL
+    {0xFBA31204, 0, "umullal r1, r2, r3, r4", {
+        .instr = I_UMULL, .I = B_UNSET, .RdLo = r1, .RdHi = r2, .Rn = r3, .Rm = r4, .cond = C_AL}},
+
+    // UQADD16
+    {0xFA92F153, 0, "uqadd16al r1, r2, r3", {
+        .instr = I_UQADD16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UQADD8
+    {0xFA82F153, 0, "uqadd8al r1, r2, r3", {
+        .instr = I_UQADD8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UQASX
+    {0xFAA2F153, 0, "uqasxal r1, r2, r3", {
+        .instr = I_UQASX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UQSUB16
+    {0xFAD2F153, 0, "uqsub16 r1, r2, r3", {
+        .instr = I_UQSUB16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // UQSUB8
+    {0xFAC2F153, 0, "uqsub8 r1, r2, r3", {
+        .instr = I_UQSUB8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // USAD8
+    {0xFB72F103, 0, "usad8al r1, r2, r3", {
+        .instr = I_USAD8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // USADA8
+    {0xFB724103, 0, "usada8al r1, r2, r3, r4", {
+        .instr = I_USADA8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .Ra = r4, .cond = C_AL}},
+
+
+    /* TODO: USAT, USAT16 */
+
+    // USAX
+    {0xFAE2F143, 0, "usaxal r1, r2, r3", {
+        .instr = I_USAX, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // USUB16
+    {0xFAD2F143, 0, "usub16al r1, r2, r3", {
+        .instr = I_USUB16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+    // USUB8
+    {0xFAC2F143, 0, "usub8al r1, r2, r3", {
+        .instr = I_USUB8, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
+
+    // UXTAB
+    {0xFA52F1A3, 0, "uxtabal r1, r2, r3, #16", {
+        .instr = I_UXTAB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .rotate = 16, .cond = C_AL}},
+    {0xFA5FF1A3, 0, "uxtbal.w r1, r2, r3, #16", {
+        .instr = I_UXTB, .I = B_UNSET, .Rd = r1, .Rm = r3, .rotate = 16, .cond = C_AL}},
+
+    // UXTAB16
+    // The manual contains a mistake (???) here where there is Rd two times, this is probably not the case.
+    {0xFA32F1A3, 0, "uxtab16al r1, r2, r3, #16", {
+        .instr = I_UXTAB16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .rotate = 16, .cond = C_AL}},
+    {0xFA3FF1A3, 0, "uxtb16al r1, r2, r3, #16", {
+        .instr = I_UXTB16, .I = B_UNSET, .Rd = r1, .Rm = r3, .rotate = 16, .cond = C_AL}},
+
+    // UXTAH
+    {0xFA12F1A3, 0, "uxtahal r1, r2, r3, #16", {
+        .instr = I_UXTAH, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .rotate = 16, .cond = C_AL}},
+    {0xFA1FF1A3, 0, "uxthal.w r1, r2, r3, #16", {
+        .instr = I_UXTH, .I = B_UNSET, .Rd = r1, .Rm = r3, .rotate = 16, .cond = C_AL}},
+
+    // UXTB
+    {0xFA5FF193, 0, "uxtbal.w r1, r2, r3, #8", {
+        .instr = I_UXTB, .I = B_UNSET, .Rd = r1, .Rm = r3, .rotate = 8, .cond = C_AL}},
+
+    // UXTB16
+    {0xFA3FF193, 0, "uxtb16al r1, r2, r3, #8", {
+        .instr = I_UXTB16, .I = B_UNSET, .Rd = r1, .Rm = r3, .rotate = 8, .cond = C_AL}},
+
+    // UXTH
+    {0xFA1FF1B8, 0, "uxthal.w r1, r2, r8, #24", {
+        .instr = I_UXTH, .I = B_UNSET, .Rd = r1, .Rm = r8, .rotate = 24, .cond = C_AL}},
+
+    // WFE
+    {0xF3AF8002, 0, "wfeal.w", {
+        .instr = I_WFE, .I = B_UNSET, .cond = C_AL}},
+
+    // WFI
+    {0xF3AF8003, 0, "wfial.w", {
+        .instr = I_WFI, .I = B_UNSET, .cond = C_AL}},
+
+    // YIELD
+    {0xF3AF8001, 0, "yieldal.w", {
+        .instr = I_YIELD, .I = B_UNSET, .cond = C_AL}},
 
 
 
