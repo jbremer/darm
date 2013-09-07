@@ -53,7 +53,7 @@ struct {
     {0xEA121143, 0, "andsal.w r1, r2, r3 lsl #5", {
         .instr = I_AND, .I = B_SET, .S = B_SET, .imm = 0x5, .Rd = r1, .Rn = r2, .Rm = r3, .shift = 5, .shift_type = S_LSL, .cond = C_AL}},
     {0xEA121F43, 0, "tstal r2, r3 lsl #5", {
-        .instr = I_TST, .I = B_SET, .S = B_UNSET, .imm = 0x5, .Rn = r2, .Rm = r3, .shift = 5, .shift_type = S_LSL, .cond = C_AL}},
+        .instr = I_TST, .I = B_SET, .S = B_UNSET, .imm = 0x5, .Rd = PC, .Rn = r2, .Rm = r3, .shift = 5, .shift_type = S_LSL, .cond = C_AL}},
     {0xEA5F11A2, 0, "asrsal.w r1, r2, #6", {
         .instr = I_ASR, .I = B_SET, .S = B_SET, .imm = 0x6, .Rd = r1, .Rm = r2, .shift = 6, .shift_type = S_ASR, .cond = C_AL}},
     {0xFA42F104, 0, "asral.w r1, r2, r4", {
@@ -903,7 +903,6 @@ struct {
     {0xF6AD71cc, 0, "subwal r1, sp, #0xfcc", {
         .instr = I_SUBW, .I = B_SET, .Rd = r1, .Rn = SP, .imm = 0xfcc, .S = B_UNSET, .cond = C_AL}},
 
-
     // SUB SP min reg
     {0xEBAD7113, 0, "subal.w r1, sp, r3, lsr #28", {
         .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = SP, .Rm = r3, .imm = 28, .S = B_UNSET, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
@@ -911,6 +910,58 @@ struct {
         .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = SP, .Rm = r3, .imm = 28, .S = B_SET, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
     {0xEBBD7F13, 0, "cmpal.w sp, r3, lsr #28", {
         .instr = I_CMP, .I = B_SET, .Rd = PC, .Rn = SP, .Rm = r3, .imm = 28, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+
+    // SXTAB
+    {0xFA42F1A3, 0, "sxtabal r1, r2, r3, #16", {
+        .instr = I_SXTAB, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .rotate = 16, .cond = C_AL}},
+    {0xFA4FF1A3, 0, "sxtbal r1, r3, #16", {
+        .instr = I_SXTB, .I = B_UNSET, .Rd = r1, .Rm = r3, .rotate = 16, .cond = C_AL}},
+
+    // SXTAB16
+    {0xFA22F1A3, 0, "sxtab16al r1, r2, r3, #16", {
+        .instr = I_SXTAB16, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .rotate = 16, .cond = C_AL}},
+    {0xFA2FF1A3, 0, "sxtb16al r1, r3, #16", {
+        .instr = I_SXTB16, .I = B_UNSET, .Rd = r1, .Rm = r3, .rotate = 16, .cond = C_AL}},
+
+    // SXTAH
+    {0xFA02F1A3, 0, "sxtahal r1, r2, r3, #16", {
+        .instr = I_SXTAH, .I = B_UNSET, .Rd = r1, .Rn = r2, .Rm = r3, .rotate = 16, .cond = C_AL}},
+    {0xFA0FF1A3, 0, "sxthal r1, r3, #16", {
+        .instr = I_SXTH, .I = B_UNSET, .Rd = r1, .Rm = r3, .rotate = 16, .cond = C_AL}},
+
+    // SXTB
+    {0xFA4FF1B5, 0, "sxtbal.w r1, r5, #24", {
+        .instr = I_SXTB, .I = B_UNSET, .Rd = r1, .Rm = r5, .rotate = 24, .cond = C_AL}},
+
+    // SXTB16
+    {0xFA2FF1B5, 0, "sxtb16al.w r1, r5, #24", {
+        .instr = I_SXTB16, .I = B_UNSET, .Rd = r1, .Rm = r5, .rotate = 24, .cond = C_AL}},
+
+    // SXTH
+    {0xFA0FF1B5, 0, "sxthal.w r1, r5, #24", {
+        .instr = I_SXTH, .I = B_UNSET, .Rd = r1, .Rm = r5, .rotate = 24, .cond = C_AL}},
+
+    // TBB
+    {0xE8D1F002, 0, "tbbal [r1, r2]", {
+        .instr = I_TBB, .I = B_UNSET, .Rn = r1, .Rm = r2, .H = B_UNSET, .cond = C_AL}},
+
+    // TBH
+    {0xE8D7F018, 0, "tbhal [r7, r8]", {
+        .instr = I_TBH, .I = B_UNSET, .Rn = r7, .Rm = r8, .H = B_SET, .cond = C_AL}},
+
+    // TEQ
+    {0xF4917FFF, 0, "teqal r1, #0x1fe", {
+        .instr = I_TEQ, .I = B_SET, .Rd = PC, .Rn = r1, .imm = 0x1fe, .cond = C_AL}},
+    {0xEA915F62, 0, "teqal r1, r2, asr #21", {
+        .instr = I_TEQ, .I = B_SET, .Rd = PC, .Rn = r1, .Rm = r2, .imm = 21, .shift = 21, .shift_type = S_ASR, .cond = C_AL}},
+
+    // TST
+    {0xF0110F0F, 0, "tstal r1, #15", {
+        .instr = I_TST, .I = B_SET, .Rd = PC, .Rn = r1, .imm = 15, .cond = C_AL}},
+    {0xEA117F32, 0, "tstal r1, r2, ror #28", {
+        .instr = I_TST, .I = B_SET, .Rd = PC, .Rn = r1, .Rm = r2, .imm = 28, .shift = 28, .shift_type = S_ROR, .cond = C_AL}},
+
+
 
 
 };
@@ -963,7 +1014,7 @@ int test_thumb2_instructions() {
                 C(width) || C(reglist) || F(T) || F(M) || F(N) ||
                 C(Rt2) || F(B) || C(coproc) || C(opc1) || C(opc2) ||
                 C(CRn) || C(CRm) || C(CRd) /*|| C(firstcond)*/ || C(mask) ||
-		F(J1) || F(J2) || C(sat_imm)
+		F(J1) || F(J2) || C(sat_imm) || C(rotate)
                 ) {
 
 

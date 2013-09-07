@@ -266,7 +266,7 @@ void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 	case T_THUMB2_ROTATE_FLAG:
 	    // Rotate field
-	    d->rotate = (w2 & b110000) >> 4;
+	    d->rotate = (w2 >> 1) & b11000;
 	    break;
 	case T_THUMB2_U_FLAG:
 	    // U flag
@@ -522,10 +522,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->W = B_UNSET;
 	    break;
 
-	case I_TST:
-	    d->S = B_INVLD;
-	    break;
-
 	case I_ASR:
 	    // TODO: fetch shift type from opcode so this can be more generic
 	    if (d->I == B_SET) {
@@ -539,7 +535,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->I = B_INVLD;
 	    break;
 
-	case I_CMP: case I_CMN: case I_TEQ:
+	case I_CMP: case I_CMN: case I_TEQ: case I_TST:
 	    d->Rd = PC;
 	    d->Rn = (w & 0xf);
 	    d->S = B_INVLD;
@@ -766,6 +762,10 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->sat_imm = w2 & 0xF;
 	    break;
 
+	case I_SXTB: case I_SXTB16: case I_SXTH:
+	    d->Rn = R_INVLD;
+	    break;
+
 	// WM flags
 	case I_STM: case I_STMDB:
 	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
@@ -796,7 +796,9 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     d->instr_imm_type = thumb2_imm_instr_types[index];
     d->instr_flag_type = thumb2_flags_instr_types[index];
 
+    printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
     d->instr = thumb2_decode_instruction(d, w, w2);
+    printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
 
     thumb2_parse_reg(index, d, w, w2);
     thumb2_parse_imm(index, d, w, w2);

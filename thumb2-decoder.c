@@ -209,8 +209,12 @@ darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2) {
     } else if (op1 == 1 && op2 == 1) {
 	switch(op3) {
 	    case 0:
+		d->instr_type = T_THUMB2_RN_RM_REG;
+		d->instr_imm_type = T_THUMB2_NO_IMM;
 		return I_TBB;
 	    case 1:
+		d->instr_type = T_THUMB2_RN_RM_REG;
+		d->instr_imm_type = T_THUMB2_NO_IMM;
 		return I_TBH;
 	    case 4:
 		return I_LDREXB;
@@ -325,9 +329,10 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	    else
 		return I_ORN;
 	case 4:
-	    if (Rd_S == 0x1F)
+	    if (Rd_S == 0x1F) {
+		d->instr_type = T_THUMB2_RN_REG;
 		return I_TEQ;
-	    else
+	    } else
 		return I_EOR;
 	case 8:
 	    if (Rd_S == 0x1F)
@@ -846,6 +851,7 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
 		return I_ROR;  // register
 	}
     } else if (op1 < 8 && (op2&b1000) == 8) {
+	d->instr_flag_type = T_THUMB2_ROTATE_FLAG;
 	switch(op1) {
 	    case 0:
 		if (Rn == b1111)
