@@ -862,6 +862,55 @@ struct {
     {0xF8421E33, 0, "strtal r1, [r2, #0x33]", {
         .instr = I_STRT, .I = B_SET, .Rt = r1, .Rn = r2, .imm = 0x33, .cond = C_AL}},
 
+    // SUB
+    {0xF5A271FF, 0, "subal.w r1, r2, #0x1fe", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = r2, .imm = 0x1fe, .S = B_UNSET, .cond = C_AL}},
+    {0xF5B275FF, 0, "subsal.w r5, r2, #0x1fe", {
+        .instr = I_SUB, .I = B_SET, .Rd = r5, .Rn = r2, .imm = 0x1fe, .S = B_SET, .cond = C_AL}},
+    {0xF5A27FFF, 0, "subal.w pc, r2, #0x1fe", {
+        .instr = I_SUB, .I = B_SET, .Rd = PC, .Rn = r2, .imm = 0x1fe, .S = B_UNSET, .cond = C_AL}},
+    {0xF5B27FFF, 0, "cmpal.w r2, #0x1fe", {
+        .instr = I_CMP, .I = B_SET, .Rd = PC, .Rn = r2, .imm = 0x1fe, .cond = C_AL}},
+    {0xF5AD71FF, 0, "subal.w r1, sp, #0x1fe", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = SP, .imm = 0x1fe, .S = B_UNSET, .cond = C_AL}},
+
+    // SUBW
+    {0xF6A271FF, 0, "subwal r1, r2, #0xfff", {
+        .instr = I_SUBW, .I = B_SET, .Rd = r1, .Rn = r2, .imm = 0xfff, .cond = C_AL}},
+    {0xF6AF71FF, 0, "adral.w r1, #0xfff", {
+        .instr = I_ADR, .I = B_SET, .Rd = r1, .Rn = PC, .imm = 0xfff, .cond = C_AL}},
+    {0xF6AD71FF, 0, "subwal r1, sp, #0xfff", {
+        .instr = I_SUBW, .I = B_SET, .Rd = r1, .Rn = SP, .imm = 0xfff, .cond = C_AL}},
+
+    // SUB register
+    {0xEBA27113, 0, "subal.w r1, r2, r3, lsr #28", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 28, .S = B_UNSET, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEBB27113, 0, "subsal.w r1, r2, r3, lsr #28", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .imm = 28, .S = B_SET, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEBB27F13, 0, "cmpal.w r2, r3, lsr #28", {
+        .instr = I_CMP, .I = B_SET, .Rd = PC, .Rn = r2, .Rm = r3, .imm = 28, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEBAD7113, 0, "subal.w r1, sp, r3, lsr #28", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = SP, .Rm = r3, .imm = 28, .S = B_UNSET, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+
+
+    // SUB SP min imm
+    {0xF5AD71FF, 0, "subal.w r1, sp, #0x1fe", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = SP, .imm = 0x1fe, .S = B_UNSET, .cond = C_AL}},
+    {0xF5BD71FF, 0, "subsal.w r1, sp, #0x1fe", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = SP, .imm = 0x1fe, .S = B_SET, .cond = C_AL}},
+    {0xF5BD7FFF, 0, "cmpal.w sp, #0x1fe", {
+        .instr = I_CMP, .I = B_SET, .Rd = PC, .Rn = SP, .imm = 0x1fe, .cond = C_AL}},
+    {0xF6AD71cc, 0, "subwal r1, sp, #0xfcc", {
+        .instr = I_SUBW, .I = B_SET, .Rd = r1, .Rn = SP, .imm = 0xfcc, .S = B_UNSET, .cond = C_AL}},
+
+
+    // SUB SP min reg
+    {0xEBAD7113, 0, "subal.w r1, sp, r3, lsr #28", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = SP, .Rm = r3, .imm = 28, .S = B_UNSET, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEBBD7113, 0, "subsal.w r1, sp, r3, lsr #28", {
+        .instr = I_SUB, .I = B_SET, .Rd = r1, .Rn = SP, .Rm = r3, .imm = 28, .S = B_SET, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
+    {0xEBBD7F13, 0, "cmpal.w sp, r3, lsr #28", {
+        .instr = I_CMP, .I = B_SET, .Rd = PC, .Rn = SP, .Rm = r3, .imm = 28, .shift = 28, .shift_type = S_LSR, .cond = C_AL}},
 
 
 };

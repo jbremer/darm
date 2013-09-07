@@ -471,17 +471,22 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    }
 	    */
 	    // Check if we are dealing with SP variant
-	    if (d->Rd != R_INVLD && d->Rm != R_INVLD && d->Rn == R_INVLD) {
+	    //if (d->Rd != R_INVLD && d->Rm != R_INVLD && d->Rn == R_INVLD) {
+	    if ((w & 0xf) == b1101) {
 		d->Rn = SP;
 	    }
 	    break;
+
 
 	case I_ADDW: case I_SUBW:
             // Set to ADR instruction
 	    if (d->Rn == PC) {
 		d->instr = I_ADR;
 		d->S = B_INVLD;
-		d->Rn = R_INVLD;
+		//d->Rn = R_INVLD;
+	    }
+	    if ((w & 0xf) == b1101) {
+		d->Rn = SP;
 	    }
 	    break;
 
@@ -536,6 +541,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	case I_CMP: case I_CMN: case I_TEQ:
 	    d->Rd = PC;
+	    d->Rn = (w & 0xf);
 	    d->S = B_INVLD;
 	    break;
 

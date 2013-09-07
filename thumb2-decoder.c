@@ -364,10 +364,10 @@ darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	case 4:
 	    return I_MOVW;
 	case 10:
-	    if (Rn = b1111)
+	    if (Rn == b1111)
 		return I_ADR;
 	    else
-		return I_SUB;
+		return I_SUBW;
 	case 12:
 	    return I_MOVT;
 	case 16:
