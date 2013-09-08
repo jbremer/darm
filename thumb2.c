@@ -512,8 +512,10 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	// Weird corner case not handled by decoder (in manual)
 	// TODO: this needs less magic
 	case I_LDR:
+	    /*
 	    if ((w & 0xFFF0) == 0xF850 && (w2 & 0xFFF) == 0xB04)
 		d->instr = I_POP;
+	   */
 	    break;
 
 	case I_LDRBT: case I_LDRHT: case I_LDRSBT: case I_LDRSHT:
