@@ -678,16 +678,27 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2) {
     Rn = w & b1111;
     Rt = (w2 >> 12) & b1111;
 
+    // Set types
+    //d->instr_type = T_THUMB2_RN_RT_REG;
+    //d->instr_imm_type = T_THUMB2_IMM12;
+    //d->instr_flag_type = T_THUMB2_NO_FLAG;
+
     if ((op1&2) == 0 && Rn == b1111) {
+	d->instr_flag_type = T_THUMB2_U_FLAG;
 	if (Rt == b1111)
 	    return I_PLD;  // literal
-	else
+	else {
+	    d->instr_type = T_THUMB2_RT_REG;
 	    return I_LDRH; // literal
+	}
     } else if ((op1&2) == 2 && Rn == b1111) {
         if (Rt == b1111)
 	    return I_NOP;  // mem hint
-	else
+	else {
+            //d->instr_flag_type = T_THUMB2_U_FLAG;
+	    //d->instr_type = T_THUMB2_RT_REG;
 	    return I_LDRSH; // literal
+	}
     } else if (op1 == 0) {
 	if (op2 == 0) {
 	    if (Rt == b1111)
@@ -695,20 +706,20 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2) {
 	    else
 		return I_LDRH;  // register
 	} else if ((op2 & 0x24) == 0x24) {
-	    return I_LDRH;  // immediate
+	    return I_LDRH;  // immediate 8 bit
 	} else if ((op2 & 0x3C) == 0x30) {
 	    if (Rt == b1111)
-		return I_PLD;  // PLD,PLDW immediate
+		return I_PLD;  // PLD,PLDW immediate 8 bit
 	    else
-		return I_LDRH;  // immediate
+		return I_LDRH;  // immediate 8 bit
 	} else if ((op2 & 0x3C) == 0x38) {
 	    return I_LDRHT;
 	}
     } else if (op1 == 1) {
 	if (Rt == b1111)
-	    return I_PLD;  // PLD,PLDW immediate
+	    return I_PLD;  // PLD,PLDW immediate 12 bit
 	else
-	    return I_LDRH;  // immediate
+	    return I_LDRH;  // immediate 12 bit
     } else if (op1 == 2) {
 	if (op2 == 0) {
 	    if (Rt == b1111)
@@ -716,12 +727,12 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2) {
 	    else
 		return I_LDRSH;  // register
 	} else if ((op2 & 0x24) == 0x24) {
-	    return I_LDRSH;  // immediate
+	    return I_LDRSH;  // immediate 8 bit
 	} else if ((op2 & 0x3C) == 0x30) {
 	    if (Rt == b1111)
 		return I_NOP;
 	    else
-		return I_LDRSH;  // immediate
+		return I_LDRSH;  // immediate 8 bit
 	} else if ((op2 & 0x3C) == 0x38) {
 	    return I_LDRSHT;
 	}
@@ -729,7 +740,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2) {
 	if (Rt == b1111)
 	    return I_NOP;
 	else
-	    return I_LDRSH;  // immediate
+	    return I_LDRSH;  // immediate 12 bit
     }
 
 }
