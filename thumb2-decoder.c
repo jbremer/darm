@@ -142,9 +142,16 @@ darm_instr_t thumb2_load_store_multiple(darm_t *d, uint16_t w, uint16_t w2) {
     op = (w >> 7) & b11;
     L = (w >> 4) & b1;
     W_Rn = ((w >> 1) & 0x10) | (w & b1111);
+
+    d->instr_type = T_THUMB2_RN_REG;
+    d->instr_imm_type = T_THUMB2_NO_IMM;
+    d->instr_flag_type = T_THUMB2_REGLIST_FLAG;
+
     switch (op) {
 	case 0:
 	case 3:
+            d->instr_type = T_THUMB2_NO_REG;
+	    d->instr_flag_type = T_THUMB2_NO_FLAG;
 	    if (L == 0)
 		return I_SRS;
 	    else if (L == 1)
@@ -154,20 +161,26 @@ darm_instr_t thumb2_load_store_multiple(darm_t *d, uint16_t w, uint16_t w2) {
 	    if (L == 0)
 		return I_STM;
 	    else if (L == 1) {
-		if (W_Rn == 0x1D)
+		if (W_Rn == 0x1D) {
+		    d->instr_type = T_THUMB2_NO_REG;
 		    return I_POP;
-		else
+		} else {
+		    d->instr_flag_type = T_THUMB2_WP_REGLIST_FLAG;
 		    return I_LDM;
+		}
 	    }
 	    break;
 	case 2:
 	    if (L == 0) {
-		if (W_Rn == 0x1D)
+		if (W_Rn == 0x1D) {
+		    d->instr_type = T_THUMB2_NO_REG;
 		    return I_PUSH;
-		else
+		} else
 		    return I_STMDB;
-	    } else if (L == 1)
+	    } else if (L == 1) {
+                d->instr_flag_type = T_THUMB2_WP_REGLIST_FLAG;
 		return I_LDMDB;
+	    }
             break;
     }
 
@@ -488,34 +501,48 @@ darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2) {
     op1 = (w2 >> 12) & b111;
     op2 = (w2 >> 8) & b1111;
     imm8 = w2 & 0xFF;
+
+    // Set types
+    d->instr_type = T_THUMB2_NO_REG;
+    d->instr_imm_type = T_THUMB2_NO_IMM;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
+
+
     if (op1 == 0 && op == 0xFE)
 	//TODO: return I_HVC;
 	return I_NOP;
     else if (op1 == 0 && op == 0xFF)
 	return I_SMC;
-    else if ((op1&b101) == 1)
+    else if ((op1&b101) == 1) {
+	d->instr_flag_type = T_THUMB2_S_FLAG;
 	return I_B;
-    else if (op1 == 2 && op == 0xFF)
+    } else if (op1 == 2 && op == 0xFF)
 	return I_UDF;
     else if ((op1&b101) == 0) {
-	if ((op & 0x38) != 0x38)
+	if ((op & 0x38) != 0x38) {
+            d->instr_flag_type = T_THUMB2_S_FLAG;
 	    return I_B;
-	else if ((op & 0x7E) == 0x38 && (imm8 & 0x10) == 0x10)
+	} else if ((op & 0x7E) == 0x38 && (imm8 & 0x10) == 0x10)
 	    return I_MSR;	// banked register
-	else if (op == 0x38 && (imm8 & 0x10) == 0)
+	else if (op == 0x38 && (imm8 & 0x10) == 0) {
+	    d->instr_type = T_THUMB2_RN_REG;
 	    return I_MSR;	// register 
-	else if (op == 0x3A)
+	} else if (op == 0x3A)
 	    return thumb2_proc_state(d, w, w2);
 	else if (op == 0x3B)
 	    return thumb2_misc_ctrl(d, w, w2);
-	else if (op == 0x3C)
+	else if (op == 0x3C) {
+	    d->instr_type = T_THUMB2_RM_REG;
 	    return I_BXJ;
-	else if (op == 0x3E && (imm8 & 0x10) == 0)
+	} else if (op == 0x3E && (imm8 & 0x10) == 0) {
+	    d->instr_type = T_THUMB2_RD_REG;
 	    return I_MRS;
-
+	}
     } else if ((op1&b101) == b100) {
+        d->instr_flag_type = T_THUMB2_S_FLAG;
 	return I_BLX;
     } else if ((op1&b101) == b101) {
+        d->instr_flag_type = T_THUMB2_S_FLAG;
 	return I_BL;
     }
 }
