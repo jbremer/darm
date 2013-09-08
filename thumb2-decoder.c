@@ -194,32 +194,48 @@ darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2) {
     op3 = (w2 >> 4) & b1111;
     Rn = w & b1111;
 
-    if (op1 == 0 && op2 == 0)
+
+    // set types
+    d->instr_type = T_THUMB2_RN_RT_REG;
+    d->instr_imm_type = T_THUMB2_IMM8;;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
+
+    if (op1 == 0 && op2 == 0) {
+	d->instr_type = T_THUMB2_RN_RD_RT_REG;
         return I_STREX;
-    else if (op1 == 0 && op2 == 1)
+    } else if (op1 == 0 && op2 == 1)
         return I_LDREX;
     else if ((op1&2) == 0 && op2 == 2) {
 	d->instr_type = T_THUMB2_RN_RT_RT2_REG;
-	d->instr_imm_type = T_THUMB2_IMM8;
+	d->instr_flag_type = T_THUMB2_WUP_FLAG;
         return I_STRD;  // immediate
-    } else if ((op1&2) == 0 && op2 == 3)
+    } else if ( ((op1&2) == 0 && op2 == 3) || ((op1&2) == 2 && (op2&1) == 1) ) {
+	d->instr_flag_type = T_THUMB2_WUP_FLAG;
+
+	if (Rn == b1111)
+            d->instr_type = T_THUMB2_RT_RT2_REG;
+	else
+            d->instr_type = T_THUMB2_RN_RT_RT2_REG;
+
         return I_LDRD;	// literal and immediate
-    else if ((op1&2) == 2 && (op2&1) == 0) {
+    } else if ((op1&2) == 2 && (op2&1) == 0) {
 	d->instr_type = T_THUMB2_RN_RT_RT2_REG;
-	d->instr_imm_type = T_THUMB2_IMM8;
+	d->instr_flag_type = T_THUMB2_WUP_FLAG;
 	return I_STRD;	// immediate
-    } else if ((op1&2) == 2 && (op2&1) == 1)
-	return I_LDRD; // literal and immediate
-    else if (op1 == 1 && op2 == 0) {
+    } else if (op1 == 1 && op2 == 0) {
+        d->instr_imm_type = T_THUMB2_NO_IMM;
+	d->instr_type = T_THUMB2_RN_RD_RT_REG;
 	switch(op3) {
 	    case 4:
 		return I_STREXB;
 	    case 5:
 		return I_STREXH;
 	    case 7:
+ 		d->instr_type = T_THUMB2_RN_RD_RT_RT2_REG;
 		return I_STREXD;
         }
     } else if (op1 == 1 && op2 == 1) {
+        d->instr_imm_type = T_THUMB2_NO_IMM;
 	switch(op3) {
 	    case 0:
 		d->instr_type = T_THUMB2_RN_RM_REG;
@@ -234,6 +250,7 @@ darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2) {
 	    case 5:
 		return I_LDREXH;
 	    case 7:
+		d->instr_type = T_THUMB2_RN_RT_RT2_REG;
 		return I_LDREXD;
 	}
     }
