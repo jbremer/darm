@@ -309,12 +309,17 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
     Rn = w & b1111;
     Rd_S = ((w2 >> 7) & 0x1E) | ((w >> 4) & 1);
 
+    // Set instruction types
+    d->instr_imm_type = T_THUMB2_IMM1_IMM3_IMM8;
+    d->instr_flag_type = T_THUMB2_S_FLAG;
+
     // These all operate on immediates
     switch(op) {
 	case 0:
-	    if (Rd_S == 0x1F)
+	    if (Rd_S == 0x1F) {
+		d->instr_flag_type = T_THUMB2_NO_FLAG;
 		return I_TST;
-	    else
+	    } else
 		return I_AND;
 	case 1:
 	    return I_BIC;
@@ -331,22 +336,25 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	case 4:
 	    if (Rd_S == 0x1F) {
 		d->instr_type = T_THUMB2_RN_REG;
+		d->instr_flag_type = T_THUMB2_NO_FLAG;
 		return I_TEQ;
 	    } else
 		return I_EOR;
 	case 8:
-	    if (Rd_S == 0x1F)
+	    if (Rd_S == 0x1F) {
+		d->instr_flag_type = T_THUMB2_NO_FLAG;
 		return I_CMN;
-	    else
+	    } else
 		return I_ADD;
 	case 10:
 	    return I_ADC;
 	case 11:
 	    return I_SBC;
 	case 13:
-	    if (Rd_S == 0x1F)
+	    if (Rd_S == 0x1F) {
+		d->instr_flag_type = T_THUMB2_NO_FLAG;
 		return I_CMP;
-	    else
+	    } else
 		return I_SUB;
 	case 14:
 	    return I_RSB;
