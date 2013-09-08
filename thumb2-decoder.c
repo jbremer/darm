@@ -310,6 +310,7 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
     Rd_S = ((w2 >> 7) & 0x1E) | ((w >> 4) & 1);
 
     // Set instruction types
+    d->instr_type = T_THUMB2_RN_RD_REG;
     d->instr_imm_type = T_THUMB2_IMM1_IMM3_IMM8;
     d->instr_flag_type = T_THUMB2_S_FLAG;
 
@@ -317,6 +318,7 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
     switch(op) {
 	case 0:
 	    if (Rd_S == 0x1F) {
+		d->instr_type = T_THUMB2_RN_REG;
 		d->instr_flag_type = T_THUMB2_NO_FLAG;
 		return I_TST;
 	    } else
@@ -324,14 +326,16 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	case 1:
 	    return I_BIC;
 	case 2:
-	    if (Rn == b1111)
+	    if (Rn == b1111) {
+		d->instr_type = T_THUMB2_RD_REG;
 		return I_MOV;
-	    else
+	    } else
 		return I_ORR;
 	case 3:
-	    if (Rn == b1111)
+	    if (Rn == b1111) {
+		d->instr_type = T_THUMB2_RD_REG;
 		return I_MVN;
-	    else
+	    } else
 		return I_ORN;
 	case 4:
 	    if (Rd_S == 0x1F) {
@@ -342,6 +346,7 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 		return I_EOR;
 	case 8:
 	    if (Rd_S == 0x1F) {
+		d->instr_type = T_THUMB2_RN_REG;
 		d->instr_flag_type = T_THUMB2_NO_FLAG;
 		return I_CMN;
 	    } else
@@ -352,6 +357,7 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	    return I_SBC;
 	case 13:
 	    if (Rd_S == 0x1F) {
+		d->instr_type = T_THUMB2_RN_REG;
 		d->instr_flag_type = T_THUMB2_NO_FLAG;
 		return I_CMP;
 	    } else
@@ -367,6 +373,9 @@ darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2) {
     Rn = w & b1111;
 
     // Immediate stuff
+    d->instr_type = T_THUMB2_RN_RD_REG;
+    d->instr_imm_type = T_THUMB2_IMM1_IMM3_IMM8;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
 
     switch(op) {
 	case 0:
@@ -375,6 +384,7 @@ darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	    else
 		return I_ADDW;
 	case 4:
+            d->instr_type = T_THUMB2_RD_REG;
 	    return I_MOVW;
 	case 10:
 	    if (Rn == b1111)
@@ -382,29 +392,42 @@ darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	    else
 		return I_SUBW;
 	case 12:
+            d->instr_type = T_THUMB2_RD_REG;
 	    return I_MOVT;
 	case 16:
+            d->instr_imm_type = T_THUMB2_IMM2_IMM3;
 	    return I_SSAT;
 	case 18:
-	    if ((w2 & 0x70C0) == 0)
+	    if ((w2 & 0x70C0) == 0) {
+                d->instr_imm_type = T_THUMB2_NO_IMM;
 		return I_SSAT16;
-	    else
+	    } else {
+                d->instr_imm_type = T_THUMB2_IMM2_IMM3;
 		return I_SSAT;
+	    }
 	case 20:
+            d->instr_imm_type = T_THUMB2_IMM2_IMM3;
 	    return I_SBFX;
 	case 22:
-	    if (Rn == b1111)
+            d->instr_imm_type = T_THUMB2_IMM2_IMM3;
+	    if (Rn == b1111) {
+                d->instr_type = T_THUMB2_RD_REG;
 		return I_BFC;
-	    else
+	    } else
 		return I_BFI;
 	case 24:
+            d->instr_imm_type = T_THUMB2_IMM2_IMM3;
 	    return I_USAT;
 	case 26:
-	    if ((w2 & 0x70C0) == 0)
-		return I_SSAT16;
-	    else
-		return I_SSAT;
+	    if ((w2 & 0x70C0) == 0) {
+                d->instr_imm_type = T_THUMB2_NO_IMM;
+		return I_USAT16;
+	    } else {
+                d->instr_imm_type = T_THUMB2_IMM2_IMM3;
+		return I_USAT;
+	    }
 	case 28:
+            d->instr_imm_type = T_THUMB2_IMM2_IMM3;
 	    return I_UBFX;
 
     }
