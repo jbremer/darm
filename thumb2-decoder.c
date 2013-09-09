@@ -679,9 +679,9 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2) {
     Rt = (w2 >> 12) & b1111;
 
     // Set types
-    //d->instr_type = T_THUMB2_RN_RT_REG;
-    //d->instr_imm_type = T_THUMB2_IMM12;
-    //d->instr_flag_type = T_THUMB2_NO_FLAG;
+    d->instr_type = T_THUMB2_RN_RT_REG;
+    d->instr_imm_type = T_THUMB2_IMM12;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
 
     if ((op1&2) == 0 && Rn == b1111) {
 	d->instr_flag_type = T_THUMB2_U_FLAG;
@@ -695,45 +695,67 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2) {
         if (Rt == b1111)
 	    return I_NOP;  // mem hint
 	else {
-            //d->instr_flag_type = T_THUMB2_U_FLAG;
-	    //d->instr_type = T_THUMB2_RT_REG;
+            d->instr_flag_type = T_THUMB2_U_FLAG;
+	    d->instr_type = T_THUMB2_RT_REG;
 	    return I_LDRSH; // literal
 	}
     } else if (op1 == 0) {
 	if (op2 == 0) {
-	    if (Rt == b1111)
+            d->instr_imm_type = T_THUMB2_IMM2;
+	    if (Rt == b1111) {
+		d->instr_type = T_THUMB2_RN_RM_REG;
 		return I_PLD;  // PLD,PLDW register
-	    else
+	    } else {
+		d->instr_type = T_THUMB2_RN_RM_RT_REG;
 		return I_LDRH;  // register
+	    }
 	} else if ((op2 & 0x24) == 0x24) {
+            d->instr_imm_type = T_THUMB2_IMM8;
+	    d->instr_flag_type = T_THUMB2_WUP_FLAG;
 	    return I_LDRH;  // immediate 8 bit
 	} else if ((op2 & 0x3C) == 0x30) {
-	    if (Rt == b1111)
+	    if (Rt == b1111) {
+		d->instr_type = T_THUMB2_RN_REG;
+                d->instr_imm_type = T_THUMB2_IMM8;
 		return I_PLD;  // PLD,PLDW immediate 8 bit
-	    else
+	    } else {
+                d->instr_imm_type = T_THUMB2_IMM8;
+                d->instr_flag_type = T_THUMB2_WUP_FLAG;
 		return I_LDRH;  // immediate 8 bit
+	    }
 	} else if ((op2 & 0x3C) == 0x38) {
+            d->instr_imm_type = T_THUMB2_IMM8;
 	    return I_LDRHT;
 	}
     } else if (op1 == 1) {
-	if (Rt == b1111)
+	if (Rt == b1111) {
+	    d->instr_type = T_THUMB2_RN_REG;
 	    return I_PLD;  // PLD,PLDW immediate 12 bit
-	else
+	} else
 	    return I_LDRH;  // immediate 12 bit
     } else if (op1 == 2) {
 	if (op2 == 0) {
 	    if (Rt == b1111)
 		return I_NOP;
-	    else
+	    else {
+                d->instr_imm_type = T_THUMB2_IMM2;
+		d->instr_type = T_THUMB2_RN_RM_RT_REG;
 		return I_LDRSH;  // register
+	    }
 	} else if ((op2 & 0x24) == 0x24) {
+            d->instr_imm_type = T_THUMB2_IMM8;
+            d->instr_flag_type = T_THUMB2_WUP_FLAG;
 	    return I_LDRSH;  // immediate 8 bit
 	} else if ((op2 & 0x3C) == 0x30) {
 	    if (Rt == b1111)
 		return I_NOP;
-	    else
+	    else {
+                d->instr_imm_type = T_THUMB2_IMM8;
+                d->instr_flag_type = T_THUMB2_WUP_FLAG;
 		return I_LDRSH;  // immediate 8 bit
+	    }
 	} else if ((op2 & 0x3C) == 0x38) {
+            d->instr_imm_type = T_THUMB2_IMM8;
 	    return I_LDRSHT;
 	}
     } else if (op1 == 3) {
