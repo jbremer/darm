@@ -298,13 +298,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
     // Misc. cases
     switch(d->instr) {
 
-	// Branch and exchange Jazelle
-	case I_BXJ:
-            d->Rm = w & b1111;
-	    d->S = B_INVLD;
-            d->I = B_INVLD;
-	    break;
-
 	// Branch
         case I_B:
 	        d->I = B_SET;
@@ -357,25 +350,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    if (d->I == B_SET) {
 	        d->shift = d->imm;
 	        d->shift_type = ((w2 >> 4) & b11);
-	    }
-	    break;
-
-	case I_ADD: case I_SUB:
-	    if ((w & 0xf) == b1101) {
-		d->Rn = SP;
-	    }
-	    break;
-
-
-	case I_ADDW: case I_SUBW:
-            // Set to ADR instruction
-	    if (d->Rn == PC) {
-		d->instr = I_ADR;
-		d->S = B_INVLD;
-		//d->Rn = R_INVLD;
-	    }
-	    if ((w & 0xf) == b1101) {
-		d->Rn = SP;
 	    }
 	    break;
 
