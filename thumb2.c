@@ -339,45 +339,27 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->lsb = d->imm & 0x1F;
 	    d->msb = w2 & 0x1F;
 	    d->width = d->msb + 1 - d->lsb;
-	    if (d->Rn == b1111)
-		d->instr = I_BFC;
 	    break;
 
 	case I_LSL: case I_LSR: case I_ASR: case I_ROR:
-	    if (d->Rn == b1111)
-	        d->Rn = R_INVLD;
-
 	    if (d->I == B_SET) {
 	        d->shift = d->imm;
 	        d->shift_type = ((w2 >> 4) & b11);
 	    }
 	    break;
 
+	// imm4 case
 	case I_MOVW: case I_MOVT:
 	    d->imm = (uint32_t) ((w & b1111) << 12) | ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF);
 	    break;
 
-	case I_LDRBT: case I_LDRHT: case I_LDRSBT: case I_LDRSHT:
-	    d->P = B_UNSET;
-	    d->U = B_UNSET;
-	    d->W = B_UNSET;
-	    break;
-
-	case I_CLREX:
-            d->S = B_INVLD;
-	    d->I = B_INVLD;
-	    break;
-
+	// preserve PC in rd for further use(?)
 	case I_CMP: case I_CMN: case I_TEQ: case I_TST:
 	    d->Rd = PC;
-	    d->Rn = (w & 0xf);
-	    d->S = B_INVLD;
 	    break;
 
 	// option field
 	case I_DBG: case I_DMB: case I_DSB: case I_ISB:
-	    d->S = B_INVLD;
-	    d->I = B_INVLD;
 	    d->option = w2 & b1111; // directly index enum
 	    break;
 
@@ -403,25 +385,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->CRd = (w2 >> 12) & b1111; // enum index
 	    break;
 
-	case I_LDRB: case I_LDRSB: case I_LDRSH:
-	    if (d->Rn == b1111) {
-		d->imm = w2 & 0xfff;
-		d->Rn = R_INVLD;
-		d->Rm = R_INVLD;
-		d->P = B_INVLD;
-		d->U = ((w >> 7) & 1) ? B_SET : B_UNSET;
-		d->W = B_INVLD;
-		d->shift_type = S_INVLD;
-		d->shift = 0;
-	    }
-	    break;
-
-	case I_STRBT:
-	    d->P = B_INVLD;
-	    d->U = B_INVLD;
-	    d->W = B_INVLD;
-	    break;
-
+	// Weird rd offset
 	case I_STREX:
             d->Rd = ((w2 >> 8) & b1111);
 	    d->imm = (uint32_t) ((w2 & 0xFF) << 2);
@@ -435,13 +399,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->P = (w >> 8) & 1 ? B_SET : B_UNSET;
 	    break;
 
-	case I_LDREXB:
-	    d->imm = 0;
-	    d->I = B_INVLD;
-	    d->Rt2 = R_INVLD;
-	    d->W = d->U = d->P = B_INVLD;
-	    break;
-
+	// Catch some pop/push inconsistencies
 	case I_POP: case I_PUSH:
 	    if (w == 0xF85D || w == 0xF84D) // no flags
 		break;
@@ -470,20 +428,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->opc1 = (w2 >> 4) & b1111;
 	    d->CRm = (w2 & b1111);
 	    d->Rt2 = w & b1111;
-	    break;
-
-	// MOV with imm4
-	case I_MOV:
-	    if (d->Rn == b1111) {
-		d->shift = 0;
-		d->shift_type = S_INVLD;
-		d->Rn = R_INVLD;
-	    }
-	    break;
-
-	case I_MRS:
-            d->Rd = (w2 >> 8) & b1111;
-	    d->I = B_UNSET;
 	    break;
 
 	case I_MSR:
