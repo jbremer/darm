@@ -39,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
 #define SIGN_EXTEND32(v, len) ((v << (32 - len)) >> (32 - len))
 
-int thumb2_lookup_instr(uint16_t w, uint16_t w2);
+//int thumb2_lookup_instr(uint16_t w, uint16_t w2);
 void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2);
 void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2);
 void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2);
@@ -101,24 +101,6 @@ void thumb2_decode_immshift(darm_t *d, uint8_t type, uint8_t imm5)
 	}
 }
 
-
-
-
-
-int thumb2_lookup_instr(uint16_t w, uint16_t w2) {
-// TODO: replace with binary search tree for speedup
-	uint32_t dw;
-	int i;
-	dw = (w << 16) | w2;
-	for (i = 0 ; i < THUMB2_INSTRUCTION_COUNT ; i++) {
-		//printf("%x %x\n", thumb2_instruction_ids[i], thumb2_instruction_masks[i]);
-		if ((dw & thumb2_instruction_masks[i]) == thumb2_instruction_ids[i]) {
-			return i;
-		}
-	}
-	
-	return 0;
-}
 
 // Parse the register instruction type
 void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2) {
@@ -258,7 +240,6 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 }
 // Parse the flag instruction type
 void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
-    //printf("FLAG TYPE: %i\n", thumb2_flags_instr_types[index]);
 
     switch(d->instr_flag_type) {
 	case T_THUMB2_NO_FLAG:
@@ -313,10 +294,12 @@ void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 
 // Handle weird branch cases
+/*
 int parse_branch_misc_cases(darm_t *d, uint16_t w, uint16_t w2) {
 
 
     // Check if op field is BXJ b0111000
+    
     if (((w >> 4) & 0x7F) == 0x3C) {
 	printf("BXJ!!!!\n");
         d->instr = I_BXJ;
@@ -383,7 +366,7 @@ int parse_branch_misc_cases(darm_t *d, uint16_t w, uint16_t w2) {
     // TODO: handle more stuff like MSR, MRS
     return 0;
 }
-
+*/
 
 // Parse misc instruction cases
 void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
@@ -401,10 +384,11 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	// Branch
         case I_B:
 	    // Handle exceptions
+	    /*
 	    if (((w & 0x380) == 0x380) && parse_branch_misc_cases(d,w,w2) > 0) {
 		break;
-
 	    } else {
+	    */
 	        d->I = B_SET;
                 d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
                 d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
@@ -419,7 +403,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		    // I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
 		    d->imm = SIGN_EXTEND32( (((w & 0x400) << 14) | (((~(w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1)), 25);
 	        }
-	    }
+	    //}
 	    break;
 
 	// Branch with Link
@@ -460,16 +444,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 
 	case I_ADD: case I_SUB:
-	    // Set to CMN/CMP instruction
-	    /*
-	    if (d->Rd == PC && d->S == B_SET) {
-		d->instr = (d->instr == I_ADD) ? I_CMN : I_CMP;
-		d->Rd = R_INVLD; // If you want to set Rd to PC, don't forget to enforce for normal CMN as well.
-		d->S = B_INVLD;
-	    }
-	    */
-	    // Check if we are dealing with SP variant
-	    //if (d->Rd != R_INVLD && d->Rm != R_INVLD && d->Rn == R_INVLD) {
 	    if ((w & 0xf) == b1101) {
 		d->Rn = SP;
 	    }
@@ -494,26 +468,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	case I_MOVW: case I_MOVT:
 	    d->imm = (uint32_t) ((w & b1111) << 12) | ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF);
-	    break;
-
-	case I_AND:
-	    // Set to TST instruction
-	    /*
-	    if (d->Rd == PC && d->S == 1) {
-		d->instr = I_TST;
-		d->Rd = R_INVLD;
-		d->S = B_INVLD;
-	    }
-	    */
-	    break;
-
-	// Weird corner case not handled by decoder (in manual)
-	// TODO: this needs less magic
-	case I_LDR:
-	    /*
-	    if ((w & 0xFFF0) == 0xF850 && (w2 & 0xFFF) == 0xB04)
-		d->instr = I_POP;
-	   */
 	    break;
 
 	case I_LDRBT: case I_LDRHT: case I_LDRSBT: case I_LDRSHT:
