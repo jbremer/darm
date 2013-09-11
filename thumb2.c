@@ -39,11 +39,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
 #define SIGN_EXTEND32(v, len) ((v << (32 - len)) >> (32 - len))
 
-//int thumb2_lookup_instr(uint16_t w, uint16_t w2);
-void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2);
-void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2);
-void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2);
-void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2);
+void thumb2_parse_reg(darm_t *d, uint16_t w, uint16_t w2);
+void thumb2_parse_imm(darm_t *d, uint16_t w, uint16_t w2);
+void thumb2_parse_flag(darm_t *d, uint16_t w, uint16_t w2);
+void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2);
 
 // 12 -> 32 bit expansion function
 // See manual for this
@@ -103,7 +102,7 @@ void thumb2_decode_immshift(darm_t *d, uint8_t type, uint8_t imm5)
 
 
 // Parse the register instruction type
-void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2) {
+void thumb2_parse_reg(darm_t *d, uint16_t w, uint16_t w2) {
 
     switch(d->instr_type) {
 	case T_THUMB2_NO_REG:
@@ -195,7 +194,7 @@ void thumb2_parse_reg(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 }
 // Parse the immediate instruction type
-void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
+void thumb2_parse_imm(darm_t *d, uint16_t w, uint16_t w2) {
     d->I = B_SET;
 
     switch(d->instr_imm_type) {
@@ -239,7 +238,7 @@ void thumb2_parse_imm(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 }
 // Parse the flag instruction type
-void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
+void thumb2_parse_flag(darm_t *d, uint16_t w, uint16_t w2) {
 
     switch(d->instr_flag_type) {
 	case T_THUMB2_NO_FLAG:
@@ -277,7 +276,6 @@ void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 	case T_THUMB2_S_FLAG:
 	    // S flag
-	    // TODO: different bit on branches
 	    d->S = (w >> 4) & 1 ? B_SET : B_UNSET;
 	    break;
 	case T_THUMB2_S_TYPE_FLAG:
@@ -293,7 +291,7 @@ void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 }
 
 // Parse misc instruction cases
-void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
+void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2) {
 
     // Misc. cases
     switch(d->instr) {
@@ -532,16 +530,15 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
 
-    int index;
 
     //printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
     d->instr = thumb2_decode_instruction(d, w, w2);
     //printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
 
-    thumb2_parse_reg(index, d, w, w2);
-    thumb2_parse_imm(index, d, w, w2);
-    thumb2_parse_flag(index, d, w, w2);
-    thumb2_parse_misc(index, d, w, w2);
+    thumb2_parse_reg(d, w, w2);
+    thumb2_parse_imm(d, w, w2);
+    thumb2_parse_flag(d, w, w2);
+    thumb2_parse_misc(d, w, w2);
     d->instr_type = I_INVLD;
     return 0;
 }
