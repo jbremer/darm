@@ -547,14 +547,12 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 
 // placeholder function for printing out thumb2 instructions
 // This is here until the format string problem is resolved
-// This lacks a lot of functionality, for debug only
+// TODO: This lacks a lot of functionality, for debug only, replace with better function
 char *darm_thumb2_str(darm_t *d) {
 
-    int index, offset=0;
+    int index=0, offset=0;
     static char stringbuf[512];
 
-    // Such a great idea
-    // TODO: fix
     for (int i = 0 ; i < THUMB2_INSTRUCTION_COUNT ; i++) {
 	if (d->instr == thumb2_instr_labels[i]) {
 	    index = i;

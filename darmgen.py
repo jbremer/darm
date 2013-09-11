@@ -81,11 +81,6 @@ def instruction_types_table(arr, kind):
            for x in range(256)]
     return typed_table('darm_enctype_t', '%s_instr_types' % kind, arr)
 
-def instruction_types_table_thumb2(arr, offset, kind):
-    """Lookup table for the types of Thumb2 instructions."""
-    barr = map(lambda x: 'T_%s' % x[offset][1], arr.values())
-    return typed_table('darm_enctype_t', '%s_instr_types' % kind, barr)
-
 def instruction_names_index_table(arr, kind):
     """Lookup table for instruction label for each instruction index."""
     arr = ['I_%s' % arr[x][0] if x in arr else 'I_INVLD'
@@ -617,7 +612,7 @@ if __name__ == '__main__':
     # the last item (a list) will contain the instructions affected by this
     # encoding type
     instr_types = [list(x) + [[]] for x in instr_types]
-    print instr_types
+
     # prepend the instruction set to the encoding types
     insns_types = {0:'', 1:'ARM_', 2:'THUMB_', 3:'THUMB2_', 31:'THUMB2_',32:'THUMB2_'}
     instr_types = [[x[0]] + [insns_types[x[0]] + x[1]] + x[2:6]
@@ -707,33 +702,14 @@ if __name__ == '__main__':
                 else:
                     identifier += ['X'] * bits[x].bitsize
 
-	    # create bitmask for instruction	
-	    mask = string.replace(string.replace(''.join(identifier), '0', '1'), 'X', '0')
-	    mask = sum(int(mask[y])*2**(31-y) for y in range(32))
-
 	    # replace X with 0 and convert index to integer
 	    idx_bin = string.replace(''.join(identifier), 'X', '0')
 	    idx = sum(int(idx_bin[y])*2**(31-y) for y in range(32))
 
-	    a = thumb2('INVLD','','','')
-	    b = thumb2_imm('INVLD','','','')
-	    c = thumb2_flags('INVLD','','','')
-
-	    # find all three instruction types
-	    for y in instr_types:
-		if y[0] == 3 and y[4](bits, instr, idx):
-		    a = y
-                if y[0] == 31 and y[4](bits, instr, idx):
-                    b = y
-		if y[0] == 32 and y[4](bits, instr, idx):
-		    c = y
-
-	    thumb2_table[idx] = instruction_name(instr), a, b, c, idx, mask
+	    thumb2_table[idx] = instruction_name(instr), idx
 	else:
 	    raise
 
-
-    print thumb2_table
     # make a list of unique instructions affected by each encoding type,
     # we remove the first item from the instruction names, as this is I_INVLD
     instr_types = [x[:5] + [instruction_names(x[5])[1:]] for x in instr_types]
@@ -815,14 +791,8 @@ if __name__ == '__main__':
 
     print('#define THUMB2_INSTRUCTION_COUNT ' + str(len(thumb2_table)) + '\n\n')
 
-
     # print some required definitions
-    print('extern darm_enctype_t thumb2_instr_types[256];')
-    print('extern darm_enctype_t thumb2_imm_instr_types[256];')
-    print('extern darm_enctype_t thumb2_flags_instr_types[256];')
     print('extern darm_instr_t thumb2_instr_labels[256];')
-    print('extern unsigned int thumb2_instruction_ids[256];')
-    print('extern unsigned int thumb2_instruction_masks[256];')
     print('extern const char * thumb2_instruction_strings[256];')
 
     type_lut('immediate', 4)
@@ -931,31 +901,12 @@ if __name__ == '__main__':
     print('#include <stdint.h>')
     print('#include "thumb2-tbl.h"')
 
-
-    # print a table containing all the types of instructions
-    print(instruction_types_table_thumb2(thumb2_table, 1, 'thumb2'))
-
-    # print a table containing all the types of instructions (immediates)
-    print(instruction_types_table_thumb2(thumb2_table, 2, 'thumb2_imm'))
-
-    # print a table containing all the types of instructions (flags)
-    print(instruction_types_table_thumb2(thumb2_table, 3, 'thumb2_flags'))
-
     # print a table containing the instruction label for each entry
     print(instruction_names_index_table_thumb2(thumb2_table, 'thumb2'))
 
     # print a table containing the instruction string for each entry
     string_list = map(lambda x: "\"" + str(x[0]) + "\"", thumb2_table.values())
     print(typed_table('const char *', 'thumb2_instruction_strings', string_list))
-
-    # print a table that contains the numeric identifier for each instruction
-    id_list = map(lambda x: str(x[4]), thumb2_table.values())
-    print(typed_table('unsigned int', 'thumb2_instruction_ids', id_list))
-
-    # print a table that contains masks for each instruction
-    mask_list = map(lambda x: str(x[5]), thumb2_table.values())
-    print(typed_table('unsigned int', 'thumb2_instruction_masks', mask_list))
-    
 
     #
     # armv7-tbl.c

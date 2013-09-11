@@ -143,6 +143,8 @@ darm_instr_t thumb2_load_store_multiple(darm_t *d, uint16_t w, uint16_t w2) {
     L = (w >> 4) & b1;
     W_Rn = ((w >> 1) & 0x10) | (w & b1111);
 
+    (void)w2; // unused
+
     d->instr_type = T_THUMB2_RN_REG;
     d->instr_imm_type = T_THUMB2_NO_IMM;
     d->instr_flag_type = T_THUMB2_REGLIST_FLAG;
@@ -254,12 +256,15 @@ darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2) {
 		return I_LDREXD;
 	}
     }
+
+    return I_INVLD;
 }
 
 darm_instr_t thumb2_move_shift(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t type, imm3_imm2;
     type = (w2>>4) & b11;
     imm3_imm2 = ((w2>>10) & 0x1C) | ((w2>>6) & b11);
+    (void)w; // unused
 
     // Set types
     d->instr_type = T_THUMB2_RD_RM_REG;
@@ -284,6 +289,8 @@ darm_instr_t thumb2_move_shift(darm_t *d, uint16_t w, uint16_t w2) {
 	    } else
 		return I_ROR;
     }
+
+    return I_INVLD;
 
 }
 
@@ -353,6 +360,8 @@ darm_instr_t thumb2_data_shifted_reg(darm_t *d, uint16_t w, uint16_t w2) {
 	    return I_RSB;
     }
 
+    return I_INVLD;
+
 }
 
 darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
@@ -417,6 +426,8 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 	case 14:
 	    return I_RSB;
     }
+
+    return I_INVLD;
 }
 
 darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2) {
@@ -484,6 +495,7 @@ darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2) {
 
     }
 
+    return I_INVLD;
 
 }
 
@@ -491,6 +503,8 @@ darm_instr_t thumb2_proc_state(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op1, op2;
     op1 = (w2 >> 8) & b111;
     op2 = w2 & 0xFF;
+    (void)w; // unused
+    (void)d; // unused
 
     if (op1 == 0) {
         switch(op2) {
@@ -509,13 +523,19 @@ darm_instr_t thumb2_proc_state(darm_t *d, uint16_t w, uint16_t w2) {
 		    return I_DBG;
         }
 
-    } else
+    } else {
         return I_CPS;
+    }
+
+    return I_INVLD;
 }
 
 darm_instr_t thumb2_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op;
     op = (w2 >> 4) & b111;
+    (void)d; // unused
+    (void)w; // unused
+
     switch(op) {
         case 0:
 	case 1:
@@ -540,6 +560,8 @@ darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2) {
     op1 = (w2 >> 12) & b111;
     op2 = (w2 >> 8) & b1111;
     imm8 = w2 & 0xFF;
+
+    (void)op2; // unused
 
     // Set types
     d->instr_type = T_THUMB2_NO_REG;
@@ -584,6 +606,9 @@ darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2) {
         d->instr_flag_type = T_THUMB2_S_FLAG;
 	return I_BL;
     }
+
+    return I_INVLD;
+
 }
 
 
@@ -758,6 +783,9 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2) {
 	}
     }
 
+
+    return I_INVLD;
+
 }
 
 darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2) {
@@ -854,6 +882,8 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2) {
 	    return I_LDRSH;  // immediate 12 bit
     }
 
+    return I_INVLD;
+
 }
 
 darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2) {
@@ -904,6 +934,8 @@ darm_instr_t thumb2_parallel_signed(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op1, op2, Rn;
     op1 = (w >> 4) & b111;
     op2 = (w2 >> 4) & b11;
+
+    (void)Rn; // unused
 
     // set types
     d->instr_type = T_THUMB2_RN_RD_RM_REG;
@@ -957,12 +989,16 @@ darm_instr_t thumb2_parallel_signed(darm_t *d, uint16_t w, uint16_t w2) {
         }
     }
 
+    return I_INVLD;
+
 }
 
 darm_instr_t thumb2_parallel_unsigned(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op1, op2, Rn;
     op1 = (w >> 4) & b111;
     op2 = (w2 >> 4) & b11;
+
+    (void)Rn; // unused
 
     // set types
     d->instr_type = T_THUMB2_RN_RD_RM_REG;
@@ -1016,6 +1052,8 @@ darm_instr_t thumb2_parallel_unsigned(darm_t *d, uint16_t w, uint16_t w2) {
 		return I_UHSAX;
         }
     }
+
+    return I_INVLD;
 
 }
 
@@ -1140,6 +1178,8 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
     } else if ((op1&b1100) == 8 && (op2&b1100) == 8) {
 	thumb2_misc_op(d, w, w2);
     }
+
+    return I_INVLD;
 }
 
 darm_instr_t thumb2_nm_decoder(darm_t *d, uint16_t w, uint16_t w2, darm_instr_t i1, darm_instr_t i2, darm_instr_t i3, darm_instr_t i4) {
@@ -1147,6 +1187,9 @@ darm_instr_t thumb2_nm_decoder(darm_t *d, uint16_t w, uint16_t w2, darm_instr_t 
     static uint8_t n,m;
     n = (w2 >> 5) & 1;
     m = (w2 >> 4) & 1;
+
+    (void)d; // unused
+    (void)w; // unused
 
     if (n == 1) {
 	if (m == 1)
@@ -1159,6 +1202,8 @@ darm_instr_t thumb2_nm_decoder(darm_t *d, uint16_t w, uint16_t w2, darm_instr_t 
 	else
 	    return i1;
     }
+
+    return I_INVLD;
 
 } 
 
@@ -1293,6 +1338,10 @@ darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2) {
 
 
 darm_instr_t thumb2_coproc_simd(darm_t *d, uint16_t w, uint16_t w2) {
+
+    (void)d; // unused
+    (void)w; // unused
+    (void)w2; // unused
 
     /* TODO: implement */
     return -1;
