@@ -905,6 +905,11 @@ darm_instr_t thumb2_parallel_signed(darm_t *d, uint16_t w, uint16_t w2) {
     op1 = (w >> 4) & b111;
     op2 = (w2 >> 4) & b11;
 
+    // set types
+    d->instr_type = T_THUMB2_RN_RD_RM_REG;
+    d->instr_imm_type = T_THUMB2_NO_IMM;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
+
     if (op2 == 0) {
 	switch (op1) {
 	    case 0:
@@ -958,6 +963,12 @@ darm_instr_t thumb2_parallel_unsigned(darm_t *d, uint16_t w, uint16_t w2) {
     static uint8_t op1, op2, Rn;
     op1 = (w >> 4) & b111;
     op2 = (w2 >> 4) & b11;
+
+    // set types
+    d->instr_type = T_THUMB2_RN_RD_RM_REG;
+    d->instr_imm_type = T_THUMB2_NO_IMM;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
+
 
     if (op2 == 0) {
 	switch (op1) {
@@ -1015,6 +1026,11 @@ darm_instr_t thumb2_misc_op(darm_t *d, uint16_t w, uint16_t w2) {
     if (((w2 >> 12) & b1111) != b1111)
 	return I_INVLD;
 
+    // set types
+    d->instr_type = T_THUMB2_RN_RD_RM_REG;
+    d->instr_imm_type = T_THUMB2_NO_IMM;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
+
     switch(op1) {
 	case 0:
 	    switch(op2) {
@@ -1028,6 +1044,7 @@ darm_instr_t thumb2_misc_op(darm_t *d, uint16_t w, uint16_t w2) {
 		    return I_QDSUB;
 	    }
 	case 1:
+	    d->instr_type = T_THUMB2_RD_RM_REG;
 	    switch(op2) {
 		case 0:
 		    return I_REV;
@@ -1043,8 +1060,10 @@ darm_instr_t thumb2_misc_op(darm_t *d, uint16_t w, uint16_t w2) {
 		return I_SEL;
 	    break;
 	case 3:
-	    if (op2 == 0)
+	    if (op2 == 0) {
+                d->instr_type = T_THUMB2_RD_RM_REG;
 		return I_CLZ;
+	    }
     }
 
     return I_INVLD;
@@ -1056,7 +1075,14 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
     op2 = (w2 >> 4) & b1111;
     Rn = w & b1111;
 
+    // set types
+    d->instr_type = T_THUMB2_RN_RD_RM_REG;
+    d->instr_imm_type = T_THUMB2_NO_IMM;
+    d->instr_flag_type = T_THUMB2_ROTATE_FLAG;
+
+
     if (op2 == 0 && (op1 & b1000) == 0) {
+        d->instr_flag_type = T_THUMB2_S_FLAG;
 	switch(op1&b1110) {
 	    case 0:
 		return I_LSL;  // register
@@ -1071,34 +1097,40 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
 	d->instr_flag_type = T_THUMB2_ROTATE_FLAG;
 	switch(op1) {
 	    case 0:
-		if (Rn == b1111)
+		if (Rn == b1111) {
+		    d->instr_type = T_THUMB2_RD_RM_REG;
 		    return I_SXTH;
-		else
+		} else
 		    return I_SXTAH;
 	    case 1:
-		if (Rn == b1111)
+		if (Rn == b1111) {
+		    d->instr_type = T_THUMB2_RD_RM_REG;
 		    return I_UXTH;
-		else
+		} else
 		    return I_UXTAH;
 	    case 2:
-		if (Rn == b1111)
+		if (Rn == b1111) {
+		    d->instr_type = T_THUMB2_RD_RM_REG;
 		    return I_SXTB16;
-		else
+		} else
 		    return I_SXTAB16;
 	    case 3:
-		if (Rn == b1111)
+		if (Rn == b1111) {
+		    d->instr_type = T_THUMB2_RD_RM_REG;
 		    return I_UXTB16;
-		else
+		} else
 		    return I_UXTAB16;
 	    case 4:
-		if (Rn == b1111)
+		if (Rn == b1111) {
+		    d->instr_type = T_THUMB2_RD_RM_REG;
 		    return I_SXTB;
-		else
+		} else
 		    return I_SXTAB;
 	    case 5:
-		if (Rn == b1111)
+		if (Rn == b1111) {
+		    d->instr_type = T_THUMB2_RD_RM_REG;
 		    return I_UXTB;
-		else
+		} else
 		    return I_UXTAB;
 	}
     } else if ((op1&b1000) == 8 && (op2&b1100) == 0) {
