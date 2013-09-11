@@ -30,6 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <string.h>
 #include "darm.h"
 
 #define APPEND(out, ptr) \
@@ -38,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
         if(p != NULL) while (*p != 0) *out++ = *p++; \
     } while (0);
 
-int utoa(unsigned int value, char *out, int base)
+static int _utoa(unsigned int value, char *out, int base)
 {
     char buf[30]; unsigned int i, counter = 0;
 
@@ -57,18 +58,79 @@ int utoa(unsigned int value, char *out, int base)
     return counter;
 }
 
-int append_imm(char *arg, uint32_t imm)
+static int _append_imm(char *arg, uint32_t imm)
 {
     const char *start = arg;
     if(imm > 0x1000) {
         *arg++ = '0';
         *arg++ = 'x';
-        arg += utoa(imm, arg, 16);
+        arg += _utoa(imm, arg, 16);
     }
     else {
-        arg += utoa(imm, arg, 10);
+        arg += _utoa(imm, arg, 10);
     }
     return arg - start;
+}
+
+void darm_init(darm_t *d)
+{
+    // initialize the entire darm state in order to make sure that no members
+    // contain undefined data
+    memset(d, 0, sizeof(darm_t));
+    d->instr = I_INVLD;
+    d->instr_type = T_INVLD;
+    d->shift_type = S_INVLD;
+    d->S = d->E = d->U = d->H = d->P = d->I = B_INVLD;
+    d->R = d->T = d->W = d->M = d->N = d->B = B_INVLD;
+    d->Rd = d->Rn = d->Rm = d->Ra = d->Rt = R_INVLD;
+    d->Rt2 = d->RdHi = d->RdLo = d->Rs = R_INVLD;
+    d->option = O_INVLD;
+    // TODO set opc and coproc? to what value?
+    d->CRn = d->CRm = d->CRd = R_INVLD;
+    d->firstcond = C_INVLD, d->mask = 0;
+}
+
+int darm_disasm(darm_t *d, uint16_t w, uint16_t w2, uint32_t addr)
+{
+    // if the least significant bit is not set, then this is
+    // an ARMv7 instruction
+    if((addr & 1) == 0) {
+
+        // disassemble and check for error return values
+        if(darm_armv7_disasm(d, (w2 << 16) | w) < 0) {
+            return 0;
+        }
+        else {
+            return 2;
+        }
+    }
+
+    // magic table constructed based on section A6.1 of the ARM manual
+    static uint8_t is_thumb2[0x20] = {
+        [b11101] = 1,
+        [b11110] = 1,
+        [b11111] = 1,
+    };
+
+    // check whether this is a Thumb or Thumb2 instruction
+    if(is_thumb2[w >> 11] == 0) {
+
+        // this is a Thumb instruction
+        if(darm_thumb_disasm(d, w) < 0) {
+            return 0;
+        }
+        else {
+            return 1;
+        }
+    }
+
+    // this is a Thumb2 instruction
+    if(darm_thumb2_disasm(d, w, w2) < 0) {
+        return 0;
+    }
+    else {
+        return 2;
+    }
 }
 
 int darm_str(const darm_t *d, darm_str_t *str)
@@ -175,7 +237,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
             if(d->I != B_SET) break;
 
             *args[arg]++ = '#';
-            args[arg] += append_imm(args[arg], d->imm);
+            args[arg] += _append_imm(args[arg], d->imm);
             arg++;
             continue;
 
@@ -203,7 +265,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
                         *shift++ = ' ';
                     }
                     *shift++ = '#';
-                    shift += utoa(imm, shift, 10);
+                    shift += _utoa(imm, shift, 10);
                 }
                 else if(d->P == B_SET) {
                     // we're still in the memory address, but there was
@@ -235,7 +297,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
             continue;
 
         case 'e':
-            args[arg] += utoa(d->E, args[arg], 10);
+            args[arg] += _utoa(d->E, args[arg], 10);
             continue;
 
         case 'x':
@@ -276,19 +338,19 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
         case 'L':
             *args[arg]++ = '#';
-            args[arg] += utoa(d->lsb, args[arg], 10);
+            args[arg] += _utoa(d->lsb, args[arg], 10);
             arg++;
             continue;
 
         case 'w':
             *args[arg]++ = '#';
-            args[arg] += utoa(d->width, args[arg], 10);
+            args[arg] += _utoa(d->width, args[arg], 10);
             arg++;
             continue;
 
         case 'o':
             *args[arg]++ = '#';
-            args[arg] += utoa(d->option, args[arg], 10);
+            args[arg] += _utoa(d->option, args[arg], 10);
             arg++;
             continue;
 
@@ -328,7 +390,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
             else if(d->imm != 0) {
                 // negative offset?
                 APPEND(args[arg], d->U == B_UNSET ? "#-" : "#");
-                args[arg] += append_imm(args[arg], d->imm);
+                args[arg] += _append_imm(args[arg], d->imm);
             }
             else {
                 // there's no immediate, so we have to remove the ", " which
@@ -366,7 +428,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
             else {
                 APPEND(args[arg], "#+");
             }
-            args[arg] += append_imm(args[arg], imm);
+            args[arg] += _append_imm(args[arg], imm);
             continue;
 
         case 'M':
@@ -384,7 +446,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
                     APPEND(args[arg], ", ");
                     APPEND(args[arg], type);
                     APPEND(args[arg], " #");
-                    args[arg] += utoa(imm, args[arg], 10);
+                    args[arg] += _utoa(imm, args[arg], 10);
                 }
             }
             else if(d->imm != 0) {
@@ -392,7 +454,7 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
                 // negative offset?
                 APPEND(args[arg], d->U == B_UNSET ? "#-" : "#");
-                args[arg] += append_imm(args[arg], d->imm);
+                args[arg] += _append_imm(args[arg], d->imm);
             }
 
             *args[arg]++ = ']';
@@ -407,40 +469,40 @@ int darm_str(const darm_t *d, darm_str_t *str)
         case 'A':
             if(d->rotate != 0) {
                 APPEND(args[arg], "ROR #");
-                args[arg] += utoa(d->rotate, args[arg], 10);
+                args[arg] += _utoa(d->rotate, args[arg], 10);
             }
             continue;
 
         case 'C':
-            args[arg] += utoa(d->coproc, args[arg], 10);
+            args[arg] += _utoa(d->coproc, args[arg], 10);
             arg++;
             continue;
 
         case 'p':
-            args[arg] += utoa(d->opc1, args[arg], 10);
+            args[arg] += _utoa(d->opc1, args[arg], 10);
             arg++;
             continue;
 
         case 'P':
-            args[arg] += utoa(d->opc2, args[arg], 10);
+            args[arg] += _utoa(d->opc2, args[arg], 10);
             arg++;
             continue;
 
         case 'N':
             APPEND(args[arg], "cr");
-            args[arg] += utoa(d->CRn, args[arg], 10);
+            args[arg] += _utoa(d->CRn, args[arg], 10);
             arg++;
             continue;
 
         case 'J':
             APPEND(args[arg], "cr");
-            args[arg] += utoa(d->CRm, args[arg], 10);
+            args[arg] += _utoa(d->CRm, args[arg], 10);
             arg++;
             continue;
 
         case 'I':
             APPEND(args[arg], "cr");
-            args[arg] += utoa(d->CRd, args[arg], 10);
+            args[arg] += _utoa(d->CRd, args[arg], 10);
             arg++;
             continue;
 
@@ -583,6 +645,8 @@ void darm_dump(const darm_t *d)
     PRINT_FLAG(R, "round the result", "do NOT round the result");
     PRINT_FLAG(W, "write-back", "do NOT write-back");
     PRINT_FLAG(I, "immediate present", "no immediate present");
+    PRINT_FLAG(J1, "branch flag set", "branch flag not set");
+    PRINT_FLAG(J2, "branch flag set", "branch flag not set");
 
     if(d->option != O_INVLD) {
         printf("option:        %d\n", d->option);
@@ -619,6 +683,9 @@ void darm_dump(const darm_t *d)
         char reglist[64];
         darm_reglist(d->reglist, reglist);
         printf("reglist:       %s\n", reglist);
+    }
+    if (d->sat_imm != 0) {
+        printf("sat_imm:           0x%08x  %d\n", d->sat_imm, d->sat_imm);
     }
 
     if(d->opc1 != 0 || d->opc2 != 0 || d->coproc != 0) {

@@ -41,18 +41,22 @@ POSSIBILITY OF SUCH DAMAGE.
 #define B_INVLD 2
 
 typedef enum _darm_reg_t {
-    r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
+    r0 = 0, r1 = 1, r2 = 2, r3 = 3, r4 = 4, r5 = 5, r6 = 6, r7 = 7, r8 = 8,
+    r9 = 9, r10 = 10, r11 = 11, r12 = 12, r13 = 13, r14 = 14, r15 = 15,
+
     FP = b1011, IP = b1100, SP = b1101, LR = b1110, PC = b1111,
 
-    cr0 = 0, cr1, cr2, cr3, cr4, cr5, cr6, cr7,
-    cr8, cr9, cr10, cr11, cr12, cr13, cr14, cr15,
+    cr0 = 0, cr1 = 1, cr2 = 2, cr3 = 3, cr4 = 4, cr5 = 5, cr6 = 6, cr7 = 7,
+    cr8 = 8, cr9 = 9, cr10 = 10, cr11 = 11, cr12 = 12, cr13 = 13, cr14 = 14,
+    cr15 = 15,
 
     R_INVLD = -1
 } darm_reg_t;
 
 typedef enum _darm_cond_t {
-    C_EQ, C_NE, C_CS, C_CC, C_MI, C_PL, C_VS,
-    C_VC, C_HI, C_LS, C_GE, C_LT, C_GT, C_LE, C_AL,
+    C_EQ = b0000, C_NE = b0001, C_CS = b0010, C_CC = b0011, C_MI = b0100,
+    C_PL = b0101, C_VS = b0110, C_VC = b0111, C_HI = b1000, C_LS = b1001,
+    C_GE = b1010, C_LT = b1011, C_GT = b1100, C_LE = b1101, C_AL = b1110,
 
     C_HS = C_CS, C_LO = C_CC,
     C_UNCOND = b1111,
@@ -61,7 +65,7 @@ typedef enum _darm_cond_t {
 } darm_cond_t;
 
 typedef enum _darm_shift_type_t {
-    S_LSL, S_LSR, S_ASR, S_ROR,
+    S_LSL = 0, S_LSR = 1, S_ASR = 2, S_ROR = 3,
 
     S_INVLD = -1,
 } darm_shift_type_t;
@@ -86,6 +90,8 @@ typedef struct _darm_t {
     // the instruction label
     darm_instr_t    instr;
     darm_enctype_t  instr_type;
+    darm_enctype_t  instr_imm_type;	// thumb32 immediate type
+    darm_enctype_t  instr_flag_type;	// thumb32 flag type
 
     // conditional flags, if any
     darm_cond_t     cond;
@@ -155,16 +161,18 @@ typedef struct _darm_t {
 
     // immediate operand
     uint32_t        imm;
+    uint32_t	    sat_imm;
 
     // register shift info
     darm_shift_type_t shift_type;
     darm_reg_t      Rs;
     uint32_t        shift;
 
-    // certain instructions operate on bits, they specify the lowest
+    // certain instructions operate on bits, they specify the lowest or highest
     // significant bit to be used, as well as the width, the amount of bits
     // that are affected
     uint32_t        lsb;
+    uint32_t	    msb;
     uint32_t        width;
 
     // bitmask of registers affected by the STM/LDM/PUSH/POP instruction
@@ -177,6 +185,14 @@ typedef struct _darm_t {
     darm_reg_t      CRd;
     darm_reg_t      CRn;
     darm_reg_t      CRm;
+    uint32_t	    D;
+
+    // Flags for branch instruction
+    uint32_t	    J1, J2;
+
+    // condition and mask for the IT instruction
+    darm_cond_t     firstcond;
+    uint8_t         mask;
 } darm_t;
 
 typedef struct _darm_str_t {
@@ -193,6 +209,11 @@ typedef struct _darm_str_t {
     char total[64];
 } darm_str_t;
 
+// reset a darm object, this function is internally called right before using
+// any of the disassemble routines, hence a user is normally not required to
+// call this function beforehand
+void darm_init(darm_t *d);
+
 // disassemble an armv7 instruction
 int darm_armv7_disasm(darm_t *d, uint32_t w);
 
@@ -201,6 +222,29 @@ int darm_thumb_disasm(darm_t *d, uint16_t w);
 
 // disassemble a thumb2 instruction
 int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2);
+
+//
+// Disassembles an instruction - determines instruction set
+// (ARMv7 or Thumb/Thumb2) based on the address and determines Thumb or
+// Thumb2 mode based on the instruction itself.
+//
+// Takes two 16 bit words as input, the first representing the lower 16 bits
+// and the second 16 bit word representing the upper 16 bits of the possibly
+// full 32 bits.
+//
+// Returns 0 on failure, 1 for Thumb, 2 for Thumb2, and 2 for ARMv7. In other
+// words, the function returns the amount of 16 bit words that were used to
+// disassemble this instruction.
+//
+// Note that, in order to instruct the disassembler to disassemble a Thumb or
+// Thumb2 instruction, the address has to have the least significant bit set.
+// That is, given a 4-byte aligned addr, addr is disassembled as 32bit ARMv7
+// instruction, addr+1 is disassembled as Thumb or Thumb2 instruction, and
+// addr+3 is also disassembled as Thumb/Thumb2. Furthermore, addr+2 is
+// disassembled as ARMv7, but do not rely on this being defined behavior in
+// the ARM CPU.
+//
+int darm_disasm(darm_t *d, uint16_t w, uint16_t w2, uint32_t addr);
 
 int darm_immshift_decode(const darm_t *d, const char **type,
     uint32_t *immediate);

@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include <string.h>
 #include "../darm.h"
+#include "../thumb2.h"
+#include "tests.h"
+
+void print_failure(char *failreason) {
+    printf("[\x01b[1;31;49mFAILED\x01b[0;39;49m] %s", failreason);
+}
+
+void print_success(char *operation) {
+    printf("[\x01b[1;32;49mSUCCESS\x01b[0;39;49m] %s", operation);
+}
+
 
 struct {
     uint32_t w;
@@ -61,7 +72,7 @@ struct {
     {0xe1140505, 0, "tst r4, r5, lsl #10", {
         .instr = I_TST, .instr_type = T_ARM_CMP_OP, .cond = C_AL, .Rn = 4,
         .Rm = 5, .shift_type = S_LSL, .shift = 10}},
-    {0xe15a017b, 0, "cmp r10, fp, ror r1", {
+    {0xe15a017b, 0, "cmp r10, r11, ror r1", {
         .instr = I_CMP, .instr_type = T_ARM_CMP_OP, .cond = C_AL, .Rn = 10,
         .Rm = 11, .shift_type = S_ROR, .Rs = 1}},
     {0xe35704f0, 0, "cmp r7, #0xf0000000", {
@@ -71,7 +82,7 @@ struct {
         .cond = C_AL}},
     {0xe320f003, 0, "wfi", {.instr = I_WFI, .instr_type = T_ARM_OPLESS,
         .cond = C_AL}},
-    {0xe1a0c064, 0, "rrx ip, r4", {
+    {0xe1a0c064, 0, "rrx r12, r4", {
         .instr = I_RRX, .instr_type = T_ARM_DST_SRC, .cond = C_AL, .S = 0,
         .Rd = 12, .shift = 0, .Rm = 4, .shift_type = S_ROR}},
     {0xe3a013e8, 0, "mov r1, #0xa0000003", {
@@ -126,9 +137,12 @@ struct {
         .instr = I_LDRD, .instr_type = T_ARM_STACK2, .cond = C_AL, .U = 1,
         .P = 0, .W = 0, .R = 0, .Rn = 4, .Rt = 2, .imm = 0xff, .I = B_SET}},
     // TODO is correct?
-    {0xe7c8411f, 0, "bfc r4, #2, #6", {
+    {0xe7c8411f, 0, "bfc r4, #2, #7", {
         .instr = I_BFC, .instr_type = T_ARM_BITS, .cond = C_AL, .Rd = 4,
-        .lsb = 2, .width = 6}},
+        .lsb = 2, .width = 7}},
+    {0xe7de3312, 0, "bfi r3, r2, #6, #25", {
+        .instr = I_BFI, .instr_type = T_ARM_BITS, .cond = C_AL,
+        .Rd = r3, .Rn = r2, .lsb = 6, .width = 25}},
     {0xe7e42153, 0, "ubfx r2, r3, #2, #5", {
         .instr = I_UBFX, .instr_type = T_ARM_BITS, .cond = C_AL, .Rd = 2,
         .Rn = 3, .lsb = 2, .width = 5}},
@@ -205,7 +219,7 @@ struct {
         .instr = I_STR, .instr_type = T_ARM_STACK0, .cond = C_AL, .S = 0,
         .P = B_SET, .U = B_SET, .W = B_SET, .Rn = 4, .Rt = 3, .I = B_SET,
         .imm = 3}},
-    {0xe28fc601, 0, "adr ip, #+0x100000", {
+    {0xe28fc601, 0, "adr r12, #+0x100000", {
         .instr = I_ADR, .instr_type = T_ARM_ARITH_IMM, .cond = C_AL,
         .S = B_UNSET, .U = B_SET, .I = B_SET, .imm = 0x100000, .Rd = 12}},
     {0xf5d3f000, 0, "pld [r3]", {
@@ -214,6 +228,9 @@ struct {
     {0xee1d1f72, 0, "mrc 15, 0, r1, cr13, cr2, 3", {
         .instr = I_MRC, .instr_type = T_ARM_MVCR, .cond = C_AL, .coproc = 15,
         .opc1 = 0, .Rt = r1, .CRn = cr13, .CRm = cr2, .opc2 = 3}},
+    {0xe7f002fa, 0, "udf #42", {
+        .instr = I_UDF, .instr_type = T_ARM_UDF, .cond = C_AL,
+        .I = B_SET, .imm = 42}},
 
     // we switch to thumb (oboy)
     {0, 0, NULL, {.instr = I_INVLD}},
@@ -257,7 +274,7 @@ struct {
         .instr = I_BLX, .instr_type = T_THUMB_BRANCH_REG, .cond = C_AL,
         .Rm = r7}},
     {0xbf10, 0, "yield", {
-        .instr = I_YIELD, .instr_type = T_THUMB_NO_OPERANDS, .cond = C_AL}},
+        .instr = I_YIELD, .instr_type = T_THUMB_IT_HINTS, .cond = C_AL}},
     {0x372a, 0, "add r7, r7, #42", {
         .instr = I_ADD, .instr_type = T_THUMB_HAS_IMM8, .cond = C_AL,
         .Rd = r7, .Rn = r7, .I = B_SET, .imm = 42}},
@@ -276,15 +293,15 @@ struct {
     {0x1ef4, 0, "sub r4, r6, #3", {
         .instr = I_SUB, .instr_type = T_THUMB_2REG_IMM, .cond = C_AL,
         .Rd = r4, .Rn = r6, .I = B_SET, .imm = 3}},
-    {0xad18, 0, "add r5, sp, #24", {
+    {0xad18, 0, "add r5, sp, #96", {
         .instr = I_ADD, .instr_type = T_THUMB_ADD_SP_IMM, .cond = C_AL,
-        .Rd = r5, .Rn = SP, .I = B_SET, .imm = 24}},
-    {0x4676, 0, "mov r6, r14", {
+        .Rd = r5, .Rn = SP, .I = B_SET, .imm = 96}},
+    {0x4676, 0, "mov r6, lr", {
         .instr = I_MOV, .instr_type = T_THUMB_MOV4, .cond = C_AL,
-        .Rd = r6, .Rn = r14}},
-    {0x88f3, 0, "ldrh r3, [r6, #3]", {
+        .Rd = r6, .Rm = LR}},
+    {0x88f3, 0, "ldrh r3, [r6, #6]", {
         .instr = I_LDRH, .instr_type= T_THUMB_RW_MEMI, .cond = C_AL,
-        .Rt = r3, .Rn = r6, .I = B_SET, .imm = 3, .U = B_SET,
+        .Rt = r3, .Rn = r6, .I = B_SET, .imm = 6, .U = B_SET,
         .P = B_SET, .W = B_UNSET}},
     {0x5073, 0, "str r3, [r6, r1]", {
         .instr = I_STR, .instr_type = T_THUMB_RW_MEMO, .cond = C_AL,
@@ -307,6 +324,21 @@ struct {
     {0x4545, 0, "cmp r5, r8", {
         .instr = I_CMP, .instr_type = T_THUMB_CMP, .cond = C_AL,
         .Rn = r5, .Rm = r8}},
+    {0xde2a, 0, "udf #42", {
+        .instr = I_UDF, .instr_type = T_THUMB_ONLY_IMM8, .cond = C_AL,
+        .I = B_SET, .imm = 42}},
+    {0x449b, 0, "add sp, sp, r3", {
+        .instr = I_ADD, .instr_type = T_THUMB_MOD_SP_REG, .cond = C_AL,
+        .Rd = SP, .Rn = SP, .Rm = r3}},
+    {0xb132, 0, "cbz r2, #+12", {
+        .instr = I_CBZ, .instr_type = T_THUMB_CBZ, .cond = C_AL,
+        .Rn = r2, .I = B_SET, .U = B_SET, .Rm = PC, .imm = 12}},
+    {0xbbbb, 0, "cbnz r3, #+110", {
+        .instr = I_CBNZ, .instr_type = T_THUMB_CBZ, .cond = C_AL,
+        .Rn = r3, .I = B_SET, .U = B_SET, .Rm = PC, .imm = 110}},
+    {0xbf34, 0, "", {
+        .instr = I_IT, .instr_type = T_THUMB_IT_HINTS, .cond = C_AL,
+        .firstcond = C_CC, .mask = 4}},
 
     // we now switch to thumb2
     {0, 0, NULL, {.instr = I_INVLD}},
@@ -321,6 +353,8 @@ static int _darm_thumb2_disasm(darm_t *d, uint32_t w)
 {
     return darm_thumb2_disasm(d, w >> 16, w & 0xffff);
 }
+
+
 
 int main()
 {
@@ -355,6 +389,7 @@ int main()
         if(p->CRn == 0) p->CRn = R_INVLD;
         if(p->CRm == 0) p->CRm = R_INVLD;
         if(p->CRd == 0) p->CRd = R_INVLD;
+        if(p->firstcond == 0) p->firstcond = C_INVLD;
 
         if(p->shift_type == S_LSL && p->Rs == R_INVLD && p->shift == 0) {
             p->shift_type = S_INVLD;
@@ -376,34 +411,41 @@ int main()
         // so we don't have to hardcode all of these
         tests[i].d.w = d.w;
 
-#define C(x) p->x != d.x
-
-    // if d.x, the output from the disasm, is invalid or unset, then the set
-    // value must be unset, otherwise, it must be set (this is because we
-    // can't specify B_INVLD in the unittests without making everything
-    // unreadable)
-#define F(x) \
-    ((d.x == B_INVLD || d.x == B_UNSET) ? p->x != B_UNSET : p->x != B_SET)
-
-        // enter ugly code
-        if(ret != tests[i].r || C(w) || C(instr) || C(instr_type) ||
+        // test all flags and conditions
+        int flags;
+        if((flags = ret != tests[i].r || C(w) || C(instr) || C(instr_type) ||
                 C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
                 C(Rt) || C(RdHi) || C(RdLo) || F(I) || C(imm) ||
                 C(shift_type) || C(Rs) || C(shift) || C(lsb) ||
                 C(width) || C(reglist) || F(T) || F(M) || F(N) ||
                 C(Rt2) || F(B) || C(coproc) || C(opc1) || C(opc2) ||
-                C(CRn) || C(CRm) || C(CRd) || strcmp(str.total, tests[i].s)) {
-            // leave ugly code
-            printf("incorrect encoding for 0x%08x, ret %d\n", d.w, ret);
+                C(CRn) || C(CRm) || C(CRd) || C(firstcond) || C(mask)) ||
+                strcmp(str.total, tests[i].s)) {
+
+            // problem with instruction test
+            printf("incorrect %s for 0x%08x, ret %d\n",
+                flags ? "flags" : "string representation", d.w, ret);
             printf("  %s = %s (%d)\n", str.total, tests[i].s,
                 strcmp(str.total, tests[i].s));
             darm_dump(&d);
+            darm_dump(&tests[i].d);
             failure = 1;
         }
     }
+
+    // Run tests on thumb2 instructions
+    failure += test_thumb2_instructions();
+
+
+
+    // Run some tests on utility functions
+    failure += test_thumb2_functions();
+
     if(failure == 0) {
         printf("[x] unittests were successful\n");
+    } else {
+	print_failure("Failed unittests\n");
     }
     return failure;
 }

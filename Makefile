@@ -6,14 +6,19 @@ ifneq ($(OS),Windows_NT)
 	PIC_FLAGS = -fPIC
 endif
 
-SRC = $(wildcard *.c)
+SRC = $(wildcard *.c tests/tests_thumb2.c)
 OBJ = $(SRC:.c=.o)
 
-GENCODESRC = darm-tbl.c armv7-tbl.c thumb-tbl.c
+GENCODESRC = darm-tbl.c darm-tbl.h armv7-tbl.c armv7-tbl.h \
+	thumb-tbl.c thumb-tbl.h
 GENCODEOBJ = darm-tbl.o armv7-tbl.o thumb-tbl.o
 
-STUFF = $(GENCODESRC) $(GENCODEOBJ) $(OBJ) \
-	tests/tests.exe libdarm.a libdarm.so
+# generated stuff
+GENR = $(GENCODESRC) $(GENCODEOBJ) $(OBJ)
+LIBS  = libdarm.a libdarm.so
+TOOLS = tests/tests.exe utils/elfdarm.exe
+
+STUFF = $(GENR) $(LIBS) $(TOOLS)
 
 default: $(STUFF)
 
@@ -23,8 +28,8 @@ $(GENCODESRC): darmgen.py darmtbl.py darmtbl2.py
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $^ $(PIC_FLAGS)
 
-%.exe: %.c $(OBJ) $(GENCODEOBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+%.exe: %.c
+	$(CC) $(CFLAGS) -o $@ $^ libdarm.a -I. -Itests
 
 %.so: $(OBJ) $(GENCODEOBJ)
 	$(CC) -shared $(CFLAGS) -o $@ $^

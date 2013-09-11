@@ -88,6 +88,9 @@ D             = Bitsize('D', 1, 'User-defined bit')
 tb            = Bitsize('tb', 1, 'Is PKH in TB form or not?')
 imm4H         = Bitsize('imm4H', 4, 'High Word Register')
 imm4L         = Bitsize('imm4L', 4, 'Low Word Register')
+op            = Bitsize('op', 1, 'Operation for CB{N}Z')
+firstcond     = Bitsize('firstcond', 4, 'First Condition for IT')
+mask          = Bitsize('mask', 4, 'Mask for IT')
 
 i             = Bitsize('imm1', 1, 'Immediate')
 J1            = Bitsize('J1', 1, 'Immediate')
@@ -152,8 +155,8 @@ thumbs = [
     ('BLX<c> <Rm>', 0, 1, 0, 0, 0, 1, 1, 1, 1, Rm, (0), (0), (0)),
     ('BX<c> <Rm>', 0, 1, 0, 0, 0, 1, 1, 1, 0, Rm, (0), (0), (0)),
     ('BXJ<c> <Rm>', 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, Rm, 1, 0, (0), 0, (1), (1), (1), (1), (0), (0), (0), (0), (0), (0), (0), (0)),
-    #('CB{N}Z <Rn>, <label>', 1, 0, 1, 1, op, 0, i, 1, imm5, Rn),
-    #('CB{N}Z <Rn>, <label>', 1, 0, 1, 1, op, 0, i, 1, imm5, Rn),
+    # CBZ or CBNZ
+    ('CBZ <Rn>, <label>', 1, 0, 1, 1, op, 0, i, 1, imm5, Rn3),
     ('CLREX<c>', 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 0, 1, 0, (1), (1), (1), (1)),
     ('CLZ<c> <Rd>, <Rm>', 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, Rm, 1, 1, 1, 1, Rd, 1, 0, 0, 0, Rm),
     ('CMN<c> <Rn>, #<const>', 1, 1, 1, 1, 0, i, 0, 1, 0, 0, 0, 1, Rn, 0, imm3, 1, 1, 1, 1, imm8),
@@ -171,8 +174,7 @@ thumbs = [
     ('EOR{S}<c> <Rdn3>, <Rm3>', 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, Rm3, Rdn3),
     ('EOR{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, S, Rn, (0), imm3, Rd, imm2, type_, Rm),
     ('ISB<c> <option>', 1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 1, 0, option),
-    #('IT{<x>{<y>{<z>}}} <firstcond>', 1, 0, 1, 1, 1, 1, 1, 1, firstcond, mask),
-    #('IT{<x>{<y>{<z>}}} <firstcond>', 1, 0, 1, 1, 1, 1, 1, 1, firstcond, mask),
+    ('IT{<x>{<y>{<z>}}} <firstcond>', 1, 0, 1, 1, 1, 1, 1, 1, firstcond, mask),
     ('LDM<c> <Rn>{!}, <registers>', 1, 1, 0, 0, 1, Rn3, register_list8),
     ('LDM<c>.W <Rn>{!}, <registers>', 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, W, 1, Rn, register_list),
     ('LDM<c>.W <Rn>{!}, <registers>', 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, W, 1, Rn, register_list),
@@ -416,7 +418,7 @@ thumbs = [
     ('USUB16<c> <Rd>, <Rn>, <Rm>', 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, Rn, 1, 1, 1, 1, Rd, 0, 1, 0, 0, Rm),
     ('USUB8<c> <Rd>, <Rn>, <Rm>', 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 1, 0, 0, Rm),
     ('UXTAB<c> <Rd>, <Rn>, <Rm>{, <rotation>}', 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, Rn, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm),
-    ('UXTAB16<c> <Rd>, <Rn>, <Rm>{, <rotation>}', 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, Rd, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm),
+    ('UXTAB16<c> <Rd>, <Rn>, <Rm>{, <rotation>}', 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, Rn, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm),
     ('UXTAH<c> <Rd>, <Rn>, <Rm>{, <rotation>}', 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, Rn, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm),
     ('UXTB<c> <Rd3>, <Rm3>', 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, Rm3, Rd3),
     ('UXTB<c>.W <Rd>, <Rm>{, <rotation>}', 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm),

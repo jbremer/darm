@@ -28,6 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from ctypes import cdll, Structure, byref, POINTER, create_string_buffer
 from ctypes import c_uint8, c_uint16, c_int32, c_uint32, c_char_p, c_char
+import os.path
 
 
 class _Base:
@@ -90,7 +91,7 @@ class Shift:
         self.shift = shift
 
     def type_name(self):
-        return _lib.darm_shift_type_name(self.type_)
+        return 'S_' + _lib.darm_shift_type_name(self.type_)
 
     def __str__(self):
         type_name = self.type_name()
@@ -122,6 +123,8 @@ class RegisterList:
     def __nonzero__(self):
         return self.reglist != 0
 
+    __bool__ = __nonzero__
+
 
 def flag(v):
     """Boolean flag.
@@ -151,7 +154,7 @@ class _Darm(Structure):
         ('T', c_uint32),
         ('W', c_uint32),
         ('I', c_uint32),
-        ('rotate', c_uint32),
+        ('rotate', c_int32),
         ('Rd', c_int32),
         ('Rn', c_int32),
         ('Rm', c_int32),
@@ -173,6 +176,8 @@ class _Darm(Structure):
         ('CRd', c_int32),
         ('CRn', c_int32),
         ('CRm', c_int32),
+        ('firstcond', c_int32),
+        ('mask', c_uint8),
     ]
 
 
@@ -230,7 +235,7 @@ class Darm:
         args += ['%s=%s' % (r, g(r)) for r in self._flags if not g(r) is None]
 
         # other flags
-        if self.rotate:
+        if self.rotate != -1:
             args.append('rotate=%d' % self.rotate)
 
         if self.option != -1:
@@ -273,13 +278,22 @@ def disasm_thumb(w):
     return Darm(d) if ret == 0 else None
 
 
+def disasm_thumb2(w):
+    d = _Darm()
+    ret = _lib.darm_thumb2_disasm(byref(d), w & 0xffff, (w >> 16) & 0xffff)
+    return Darm(d) if ret == 0 else None
+
+
 def _set_func(name, restype, *argtypes):
     getattr(_lib, name).restype = restype
     getattr(_lib, name).argtypes = argtypes
 
-_lib = cdll.LoadLibrary('libdarm.so')
+
+_darm_dir = os.path.dirname(os.path.abspath(__file__))
+_lib = cdll.LoadLibrary(os.path.join(_darm_dir, 'libdarm.so'))
 _set_func('darm_armv7_disasm', c_int32, POINTER(_Darm), c_uint32)
 _set_func('darm_thumb_disasm', c_int32, POINTER(_Darm), c_uint16)
+_set_func('darm_thumb2_disasm', c_int32, POINTER(_Darm), c_uint16, c_uint16)
 _set_func('darm_mnemonic_name', c_char_p, c_uint32)
 _set_func('darm_enctype_name', c_char_p, c_uint32)
 _set_func('darm_register_name', c_char_p, c_int32)
