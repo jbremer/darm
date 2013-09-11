@@ -570,37 +570,66 @@ darm_instr_t thumb2_store_single_item(darm_t *d, uint16_t w, uint16_t w2) {
     op1 = (w >> 5) & b111;
     op2 = (w2 >> 6) & 0x3F;
 
+    // set types
+    d->instr_type = T_THUMB2_RN_RT_REG;
+    d->instr_imm_type = T_THUMB2_IMM8;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
+
     switch(op1) {
         case 0:
-	    if (op2 == 0)
+	    if (op2 == 0) {
+		d->instr_type = T_THUMB2_RN_RM_RT_REG;
+		d->instr_imm_type = T_THUMB2_IMM2;
 		return I_STRB;	// register
-	    else if ((op2 & 0x3C) == 0x38)
+	    } else if ((op2 & 0x3C) == 0x38)
 		return I_STRBT;
-	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24)
-		return I_STRB;  // immediate
+	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24) {
+		d->instr_flag_type = T_THUMB2_WUP_FLAG;
+		return I_STRB;  // immediate 8 bit
+	    }
 	    break;
 	case 1:
-	    if (op2 == 0)
+	    if (op2 == 0) {
+		d->instr_type = T_THUMB2_RN_RM_RT_REG;
+		d->instr_imm_type = T_THUMB2_IMM2;
 		return I_STRH;	// register
-	    else if ((op2 & 0x3C) == 0x38)
+	    } else if ((op2 & 0x3C) == 0x38)
 		return I_STRHT;
-	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24)
-		return I_STRH;  // immediate	
+	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24) {
+		d->instr_flag_type = T_THUMB2_WUP_FLAG;
+		return I_STRH;  // immediate 8 bit
+	    }
 	    break;
 	case 2:
-	    if (op2 == 0)
+	    if (op2 == 0) {
+		d->instr_type = T_THUMB2_RN_RM_RT_REG;
+		d->instr_imm_type = T_THUMB2_IMM2;
 		return I_STR;	// register
-	    else if ((op2 & 0x3C) == 0x38)
+	    } else if ((op2 & 0x3C) == 0x38)
 		return I_STRT;
-	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24)
-		return I_STR;  // immediate
+	    else if ((op2 & 0x3C) == 0x30 || (op2 & 0x24) == 0x24) {
+
+		// PUSH pseudo single register if Rn == SP and P,W set and imm == 4
+		if ((w&0xf) == b1101 && (w2&0xFFF) == 0xD04) {
+		    d->instr_type = T_THUMB2_RT_REG;
+		    d->instr_imm_type = T_THUMB2_NO_IMM;
+	            d->instr_flag_type = T_THUMB2_NO_FLAG;
+		    return I_PUSH;
+	        }
+
+		d->instr_flag_type = T_THUMB2_WUP_FLAG;
+		return I_STR;  // immediate 8 bit
+	    }
 	    break;
 	case 4:
-	    return I_STRB;  // immediate
+            d->instr_imm_type = T_THUMB2_IMM12;
+	    return I_STRB;  // immediate 12 bit
 	case 5:
-	    return I_STRH;  // immediate
+            d->instr_imm_type = T_THUMB2_IMM12;
+	    return I_STRH;  // immediate 12 bit
 	case 6:
-	    return I_STR;  // immediate
+            d->instr_imm_type = T_THUMB2_IMM12;
+	    return I_STR;  // immediate 12 bit
     }
 
     return I_INVLD;
