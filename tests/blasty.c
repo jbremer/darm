@@ -14,6 +14,8 @@ int main(int argc, char *argv[]) {
 	char linebuf[128];
 	darm_str_t ds;
 
+	(void)linebuf; // unused
+
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s <file.bin>\n", argv[0]);
 		return -1;

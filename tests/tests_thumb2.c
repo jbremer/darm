@@ -1138,7 +1138,8 @@ int test_thumb2_instructions() {
         // so we don't have to hardcode all of these
         d.w = thumb2_tests[i].d.w;
 
-        int flags; ret = 0;
+        ret = 0;
+
         if(C(w) || C(instr) || C(instr_type) ||
                 C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
                 F(P) || F(R) || F(W) || C(Rd) || C(Rn) || C(Rm) || C(Ra) ||
@@ -1165,7 +1166,7 @@ int test_thumb2_instructions() {
 	}
     }
 
-
+    return 0;
 }
 
 

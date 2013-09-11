@@ -44,5 +44,6 @@ void print_success(char *operation);
 
 // Thumb2 
 int test_thumb2_functions();
+int test_thumb2_instructions();
 
 #endif

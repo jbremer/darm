@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
    int len;
 
    if (argc == 2) {
-     sscanf(argv[1], "%i", &expand);
+     sscanf(argv[1], "%i", (int *)&expand);
 
      printf("%i\n", thumb_expand_imm(expand));
   }
