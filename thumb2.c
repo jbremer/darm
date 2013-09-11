@@ -379,10 +379,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    }
 	    break;
 
-	case I_MUL:
-	    d->Ra = R_INVLD;
-	    break;
-
 	case I_MOVW: case I_MOVT:
 	    d->imm = (uint32_t) ((w & b1111) << 12) | ((w & 0x400) << 1) | ((w2 & 0x7000) >> 4) | (w2 & 0xFF);
 	    break;
@@ -392,7 +388,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->U = B_UNSET;
 	    d->W = B_UNSET;
 	    break;
-
 
 	case I_CLREX:
             d->S = B_INVLD;
@@ -406,8 +401,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 
 	// option field
-	case I_DBG: case I_DMB: case I_DSB:
-	case I_ISB:
+	case I_DBG: case I_DMB: case I_DSB: case I_ISB:
 	    d->S = B_INVLD;
 	    d->I = B_INVLD;
 	    d->option = w2 & b1111; // directly index enum
@@ -418,14 +412,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	//case I_CPD: case I_CPD2:
 	//break;
 
-	// EOR exception
-	case I_EOR:
-	    if (d->Rd == PC && d->S == B_SET) {
-		d->instr = I_TEQ;
-		d->Rd = R_INVLD;
-		d->S = B_UNSET;
-	    }
-	    break;
 	// co-proc load/store memory
 	case I_LDC: case I_LDC2:
 	case I_STC: case I_STC2:
@@ -603,10 +589,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	case I_SSAT16: case I_USAT16:
 	    d->sat_imm = w2 & 0xF;
-	    break;
-
-	case I_SXTB: case I_SXTB16: case I_SXTH: case I_UXTH:
-	    d->Rn = R_INVLD;
 	    break;
 
 	// WM flags
