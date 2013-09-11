@@ -1172,11 +1172,11 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2) {
 		    return I_UXTAB;
 	}
     } else if ((op1&b1000) == 8 && (op2&b1100) == 0) {
-	thumb2_parallel_signed(d, w, w2);
+	return thumb2_parallel_signed(d, w, w2);
     } else if ((op1&b1000) == 8 && (op2&b1100) == 4) {
-	thumb2_parallel_unsigned(d, w, w2);
+	return thumb2_parallel_unsigned(d, w, w2);
     } else if ((op1&b1100) == 8 && (op2&b1100) == 8) {
-	thumb2_misc_op(d, w, w2);
+	return thumb2_misc_op(d, w, w2);
     }
 
     return I_INVLD;
