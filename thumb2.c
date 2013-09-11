@@ -525,6 +525,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->coproc = (w2 >> 8) & b1111;
 	    d->CRd = (w2 >> 12) & b1111; // enum index
 	    break;
+
 	case I_LDRB: case I_LDRSB: case I_LDRSH:
 	    if (d->Rn == b1111) {
 		d->imm = w2 & 0xfff;
@@ -536,13 +537,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->shift_type = S_INVLD;
 		d->shift = 0;
 	    }
-	    break;
-
-        // STR -> PUSH single register pseudo instruction
-        case I_STR:
-	    if ((w&0xF) == b1101 && (w2&0xFFF) == 0xD04) {
-		d->instr = I_PUSH;
-            }
 	    break;
 
 	case I_STRBT:
@@ -557,8 +551,7 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 
 	// zero-extend corner case with '00' appended
-	case I_LDRD: case I_LDREX:
-        case I_STRD:
+	case I_LDRD: case I_LDREX: case I_STRD:
 	    d->imm = (uint32_t) ((w2 & 0xFF) << 2);
 	    d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
 	    d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
@@ -580,11 +573,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
 	    break;
 
-
-	// M-flag bit 14:
-	case I_LDM: case I_LDMDB:
-	    //d->M = (w2 >> 14) & 1 ? B_SET : B_UNSET;
-	    break;
 
 	// co-processor move
 	case I_MCR: case I_MCR2:
@@ -609,14 +597,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	// MOV with imm4
 	case I_MOV:
-	    // TODO: explain
-	    /*
-	    if ((w & 0xFC8F) == 0x24) {
-		d->I = B_SET;
-		d->imm = (uint32_t) ((w << 12) & 0xF00) | ((w << 2) & 0x800) | ((w2 >> 4) & 0xF00) | (w2 & 0xFF);
-	    }
-	    */
-
 	    if (d->Rn == b1111) {
 		d->shift = 0;
 		d->shift_type = S_INVLD;
@@ -672,12 +652,11 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    break;
 
 	// N, M flags
-	// TODO: fix smlaw and smulw
 	case I_SMLABB: case I_SMLABT: case I_SMLATB: case I_SMLATT:
 	case I_SMULBB: case I_SMULBT: case I_SMULTB: case I_SMULTT:
 	    d->N = (w2 >> 5) & 1 ? B_SET : B_UNSET;
-	case I_SMLAD:
-	case I_SMLAW: case I_SMLSD: case I_SMUAD:
+	case I_SMLAD: case I_SMLAW:
+	case I_SMLSD: case I_SMUAD:
 	case I_SMULW: case I_SMUSD:
 	    d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
 	    if (d->Ra == b1111)
@@ -737,11 +716,6 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
 
     int index;
-    //index = thumb2_lookup_instr(w, w2);
-    //d->instr = thumb2_instr_labels[index];
-    //d->instr_type = thumb2_instr_types[index];
-    //d->instr_imm_type = thumb2_imm_instr_types[index];
-    //d->instr_flag_type = thumb2_flags_instr_types[index];
 
     //printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
     d->instr = thumb2_decode_instruction(d, w, w2);
