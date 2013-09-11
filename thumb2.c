@@ -449,15 +449,13 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		d->instr = I_BFC;
 	    break;
 
-	case I_LSL: case I_ROR:
+	case I_LSL: case I_LSR: case I_ASR: case I_ROR:
 	    if (d->Rn == b1111)
 	        d->Rn = R_INVLD;
-	    break;
 
-	case I_LSR:
 	    if (d->I == B_SET) {
 	        d->shift = d->imm;
-	        d->shift_type = S_LSR;
+	        d->shift_type = ((w2 >> 4) & b11);
 	    }
 	    break;
 
@@ -524,13 +522,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 	    d->W = B_UNSET;
 	    break;
 
-	case I_ASR:
-	    // TODO: fetch shift type from opcode so this can be more generic
-	    if (d->I == B_SET) {
-		d->shift = d->imm;
-		d->shift_type = S_ASR;
-	    }
-	    break;
 
 	case I_CLREX:
             d->S = B_INVLD;

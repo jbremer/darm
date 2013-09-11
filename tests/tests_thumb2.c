@@ -354,7 +354,7 @@ struct {
     {0xEA4F7102, 0, "lslal.w r1, r2, #0x1c", {
         .instr = I_LSL, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r2, .imm = 0x1c, .shift = 0x1c, .shift_type = S_LSL, .cond = C_AL}},
     {0xEA5F0102, 0, "movsal.w r1, r2", {
-        .instr = I_MOV, .I = B_SET, .S = B_SET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+        .instr = I_MOV, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rm = r2, .cond = C_AL}},
     {0xFA12F103, 0, "lslsal.w r1, r2, r3", {
         .instr = I_LSL, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rn = r2, .Rm = r3, .cond = C_AL}},
 
@@ -392,9 +392,9 @@ struct {
 
     // register
     {0xEA4F0102, 0, "moval.w r1, r2", {
-        .instr = I_MOV, .I = B_SET, .S = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+        .instr = I_MOV, .I = B_UNSET, .S = B_UNSET, .Rd = r1, .Rm = r2, .cond = C_AL}},
     {0xEA5F0102, 0, "movsal.w r1, r2", {
-        .instr = I_MOV, .I = B_SET, .S = B_SET, .Rd = r1, .Rm = r2, .cond = C_AL}},
+        .instr = I_MOV, .I = B_UNSET, .S = B_SET, .Rd = r1, .Rm = r2, .cond = C_AL}},
 
     // MOVT
     {0xF6CF7100, 0, "movtal r1, #0xff00", {
