@@ -292,82 +292,6 @@ void thumb2_parse_flag(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 }
 
-
-// Handle weird branch cases
-/*
-int parse_branch_misc_cases(darm_t *d, uint16_t w, uint16_t w2) {
-
-
-    // Check if op field is BXJ b0111000
-    
-    if (((w >> 4) & 0x7F) == 0x3C) {
-	printf("BXJ!!!!\n");
-        d->instr = I_BXJ;
-	d->Rm = w & b1111;
-	d->S = B_INVLD;
-	d->I = B_INVLD;
-	return 1;
-    }
-
-    // Check if instruction matches changeprocstate/hints mask
-    if ((w & 0xFFF0) == 0xF3A0 && (w2 & 0xD000) == 0x8000) {
-	// DBG
-	if ((w2 & 0x7F0) == 0xF0) {
-	    d->instr = I_DBG;
-	    d->S = B_INVLD;
-	    d->I = B_INVLD;
-	    d->option = w2 & b1111;
-	    return 1;
-	}
-
-    }
-    // Check if instruction matches misccontrol mask
-    if ((w & 0xFFF0) == 0xF3B0 && (w2 & 0xD000) == 0x8000) {
-	switch ((w2>>4)&b1111) {
-	    case 0:
-		// ENTERX, LEAVEX
-		break;
-	    case 1:
-		// ENTERX, LEAVEX
-		break;
-	    case 2:
-		d->instr = I_CLREX;
-		d->S = B_INVLD;
-		d->I = B_INVLD;
-		break;
-	    case 4:
-		// DSB
-		d->instr = I_DSB;
-		d->S = B_INVLD;
-		d->I = B_INVLD;
-		d->option = w2 & b1111;
-		break;
-	    case 5:
-		// DMB
-		d->instr = I_DMB;
-		d->S = B_INVLD;
-		d->I = B_INVLD;
-		d->option = w2 & b1111;
-		break;
-	    case 6:
-		// ISB
-		d->instr = I_ISB;
-		d->S = B_INVLD;
-		d->I = B_INVLD;
-		d->option = w2 & b1111;
-		break;
-	    default:
-		break;
-        }
-	return 1;
-    }
-
-
-    // TODO: handle more stuff like MSR, MRS
-    return 0;
-}
-*/
-
 // Parse misc instruction cases
 void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
@@ -383,12 +307,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 
 	// Branch
         case I_B:
-	    // Handle exceptions
-	    /*
-	    if (((w & 0x380) == 0x380) && parse_branch_misc_cases(d,w,w2) > 0) {
-		break;
-	    } else {
-	    */
 	        d->I = B_SET;
                 d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
                 d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
@@ -403,7 +321,6 @@ void thumb2_parse_misc(int index, darm_t *d, uint16_t w, uint16_t w2) {
 		    // I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10:imm11:0, 32)
 		    d->imm = SIGN_EXTEND32( (((w & 0x400) << 14) | (((~(w2 >> 13) ^ (w >> 10)) & 1) << 23) | ((~((w2 >> 11) ^ (w >> 10)) & 1) << 22) | ((w & 0x3FF) << 12) | ((w2 & 0x7FF) << 1)), 25);
 	        }
-	    //}
 	    break;
 
 	// Branch with Link
