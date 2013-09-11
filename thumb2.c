@@ -783,11 +783,11 @@ static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
 
     int index;
-    index = thumb2_lookup_instr(w, w2);
-    d->instr = thumb2_instr_labels[index];
-    d->instr_type = thumb2_instr_types[index];
-    d->instr_imm_type = thumb2_imm_instr_types[index];
-    d->instr_flag_type = thumb2_flags_instr_types[index];
+    //index = thumb2_lookup_instr(w, w2);
+    //d->instr = thumb2_instr_labels[index];
+    //d->instr_type = thumb2_instr_types[index];
+    //d->instr_imm_type = thumb2_imm_instr_types[index];
+    //d->instr_flag_type = thumb2_flags_instr_types[index];
 
     //printf("%i %i\n", T_THUMB2_RN_REG, d->instr_type);
     d->instr = thumb2_decode_instruction(d, w, w2);

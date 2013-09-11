@@ -1171,6 +1171,10 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
     if (((w2 >> 6) & b11) != 0)
 	return I_INVLD;
 
+    d->instr_type = T_THUMB2_RN_RD_RM_RA_REG;
+    d->instr_imm_type = T_THUMB2_NO_IMM;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
+
     if (op1 == 1) {
 	if (Ra == b1111)
 	    return thumb2_nm_decoder(d, w, w2, I_SMULBB, I_SMULBT, I_SMULTB, I_SMULTT);
@@ -1183,41 +1187,47 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2) {
 
     switch(op1) {
 	case 0:
-	    if (op2 == 0 && Ra == b1111)
+	    if (op2 == 0 && Ra == b1111) {
+		d->instr_type = T_THUMB2_RN_RD_RM_REG;
 		return I_MUL;
-	    else if (op2 == 0 && Ra != b1111)
+	    } else if (op2 == 0 && Ra != b1111)
 		return I_MLA;
 	    else if (op2 == 1)
 		return I_MLS;
 	    break;
 	case 2:
-	    if (Ra == b1111)
+	    if (Ra == b1111) {
+		d->instr_type = T_THUMB2_RN_RD_RM_REG;
 		return I_SMUAD;
-	    else
+	    } else
 		return I_SMLAD;
 	case 3:
 	    // B or T variant indicated by M bit but not encoded in instruction name
-	    if (Ra == b1111)
+	    if (Ra == b1111) {
+		d->instr_type = T_THUMB2_RN_RD_RM_REG;
 		return I_SMULW;
-	    else
+	    } else
 		return I_SMLAW;
 	    return I_INVLD;
 	case 4:
-	    if (Ra == b1111)
+	    if (Ra == b1111) {
+		d->instr_type = T_THUMB2_RN_RD_RM_REG;
 		return I_SMUSD;
-	    else
+	    } else
 		return I_SMLSD;
 	case 5:
-	    if (Ra == b1111)
+	    if (Ra == b1111) {
+		d->instr_type = T_THUMB2_RN_RD_RM_REG;
 		return I_SMMUL;
-	    else
+	    } else
 		return I_SMMLA;
 	case 6:
 	    return I_SMMLS;
 	case 7:
-	    if (op2 == 0 && Ra == b1111)
+	    if (op2 == 0 && Ra == b1111) {
+		d->instr_type = T_THUMB2_RN_RD_RM_REG;
 		return I_USAD8;
-	    else if (op2 == 0)
+	    } else if (op2 == 0)
 		return I_USADA8;
     }
     return I_INVLD;
@@ -1229,22 +1239,31 @@ darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2) {
     op1 = (w >> 4) & b111;
     op2 = (w2 >> 4) & b1111;
 
+    // Set types
+    d->instr_type = T_THUMB2_RN_RM_REG;
+    d->instr_imm_type = T_THUMB2_NO_IMM;
+    d->instr_flag_type = T_THUMB2_NO_FLAG;
+
     switch (op1) {
 	case 0:
 	    if (op2 == 0)
 		return I_SMULL;
 	    break;
 	case 1:
-	    if (op2 == b1111)
+	    if (op2 == b1111) {
+		d->instr_type = T_THUMB2_RN_RD_RM_REG;
 		return I_SDIV;
+	    }
 	    break;
 	case 2:
 	    if (op2 == 0)
 		return I_UMULL;
 	    break;
 	case 3:
-	    if (op2 == b1111)
+	    if (op2 == b1111) {
+		d->instr_type = T_THUMB2_RN_RD_RM_REG;
 		return I_UDIV;
+	    }
 	    break;
 	case 4:
 	    if (op2 == 0)
