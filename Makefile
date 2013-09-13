@@ -16,7 +16,7 @@ GENCODEOBJ = darm-tbl.o armv7-tbl.o thumb-tbl.o
 # generated stuff
 GENR = $(GENCODESRC) $(GENCODEOBJ) $(OBJ)
 LIBS  = libdarm.a libdarm.so
-TOOLS = tests/tests.exe tests/blasty.exe tests/expand.exe utils/elfdarm.exe
+TOOLS = tests/tests.exe tests/expand.exe utils/elfdarm.exe
 
 STUFF = $(GENR) $(LIBS) $(TOOLS)
 
