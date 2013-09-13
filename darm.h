@@ -90,6 +90,8 @@ typedef struct _darm_t {
     // the instruction label
     darm_instr_t    instr;
     darm_enctype_t  instr_type;
+    darm_enctype_t  instr_imm_type;	// thumb32 immediate type
+    darm_enctype_t  instr_flag_type;	// thumb32 flag type
 
     // conditional flags, if any
     darm_cond_t     cond;
@@ -159,16 +161,18 @@ typedef struct _darm_t {
 
     // immediate operand
     uint32_t        imm;
+    uint32_t	    sat_imm;
 
     // register shift info
     darm_shift_type_t shift_type;
     darm_reg_t      Rs;
     uint32_t        shift;
 
-    // certain instructions operate on bits, they specify the lowest
+    // certain instructions operate on bits, they specify the lowest or highest
     // significant bit to be used, as well as the width, the amount of bits
     // that are affected
     uint32_t        lsb;
+    uint32_t	    msb;
     uint32_t        width;
 
     // bitmask of registers affected by the STM/LDM/PUSH/POP instruction
@@ -181,6 +185,10 @@ typedef struct _darm_t {
     darm_reg_t      CRd;
     darm_reg_t      CRn;
     darm_reg_t      CRm;
+    uint32_t	    D;
+
+    // Flags for branch instruction
+    uint32_t	    J1, J2;
 
     // condition and mask for the IT instruction
     darm_cond_t     firstcond;

@@ -645,6 +645,8 @@ void darm_dump(const darm_t *d)
     PRINT_FLAG(R, "round the result", "do NOT round the result");
     PRINT_FLAG(W, "write-back", "do NOT write-back");
     PRINT_FLAG(I, "immediate present", "no immediate present");
+    PRINT_FLAG(J1, "branch flag set", "branch flag not set");
+    PRINT_FLAG(J2, "branch flag set", "branch flag not set");
 
     if(d->option != O_INVLD) {
         printf("option:        %d\n", d->option);
@@ -681,6 +683,9 @@ void darm_dump(const darm_t *d)
         char reglist[64];
         darm_reglist(d->reglist, reglist);
         printf("reglist:       %s\n", reglist);
+    }
+    if (d->sat_imm != 0) {
+        printf("sat_imm:           0x%08x  %d\n", d->sat_imm, d->sat_imm);
     }
 
     if(d->opc1 != 0 || d->opc2 != 0 || d->coproc != 0) {

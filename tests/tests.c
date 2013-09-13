@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include <string.h>
 #include "../darm.h"
+#include "../thumb2.h"
+#include "tests.h"
+
+void print_failure(char *failreason) {
+    printf("[\x01b[1;31;49mFAILED\x01b[0;39;49m] %s", failreason);
+}
+
+void print_success(char *operation) {
+    printf("[\x01b[1;32;49mSUCCESS\x01b[0;39;49m] %s", operation);
+}
+
 
 struct {
     uint32_t w;
@@ -343,6 +354,8 @@ static int _darm_thumb2_disasm(darm_t *d, uint32_t w)
     return darm_thumb2_disasm(d, w >> 16, w & 0xffff);
 }
 
+
+
 int main()
 {
     int failure = 0;
@@ -398,16 +411,7 @@ int main()
         // so we don't have to hardcode all of these
         tests[i].d.w = d.w;
 
-#define C(x) p->x != d.x
-
-    // if d.x, the output from the disasm, is invalid or unset, then the set
-    // value must be unset, otherwise, it must be set (this is because we
-    // can't specify B_INVLD in the unittests without making everything
-    // unreadable)
-#define F(x) \
-    ((d.x == B_INVLD || d.x == B_UNSET) ? p->x != B_UNSET : p->x != B_SET)
-
-        // enter ugly code
+        // test all flags and conditions
         int flags;
         if((flags = ret != tests[i].r || C(w) || C(instr) || C(instr_type) ||
                 C(cond) || F(S) || F(E) || C(option) || F(U) || F(H) ||
@@ -418,7 +422,8 @@ int main()
                 C(Rt2) || F(B) || C(coproc) || C(opc1) || C(opc2) ||
                 C(CRn) || C(CRm) || C(CRd) || C(firstcond) || C(mask)) ||
                 strcmp(str.total, tests[i].s)) {
-            // leave ugly code
+
+            // problem with instruction test
             printf("incorrect %s for 0x%08x, ret %d\n",
                 flags ? "flags" : "string representation", d.w, ret);
             printf("  %s = %s (%d)\n", str.total, tests[i].s,
@@ -428,8 +433,19 @@ int main()
             failure = 1;
         }
     }
+
+    // Run tests on thumb2 instructions
+    failure += test_thumb2_instructions();
+
+
+
+    // Run some tests on utility functions
+    failure += test_thumb2_functions();
+
     if(failure == 0) {
         printf("[x] unittests were successful\n");
+    } else {
+	print_failure("Failed unittests\n");
     }
     return failure;
 }
