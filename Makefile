@@ -1,9 +1,15 @@
 AR = ar
 CC = gcc
-CFLAGS = -std=c99 -Wall -O2 -s -Wextra
+CFLAGS = -std=c99 -Wall -O2 -Wextra
 
+# on non-windows, add -fPIC
 ifneq ($(OS),Windows_NT)
-	PIC_FLAGS = -fPIC
+	CFLAGS += -fPIC
+endif
+
+# on non-macosx, add -s
+ifneq ($(shell uname),Darwin)
+	CFLAGS += -s
 endif
 
 SRC = $(wildcard *.c tests/tests_thumb2.c)
@@ -26,7 +32,7 @@ $(GENCODESRC): darmgen.py darmtbl.py darmtbl2.py
 	python darmgen.py
 
 %.o: %.c
-	$(CC) $(CFLAGS) -o $@ -c $^ $(PIC_FLAGS)
+	$(CC) $(CFLAGS) -o $@ -c $^
 
 %.exe: %.c
 	$(CC) $(CFLAGS) -o $@ $^ libdarm.a -I. -Itests
