@@ -88,8 +88,6 @@ void darm_init(darm_t *d)
     // TODO set opc and coproc? to what value?
     d->CRn = d->CRm = d->CRd = R_INVLD;
     d->firstcond = C_INVLD, d->mask = 0;
-
-    d->J1 = d->J2 = B_INVLD;
 }
 
 int darm_disasm(darm_t *d, uint16_t w, uint16_t w2, uint32_t addr)
@@ -647,8 +645,6 @@ void darm_dump(const darm_t *d)
     PRINT_FLAG(R, "round the result", "do NOT round the result");
     PRINT_FLAG(W, "write-back", "do NOT write-back");
     PRINT_FLAG(I, "immediate present", "no immediate present");
-    PRINT_FLAG(J1, "branch flag set", "branch flag not set");
-    PRINT_FLAG(J2, "branch flag set", "branch flag not set");
 
     if(d->option != O_INVLD) {
         printf("option:        %d\n", d->option);

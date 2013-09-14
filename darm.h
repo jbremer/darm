@@ -185,10 +185,7 @@ typedef struct _darm_t {
     darm_reg_t      CRd;
     darm_reg_t      CRn;
     darm_reg_t      CRm;
-    uint32_t	    D;
-
-    // Flags for branch instruction
-    uint32_t	    J1, J2;
+    uint32_t        D;
 
     // condition and mask for the IT instruction
     darm_cond_t     firstcond;

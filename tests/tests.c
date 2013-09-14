@@ -383,13 +383,13 @@ struct {
 
     /* Branch */
     {0xF43F8801, 0, "beq.w #-266238", {
-        .instr = I_B, .I = B_SET, .S = B_SET, .imm = 0xFFFBF002, .J1 = B_UNSET, .J2 = B_SET,  .cond = C_EQ}},
+        .instr = I_B, .I = B_SET, .S = B_SET, .imm = 0xFFFBF002, .cond = C_EQ}},
     {0xF30AAFF6, 0, "bgt.w #0xcafec", {
-        .instr = I_B, .I = B_SET, .S = B_UNSET, .imm = 0xCAFEC, .J1 = B_SET, .J2 = B_SET,  .cond = C_GT}},
+        .instr = I_B, .I = B_SET, .S = B_UNSET, .imm = 0xCAFEC, .cond = C_GT}},
     {0xF0AF975D, 0, "bal.w #0xcafeba", {
-        .instr = I_B, .I = B_SET, .S = B_UNSET, .imm = 0xCAFEBA, .J1 = B_UNSET, .J2 = B_UNSET,  .cond = C_AL}},
+        .instr = I_B, .I = B_SET, .S = B_UNSET, .imm = 0xCAFEBA, .cond = C_AL}},
     {0xF55FB6BA, 0, "bal.w #-6947468", {
-        .instr = I_B, .I = B_SET, .S = B_SET, .imm = 0xFF95FD74, .J1 = B_SET, .J2 = B_UNSET,  .cond = C_AL}},
+        .instr = I_B, .I = B_SET, .S = B_SET, .imm = 0xFF95FD74, .cond = C_AL}},
     {0xF36F535C, 0, "bfcal r3, #21, #8", {
         .instr = I_BFC, .I = B_SET, .imm = 21, .Rd = r3, .msb = 28, .width = 8, .lsb = 21,  .cond = C_AL}},
     {0xF36251DF, 0, "bfial r1, r2, #23, #9", {
@@ -405,13 +405,13 @@ struct {
     {0xEA327223, 0, "bicsal.w r2, r2, r3 asr #28", {
         .instr = I_BIC, .I = B_SET, .S = B_SET, .imm = 28, .Rd = r2, .Rn = r2, .Rm = r3, .shift = 28, .shift_type = S_ASR, .cond = C_AL}},
     {0xF1EAD6DF, 0, "blal #0xdeadbe", {
-        .instr = I_BL, .I = B_SET, .S = B_UNSET, .imm = 0xdeadbe, .J1 = B_UNSET, .J2 = B_UNSET, .cond = C_AL}},
+        .instr = I_BL, .I = B_SET, .S = B_UNSET, .imm = 0xdeadbe, .cond = C_AL}},
     {0xF5EAFEDF, 0, "blal #-2183746", {
-        .instr = I_BL, .I = B_SET, .S = B_SET, .imm = 0xffdeadbe, .J1 = B_SET, .J2 = B_SET, .cond = C_AL}},
+        .instr = I_BL, .I = B_SET, .S = B_SET, .imm = 0xffdeadbe, .cond = C_AL}},
     {0xF00FC78E, 0, "blxal #0xc0ff1c", {
-        .instr = I_BLX, .I = B_SET, .S = B_UNSET, .imm = 0xc0ff1c, .J1 = B_UNSET, .J2 = B_UNSET, .H = B_SET, .cond = C_AL}},
+        .instr = I_BLX, .I = B_SET, .S = B_UNSET, .imm = 0xc0ff1c, .H = B_SET, .cond = C_AL}},
     {0xF40FEF8E, 0, "blxal #-4128996", {
-        .instr = I_BLX, .I = B_SET, .S = B_SET, .imm = 0xffc0ff1c, .J1 = B_SET, .J2 = B_SET, .H = B_SET, .cond = C_AL}},
+        .instr = I_BLX, .I = B_SET, .S = B_SET, .imm = 0xffc0ff1c, .H = B_SET, .cond = C_AL}},
     {0xF3C58F00, 0, "bxjal r5", {
         .instr = I_BXJ, .I = B_UNSET, .Rm = r5, .cond = C_AL}},
 

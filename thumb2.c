@@ -316,8 +316,6 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
     case I_B:
         d->I = B_SET;
         d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
-        d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
-        d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
         if ((w2 & 0x1000) == 0) {
             // T3
             // sign_extend(S:J2:J1:imm6:imm11:0, 32)
@@ -348,8 +346,6 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
     case I_BL: case I_BLX:
         d->I = B_SET;
         d->S = (w >> 10) & 1 ? B_SET : B_UNSET;
-        d->J1 = (w2 >> 13) & 1 ? B_SET : B_UNSET;
-        d->J2 = (w2 >> 11) & 1 ? B_SET : B_UNSET;
         if ((w2 & 0x1000) == 0) {
             // BLX
             // I1 = not(J1 xor S); I2 = not(J2 xor S); imm32 = sign_extend(S:I1:I2:imm10H:imm10L:00, 32)
