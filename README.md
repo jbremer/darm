@@ -56,7 +56,7 @@ Many thanks to [Valentin Pistol][pistol] without whom this project would never
 have seen the light of day.
 
 Thanks to [Peter Geissler][blasty], [Jay Little][computerality],
-[Michael Laurenzano][mlaurenzano], [Jonathan Tetteroo][j-tetteroo],
+[Michael Laurenzano][mlaurenzano], [Jonathan Tetteroo][jtetteroo],
 [Joshua Drake][jduck], and [rednovae][] for contributions, suggestions,
 additional tests, etc.
 
@@ -66,6 +66,6 @@ additional tests, etc.
 [blasty]: https://github.com/blasty/
 [computerality]: https://github.com/computerality
 [mlaurenzano]: https://github.com/mlaurenzano
-[jtetteroo]: https://github.com/jtetteroo
+[jtetteroo]: https://github.com/j-tetteroo
 [jduck]: https://github.com/jduck
 [rednovae]: https://github.com/endeav0r
