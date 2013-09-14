@@ -140,6 +140,8 @@ class _Darm(Structure):
         ('w', c_uint32),
         ('instr', c_uint32),
         ('instr_type', c_uint32),
+        ('instr_imm_type', c_uint32),
+        ('instr_flag_type', c_uint32),
         ('cond', c_uint32),
         ('B', c_uint32),
         ('S', c_uint32),
@@ -164,10 +166,12 @@ class _Darm(Structure):
         ('RdHi', c_int32),
         ('RdLo', c_int32),
         ('imm', c_uint32),
+        ('sat_imm', c_uint32),
         ('type_', c_int32),
         ('Rs', c_int32),
         ('shift', c_uint32),
         ('lsb', c_uint32),
+        ('msb', c_uint32),
         ('width', c_uint32),
         ('reglist', c_uint16),
         ('coproc', c_uint8),
@@ -176,6 +180,7 @@ class _Darm(Structure):
         ('CRd', c_int32),
         ('CRn', c_int32),
         ('CRm', c_int32),
+        ('D', c_int32),
         ('firstcond', c_int32),
         ('mask', c_uint8),
     ]
@@ -280,7 +285,7 @@ def disasm_thumb(w):
 
 def disasm_thumb2(w):
     d = _Darm()
-    ret = _lib.darm_thumb2_disasm(byref(d), w & 0xffff, (w >> 16) & 0xffff)
+    ret = _lib.darm_thumb2_disasm(byref(d), (w >> 16) & 0xffff, w & 0xffff)
     return Darm(d) if ret == 0 else None
 
 
