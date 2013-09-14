@@ -838,7 +838,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
 int darm_armv7_disasm(darm_t *d, uint32_t w)
 {
-    int ret = -1;
+    int ret;
 
     darm_init(d);
     d->w = w;

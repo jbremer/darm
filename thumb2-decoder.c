@@ -127,15 +127,9 @@ darm_instr_t thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2)
             case 5:
                 // load word
                 return thumb2_load_word(d, w, w2);
-
-            default:
-                break;
             }
             break;
         }
-
-    default:
-        break;
     }
 
     // TODO handle other co-proc case
@@ -920,7 +914,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
             if(Rt == b1111) {
                 d->instr_type = T_THUMB2_RN_REG;
                 d->instr_imm_type = T_THUMB2_IMM8;
-                return I_PLD; // PLD,PLDW immediate 8 bit
+                return I_PLD; // PLD/PLDW immediate 8 bit
             }
 
             d->instr_imm_type = T_THUMB2_IMM8;
@@ -935,7 +929,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
     else if(op1 == 1) {
         if(Rt == b1111) {
             d->instr_type = T_THUMB2_RN_REG;
-            return I_PLD; // PLD,PLDW immediate 12 bit
+            return I_PLD; // PLD/PLDW immediate 12 bit
         }
 
         return I_LDRH; // immediate 12 bit
@@ -1008,7 +1002,8 @@ darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2)
         else if((op2 & 0x3c) == 0x30 || (op2 & 0x24) == 0x24) {
             d->instr_flag_type = T_THUMB2_WUP_FLAG;
 
-            // POP pseudo single register if Rn == SP and U,W set and imm == 4
+            // POP pseudo single register if Rn == SP,
+            // U and W are set, and imm == 4
             if((w & 0xf) == b1101 && (w2 & 0xfff) == 0xb04) {
                 d->instr_type = T_THUMB2_RT_REG;
                 d->instr_imm_type = T_THUMB2_NO_IMM;
@@ -1524,9 +1519,6 @@ darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2)
             return I_UMAAL;
         }
 
-        break;
-
-    default:
         break;
     }
 

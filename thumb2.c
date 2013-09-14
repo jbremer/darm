@@ -579,6 +579,10 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
 static int thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
     d->instr = thumb2_decode_instruction(d, w, w2);
+    if(d->instr == I_INVLD) {
+        return -1;
+    }
+
     thumb2_parse_reg(d, w, w2);
     thumb2_parse_imm(d, w, w2);
     thumb2_parse_flag(d, w, w2);
