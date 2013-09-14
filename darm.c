@@ -88,6 +88,8 @@ void darm_init(darm_t *d)
     // TODO set opc and coproc? to what value?
     d->CRn = d->CRm = d->CRd = R_INVLD;
     d->firstcond = C_INVLD, d->mask = 0;
+
+    d->J1 = d->J2 = B_INVLD;
 }
 
 int darm_disasm(darm_t *d, uint16_t w, uint16_t w2, uint32_t addr)

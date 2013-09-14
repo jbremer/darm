@@ -805,7 +805,7 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
             d->instr_flag_type = T_THUMB2_WUP_FLAG;
             return I_LDRB; // immediate
         }
-        else if((op2 & 0x3u) == 0x30) {
+        else if((op2 & 0x3c) == 0x30) {
             d->instr_imm_type = T_THUMB2_IMM8;
             if(Rt == b1111) {
                 d->instr_type = T_THUMB2_RN_REG;

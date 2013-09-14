@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define BITMSK_8 ((1 << 8) - 1)
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
-#define SIGN_EXTEND32(v, len) ((v << (32 - len)) >> (32 - len))
+#define SIGN_EXTEND32(v, len) (((int32_t)(v) << (32 - len)) >> (32 - len))
 
 void thumb2_parse_reg(darm_t *d, uint16_t w, uint16_t w2);
 void thumb2_parse_imm(darm_t *d, uint16_t w, uint16_t w2);
@@ -505,11 +505,10 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
         d->Rt = R_INVLD;
         d->P = B_INVLD;
         if(d->Rn == b1111) {
-            d->Rn = R_INVLD;
+            d->Rn = d->Rm = R_INVLD;
             d->imm = w2 & 0xfff;
             d->shift_type = S_INVLD;
             d->shift = 0;
-            d->Rm = R_INVLD;
             d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
         }
         d->W = (w & b1111) != b1111 ? ((w >> 5) & 1) : B_INVLD;
