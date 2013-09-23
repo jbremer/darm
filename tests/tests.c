@@ -1571,7 +1571,7 @@ int main()
                 C(CRn) || C(CRm) || C(CRd) || C(firstcond) || C(mask)) ||
                 // for now only compare strings for armv7,
                 // not for thumb and thumb2
-                (disasm_index == 0 && strcmp(str.total, tests[i].s))) {
+                (disasm_index < 2 && strcmp(str.total, tests[i].s))) {
 
             // problem with instruction test
             printf("incorrect %s for 0x%08x, ret %d\n",

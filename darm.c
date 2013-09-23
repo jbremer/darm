@@ -160,6 +160,27 @@ int darm_str(const darm_t *d, darm_str_t *str)
 
     char *shift = str->shift;
 
+    // there are a couple of instructions in the Thumb instruction set which
+    // do not have an equivalent in ARMv7, hence they'll not have an ARMv7
+    // format string - we handle these instructions in a hacky way for now..
+    switch (d->instr) {
+    case I_CPS:
+    case I_IT:
+        // TODO
+        return -1;
+
+    case I_CBZ:
+    case I_CBNZ:
+        APPEND(args[arg], darm_register_name(d->Rn));
+        arg++;
+        APPEND(args[arg], "#+");
+        args[arg] += _append_imm(args[arg], d->imm);
+        goto finalize;
+
+    default:
+        break;
+    }
+
     const char **ptrs = armv7_format_strings[d->instr];
     if(ptrs[0] == NULL) return -1;
 
@@ -513,6 +534,8 @@ int darm_str(const darm_t *d, darm_str_t *str)
         if(ptrs[++idx] == NULL || idx == 3) return -1;
         off--;
     }
+
+finalize:
 
     *mnemonic = *shift = 0;
     *args[0] = *args[1] = *args[2] = *args[3] = *args[4] = *args[5] = 0;
