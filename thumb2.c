@@ -635,7 +635,7 @@ char *darm_thumb2_str(darm_t *d)
 int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
 {
     darm_init(d);
-    d->w = w | (w2 << 16);
+    d->w = (w << 16) | w2;
 
     // we set all conditional flags to "execute always" by default, as most
     // thumb instructions don't feature a conditional flag

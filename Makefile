@@ -12,7 +12,7 @@ ifneq ($(shell uname),Darwin)
 	CFLAGS += -s
 endif
 
-SRC = $(wildcard *.c tests/tests_thumb2.c)
+SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
 GENCODESRC = darm-tbl.c darm-tbl.h armv7-tbl.c armv7-tbl.h \
