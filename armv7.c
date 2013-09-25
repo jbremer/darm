@@ -688,8 +688,10 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             return 0;
 
         case I_SMC:
-            // if the 7th bit is 1, then this is the SMUL instruction
-            if((w >> 7) & 1) {
+            switch ((w >> 4) & b1111) {
+            // if the 7th bit is 1 and the 4th bit 0, then this is
+            // the SMUL instruction
+            case b1000: case b1010: case b1100: case b1110:
                 d->instr = I_SMUL;
                 d->instr_type = T_ARM_SM;
                 d->Rd = (w >> 16) & b1111;
@@ -697,10 +699,24 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->M  = (w >> 6) & 1;
                 d->N  = (w >> 5) & 1;
                 d->Rn = w & b1111;
-            }
-            else {
+                break;
+
+            // smc
+            case 0b0111:
+                d->instr = I_SMC;
                 d->imm = w & b1111;
                 d->I = B_SET;
+                break;
+
+            // clz
+            case 0b0001:
+                d->instr = I_CLZ;
+                d->Rm = w & b1111;
+                d->Rd = (w >> 12) & b1111;
+                break;
+
+            default:
+                return -1;
             }
             return 0;
 

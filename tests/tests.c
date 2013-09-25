@@ -160,6 +160,9 @@ struct {
     {0xe1600075, 0, "smc #5", {
         .instr = I_SMC, .instr_type = T_ARM_MISC, .cond = C_AL,
         .imm = 5, .I = B_SET}},
+    {0xe16f3f14, 0, "clz r3, r4", {
+        .instr = I_CLZ, .instr_type = T_ARM_MISC, .cond = C_AL,
+        .Rd = r3, .Rm = r4}},
     {0xe16601e8, 0, "smultt r6, r8, r1", {
         .instr = I_SMUL, .instr_type = T_ARM_SM, .cond = C_AL, .Rd = 6,
         .Rm = 1, .M = 1, .N = 1, .Rn = 8}},
@@ -221,6 +224,12 @@ struct {
     {0xe7f002fa, 0, "udf #42", {
         .instr = I_UDF, .instr_type = T_ARM_UDF, .cond = C_AL,
         .I = B_SET, .imm = 42}},
+    {0xe1434052, 0, "qdadd r4, r2, r3", {
+        .instr = I_QDADD, .instr_type = T_ARM_SAT, .cond = C_AL,
+        .Rd = r4, .Rm = r2, .Rn = r3}},
+    {0xe1634052, 0, "qdsub r4, r2, r3", {
+        .instr = I_QDSUB, .instr_type = T_ARM_SAT, .cond = C_AL,
+        .Rd = r4, .Rm = r2, .Rn = r3}},
 
     // we switch to thumb (oboy)
     {0, 0, NULL, {.instr = I_INVLD}},
