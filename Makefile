@@ -42,7 +42,7 @@ $(GENCODESRC): darmgen.py darmtbl.py darmtbl2.py
 	$(CC) $(CFLAGS) -o $@ -c $^
 
 %$(BIN_EXT): %.c
-	$(CC) $(CFLAGS) -o $@ $^ -L. -ldarm -I. -Itests
+	$(CC) $(CFLAGS) -o $@ $^ libdarm.a -I. -Itests
 
 %$(LIB_EXT): $(OBJ) $(GENCODEOBJ)
 	$(CC) -shared $(CFLAGS) -o $@ $^
