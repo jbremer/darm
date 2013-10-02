@@ -154,6 +154,7 @@ int main(int argc, char *argv[])
     fclose(fp);
 
     parse_elf_header(g_buf = buf);
+    return 0;
 
 error:
     fclose(fp);
