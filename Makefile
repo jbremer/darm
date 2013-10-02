@@ -5,6 +5,13 @@ CFLAGS = -std=c99 -Wall -O2 -Wextra
 # on non-windows, add -fPIC
 ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
+	BIN_EXT =
+	LIB_EXT = .so
+endif
+
+ifeq ($(OS),Windows_NT)
+	BIN_EXT = .exe
+	LIB_EXT = .dll
 endif
 
 # on non-macosx, add -s
@@ -21,8 +28,8 @@ GENCODEOBJ = darm-tbl.o armv7-tbl.o thumb-tbl.o thumb2-tbl.o
 
 # generated stuff
 GENR = $(GENCODESRC) $(GENCODEOBJ) $(OBJ)
-LIBS  = libdarm.a libdarm.so
-TOOLS = tests/tests.exe tests/expand.exe utils/elfdarm.exe
+LIBS  = libdarm.a libdarm$(LIB_EXT)
+TOOLS = tests/tests$(BIN_EXT) tests/expand$(BIN_EXT) utils/elfdarm$(BIN_EXT)
 
 STUFF = $(GENR) $(LIBS) $(TOOLS)
 
@@ -34,17 +41,17 @@ $(GENCODESRC): darmgen.py darmtbl.py darmtbl2.py
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $^
 
-%.exe: %.c
-	$(CC) $(CFLAGS) -o $@ $^ libdarm.a -I. -Itests
+%$(BIN_EXT): %.c
+	$(CC) $(CFLAGS) -o $@ $^ -L. -ldarm -I. -Itests
 
-%.so: $(OBJ) $(GENCODEOBJ)
+%$(LIB_EXT): $(OBJ) $(GENCODEOBJ)
 	$(CC) -shared $(CFLAGS) -o $@ $^
 
 %.a: $(OBJ) $(GENCODEOBJ)
 	$(AR) cr $@ $^
 
 test: $(STUFF)
-	./tests/tests.exe
+	./tests/tests$(BIN_EXT)
 
 clean:
 	rm -f $(STUFF)
