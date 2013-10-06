@@ -720,7 +720,7 @@ if __name__ == '__main__':
     print('#endif')
 
     def type_lut(name, bits):
-        print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
+        print('extern darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))
 
     #
     # thumb-tbl.h
@@ -798,8 +798,7 @@ if __name__ == '__main__':
     type_lut('sat', 2)
     type_lut('sync', 4)
     type_lut('pusr', 4)
-    print('const char *armv7_format_strings[%d][3];' % instrcnt)
-
+    print('extern const char * (*armv7_format_strings)[3];')
     print('#endif')
 
     #
@@ -1007,6 +1006,7 @@ if __name__ == '__main__':
     for instr, fmtstr in fmtstrs.items():
         fmtstr = ', '.join('"%s"' % x for x in set(fmtstr))
         lines.append('    [I_%s] = {%s},' % (instr, fmtstr))
-    print('const char *armv7_format_strings[%d][3] = {' % instrcnt)
+    print('const char *armv7_format_strings_t[%d][3] = {' % instrcnt)
     print('\n'.join(sorted(lines)))
     print('};')
+    print('const char * (*armv7_format_strings)[3] = armv7_format_strings_t ;') 
