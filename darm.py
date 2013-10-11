@@ -295,7 +295,13 @@ def _set_func(name, restype, *argtypes):
 
 
 _darm_dir = os.path.dirname(os.path.abspath(__file__))
-_lib = cdll.LoadLibrary(os.path.join(_darm_dir, 'libdarm.so'))
+if os.path.exists(os.path.join(_darm_dir, 'libdarm.dll')):
+    _lib = cdll.LoadLibrary(os.path.join(_darm_dir, 'libdarm.dll'))
+elif os.path.exists(os.path.join(_darm_dir, 'libdarm.so')):
+    _lib = cdll.LoadLibrary(os.path.join(_darm_dir, 'libdarm.so'))
+else:
+    raise Exception('libdarm not found!')
+
 _set_func('darm_armv7_disasm', c_int32, POINTER(_Darm), c_uint32)
 _set_func('darm_thumb_disasm', c_int32, POINTER(_Darm), c_uint16)
 _set_func('darm_thumb2_disasm', c_int32, POINTER(_Darm), c_uint16, c_uint16)
