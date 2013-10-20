@@ -671,7 +671,7 @@ if __name__ == '__main__':
                     identifier += ['X'] * bits[x].bitsize
 
             # replace X with 0 and convert index to integer
-            idx_bin = string.replace(''.join(identifier), 'X', '0')
+            idx_bin = ''.join(identifier).replace('X', '0')
             idx = sum(int(idx_bin[y])*2**(31-y) for y in range(32))
 
             thumb2_table[idx] = instruction_name(instr), idx
