@@ -55,22 +55,22 @@ darm_instr_t thumb2_decode_instruction(darm_t *d, uint16_t w, uint16_t w2)
 {
     uint32_t op2 = (w >> 4) & 0x7f;
 
-    switch ((w >> 11) & b11) {
+    switch ((w >> 11) & 0b11) {
     case 1:
         op2 &= 0x64;
         if(op2 == 0) {
             // load, store multiple
             return thumb2_load_store_multiple(d, w, w2);
         }
-        else if(op2 == b100) {
+        else if(op2 == 0b100) {
             // load/store dual, load/store exclusive, table branch
             return thumb2_load_store_dual(d, w, w2);
         }
-        else if(((op2 >> 5) & b11) == b1) {
+        else if(((op2 >> 5) & 0b11) == 0b1) {
             // dataprocessing (shifted register)
             return thumb2_data_shifted_reg(d, w, w2);
         }
-        else if(((op2 >> 6) & b1) == b1) {
+        else if(((op2 >> 6) & 0b1) == 0b1) {
             // coproc, simd, fpu
             return thumb2_coproc_simd(d, w, w2);
         }
@@ -140,9 +140,9 @@ darm_instr_t thumb2_load_store_multiple(darm_t *d, uint16_t w, uint16_t w2)
 {
     (void) w2;
 
-    uint32_t op = (w >> 7) & b11;
-    uint32_t L = (w >> 4) & b1;
-    uint32_t W_Rn = ((w >> 1) & 0x10) | (w & b1111);
+    uint32_t op = (w >> 7) & 0b11;
+    uint32_t L = (w >> 4) & 0b1;
+    uint32_t W_Rn = ((w >> 1) & 0x10) | (w & 0b1111);
 
     d->instr_type = T_THUMB2_RN_REG;
     d->instr_imm_type = T_THUMB2_NO_IMM;
@@ -193,10 +193,10 @@ darm_instr_t thumb2_load_store_multiple(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 7) & b11;
-    uint32_t op2 = (w >> 4) & b11;
-    uint32_t op3 = (w2 >> 4) & b1111;
-    uint32_t Rn = w & b1111;
+    uint32_t op1 = (w >> 7) & 0b11;
+    uint32_t op2 = (w >> 4) & 0b11;
+    uint32_t op3 = (w2 >> 4) & 0b1111;
+    uint32_t Rn = w & 0b1111;
 
     d->instr_type = T_THUMB2_RN_RT_REG;
     d->instr_imm_type = T_THUMB2_IMM8;;
@@ -217,7 +217,7 @@ darm_instr_t thumb2_load_store_dual(darm_t *d, uint16_t w, uint16_t w2)
     else if(((op1 & 2) == 0 && op2 == 3) ||
             ((op1 & 2) == 2 && (op2 & 1) == 1)) {
         d->instr_flag_type = T_THUMB2_WUP_FLAG;
-        if(Rn == b1111) {
+        if(Rn == 0b1111) {
             d->instr_type = T_THUMB2_RT_RT2_REG;
         }
         else {
@@ -279,8 +279,8 @@ darm_instr_t thumb2_move_shift(darm_t *d, uint16_t w, uint16_t w2)
 {
     (void) w;
 
-    uint32_t type = (w2>>4) & b11;
-    uint32_t imm3_imm2 = ((w2>>10) & 0x1C) | ((w2>>6) & b11);
+    uint32_t type = (w2>>4) & 0b11;
+    uint32_t imm3_imm2 = ((w2>>10) & 0x1C) | ((w2>>6) & 0b11);
 
     d->instr_type = T_THUMB2_RD_RM_REG;
     d->instr_imm_type = T_THUMB2_IMM2_IMM3;
@@ -315,8 +315,8 @@ darm_instr_t thumb2_move_shift(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_data_shifted_reg(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op = (w >> 5) & b1111;
-    uint32_t Rn = w & b1111;
+    uint32_t op = (w >> 5) & 0b1111;
+    uint32_t Rn = w & 0b1111;
     uint32_t Rd_S = ((w2 >> 7) & 0x1e) | ((w >> 4) & 1);
 
     d->instr_type = T_THUMB2_RN_RD_RM_REG;
@@ -337,14 +337,14 @@ darm_instr_t thumb2_data_shifted_reg(darm_t *d, uint16_t w, uint16_t w2)
         return I_BIC;
 
     case 2:
-        if(Rn == b1111) {
+        if(Rn == 0b1111) {
             return thumb2_move_shift(d, w, w2);
         }
 
         return I_ORR;
 
     case 3:
-        if(Rn == b1111) {
+        if(Rn == 0b1111) {
             d->instr_type = T_THUMB2_RD_RM_REG;
             return I_MVN;
         }
@@ -397,8 +397,8 @@ darm_instr_t thumb2_data_shifted_reg(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op = (w >> 5) & b1111;
-    uint32_t Rn = w & b1111;
+    uint32_t op = (w >> 5) & 0b1111;
+    uint32_t Rn = w & 0b1111;
     uint32_t Rd_S = ((w2 >> 7) & 0x1e) | ((w >> 4) & 1);
 
     d->instr_type = T_THUMB2_RN_RD_REG;
@@ -419,7 +419,7 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2)
         return I_BIC;
 
     case 2:
-        if(Rn == b1111) {
+        if(Rn == 0b1111) {
             d->instr_type = T_THUMB2_RD_REG;
             return I_MOV;
         }
@@ -427,7 +427,7 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2)
         return I_ORR;
 
     case 3:
-        if(Rn == b1111) {
+        if(Rn == 0b1111) {
             d->instr_type = T_THUMB2_RD_REG;
             return I_MVN;
         }
@@ -477,7 +477,7 @@ darm_instr_t thumb2_modified_immediate(darm_t *d, uint16_t w, uint16_t w2)
 darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2)
 {
     uint32_t op = (w >> 4) & 0x1f;
-    uint32_t Rn = w & b1111;
+    uint32_t Rn = w & 0b1111;
 
     d->instr_type = T_THUMB2_RN_RD_REG;
     d->instr_imm_type = T_THUMB2_IMM1_IMM3_IMM8;
@@ -485,14 +485,14 @@ darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2)
 
     switch (op) {
     case 0:
-        return Rn == b1111 ? I_ADR : I_ADDW;
+        return Rn == 0b1111 ? I_ADR : I_ADDW;
 
     case 4:
         d->instr_type = T_THUMB2_RD_REG;
         return I_MOVW;
 
     case 10:
-        return Rn == b1111 ? I_ADR : I_SUBW;
+        return Rn == 0b1111 ? I_ADR : I_SUBW;
 
     case 12:
         d->instr_type = T_THUMB2_RD_REG;
@@ -517,7 +517,7 @@ darm_instr_t thumb2_plain_immediate(darm_t *d, uint16_t w, uint16_t w2)
 
     case 22:
         d->instr_imm_type = T_THUMB2_IMM2_IMM3;
-        if(Rn == b1111) {
+        if(Rn == 0b1111) {
             d->instr_type = T_THUMB2_RD_REG;
             return I_BFC;
         }
@@ -549,7 +549,7 @@ darm_instr_t thumb2_proc_state(darm_t *d, uint16_t w, uint16_t w2)
 {
     (void) d; (void) w;
 
-    uint32_t op1 = (w2 >> 8) & b111;
+    uint32_t op1 = (w2 >> 8) & 0b111;
     uint32_t op2 = w2 & 0xff;
 
     if(op1 == 0) {
@@ -570,7 +570,7 @@ darm_instr_t thumb2_proc_state(darm_t *d, uint16_t w, uint16_t w2)
             return I_SEV;
 
         default:
-            if(((op2 >> 4) & b1111) == b1111) {
+            if(((op2 >> 4) & 0b1111) == 0b1111) {
                 return I_DBG;
             }
         }
@@ -585,7 +585,7 @@ darm_instr_t thumb2_proc_state(darm_t *d, uint16_t w, uint16_t w2)
 darm_instr_t thumb2_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2)
 {
     (void) d; (void) w;
-    uint32_t op = (w2 >> 4) & b111;
+    uint32_t op = (w2 >> 4) & 0b111;
 
     switch (op) {
     case 0: case 1:
@@ -611,7 +611,7 @@ darm_instr_t thumb2_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2)
 darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2)
 {
     uint32_t op = (w >> 4) & 0x7f;
-    uint32_t op1 = (w2 >> 12) & b111;
+    uint32_t op1 = (w2 >> 12) & 0b111;
     uint32_t imm8 = w2 & 0xff;
 
     d->instr_type = T_THUMB2_NO_REG;
@@ -625,14 +625,14 @@ darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2)
     else if(op1 == 0 && op == 0xff) {
         return I_SMC;
     }
-    else if((op1 & b101) == 1) {
+    else if((op1 & 0b101) == 1) {
         d->instr_flag_type = T_THUMB2_S_FLAG;
         return I_B;
     }
     else if(op1 == 2 && op == 0xff) {
         return I_UDF;
     }
-    else if((op1 & b101) == 0) {
+    else if((op1 & 0b101) == 0) {
         if((op & 0x38) != 0x38) {
             d->instr_flag_type = T_THUMB2_S_FLAG;
             return I_B;
@@ -659,11 +659,11 @@ darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2)
             return I_MRS;
         }
     }
-    else if((op1 & b101) == b100) {
+    else if((op1 & 0b101) == 0b100) {
         d->instr_flag_type = T_THUMB2_S_FLAG;
         return I_BLX;
     }
-    else if((op1 & b101) == b101) {
+    else if((op1 & 0b101) == 0b101) {
         d->instr_flag_type = T_THUMB2_S_FLAG;
         return I_BL;
     }
@@ -673,7 +673,7 @@ darm_instr_t thumb2_branch_misc_ctrl(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_store_single_item(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 5) & b111;
+    uint32_t op1 = (w >> 5) & 0b111;
     uint32_t op2 = (w2 >> 6) & 0x3f;
 
     d->instr_type = T_THUMB2_RN_RT_REG;
@@ -724,7 +724,7 @@ darm_instr_t thumb2_store_single_item(darm_t *d, uint16_t w, uint16_t w2)
 
             // PUSH pseudo single register if Rn == SP,
             // P and W are set, and imm == 4
-            if((w & 0xf) == b1101 && (w2 & 0xfff) == 0xd04) {
+            if((w & 0xf) == 0b1101 && (w2 & 0xfff) == 0xd04) {
                 d->instr_type = T_THUMB2_RT_REG;
                 d->instr_imm_type = T_THUMB2_NO_IMM;
                 d->instr_flag_type = T_THUMB2_NO_FLAG;
@@ -754,18 +754,18 @@ darm_instr_t thumb2_store_single_item(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 7) & b11;
+    uint32_t op1 = (w >> 7) & 0b11;
     uint32_t op2 = (w2 >> 6) & 0x3f;
-    uint32_t Rn = w & b1111;
-    uint32_t Rt = (w2 >> 12) & b1111;
+    uint32_t Rn = w & 0b1111;
+    uint32_t Rt = (w2 >> 12) & 0b1111;
 
     d->instr_type = T_THUMB2_RN_RT_REG;
     d->instr_imm_type = T_THUMB2_IMM12;
     d->instr_flag_type = T_THUMB2_NO_FLAG;
 
-    if((op1 & 2) == 0 && Rn == b1111) {
+    if((op1 & 2) == 0 && Rn == 0b1111) {
         d->instr_flag_type = T_THUMB2_U_FLAG;
-        if(Rt == b1111) {
+        if(Rt == 0b1111) {
             d->instr_imm_type = T_THUMB2_NO_REG;
             return I_PLD; // literal
         }
@@ -773,9 +773,9 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
         d->instr_type = T_THUMB2_RT_REG;
         return I_LDRB; // literal
     }
-    else if((op1 & 2) == 2 && Rn == b1111) {
+    else if((op1 & 2) == 2 && Rn == 0b1111) {
         d->instr_flag_type = T_THUMB2_U_FLAG;
-        if(Rt == b1111) {
+        if(Rt == 0b1111) {
             d->instr_imm_type = T_THUMB2_NO_REG;
             return I_PLI; // immediate, literal
         }
@@ -786,7 +786,7 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
     else if(op1 == 0) {
         if(op2 == 0) {
             d->instr_imm_type = T_THUMB2_IMM2;
-            if(Rt == b1111) {
+            if(Rt == 0b1111) {
                 d->instr_type = T_THUMB2_RN_RM_REG;
                 return I_PLD; // PLD/PLDW register
             }
@@ -801,7 +801,7 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
         }
         else if((op2 & 0x3c) == 0x30) {
             d->instr_imm_type = T_THUMB2_IMM8;
-            if(Rt == b1111) {
+            if(Rt == 0b1111) {
                 d->instr_type = T_THUMB2_RN_REG;
                 return I_PLD; // PLD/PLDW immediate
             }
@@ -815,7 +815,7 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
         }
     }
     else if(op1 == 1) {
-        if(Rt == b1111) {
+        if(Rt == 0b1111) {
             d->instr_type = T_THUMB2_RN_REG;
             return I_PLD; // PLD/PLDW immediate 12
         }
@@ -825,7 +825,7 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
     else if(op1 == 2) {
         if(op2 == 0) {
             d->instr_imm_type = T_THUMB2_IMM2;
-            if(Rt == b1111) {
+            if(Rt == 0b1111) {
                 d->instr_type = T_THUMB2_RN_RM_REG;
                 return I_PLI; // PLI register
             }
@@ -840,7 +840,7 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
         }
         else if((op2 & 0x3C) == 0x30) {
             d->instr_imm_type = T_THUMB2_IMM8;
-            if(Rt == b1111) {
+            if(Rt == 0b1111) {
                 d->instr_type = T_THUMB2_RN_REG;
                 return I_PLI; // PLI immediate/literal
             }
@@ -854,7 +854,7 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
         }
     }
     else if(op1 == 3) {
-        if(Rt == b1111) {
+        if(Rt == 0b1111) {
             d->instr_type = T_THUMB2_RN_REG;
             return I_PLI; // PLI literal/immediate
         }
@@ -867,26 +867,26 @@ darm_instr_t thumb2_load_byte_hints(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 7) & b11;
+    uint32_t op1 = (w >> 7) & 0b11;
     uint32_t op2 = (w2 >> 6) & 0x3f;
-    uint32_t Rn = w & b1111;
-    uint32_t Rt = (w2 >> 12) & b1111;
+    uint32_t Rn = w & 0b1111;
+    uint32_t Rt = (w2 >> 12) & 0b1111;
 
     d->instr_type = T_THUMB2_RN_RT_REG;
     d->instr_imm_type = T_THUMB2_IMM12;
     d->instr_flag_type = T_THUMB2_NO_FLAG;
 
-    if((op1 & 2) == 0 && Rn == b1111) {
+    if((op1 & 2) == 0 && Rn == 0b1111) {
         d->instr_flag_type = T_THUMB2_U_FLAG;
-        if(Rt == b1111) {
+        if(Rt == 0b1111) {
             return I_PLD; // literal
         }
 
         d->instr_type = T_THUMB2_RT_REG;
         return I_LDRH; // literal
     }
-    else if((op1 & 2) == 2 && Rn == b1111) {
-        if(Rt == b1111) {
+    else if((op1 & 2) == 2 && Rn == 0b1111) {
+        if(Rt == 0b1111) {
             return I_NOP; // mem hint
         }
 
@@ -897,7 +897,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
     else if(op1 == 0) {
         if(op2 == 0) {
             d->instr_imm_type = T_THUMB2_IMM2;
-            if(Rt == b1111) {
+            if(Rt == 0b1111) {
                 d->instr_type = T_THUMB2_RN_RM_REG;
                 return I_PLD; // PLD/PLDW register
             }
@@ -911,7 +911,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
             return I_LDRH; // immediate 8 bit
         }
         else if((op2 & 0x3c) == 0x30) {
-            if(Rt == b1111) {
+            if(Rt == 0b1111) {
                 d->instr_type = T_THUMB2_RN_REG;
                 d->instr_imm_type = T_THUMB2_IMM8;
                 return I_PLD; // PLD/PLDW immediate 8 bit
@@ -927,7 +927,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
         }
     }
     else if(op1 == 1) {
-        if(Rt == b1111) {
+        if(Rt == 0b1111) {
             d->instr_type = T_THUMB2_RN_REG;
             return I_PLD; // PLD/PLDW immediate 12 bit
         }
@@ -936,7 +936,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
     }
     else if(op1 == 2) {
         if(op2 == 0) {
-            if(Rt == b1111) {
+            if(Rt == 0b1111) {
                 return I_NOP;
             }
 
@@ -950,7 +950,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
             return I_LDRSH; // immediate 8 bit
         }
         else if((op2 & 0x3c) == 0x30) {
-            if(Rt == b1111) {
+            if(Rt == 0b1111) {
                 return I_NOP;
             }
 
@@ -964,7 +964,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
         }
     }
     else if(op1 == 3) {
-        if(Rt == b1111) {
+        if(Rt == 0b1111) {
             return I_NOP;
         }
 
@@ -976,25 +976,25 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 7) & b11;
+    uint32_t op1 = (w >> 7) & 0b11;
     uint32_t op2 = (w2 >> 6) & 0x3f;
-    uint32_t Rn = w & b1111;
+    uint32_t Rn = w & 0b1111;
 
     d->instr_type = T_THUMB2_RN_RT_REG;
     d->instr_imm_type = T_THUMB2_IMM8;
     d->instr_flag_type = T_THUMB2_NO_FLAG;
 
-    if((op1 & 2) == 0 && Rn == b1111) {
+    if((op1 & 2) == 0 && Rn == 0b1111) {
         d->instr_type = T_THUMB2_RT_REG;
         d->instr_imm_type = T_THUMB2_IMM12;
         d->instr_flag_type = T_THUMB2_U_FLAG;
         return I_LDR; // literal
     }
-    else if(op1 == 1 && Rn != b1111) {
+    else if(op1 == 1 && Rn != 0b1111) {
         d->instr_imm_type = T_THUMB2_IMM12;
         return I_LDR; // immediate
     }
-    else if(op1 == 0 && Rn != b1111) {
+    else if(op1 == 0 && Rn != 0b1111) {
         if(op2 == 0) { d->instr_type = T_THUMB2_RN_RM_RT_REG;
             d->instr_imm_type = T_THUMB2_IMM2;
             return I_LDR; // register
@@ -1004,7 +1004,7 @@ darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2)
 
             // POP pseudo single register if Rn == SP,
             // U and W are set, and imm == 4
-            if((w & 0xf) == b1101 && (w2 & 0xfff) == 0xb04) {
+            if((w & 0xf) == 0b1101 && (w2 & 0xfff) == 0xb04) {
                 d->instr_type = T_THUMB2_RT_REG;
                 d->instr_imm_type = T_THUMB2_NO_IMM;
                 d->instr_flag_type = T_THUMB2_NO_FLAG;
@@ -1023,8 +1023,8 @@ darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_parallel_signed(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 4) & b111;
-    uint32_t op2 = (w2 >> 4) & b11;
+    uint32_t op1 = (w >> 4) & 0b111;
+    uint32_t op2 = (w2 >> 4) & 0b11;
 
     d->instr_type = T_THUMB2_RN_RD_RM_REG;
     d->instr_imm_type = T_THUMB2_NO_IMM;
@@ -1099,8 +1099,8 @@ darm_instr_t thumb2_parallel_signed(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_parallel_unsigned(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 4) & b111;
-    uint32_t op2 = (w2 >> 4) & b11;
+    uint32_t op1 = (w >> 4) & 0b111;
+    uint32_t op2 = (w2 >> 4) & 0b11;
 
     d->instr_type = T_THUMB2_RN_RD_RM_REG;
     d->instr_imm_type = T_THUMB2_NO_IMM;
@@ -1175,10 +1175,10 @@ darm_instr_t thumb2_parallel_unsigned(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_misc_op(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 4) & b11;
-    uint32_t op2 = (w2 >> 4) & b11;
+    uint32_t op1 = (w >> 4) & 0b11;
+    uint32_t op2 = (w2 >> 4) & 0b11;
 
-    if(((w2 >> 12) & b1111) != b1111) {
+    if(((w2 >> 12) & 0b1111) != 0b1111) {
         return I_INVLD;
     }
 
@@ -1240,17 +1240,17 @@ darm_instr_t thumb2_misc_op(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 4) & b1111;
-    uint32_t op2 = (w2 >> 4) & b1111;
-    uint32_t Rn = w & b1111;
+    uint32_t op1 = (w >> 4) & 0b1111;
+    uint32_t op2 = (w2 >> 4) & 0b1111;
+    uint32_t Rn = w & 0b1111;
 
     d->instr_type = T_THUMB2_RN_RD_RM_REG;
     d->instr_imm_type = T_THUMB2_NO_IMM;
     d->instr_flag_type = T_THUMB2_ROTATE_FLAG;
 
-    if(op2 == 0 && (op1 & b1000) == 0) {
+    if(op2 == 0 && (op1 & 0b1000) == 0) {
         d->instr_flag_type = T_THUMB2_S_FLAG;
-        switch (op1 & b1110) {
+        switch (op1 & 0b1110) {
         case 0:
             return I_LSL; // register
 
@@ -1264,11 +1264,11 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2)
             return I_ROR; // register
         }
     }
-    else if(op1 < 8 && (op2 & b1000) == 8) {
+    else if(op1 < 8 && (op2 & 0b1000) == 8) {
         d->instr_flag_type = T_THUMB2_ROTATE_FLAG;
         switch(op1) {
         case 0:
-            if(Rn == b1111) {
+            if(Rn == 0b1111) {
                 d->instr_type = T_THUMB2_RD_RM_REG;
                 return I_SXTH;
             }
@@ -1276,7 +1276,7 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2)
             return I_SXTAH;
 
         case 1:
-            if(Rn == b1111) {
+            if(Rn == 0b1111) {
                 d->instr_type = T_THUMB2_RD_RM_REG;
                 return I_UXTH;
             }
@@ -1284,7 +1284,7 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2)
             return I_UXTAH;
 
         case 2:
-            if(Rn == b1111) {
+            if(Rn == 0b1111) {
                 d->instr_type = T_THUMB2_RD_RM_REG;
                 return I_SXTB16;
             }
@@ -1292,7 +1292,7 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2)
             return I_SXTAB16;
 
         case 3:
-            if(Rn == b1111) {
+            if(Rn == 0b1111) {
                 d->instr_type = T_THUMB2_RD_RM_REG;
                 return I_UXTB16;
             }
@@ -1300,7 +1300,7 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2)
             return I_UXTAB16;
 
         case 4:
-            if(Rn == b1111) {
+            if(Rn == 0b1111) {
                 d->instr_type = T_THUMB2_RD_RM_REG;
                 return I_SXTB;
             }
@@ -1308,7 +1308,7 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2)
             return I_SXTAB;
 
         case 5:
-            if(Rn == b1111) {
+            if(Rn == 0b1111) {
                 d->instr_type = T_THUMB2_RD_RM_REG;
                 return I_UXTB;
             }
@@ -1316,13 +1316,13 @@ darm_instr_t thumb2_data_reg(darm_t *d, uint16_t w, uint16_t w2)
             return I_UXTAB;
         }
     }
-    else if((op1 & b1000) == 8 && (op2 & b1100) == 0) {
+    else if((op1 & 0b1000) == 8 && (op2 & 0b1100) == 0) {
         return thumb2_parallel_signed(d, w, w2);
     }
-    else if((op1 & b1000) == 8 && (op2 & b1100) == 4) {
+    else if((op1 & 0b1000) == 8 && (op2 & 0b1100) == 4) {
         return thumb2_parallel_unsigned(d, w, w2);
     }
-    else if((op1 & b1100) == 8 && (op2 & b1100) == 8) {
+    else if((op1 & 0b1100) == 8 && (op2 & 0b1100) == 8) {
         return thumb2_misc_op(d, w, w2);
     }
 
@@ -1357,11 +1357,11 @@ darm_instr_t thumb2_nm_decoder(darm_t *d, uint16_t w, uint16_t w2,
 
 darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 4) & b111;
-    uint32_t op2 = (w2 >> 4) & b11;
-    uint32_t Ra = (w2 >> 12) & b1111;
+    uint32_t op1 = (w >> 4) & 0b111;
+    uint32_t op2 = (w2 >> 4) & 0b11;
+    uint32_t Ra = (w2 >> 12) & 0b1111;
 
-    if(((w2 >> 6) & b11) != 0) {
+    if(((w2 >> 6) & 0b11) != 0) {
         return I_INVLD;
     }
 
@@ -1370,7 +1370,7 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
     d->instr_flag_type = T_THUMB2_NO_FLAG;
 
     if(op1 == 1) {
-        if(Ra == b1111) {
+        if(Ra == 0b1111) {
             return thumb2_nm_decoder(d, w, w2,
                 I_SMULBB, I_SMULBT, I_SMULTB, I_SMULTT);
         }
@@ -1385,11 +1385,11 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
 
     switch (op1) {
     case 0:
-        if(op2 == 0 && Ra == b1111) {
+        if(op2 == 0 && Ra == 0b1111) {
             d->instr_type = T_THUMB2_RN_RD_RM_REG;
             return I_MUL;
         }
-        else if(op2 == 0 && Ra != b1111) {
+        else if(op2 == 0 && Ra != 0b1111) {
             return I_MLA;
         }
         else if(op2 == 1) {
@@ -1399,7 +1399,7 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
         break;
 
     case 2:
-        if(Ra == b1111) {
+        if(Ra == 0b1111) {
             d->instr_type = T_THUMB2_RN_RD_RM_REG;
             return I_SMUAD;
         }
@@ -1409,7 +1409,7 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
     case 3:
         // B or T variant indicated by M bit but not encoded
         // in the instruction name
-        if(Ra == b1111) {
+        if(Ra == 0b1111) {
             d->instr_type = T_THUMB2_RN_RD_RM_REG;
             return I_SMULW;
         }
@@ -1417,7 +1417,7 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
         return I_SMLAW;
 
     case 4:
-        if(Ra == b1111) {
+        if(Ra == 0b1111) {
             d->instr_type = T_THUMB2_RN_RD_RM_REG;
             return I_SMUSD;
         }
@@ -1425,7 +1425,7 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
         return I_SMLSD;
 
     case 5:
-        if(Ra == b1111) {
+        if(Ra == 0b1111) {
             d->instr_type = T_THUMB2_RN_RD_RM_REG;
             return I_SMMUL;
         }
@@ -1436,7 +1436,7 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
         return I_SMMLS;
 
     case 7:
-        if(op2 == 0 && Ra == b1111) {
+        if(op2 == 0 && Ra == 0b1111) {
             d->instr_type = T_THUMB2_RN_RD_RM_REG;
             return I_USAD8;
         }
@@ -1452,8 +1452,8 @@ darm_instr_t thumb2_mult_acc_diff(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 4) & b111;
-    uint32_t op2 = (w2 >> 4) & b1111;
+    uint32_t op1 = (w >> 4) & 0b111;
+    uint32_t op2 = (w2 >> 4) & 0b1111;
 
     d->instr_type = T_THUMB2_RN_RM_REG;
     d->instr_imm_type = T_THUMB2_NO_IMM;
@@ -1468,7 +1468,7 @@ darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2)
         break;
 
     case 1:
-        if(op2 == b1111) {
+        if(op2 == 0b1111) {
             d->instr_type = T_THUMB2_RN_RD_RM_REG;
             return I_SDIV;
         }
@@ -1483,7 +1483,7 @@ darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2)
         break;
 
     case 3:
-        if(op2 == b1111) {
+        if(op2 == 0b1111) {
             d->instr_type = T_THUMB2_RN_RD_RM_REG;
             return I_UDIV;
         }
@@ -1494,18 +1494,18 @@ darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2)
         if(op2 == 0) {
             return I_SMLAL;
         }
-        else if((op2 & b1100) == b1000) {
+        else if((op2 & 0b1100) == 0b1000) {
             return thumb2_nm_decoder(d, w, w2,
                 I_SMLALBB, I_SMLALBT, I_SMLALTB, I_SMLALTT);
         }
-        else if((op2 & b1110) == b1100) {
+        else if((op2 & 0b1110) == 0b1100) {
             return I_SMLALD;
         }
 
         break;
 
     case 5:
-        if((op2 & b1110) == b1100) {
+        if((op2 & 0b1110) == 0b1100) {
             return I_SMLSLD;
         }
 
@@ -1515,7 +1515,7 @@ darm_instr_t thumb2_long_mult_acc(darm_t *d, uint16_t w, uint16_t w2)
         if(op2 == 0) {
             return I_UMLAL;
         }
-        else if(op2 == b110) {
+        else if(op2 == 0b110) {
             return I_UMAAL;
         }
 
