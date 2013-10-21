@@ -1,6 +1,6 @@
 AR = ar
 CC = gcc
-CFLAGS = -std=c99 -Wall -O2 -Wextra
+CFLAGS = -std=c99 -Wall -O2 -Wextra -Wno-missing-field-initializers
 
 # on non-windows, add -fPIC
 ifneq ($(OS),Windows_NT)
