@@ -44,7 +44,7 @@ typedef enum _darm_reg_t {
     r0 = 0, r1 = 1, r2 = 2, r3 = 3, r4 = 4, r5 = 5, r6 = 6, r7 = 7, r8 = 8,
     r9 = 9, r10 = 10, r11 = 11, r12 = 12, r13 = 13, r14 = 14, r15 = 15,
 
-    FP = b1011, IP = b1100, SP = b1101, LR = b1110, PC = b1111,
+    FP = 11, IP = 12, SP = 13, LR = 14, PC = 15,
 
     cr0 = 0, cr1 = 1, cr2 = 2, cr3 = 3, cr4 = 4, cr5 = 5, cr6 = 6, cr7 = 7,
     cr8 = 8, cr9 = 9, cr10 = 10, cr11 = 11, cr12 = 12, cr13 = 13, cr14 = 14,
@@ -54,12 +54,12 @@ typedef enum _darm_reg_t {
 } darm_reg_t;
 
 typedef enum _darm_cond_t {
-    C_EQ = b0000, C_NE = b0001, C_CS = b0010, C_CC = b0011, C_MI = b0100,
-    C_PL = b0101, C_VS = b0110, C_VC = b0111, C_HI = b1000, C_LS = b1001,
-    C_GE = b1010, C_LT = b1011, C_GT = b1100, C_LE = b1101, C_AL = b1110,
+    C_EQ = 0, C_NE = 1, C_CS = 2, C_CC = 3, C_MI = 4,
+    C_PL = 5, C_VS = 6, C_VC = 7, C_HI = 8, C_LS = 9,
+    C_GE = 10, C_LT = 11, C_GT = 12, C_LE = 13, C_AL = 14,
 
     C_HS = C_CS, C_LO = C_CC,
-    C_UNCOND = b1111,
+    C_UNCOND = 15,
 
     C_INVLD = -1
 } darm_cond_t;
@@ -71,14 +71,14 @@ typedef enum _darm_shift_type_t {
 } darm_shift_type_t;
 
 typedef enum _darm_option_t {
-    O_SY    = b1111,
-    O_ST    = b1110,
-    O_ISH   = b1011,
-    O_ISHST = b1010,
-    O_NSH   = b0111,
-    O_NSHST = b0110,
-    O_OSH   = b0011,
-    O_OSHST = b0010,
+    O_SY    = 15, // b1111
+    O_ST    = 14, // b1110
+    O_ISH   = 11, // b1011
+    O_ISHST = 10, // b1010
+    O_NSH   = 7,  // b0111
+    O_NSHST = 6,  // b0110
+    O_OSH   = 3,  // b0011
+    O_OSHST = 2,  // b0010
 
     O_INVLD = -1,
 } darm_option_t;

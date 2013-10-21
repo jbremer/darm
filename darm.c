@@ -32,6 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <string.h>
 #include "darm.h"
+#include "darm-internal.h"
 
 #define APPEND(out, ptr) \
     do { \

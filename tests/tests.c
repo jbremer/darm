@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../darm.h"
+#include "../darm-internal.h"
 #include "../thumb2.h"
 
 struct {

@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <string.h>
 #include "darm.h"
+#include "darm-internal.h"
 #include "thumb-tbl.h"
 #include "thumb2-tbl.h"
 #include "thumb2.h"

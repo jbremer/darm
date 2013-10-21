@@ -707,6 +707,14 @@ if __name__ == '__main__':
     print('extern const char *darm_enctypes[%d];' % len(instr_types))
     print('extern const char *darm_registers[16];')
 
+    print('#endif')
+
+    #
+    # darm-internal.h
+    #
+
+    magic_open('darm-internal.h')
+
     # define constants 0b0 up upto 0b11111111
     for x in range(256):
         print('#define %s %d' % (bin(x)[1:], x))
@@ -716,8 +724,6 @@ if __name__ == '__main__':
         for y in itertools.product('01', repeat=x):
             num = ''.join(y)
             print('#define b%s %d' % (num, int(num, 2)))
-
-    print('#endif')
 
     def type_lut(name, bits):
         print('darm_instr_t type_%s_instr_lookup[%d];' % (name, 2**bits))

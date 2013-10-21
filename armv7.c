@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include <string.h>
 #include "darm.h"
+#include "darm-internal.h"
 #include "armv7-tbl.h"
 
 #define BITMSK_12 ((1 << 12) - 1)
