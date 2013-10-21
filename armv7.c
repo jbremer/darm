@@ -127,7 +127,7 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         }
         // otherwise, if the 21th bit is not set, it's either the PLD or the
         // PLI instruction
-        // we fall-through here, as 00b011 also handles the PLD and PLI
+        // we fall-through here, as 0b011 also handles the PLD and PLI
         // instructions
 
     case 0b011:
@@ -373,7 +373,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // handle saturating addition and subtraction instructions, these
     // instructions have various masks; of bits 20..27 bit 24 is set and bits
     // 21..22 specify which instruction this is, furthermore, bits 4..7
-    // represent the value 00b0101
+    // represent the value 0b0101
     const uint32_t mask2 = (0b11111001 << 20) | (0b1111 << 4);
     if((w & mask2) == ((1 << 24) | (0b0101 << 4))) {
         d->instr = type_sat_instr_lookup[(w >> 21) & 0b11];
@@ -384,7 +384,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         return 0;
     }
     // handle packing, unpacking, saturation, and reversal instructions, these
-    // instructions have the 4th bit set and bits 23..27 represent 00b01101
+    // instructions have the 4th bit set and bits 23..27 represent 0b01101
     const uint32_t mask3 = (0b11111 << 23) | (1 << 4);
     if((w & mask3) == ((0b01101 << 23) | (1 << 4))) {
         // some instructions are already handled elsewhere (namely, PKH, SEL,
@@ -396,7 +396,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->instr_type = T_ARM_PUSR;
 
         // the (SX|UX)T(A)(B|H)(16) instructions
-        // op1 represents the upper three bits, and A = 00b1111 represents
+        // op1 represents the upper three bits, and A = 0b1111 represents
         if(op2 == 0b011) {
             // the lower bit
             d->instr = type_pusr_instr_lookup[(op1 << 1) | (A == 0b1111)];
@@ -408,7 +408,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 // directly in our shift as well
                 d->rotate = (w >> 7) & 0b11000;
 
-                // if A is not 00b1111, then A represents the Rn operand
+                // if A is not 0b1111, then A represents the Rn operand
                 if(A != 0b1111) {
                     d->Rn = A;
                 }
@@ -498,7 +498,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         if(d->instr == I_BFI) {
             d->width = ((w >> 16) & 0b11111) - d->lsb + 1;
 
-            // if Rn is 00b1111, then this is in fact the BFC instruction
+            // if Rn is 0b1111, then this is in fact the BFC instruction
             if(d->Rn == 0b1111) {
                 d->Rn = R_INVLD;
                 d->instr = I_BFC;
@@ -656,12 +656,12 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         d->Rd = (w >> 12) & 0b1111;
         d->Rm = w & 0b1111;
 
-        // if this is the REV16 instruction and bits 4..7 are 00b0011, then
+        // if this is the REV16 instruction and bits 4..7 are 0b0011, then
         // this is in fact the REV instruction
         if(d->instr == I_REV16 && ((w >> 4) & 0b1111) == 0b0011) {
             d->instr = I_REV;
         }
-        // if this is the REVSH instruction and bits 4..7 are 00b0011, then
+        // if this is the REVSH instruction and bits 4..7 are 0b0011, then
         // this is in fact the RBIT instruction
         else if(d->instr == I_REVSH && ((w >> 4) & 0b1111) == 0b0011) {
             d->instr = I_RBIT;
@@ -751,7 +751,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             if((w >> 6) & 1) {
                 d->instr = I_SMMLS;
             }
-            // if it's SMMUL instruction, but Ra is not 00b1111, then this is
+            // if it's SMMUL instruction, but Ra is not 0b1111, then this is
             // the SMMLA instruction
             else if(d->Ra != 0b1111) {
                 d->instr = I_SMMLA;
