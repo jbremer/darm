@@ -107,9 +107,9 @@ int darm_disasm(darm_t *d, uint16_t w, uint16_t w2, uint32_t addr)
 
     // magic table constructed based on section A6.1 of the ARM manual
     static uint8_t is_thumb2[0x20] = {
-        [b11101] = 1,
-        [b11110] = 1,
-        [b11111] = 1,
+        [0b11101] = 1,
+        [0b11110] = 1,
+        [0b11111] = 1,
     };
 
     // check whether this is a Thumb or Thumb2 instruction

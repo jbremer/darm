@@ -47,7 +47,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         return 0;
 
     case T_THUMB_COND_BRANCH:
-        d->cond = (w >> 8) & b1111;
+        d->cond = (w >> 8) & 0b1111;
         d->I = B_SET;
         d->imm = (uint32_t)(int8_t)(w & BITMSK_8) << 1;
         return 0;
@@ -66,9 +66,9 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         return 0;
 
     case T_THUMB_SHIFT_IMM:
-        d->Rd = (w >> 0) & b111;
-        d->Rm = (w >> 3) & b111;
-        d->shift = (w >> 6) & b11111;
+        d->Rd = (w >> 0) & 0b111;
+        d->Rm = (w >> 3) & 0b111;
+        d->shift = (w >> 6) & 0b11111;
 
         // if the shift is zero and this is the lsl instruction, then this is
         // actually a mov instruction
@@ -97,7 +97,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->I = B_SET;
         d->imm = (w & BITMSK_8) << 2;
         d->Rn = SP;
-        d->Rt = (w >> 8) & b111;
+        d->Rt = (w >> 8) & 0b111;
         d->U = B_SET;
         d->W = B_UNSET;
         d->P = B_SET;
@@ -107,66 +107,66 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->I = B_SET;
         d->imm = (w & BITMSK_8) << 2;
         d->Rn = PC;
-        d->Rt = (w >> 8) & b111;
+        d->Rt = (w >> 8) & 0b111;
         d->U = B_SET;
         d->W = B_UNSET;
         d->P = B_SET;
         return 0;
 
     case T_THUMB_GPI:
-        d->instr = type_gpi_instr_lookup[(w >> 6) & b1111];
+        d->instr = type_gpi_instr_lookup[(w >> 6) & 0b1111];
         switch ((uint32_t) d->instr) {
         case I_AND: case I_EOR: case I_LSL: case I_LSR:
         case I_ASR: case I_ADC: case I_SBC: case I_ROR:
-            d->Rd = d->Rn = w & b111;
-            d->Rm = (w >> 3) & b111;
+            d->Rd = d->Rn = w & 0b111;
+            d->Rm = (w >> 3) & 0b111;
             return 0;
 
         case I_TST: case I_CMP: case I_CMN:
-            d->Rn = w & b111;
-            d->Rm = (w >> 3) & b111;
+            d->Rn = w & 0b111;
+            d->Rm = (w >> 3) & 0b111;
             return 0;
 
         case I_RSB:
             d->I = B_SET;
             d->imm = 0;
-            d->Rd = w & b111;
-            d->Rn = (w >> 3) & b111;
+            d->Rd = w & 0b111;
+            d->Rn = (w >> 3) & 0b111;
             return 0;
 
         case I_ORR: case I_BIC:
-            d->Rn = w & b111;
+            d->Rn = w & 0b111;
             // fall-through as the mvn handler is almost the same, except
             // for parsing Rn
 
         case I_MVN:
-            d->Rd = w & b111;
-            d->Rm = (w >> 3) & b111;
+            d->Rd = w & 0b111;
+            d->Rm = (w >> 3) & 0b111;
             return 0;
 
         case I_MUL:
-            d->Rd = d->Rm = w & b111;
-            d->Rn = (w >> 3) & b111;
+            d->Rd = d->Rm = w & 0b111;
+            d->Rn = (w >> 3) & 0b111;
             return 0;
         }
 
     case T_THUMB_BRANCH_REG:
         d->instr = (w >> 7) & 1 ? I_BLX : I_BX;
-        d->Rm = (w >> 3) & b1111;
+        d->Rm = (w >> 3) & 0b1111;
         return 0;
 
     case T_THUMB_IT_HINTS:
         // one of the hints instructions (instructions that hint the cpu and
         // don't take any operands)
-        if((w & b1111) == 0) {
-            d->instr = type_hints_instr_lookup[(w >> 4) & b111];
+        if((w & 0b1111) == 0) {
+            d->instr = type_hints_instr_lookup[(w >> 4) & 0b111];
             return d->instr == I_INVLD ? -1 : 0;
         }
 
         // if-then instruction
         d->instr = I_IT;
-        d->mask = w & b1111;
-        d->firstcond = (w >> 4) & b1111;
+        d->mask = w & 0b1111;
+        d->firstcond = (w >> 4) & 0b1111;
         return 0;
 
     case T_THUMB_HAS_IMM8:
@@ -175,7 +175,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 
         switch ((uint32_t) d->instr) {
         case I_ADD: case I_SUB:
-            d->Rd = d->Rn = (w >> 8) & b111;
+            d->Rd = d->Rn = (w >> 8) & 0b111;
             return 0;
 
         case I_ADR:
@@ -185,18 +185,18 @@ static int thumb_disasm(darm_t *d, uint16_t w)
             // fall-through as adr also has to set Rd
 
         case I_MOV:
-            d->Rd = (w >> 8) & b111;
+            d->Rd = (w >> 8) & 0b111;
             return 0;
 
         case I_CMP:
-            d->Rn = (w >> 8) & b111;
+            d->Rn = (w >> 8) & 0b111;
             return 0;
         }
 
     case T_THUMB_EXTEND:
-        d->instr = type_extend_instr_lookup[(w >> 6) & b11];
-        d->Rd = w & b111;
-        d->Rm = (w >> 3) & b111;
+        d->instr = type_extend_instr_lookup[(w >> 6) & 0b11];
+        d->Rd = w & 0b111;
+        d->Rm = (w >> 3) & 0b111;
         return 0;
 
     case T_THUMB_MOD_SP_IMM:
@@ -207,37 +207,37 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         return 0;
 
     case T_THUMB_3REG:
-        d->Rd = (w >> 0) & b111;
-        d->Rn = (w >> 3) & b111;
-        d->Rm = (w >> 6) & b111;
+        d->Rd = (w >> 0) & 0b111;
+        d->Rn = (w >> 3) & 0b111;
+        d->Rm = (w >> 6) & 0b111;
         return 0;
 
     case T_THUMB_2REG_IMM:
-        d->Rd = w & b111;
-        d->Rn = (w >> 3) & b111;
+        d->Rd = w & 0b111;
+        d->Rn = (w >> 3) & 0b111;
         d->I = B_SET;
-        d->imm = (w >> 6) & b111;
+        d->imm = (w >> 6) & 0b111;
         return 0;
 
     case T_THUMB_ADD_SP_IMM:
         d->I = B_SET;
         d->imm = (w & BITMSK_8) << 2;
         d->Rn = SP;
-        d->Rd = (w >> 8) & b111;
+        d->Rd = (w >> 8) & 0b111;
         return 0;
 
     case T_THUMB_MOV4:
         // D is the 8th bit and has to become the 3th bit, to function as
         // highest bit for Rd
-        d->Rd = ((w >> 4) & 8) | (w & b111);
-        d->Rm = (w >> 3) & b1111;
+        d->Rd = ((w >> 4) & 8) | (w & 0b111);
+        d->Rm = (w >> 3) & 0b1111;
         return 0;
 
     case T_THUMB_RW_MEMI:
-        d->Rt = w & b111;
-        d->Rn = (w >> 3) & b111;
+        d->Rt = w & 0b111;
+        d->Rn = (w >> 3) & 0b111;
         d->I = B_SET;
-        d->imm = (w >> 6) & b11111;
+        d->imm = (w >> 6) & 0b11111;
 
         // some instructions require some shifting for the immediate
         switch ((uint32_t) d->instr) {
@@ -256,9 +256,9 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         return 0;
 
     case T_THUMB_RW_MEMO:
-        d->Rt = (w >> 0) & b111;
-        d->Rn = (w >> 3) & b111;
-        d->Rm = (w >> 6) & b111;
+        d->Rt = (w >> 0) & 0b111;
+        d->Rn = (w >> 3) & 0b111;
+        d->Rm = (w >> 6) & 0b111;
         d->P = B_SET;
         d->U = B_SET;
         d->W = B_UNSET;
@@ -267,19 +267,19 @@ static int thumb_disasm(darm_t *d, uint16_t w)
     case T_THUMB_RW_REG:
         // TODO write-back support for LDM
         d->reglist = w & BITMSK_8;
-        d->Rn = (w >> 8) & b111;
+        d->Rn = (w >> 8) & 0b111;
         return 0;
 
     case T_THUMB_REV:
-        d->instr = type_rev_instr_lookup[(w >> 6) & b11];
+        d->instr = type_rev_instr_lookup[(w >> 6) & 0b11];
         if(d->instr == I_INVLD) return -1;
 
-        d->Rd = (w >> 0) & b111;
-        d->Rm = (w >> 3) & b111;
+        d->Rd = (w >> 0) & 0b111;
+        d->Rm = (w >> 3) & 0b111;
         return 0;
 
     case T_THUMB_SETEND:
-        d->E = (w >> 4) & b1;
+        d->E = (w >> 4) & 0b1;
         return 0;
 
     case T_THUMB_PUSHPOP:
@@ -297,22 +297,22 @@ static int thumb_disasm(darm_t *d, uint16_t w)
 
     case T_THUMB_CMP:
         // the 4th bit for Rn is stored as the 7th bit
-        d->Rn = (w & b111) | ((w >> 4) & b1000);
-        d->Rm = (w >> 3) & b1111;
+        d->Rn = (w & 0b111) | ((w >> 4) & 0b1000);
+        d->Rm = (w >> 3) & 0b1111;
         return 0;
 
     case T_THUMB_MOD_SP_REG:
         d->Rd = d->Rn = SP;
-        d->Rm = (w >> 3) & b1111;
+        d->Rm = (w >> 3) & 0b1111;
         return 0;
 
     case T_THUMB_CBZ:
         d->instr = (w >> 11) & 1 ? I_CBNZ : I_CBZ;
-        d->Rn = w & b111;
+        d->Rn = w & 0b111;
         d->Rm = PC;
         d->U = B_SET;
         d->I = B_SET;
-        d->imm = ((w >> 2) & (b11111 << 1)) | ((w >> 5) & (1 << 6));
+        d->imm = ((w >> 2) & (0b11111 << 1)) | ((w >> 5) & (1 << 6));
         return 0;
     }
     return -1;
@@ -328,7 +328,7 @@ int darm_thumb_disasm(darm_t *d, uint16_t w)
     d->cond = C_AL;
 
     switch (w >> 11) {
-    case b11101: case b11110: case b11111:
+    case 0b11101: case 0b11110: case 0b11111:
         return -1;
 
     default:

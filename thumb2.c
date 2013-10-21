@@ -118,82 +118,82 @@ void thumb2_parse_reg(darm_t *d, uint16_t w, uint16_t w2)
         break;
 
     case T_THUMB2_RT_REG:
-        d->Rt = (w2 >> 12) & b1111;
+        d->Rt = (w2 >> 12) & 0b1111;
         break;
 
     case T_THUMB2_RT_RT2_REG:
-        d->Rt = (w2 >> 12) & b1111;
-        d->Rt2 = (w2 >> 8) & b1111;
+        d->Rt = (w2 >> 12) & 0b1111;
+        d->Rt2 = (w2 >> 8) & 0b1111;
         break;
 
     case T_THUMB2_RM_REG:
-        d->Rm = (w & b1111);
+        d->Rm = (w & 0b1111);
         break;
 
     case T_THUMB2_RD_REG:
-        d->Rd = (w2 >> 8) & b1111;
+        d->Rd = (w2 >> 8) & 0b1111;
         break;
 
     case T_THUMB2_RD_RM_REG:
-        d->Rd = (w2 >> 8) & b1111;
-        d->Rm = w2 & b1111;
+        d->Rd = (w2 >> 8) & 0b1111;
+        d->Rm = w2 & 0b1111;
         break;
 
     case T_THUMB2_RN_REG:
-        d->Rn = w & b1111;
+        d->Rn = w & 0b1111;
         break;
 
     case T_THUMB2_RN_RT_REG:
-        d->Rn = w & b1111;
-        d->Rt = (w2 >> 12) & b1111;
+        d->Rn = w & 0b1111;
+        d->Rt = (w2 >> 12) & 0b1111;
         break;
 
     case T_THUMB2_RN_RT_RT2_REG:
-        d->Rn = w & b1111;
-        d->Rt = (w2 >> 12) & b1111;
-        d->Rt2 = (w2 >> 8) & b1111;
+        d->Rn = w & 0b1111;
+        d->Rt = (w2 >> 12) & 0b1111;
+        d->Rt2 = (w2 >> 8) & 0b1111;
         break;
 
     case T_THUMB2_RN_RM_REG:
-        d->Rn = w & b1111;
-        d->Rm = w2 & b1111;
+        d->Rn = w & 0b1111;
+        d->Rm = w2 & 0b1111;
         break;
 
     case T_THUMB2_RN_RM_RT_REG:
-        d->Rn = w & b1111;
-        d->Rm = w2 & b1111;
-        d->Rt = (w2 >> 12) & b1111;
+        d->Rn = w & 0b1111;
+        d->Rm = w2 & 0b1111;
+        d->Rt = (w2 >> 12) & 0b1111;
         break;
 
     case T_THUMB2_RN_RD_REG:
-        d->Rn = w & b1111;
-        d->Rd = (w2 >> 8) & b1111;
+        d->Rn = w & 0b1111;
+        d->Rd = (w2 >> 8) & 0b1111;
         break;
 
     case T_THUMB2_RN_RD_RT_REG:
-        d->Rn = (w & b1111);
-        d->Rd = (w2 & b1111);
-        d->Rt = (w2 >> 12) & b1111;
+        d->Rn = (w & 0b1111);
+        d->Rd = (w2 & 0b1111);
+        d->Rt = (w2 >> 12) & 0b1111;
         break;
 
     case T_THUMB2_RN_RD_RT_RT2_REG:
-        d->Rn = (w & b1111);
-        d->Rd = (w2 & b1111);
-        d->Rt = (w2 >> 12) & b1111;
-        d->Rt2 = (w2 >> 8) & b1111;
+        d->Rn = (w & 0b1111);
+        d->Rd = (w2 & 0b1111);
+        d->Rt = (w2 >> 12) & 0b1111;
+        d->Rt2 = (w2 >> 8) & 0b1111;
         break;
 
     case T_THUMB2_RN_RD_RM_REG:
-        d->Rn = w & b1111;
-        d->Rm = w2 & b1111;
-        d->Rd = (w2 >> 8) & b1111;
+        d->Rn = w & 0b1111;
+        d->Rm = w2 & 0b1111;
+        d->Rd = (w2 >> 8) & 0b1111;
         break;
 
     case T_THUMB2_RN_RD_RM_RA_REG:
-        d->Rn = w & b1111;
-        d->Rm = w2 & b1111;
-        d->Rd = (w2 >> 8) & b1111;
-        d->Ra = (w2 >> 12) & b1111;
+        d->Rn = w & 0b1111;
+        d->Rm = w2 & 0b1111;
+        d->Rd = (w2 >> 8) & 0b1111;
+        d->Ra = (w2 >> 12) & 0b1111;
         break;
 
     default:
@@ -221,7 +221,7 @@ void thumb2_parse_imm(darm_t *d, uint16_t w, uint16_t w2)
 
     case T_THUMB2_IMM2:
         // 2 bit immediate
-        d->imm = (w2 >> 4) & b11;
+        d->imm = (w2 >> 4) & 0b11;
         d->shift = d->imm;
         d->shift_type = S_LSL;
         break;
@@ -229,7 +229,7 @@ void thumb2_parse_imm(darm_t *d, uint16_t w, uint16_t w2)
     case T_THUMB2_IMM2_IMM3:
         // 2 and 3 bit immediates
         // (imm3:imm2)
-        d->imm = ((w2 >> 10) & b11100) | ((w2 >> 6) & b11);
+        d->imm = ((w2 >> 10) & 0b11100) | ((w2 >> 6) & 0b11);
         break;
 
     case T_THUMB2_IMM1_IMM3_IMM8:
@@ -260,7 +260,7 @@ void thumb2_parse_flag(darm_t *d, uint16_t w, uint16_t w2)
 
     case T_THUMB2_ROTATE_FLAG:
         // Rotate field
-        d->rotate = (w2 >> 1) & b11000;
+        d->rotate = (w2 >> 1) & 0b11000;
         break;
 
     case T_THUMB2_U_FLAG:
@@ -326,7 +326,7 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
                 ((w & 0x3F) << 12) |
                 ((w2 & 0x7ff) << 1);
             d->imm = SIGN_EXTEND32(d->imm, 21);
-            d->cond = (w >> 6) & b1111;
+            d->cond = (w >> 6) & 0b1111;
         }
         else {
             // T4
@@ -380,13 +380,13 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
     case I_LSL: case I_LSR: case I_ASR: case I_ROR:
         if(d->I == B_SET) {
             d->shift = d->imm;
-            d->shift_type = ((w2 >> 4) & b11);
+            d->shift_type = ((w2 >> 4) & 0b11);
         }
         break;
 
     case I_MOVW: case I_MOVT:
         d->imm =
-            ((w & b1111) << 12) |
+            ((w & 0b1111) << 12) |
             ((w & 0x400) << 1) |
             ((w2 & 0x7000) >> 4) |
             (w2 & 0xff);
@@ -399,7 +399,7 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
 
     // option field
     case I_DBG: case I_DMB: case I_DSB: case I_ISB:
-        d->option = w2 & b1111;
+        d->option = w2 & 0b1111;
         break;
 
     // co-proc data processing
@@ -416,17 +416,17 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
         d->W = (w >> 5) & 1 ? B_SET : B_UNSET;
 
         // literal or immediate
-        d->Rn = (w & b1111) == b1111 ? R_INVLD : (w & b1111);
+        d->Rn = (w & 0b1111) == 0b1111 ? R_INVLD : (w & 0b1111);
 
         d->I = B_SET;
         d->imm = (w2 & 0xff) << 2;
-        d->coproc = (w2 >> 8) & b1111;
-        d->CRd = (w2 >> 12) & b1111;
+        d->coproc = (w2 >> 8) & 0b1111;
+        d->CRd = (w2 >> 12) & 0b1111;
         break;
 
     // Weird Rd offset
     case I_STREX:
-        d->Rd = (w2 >> 8) & b1111;
+        d->Rd = (w2 >> 8) & 0b1111;
         d->imm = (w2 & 0xff) << 2;
         break;
 
@@ -456,28 +456,28 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
     // co-processor move
     case I_MCR: case I_MCR2:
     case I_MRC: case I_MRC2:
-        d->CRm = w2 & b1111;
-        d->CRn = w & b1111;
-        d->coproc = (w2 >> 8) & b1111;
-        d->Rt = (w2 >> 12) & b1111;
-        d->opc1 = (w >> 5) & b111;
-        d->opc2 = (w2 >> 5) & b111;
+        d->CRm = w2 & 0b1111;
+        d->CRn = w & 0b1111;
+        d->coproc = (w2 >> 8) & 0b1111;
+        d->Rt = (w2 >> 12) & 0b1111;
+        d->opc1 = (w >> 5) & 0b111;
+        d->opc2 = (w2 >> 5) & 0b111;
         break;
 
     // co-proc move 2 reg
     case I_MCRR: case I_MCRR2:
     case I_MRRC: case I_MRRC2:
-        d->coproc = (w2 >> 8) & b1111;
-        d->Rt = (w2 >> 12) & b1111;
-        d->opc1 = (w2 >> 4) & b1111;
-        d->CRm = (w2 & b1111);
-        d->Rt2 = w & b1111;
+        d->coproc = (w2 >> 8) & 0b1111;
+        d->Rt = (w2 >> 12) & 0b1111;
+        d->opc1 = (w2 >> 4) & 0b1111;
+        d->CRm = (w2 & 0b1111);
+        d->Rt2 = w & 0b1111;
         break;
 
     case I_MSR:
         d->I = B_SET;
-        d->Rn = w & b1111;
-        d->mask = d->imm = (w2 >> 10) & b11;
+        d->Rn = w & 0b1111;
+        d->mask = d->imm = (w2 >> 10) & 0b11;
         break;
 
     case I_PKH:
@@ -490,7 +490,7 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
         d->Rt = R_INVLD;
         d->P = B_INVLD;
         d->W = B_INVLD;
-        if(d->Rn == b1111) {
+        if(d->Rn == 0b1111) {
             d->Rn = R_INVLD;
             d->imm = w2 & 0xfff;
             d->U = ((w >> 7) & 1) ? B_SET : B_UNSET;
@@ -500,14 +500,14 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
     case I_PLD:
         d->Rt = R_INVLD;
         d->P = B_INVLD;
-        if(d->Rn == b1111) {
+        if(d->Rn == 0b1111) {
             d->Rn = d->Rm = R_INVLD;
             d->imm = w2 & 0xfff;
             d->shift_type = S_INVLD;
             d->shift = 0;
             d->U = (w >> 7) & 1 ? B_SET : B_UNSET;
         }
-        d->W = (w & b1111) != b1111 ? ((w >> 5) & 1) : B_INVLD;
+        d->W = (w & 0b1111) != 0b1111 ? ((w >> 5) & 1) : B_INVLD;
         break;
 
     case I_SBFX: case I_UBFX:
@@ -525,7 +525,7 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
     case I_SMLSD: case I_SMUAD:
     case I_SMULW: case I_SMUSD:
         d->M = (w2 >> 4) & 1 ? B_SET : B_UNSET;
-        if(d->Ra == b1111) {
+        if(d->Ra == 0b1111) {
             d->Ra = R_INVLD;
         }
         break;
@@ -541,8 +541,8 @@ void thumb2_parse_misc(darm_t *d, uint16_t w, uint16_t w2)
 
     case I_SMLAL: case I_SMULL:
     case I_UMAAL: case I_UMLAL: case I_UMULL:
-        d->RdHi = (w2 >> 8) & b1111;
-        d->RdLo = (w2 >> 12) & b1111;
+        d->RdHi = (w2 >> 8) & 0b1111;
+        d->RdLo = (w2 >> 12) & 0b1111;
         break;
 
     case I_SMMLA: case I_SMMLS: case I_SMMUL:
@@ -642,7 +642,7 @@ int darm_thumb2_disasm(darm_t *d, uint16_t w, uint16_t w2)
     d->cond = C_AL;
 
     switch (w >> 11) {
-    case b11101: case b11110: case b11111:
+    case 0b11101: case 0b11110: case 0b11111:
         return thumb2_disasm(d, w, w2);
 
     default:

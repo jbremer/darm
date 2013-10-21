@@ -144,7 +144,7 @@ struct {
         .Rn = SP, .Rt = 7, .imm = 4, .I = B_SET, .U = 1, .P = 0, .W = 0}},
     {0xe8bd00f6, 0, "pop {r1,r2,r4-r7}", {
         .instr = I_POP, .instr_type = T_ARM_LDSTREGS, .cond = C_AL,
-        .Rn = SP, .W = 1, .reglist = b11110110}},
+        .Rn = SP, .W = 1, .reglist = 0b11110110}},
     {0xe6ff4f32, 0, "rbit r4, r2", {
         .instr = I_RBIT, .instr_type = T_ARM_BITREV, .cond = C_AL,
         .Rd = 4, .Rm = 2}},
@@ -200,7 +200,7 @@ struct {
         .Rn = 2}},
     {0xe6b21474, 0, "sxtah r1, r2, r4, ror #8", {
         .instr = I_SXTAH, .instr_type = T_ARM_PUSR, .cond = C_AL,
-        .Rn = 2, .Rd = 1, .rotate = b1000, .Rm = 4}},
+        .Rn = 2, .Rd = 1, .rotate = 0b1000, .Rm = 4}},
     {0xe0f12394, 0, "smlals r2, r1, r4, r3", {
         .instr = I_SMLAL, .instr_type = T_ARM_MUL, .cond = C_AL, .S = 1,
         .RdHi = 1, .RdLo = 2, .Rm = 3, .Rn = 4}},

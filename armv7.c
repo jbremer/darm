@@ -42,7 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // the upper four bits define the rotation value, but we have to multiply the
 // rotation value by two, so instead of right shifting by eight, we do a
 // right shift of seven, effectively avoiding the left shift of one
-#define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & b11110)
+#define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & 0b11110)
 
 static struct {
     const char *mnemonic_extension;
@@ -105,22 +105,22 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
 
     // there are not a lot of unconditional instructions, so the following
     // values are a bit hardcoded
-    switch ((w >> 25) & b111) {
-    case b000:
+    switch ((w >> 25) & 0b111) {
+    case 0b000:
         d->instr = I_SETEND;
         d->E = (w >> 9) & 1;
         return 0;
 
-    case b010:
+    case 0b010:
         // if the 21th bit is set, then it's one of the CLREX, DMB, DSB or ISB
         // instructions
         if((w >> 21) & 1) {
-            d->instr = type_uncond2_instr_lookup[(w >> 4) & b111];
+            d->instr = type_uncond2_instr_lookup[(w >> 4) & 0b111];
             if(d->instr != I_INVLD) {
                 // if the instruction is either DMB, DSB or ISB, then the last
                 // four bits represent an "option"
                 if(d->instr != I_CLREX) {
-                    d->option = w & b1111;
+                    d->option = w & 0b1111;
                 }
                 return 0;
             }
@@ -130,20 +130,20 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         // we fall-through here, as 0b011 also handles the PLD and PLI
         // instructions
 
-    case b011:
+    case 0b011:
         // if the 24th bit is set, then this is a PLD instruction, otherwise
         // it's a PLI instruction
         d->instr = (w >> 24) & 1 ? I_PLD : I_PLI;
 
-        d->Rn = (w >> 16) & b1111;
+        d->Rn = (w >> 16) & 0b1111;
         d->U = (w >> 23) & 1;
 
         // if the 25th bit is set, then this instruction takes a shifted
         // register as offset, otherwise, it takes an immediate as offset
         if((w >> 25) & 1) {
-            d->Rm = w & b1111;
-            d->shift_type = (w >> 5) & b11;
-            d->shift = (w >> 7) & b11111;
+            d->Rm = w & 0b1111;
+            d->shift_type = (w >> 5) & 0b11;
+            d->shift = (w >> 7) & 0b11111;
         }
         else {
             d->I = B_SET;
@@ -157,7 +157,7 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         }
         return 0;
 
-    case b101:
+    case 0b101:
         d->instr = I_BLX;
         d->H = (w >> 24) & 1;
         d->imm = w & BITMSK_24;
@@ -176,21 +176,21 @@ static int armv7_disas_uncond(darm_t *d, uint32_t w)
         d->imm |= d->H << 1;
         return 0;
 
-    case b111:
-        d->CRn = (w >> 16) & b1111;
-        d->coproc = (w >> 8) & b1111;
-        d->opc2 = (w >> 5) & b111;
-        d->CRm = w & b1111;
+    case 0b111:
+        d->CRn = (w >> 16) & 0b1111;
+        d->coproc = (w >> 8) & 0b1111;
+        d->opc2 = (w >> 5) & 0b111;
+        d->CRm = w & 0b1111;
 
         if(((w >> 4) & 1) == 0) {
             d->instr = I_CDP2;
-            d->CRd = (w >> 12) & b1111;
-            d->opc1 = (w >> 20) & b1111;
+            d->CRd = (w >> 12) & 0b1111;
+            d->opc1 = (w >> 20) & 0b1111;
         }
         else {
             d->instr = (w >> 20) & 1 ? I_MRC2 : I_MCR2;
-            d->opc1 = (w >> 21) & b111;
-            d->Rt = (w >> 12) & b1111;
+            d->opc1 = (w >> 21) & 0b111;
+            d->Rt = (w >> 12) & 0b1111;
         }
         return 0;
     }
@@ -206,21 +206,21 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // we have to check two parts of the encoded instruction, namely bits
     // 25..27 which should be zero, and bits 4..7, of which bit 4 and bit 7
     // should be one
-    const uint32_t mask = (b111 << 25) | (b1001 << 4);
-    if((w & mask) == (b1001 << 4)) {
+    const uint32_t mask = (0b111 << 25) | (0b1001 << 4);
+    if((w & mask) == (0b1001 << 4)) {
 
         // all variants of the MUL instruction
-        if(((w >> 24) & 1) == 0 && ((w >> 4) & b1111) == b1001) {
+        if(((w >> 24) & 1) == 0 && ((w >> 4) & 0b1111) == 0b1001) {
 
-            d->instr = type_mul_instr_lookup[(w >> 21) & b111];
+            d->instr = type_mul_instr_lookup[(w >> 21) & 0b111];
             d->instr_type = T_ARM_MUL;
 
             // except for UMAAL and MLS, every variant takes the S bit
             d->S = (w >> 20) & 1;
 
             // each variant takes Rm and Rn
-            d->Rm = (w >> 8) & b1111;
-            d->Rn = w & b1111;
+            d->Rm = (w >> 8) & 0b1111;
+            d->Rn = w & 0b1111;
 
             // if this is the UMAAL or MLS instruction *and* the S bit is set,
             // then this is an invalid instruction
@@ -230,60 +230,60 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
             switch ((uint32_t) d->instr) {
             case I_MLA: case I_MLS:
-                d->Ra = (w >> 12) & b1111;
+                d->Ra = (w >> 12) & 0b1111;
                 // fall-through
 
             case I_MUL:
-                d->Rd = (w >> 16) & b1111;
+                d->Rd = (w >> 16) & 0b1111;
                 break;
 
             case I_UMAAL: case I_UMULL: case I_UMLAL: case I_SMULL:
             case I_SMLAL:
-                d->RdHi = (w >> 16) & b1111;
-                d->RdLo = (w >> 12) & b1111;
+                d->RdHi = (w >> 16) & 0b1111;
+                d->RdLo = (w >> 12) & 0b1111;
                 break;
             }
             return 0;
         }
-        else if(((w >> 24) & 1) == 0 && ((w >> 5) & b11) != 0 &&
+        else if(((w >> 24) & 1) == 0 && ((w >> 5) & 0b11) != 0 &&
                 (w >> 21) & 1) {
 
             // the high 2 bits are represented by the 5th and 6th bit, the
             // lower bit is represented by the 20th bit
-            uint32_t index = ((w >> 4) & b110) | ((w >> 20) & 1);
+            uint32_t index = ((w >> 4) & 0b110) | ((w >> 20) & 1);
             d->instr = type_stack1_instr_lookup[index];
             if(d->instr == I_INVLD) return -1;
 
             d->instr_type = T_ARM_STACK1;
-            d->Rn = (w >> 16) & b1111;
-            d->Rt = (w >> 12) & b1111;
+            d->Rn = (w >> 16) & 0b1111;
+            d->Rt = (w >> 12) & 0b1111;
             d->P = (w >> 24) & 1;
             d->U = (w >> 23) & 1;
 
             // depending on the register form we either have to extract a
             // register or an immediate
             if(((w >> 22) & 1) == 0) {
-                d->Rm = w & b1111;
+                d->Rm = w & 0b1111;
             }
             else {
                 // the four high bits start at bit 8, so we shift them right
                 // to their destination
-                d->imm = ((w >> 4) & b11110000) | (w & b1111);
+                d->imm = ((w >> 4) & 0b11110000) | (w & 0b1111);
                 d->I = B_SET;
             }
             return 0;
         }
-        else if(((w >> 5) & b11) != 0 && ((w >> 20) & b10010) != b00010) {
+        else if(((w >> 5) & 0b11) != 0 && ((w >> 20) & 0b10010) != 0b00010) {
 
             // the high 2 bits are represented by the 5th and 6th bit, the
             // lower bit is represented by the 20th bit
-            uint32_t index = ((w >> 4) & b110) | ((w >> 20) & 1);
+            uint32_t index = ((w >> 4) & 0b110) | ((w >> 20) & 1);
             d->instr = type_stack2_instr_lookup[index];
             if(d->instr == I_INVLD) return -1;
 
             d->instr_type = T_ARM_STACK2;
-            d->Rn = (w >> 16) & b1111;
-            d->Rt = (w >> 12) & b1111;
+            d->Rn = (w >> 16) & 0b1111;
+            d->Rt = (w >> 12) & 0b1111;
             d->P = (w >> 24) & 1;
             d->U = (w >> 23) & 1;
             d->W = (w >> 21) & 1;
@@ -291,52 +291,52 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // depending on the register form we either have to extract a
             // register or an immediate
             if(((w >> 22) & 1) == 0) {
-                d->Rm = w & b1111;
+                d->Rm = w & 0b1111;
             }
             else {
                 // the four high bits start at bit 8, so we shift them right
                 // to their destination
-                d->imm = ((w >> 4) & b11110000) | (w & b1111);
+                d->imm = ((w >> 4) & 0b11110000) | (w & 0b1111);
                 d->I = B_SET;
             }
             return 0;
         }
         // synchronization primitive instructions
-        else if(((w >> 24) & 1) == 1 && ((w >> 4) & b1111) == b1001) {
-            d->instr = type_sync_instr_lookup[(w >> 20) & b1111];
+        else if(((w >> 24) & 1) == 1 && ((w >> 4) & 0b1111) == 0b1001) {
+            d->instr = type_sync_instr_lookup[(w >> 20) & 0b1111];
             d->instr_type = T_ARM_SYNC;
-            d->Rn = (w >> 16) & b1111;
+            d->Rn = (w >> 16) & 0b1111;
             switch ((uint32_t) d->instr) {
             case I_SWP: case I_SWPB:
                 d->B = (w >> 22) & 1;
-                d->Rt = (w >> 12) & b1111;
-                d->Rt2 = w & b1111;
+                d->Rt = (w >> 12) & 0b1111;
+                d->Rt2 = w & 0b1111;
                 return 0;
 
             case I_LDREX: case I_LDREXD: case I_LDREXB: case I_LDREXH:
-                d->Rt = (w >> 12) & b1111;
+                d->Rt = (w >> 12) & 0b1111;
                 return 0;
 
             case I_STREX: case I_STREXD: case I_STREXB: case I_STREXH:
-                d->Rd = (w >> 12) & b1111;
-                d->Rt = w & b1111;
+                d->Rd = (w >> 12) & 0b1111;
+                d->Rt = w & 0b1111;
                 return 0;
             }
         }
     }
     // handles the STR, STRT, LDR, LDRT, STRB, STRBT, LDRB, LDRBT stack
     // instructions, and the media instructions
-    else if(((w >> 26) & b11) == b01) {
+    else if(((w >> 26) & 0b11) == 0b01) {
 
         // if both the 25th and the 4th bit are set, then this is a media
         // instruction, which is handled in the big switch-case statement
         const uint32_t media_mask = (1 << 25) | (1 << 4);
         if((w & media_mask) != media_mask) {
-            d->instr = type_stack0_instr_lookup[(w >> 20) & b11111];
+            d->instr = type_stack0_instr_lookup[(w >> 20) & 0b11111];
             d->instr_type = T_ARM_STACK0;
 
-            d->Rn = (w >> 16) & b1111;
-            d->Rt = (w >> 12) & b1111;
+            d->Rn = (w >> 16) & 0b1111;
+            d->Rt = (w >> 12) & 0b1111;
 
             // extract some flags
             d->P = (w >> 24) & 1;
@@ -350,9 +350,9 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 d->I = B_SET;
             }
             else {
-                d->shift_type = (w >> 5) & b11;
-                d->shift = (w >> 7) & b11111;
-                d->Rm = w & b1111;
+                d->shift_type = (w >> 5) & 0b11;
+                d->shift = (w >> 7) & 0b11111;
+                d->Rm = w & 0b1111;
             }
 
             // if Rn == SP and P = 1 and U = 0 and W = 1 and imm12 = 4 and
@@ -374,42 +374,42 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     // instructions have various masks; of bits 20..27 bit 24 is set and bits
     // 21..22 specify which instruction this is, furthermore, bits 4..7
     // represent the value 0b0101
-    const uint32_t mask2 = (b11111001 << 20) | (b1111 << 4);
-    if((w & mask2) == ((1 << 24) | (b0101 << 4))) {
-        d->instr = type_sat_instr_lookup[(w >> 21) & b11];
+    const uint32_t mask2 = (0b11111001 << 20) | (0b1111 << 4);
+    if((w & mask2) == ((1 << 24) | (0b0101 << 4))) {
+        d->instr = type_sat_instr_lookup[(w >> 21) & 0b11];
         d->instr_type = T_ARM_SAT;
-        d->Rn = (w >> 16) & b1111;
-        d->Rd = (w >> 12) & b1111;
-        d->Rm = w & b1111;
+        d->Rn = (w >> 16) & 0b1111;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rm = w & 0b1111;
         return 0;
     }
     // handle packing, unpacking, saturation, and reversal instructions, these
     // instructions have the 4th bit set and bits 23..27 represent 0b01101
-    const uint32_t mask3 = (b11111 << 23) | (1 << 4);
-    if((w & mask3) == ((b01101 << 23) | (1 << 4))) {
+    const uint32_t mask3 = (0b11111 << 23) | (1 << 4);
+    if((w & mask3) == ((0b01101 << 23) | (1 << 4))) {
         // some instructions are already handled elsewhere (namely, PKH, SEL,
         // REV, REV16, RBIT, and REVSH)
-        uint32_t op1 = (w >> 20) & b111;
-        uint32_t A = (w >> 16) & b1111;
-        uint32_t op2 = (w >> 5) & b111;
+        uint32_t op1 = (w >> 20) & 0b111;
+        uint32_t A = (w >> 16) & 0b1111;
+        uint32_t op2 = (w >> 5) & 0b111;
 
         d->instr_type = T_ARM_PUSR;
 
         // the (SX|UX)T(A)(B|H)(16) instructions
         // op1 represents the upper three bits, and A = 0b1111 represents
-        if(op2 == b011) {
+        if(op2 == 0b011) {
             // the lower bit
-            d->instr = type_pusr_instr_lookup[(op1 << 1) | (A == b1111)];
+            d->instr = type_pusr_instr_lookup[(op1 << 1) | (A == 0b1111)];
             if(d->instr != I_INVLD) {
-                d->Rd = (w >> 12) & b1111;
-                d->Rm = w & b1111;
+                d->Rd = (w >> 12) & 0b1111;
+                d->Rm = w & 0b1111;
 
                 // rotation is shifted to the left by three, so we do this
                 // directly in our shift as well
-                d->rotate = (w >> 7) & b11000;
+                d->rotate = (w >> 7) & 0b11000;
 
                 // if A is not 0b1111, then A represents the Rn operand
-                if(A != b1111) {
+                if(A != 0b1111) {
                     d->Rn = A;
                 }
                 return 0;
@@ -417,33 +417,33 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
 
         // SSAT
-        if((op1 & b010) == b010 && (op2 & 1) == 0) {
+        if((op1 & 0b010) == 0b010 && (op2 & 1) == 0) {
             // if the upper bit is set, then it's USAT, otherwise SSAT
             d->instr = (op1 >> 2) ? I_USAT : I_SSAT;
-            d->imm = (w >> 16) & b11111;
+            d->imm = (w >> 16) & 0b11111;
             d->I = B_SET;
             // signed saturate adds one to the immediate
             if(d->instr == I_SSAT) {
                 d->imm++;
             }
-            d->Rd = (w >> 12) & b1111;
-            d->shift = (w >> 7) & b11111;
-            d->shift_type = (w >> 5) & b11;
-            d->Rn = w & b1111;
+            d->Rd = (w >> 12) & 0b1111;
+            d->shift = (w >> 7) & 0b11111;
+            d->shift_type = (w >> 5) & 0b11;
+            d->Rn = w & 0b1111;
             return 0;
         }
 
         // SSAT16 and USAT16
-        if((op1 == b010 || op1 == b110) && op2 == b001) {
-            d->instr = op1 == b010 ? I_SSAT16 : I_USAT16;
-            d->imm = (w >> 16) & b1111;
+        if((op1 == 0b010 || op1 == 0b110) && op2 == 0b001) {
+            d->instr = op1 == 0b010 ? I_SSAT16 : I_USAT16;
+            d->imm = (w >> 16) & 0b1111;
             d->I = B_SET;
             // signed saturate 16 adds one to the immediate
             if(d->instr == I_SSAT16) {
                 d->imm++;
             }
-            d->Rd = (w >> 12) & b1111;
-            d->Rn = w & b1111;
+            d->Rd = (w >> 12) & 0b1111;
+            d->Rn = w & 0b1111;
             return 0;
         }
     }
@@ -456,24 +456,24 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     switch ((uint32_t) d->instr_type) {
     case T_ARM_ARITH_SHIFT:
         d->S = (w >> 20) & 1;
-        d->Rd = (w >> 12) & b1111;
-        d->Rn = (w >> 16) & b1111;
-        d->Rm = w & b1111;
-        d->shift_type = (w >> 5) & b11;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rn = (w >> 16) & 0b1111;
+        d->Rm = w & 0b1111;
+        d->shift_type = (w >> 5) & 0b11;
 
         // type == 1, shift with the value of the lower bits of Rs
         if(((w >> 4) & 1) == B_SET) {
-            d->Rs = (w >> 8) & b1111;
+            d->Rs = (w >> 8) & 0b1111;
         }
         else {
-            d->shift = (w >> 7) & b11111;
+            d->shift = (w >> 7) & 0b11111;
         }
         return 0;
 
     case T_ARM_ARITH_IMM:
         d->S = (w >> 20) & 1;
-        d->Rd = (w >> 12) & b1111;
-        d->Rn = (w >> 16) & b1111;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rn = (w >> 16) & 0b1111;
         d->imm = ARMExpandImm(w & BITMSK_12);
         d->I = B_SET;
 
@@ -486,26 +486,26 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         return 0;
 
     case T_ARM_BITS:
-        d->instr = type_bits_instr_lookup[(w >> 21) & b11];
+        d->instr = type_bits_instr_lookup[(w >> 21) & 0b11];
 
         d->instr_type = T_ARM_BITS;
-        d->Rd = (w >> 12) & b1111;
-        d->Rn = w & b1111;
-        d->lsb = (w >> 7) & b11111;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rn = w & 0b1111;
+        d->lsb = (w >> 7) & 0b11111;
 
         // the bfi and bfc instructions specify the MSB, whereas the SBFX and
         // UBFX instructions specify the width minus one
         if(d->instr == I_BFI) {
-            d->width = ((w >> 16) & b11111) - d->lsb + 1;
+            d->width = ((w >> 16) & 0b11111) - d->lsb + 1;
 
             // if Rn is 0b1111, then this is in fact the BFC instruction
-            if(d->Rn == b1111) {
+            if(d->Rn == 0b1111) {
                 d->Rn = R_INVLD;
                 d->instr = I_BFC;
             }
         }
         else {
-            d->width = ((w >> 16) & b11111) + 1;
+            d->width = ((w >> 16) & 0b11111) + 1;
         }
         return 0;
 
@@ -529,23 +529,23 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     case T_ARM_BRNCHMISC:
         // first get the real instruction label
-        d->instr = type_brnchmisc_instr_lookup[(w >> 4) & b1111];
+        d->instr = type_brnchmisc_instr_lookup[(w >> 4) & 0b1111];
 
         // now we do a switch statement based on the instruction label,
         // rather than some magic values
         switch ((uint32_t) d->instr) {
         case I_BKPT:
-            d->imm = (((w >> 8) & BITMSK_12) << 4) + (w & b1111);
+            d->imm = (((w >> 8) & BITMSK_12) << 4) + (w & 0b1111);
             d->I = B_SET;
             return 0;
 
         case I_BX: case I_BXJ: case I_BLX:
-            d->Rm = w & b1111;
+            d->Rm = w & 0b1111;
             return 0;
 
         case I_MSR:
-            d->Rn = w & b1111;
-            d->imm = (w >> 18) & b11;
+            d->Rn = w & 0b1111;
+            d->imm = (w >> 18) & 0b11;
             d->I = B_SET;
             return 0;
 
@@ -556,7 +556,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         break;
 
     case T_ARM_MOV_IMM:
-        d->Rd = (w >> 12) & b1111;
+        d->Rd = (w >> 12) & 0b1111;
         d->imm = w & BITMSK_12;
         d->I = B_SET;
 
@@ -570,48 +570,48 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         }
         // the MOVW and the MOVT instructions take another 4 bits of immediate
         else {
-            d->imm |= ((w >> 16) & b1111) << 12;
+            d->imm |= ((w >> 16) & 0b1111) << 12;
         }
         return 0;
 
     case T_ARM_CMP_OP:
-        d->Rn = (w >> 16) & b1111;
-        d->Rm = w & b1111;
-        d->shift_type = (w >> 5) & b11;
+        d->Rn = (w >> 16) & 0b1111;
+        d->Rm = w & 0b1111;
+        d->shift_type = (w >> 5) & 0b11;
 
         // type == 1, shift with the value of the lower bits of Rs
         if(((w >> 4) & 1) == B_SET) {
-            d->Rs = (w >> 8) & b1111;
+            d->Rs = (w >> 8) & 0b1111;
         }
         else {
-            d->shift = (w >> 7) & b11111;
+            d->shift = (w >> 7) & 0b11111;
         }
         return 0;
 
     case T_ARM_CMP_IMM:
-        d->Rn = (w >> 16) & b1111;
+        d->Rn = (w >> 16) & 0b1111;
         d->imm = ARMExpandImm(w & BITMSK_12);
         d->I = B_SET;
         return 0;
 
     case T_ARM_OPLESS:
-        d->instr = type_opless_instr_lookup[w & b111];
+        d->instr = type_opless_instr_lookup[w & 0b111];
         return d->instr == I_INVLD ? -1 : 0;
 
     case T_ARM_DST_SRC:
-        d->instr = type_shift_instr_lookup[(w >> 4) & b1111];
+        d->instr = type_shift_instr_lookup[(w >> 4) & 0b1111];
         if(d->instr == I_INVLD) return -1;
 
         d->S = (w >> 20) & 1;
-        d->Rd = (w >> 12) & b1111;
-        d->shift_type = (w >> 5) & b11;
+        d->Rd = (w >> 12) & 0b1111;
+        d->shift_type = (w >> 5) & 0b11;
         if((w >> 4) & 1) {
-            d->Rm = (w >> 8) & b1111;
-            d->Rn = w & b1111;
+            d->Rm = (w >> 8) & 0b1111;
+            d->Rn = w & 0b1111;
         }
         else {
-            d->Rm = w & b1111;
-            d->shift = (w >> 7) & b11111;
+            d->Rm = w & 0b1111;
+            d->shift = (w >> 7) & 0b11111;
 
             // if this is a LSL instruction with a zero shift, then it's
             // actually a MOV instruction (there's no register-shifted LSL)
@@ -637,7 +637,7 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
 
     case T_ARM_LDSTREGS:
         d->W = (w >> 21) & 1;
-        d->Rn = (w >> 16) & b1111;
+        d->Rn = (w >> 16) & 0b1111;
         d->reglist = w & BITMSK_16;
 
         // if this is the LDM instruction and W = 1 and Rn = SP then this is
@@ -653,17 +653,17 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         return 0;
 
     case T_ARM_BITREV:
-        d->Rd = (w >> 12) & b1111;
-        d->Rm = w & b1111;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rm = w & 0b1111;
 
         // if this is the REV16 instruction and bits 4..7 are 0b0011, then
         // this is in fact the REV instruction
-        if(d->instr == I_REV16 && ((w >> 4) & b1111) == b0011) {
+        if(d->instr == I_REV16 && ((w >> 4) & 0b1111) == 0b0011) {
             d->instr = I_REV;
         }
         // if this is the REVSH instruction and bits 4..7 are 0b0011, then
         // this is in fact the RBIT instruction
-        else if(d->instr == I_REVSH && ((w >> 4) & b1111) == b0011) {
+        else if(d->instr == I_REVSH && ((w >> 4) & 0b1111) == 0b0011) {
             d->instr = I_RBIT;
         }
         return 0;
@@ -672,47 +672,47 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         switch ((uint32_t) d->instr) {
         case I_MVN:
             d->S = (w >> 20) & 1;
-            d->Rd = (w >> 12) & b1111;
-            d->shift_type = (w >> 5) & b11;
-            d->Rm = w & b1111;
+            d->Rd = (w >> 12) & 0b1111;
+            d->shift_type = (w >> 5) & 0b11;
+            d->Rm = w & 0b1111;
             if(((w >> 4) & 1) == B_UNSET) {
-                d->shift = (w >> 7) & b11111;
+                d->shift = (w >> 7) & 0b11111;
             }
             else {
-                d->Rs = (w >> 8) & b1111;
+                d->Rs = (w >> 8) & 0b1111;
             }
             return 0;
 
         case I_DBG:
-            d->option = w & b1111;
+            d->option = w & 0b1111;
             return 0;
 
         case I_SMC:
-            switch ((w >> 4) & b1111) {
+            switch ((w >> 4) & 0b1111) {
             // if the 7th bit is 1 and the 4th bit 0, then this is
             // the SMUL instruction
-            case b1000: case b1010: case b1100: case b1110:
+            case 0b1000: case 0b1010: case 0b1100: case 0b1110:
                 d->instr = I_SMUL;
                 d->instr_type = T_ARM_SM;
-                d->Rd = (w >> 16) & b1111;
-                d->Rm = (w >> 8) & b1111;
+                d->Rd = (w >> 16) & 0b1111;
+                d->Rm = (w >> 8) & 0b1111;
                 d->M  = (w >> 6) & 1;
                 d->N  = (w >> 5) & 1;
-                d->Rn = w & b1111;
+                d->Rn = w & 0b1111;
                 break;
 
             // smc
-            case b0111:
+            case 0b0111:
                 d->instr = I_SMC;
-                d->imm = w & b1111;
+                d->imm = w & 0b1111;
                 d->I = B_SET;
                 break;
 
             // clz
-            case b0001:
+            case 0b0001:
                 d->instr = I_CLZ;
-                d->Rm = w & b1111;
-                d->Rd = (w >> 12) & b1111;
+                d->Rm = w & 0b1111;
+                d->Rd = (w >> 12) & 0b1111;
                 break;
 
             default:
@@ -721,17 +721,17 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             return 0;
 
         case I_SEL:
-            d->Rd = (w >> 12) & b1111;
-            d->Rn = (w >> 16) & b1111;
-            d->Rm = w & b1111;
+            d->Rd = (w >> 12) & 0b1111;
+            d->Rn = (w >> 16) & 0b1111;
+            d->Rm = w & 0b1111;
 
             // the SEL and PKH instructions share the same 8-bit identifier,
             // if the 5th bit is set, then this is the SEL instruction,
             // otherwise it's the PKH instruction
             if(((w >> 5) & 1) == 0) {
                 d->instr = I_PKH;
-                d->shift_type = (w >> 5) & b10;
-                d->shift = (w >> 7) & b11111;
+                d->shift_type = (w >> 5) & 0b10;
+                d->shift = (w >> 7) & 0b11111;
                 d->T = (w >> 6) & 1;
             }
             return 0;
@@ -740,11 +740,11 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
     case T_ARM_SM:
         switch ((uint32_t) d->instr) {
         case I_SMMUL:
-            d->Rd = (w >> 16) & b1111;
-            d->Ra = (w >> 12) & b1111;
-            d->Rm = (w >> 8) & b1111;
+            d->Rd = (w >> 16) & 0b1111;
+            d->Ra = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
             d->R  = (w >> 5) & 1;
-            d->Rn = w & b1111;
+            d->Rn = w & 0b1111;
 
             // this can be either the SMMUL, the SMMLA, or the SMMLS
             // instruction, depending on the 6th bit and Ra
@@ -753,34 +753,34 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             }
             // if it's SMMUL instruction, but Ra is not 0b1111, then this is
             // the SMMLA instruction
-            else if(d->Ra != b1111) {
+            else if(d->Ra != 0b1111) {
                 d->instr = I_SMMLA;
             }
             return 0;
 
         case I_SMUSD:
-            d->Rd = (w >> 16) & b1111;
-            d->Ra = (w >> 12) & b1111;
-            d->Rm = (w >> 8) & b1111;
+            d->Rd = (w >> 16) & 0b1111;
+            d->Ra = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
             d->M  = (w >> 5) & 1;
-            d->Rn = w & b1111;
+            d->Rn = w & 0b1111;
 
             // this can be either the SMLAD, the SMLSD, the SMUAD, or the
             // SMUSD instruction, depending on the 6th bit and Ra
-            if((w >> 6) & 1 && d->Rn != b1111) {
+            if((w >> 6) & 1 && d->Rn != 0b1111) {
                 d->instr = I_SMLSD;
             }
             else if(((w >> 6) & 1) == 0) {
-                d->instr = d->Ra == b1111 ? I_SMUAD : I_SMLAD;
+                d->instr = d->Ra == 0b1111 ? I_SMUAD : I_SMLAD;
             }
             return 0;
 
         case I_SMLSLD:
-            d->RdHi = (w >> 16) & b1111;
-            d->RdLo = (w >> 12) & b1111;
-            d->Rm = (w >> 8) & b1111;
+            d->RdHi = (w >> 16) & 0b1111;
+            d->RdLo = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
             d->M = (w >> 5) & 1;
-            d->Rn = w & b1111;
+            d->Rn = w & 0b1111;
 
             // if the 6th bit is zero, then this is in fact the SMLALD
             // instruction
@@ -790,21 +790,21 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             return 0;
 
         case I_SMLA:
-            d->Rd = (w >> 16) & b1111;
-            d->Ra = (w >> 12) & b1111;
-            d->Rm = (w >> 8) & b1111;
+            d->Rd = (w >> 16) & 0b1111;
+            d->Ra = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
             d->M  = (w >> 6) & 1;
             d->N  = (w >> 5) & 1;
-            d->Rn = w & b1111;
+            d->Rn = w & 0b1111;
             return 0;
 
         case I_SMLAL:
-            d->RdHi = (w >> 16) & b1111;
-            d->RdLo = (w >> 12) & b1111;
-            d->Rm = (w >> 8) & b1111;
+            d->RdHi = (w >> 16) & 0b1111;
+            d->RdLo = (w >> 12) & 0b1111;
+            d->Rm = (w >> 8) & 0b1111;
             d->M  = (w >> 6) & 1;
             d->N  = (w >> 5) & 1;
-            d->Rn = w & b1111;
+            d->Rn = w & 0b1111;
             return 0;
 
         case I_SMUL:
@@ -818,35 +818,35 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
         // the upper three bits are represented by bits 20..22, so we only
         // right-shift those 17 bytes, the lower three bits are represented
         // by bits 5..7
-        d->instr = type_pas_instr_lookup[((w >> 17) & b111000) |
-                                         ((w >> 5) & b111)];
+        d->instr = type_pas_instr_lookup[((w >> 17) & 0b111000) |
+                                         ((w >> 5) & 0b111)];
         if(d->instr == I_INVLD) return -1;
 
-        d->Rn = (w >> 16) & b1111;
-        d->Rd = (w >> 12) & b1111;
-        d->Rm = w & b1111;
+        d->Rn = (w >> 16) & 0b1111;
+        d->Rd = (w >> 12) & 0b1111;
+        d->Rm = w & 0b1111;
         return 0;
 
     case T_ARM_MVCR:
-        d->CRn = (w >> 16) & b1111;
-        d->coproc = (w >> 8) & b1111;
-        d->opc2 = (w >> 5) & b111;
-        d->CRm = w & b1111;
+        d->CRn = (w >> 16) & 0b1111;
+        d->coproc = (w >> 8) & 0b1111;
+        d->opc2 = (w >> 5) & 0b111;
+        d->CRm = w & 0b1111;
 
         if(((w >> 4) & 1) == 0) {
             d->instr = I_CDP;
-            d->opc1 = (w >> 20) & b1111;
-            d->CRd = (w >> 12) & b1111;
+            d->opc1 = (w >> 20) & 0b1111;
+            d->CRd = (w >> 12) & 0b1111;
         }
         else {
-            d->opc1 = (w >> 21) & b111;
-            d->Rt = (w >> 12) & b1111;
+            d->opc1 = (w >> 21) & 0b111;
+            d->Rt = (w >> 12) & 0b1111;
         }
         return 0;
 
     case T_ARM_UDF:
         d->I = B_SET;
-        d->imm = (w & b1111) | ((w >> 4) & (BITMSK_12 << 4));
+        d->imm = (w & 0b1111) | ((w >> 4) & (BITMSK_12 << 4));
         return 0;
     }
     return -1;
@@ -858,7 +858,7 @@ int darm_armv7_disasm(darm_t *d, uint32_t w)
 
     darm_init(d);
     d->w = w;
-    d->cond = (w >> 28) & b1111;
+    d->cond = (w >> 28) & 0b1111;
 
     if(d->cond == C_UNCOND) {
         ret = armv7_disas_uncond(d, w);
