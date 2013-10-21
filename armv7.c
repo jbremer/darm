@@ -702,14 +702,14 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
                 break;
 
             // smc
-            case b0111:
+            case 0b0111:
                 d->instr = I_SMC;
                 d->imm = w & 0b1111;
                 d->I = B_SET;
                 break;
 
             // clz
-            case b0001:
+            case 0b0001:
                 d->instr = I_CLZ;
                 d->Rm = w & 0b1111;
                 d->Rd = (w >> 12) & 0b1111;
