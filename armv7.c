@@ -618,12 +618,6 @@ static int armv7_disas_cond(darm_t *d, uint32_t w)
             // actually a MOV instruction (there's no register-shifted LSL)
             if(d->instr == I_LSL && d->shift_type == S_LSL && d->shift == 0) {
                 d->instr = I_MOV;
-
-                // if Rd and Rm are zero, then this is a NOP instruction
-                if(d->Rd == 0 && d->Rm == 0) {
-                    d->instr = I_NOP;
-                    d->Rd = d->Rm = R_INVLD;
-                }
             }
 
             // if this is a ROR instruction with a zero shift, then it's
