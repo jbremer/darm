@@ -379,7 +379,7 @@ instr_types = [
           lambda x, y, z: z == 26 or z == 27),
     armv7('LDSTREGS', 'Load or store multiple registers at once',
           ['ins<c> <Rn>{!},<registers>'],
-          lambda x, y, z: x[-1] == d.register_list),
+          lambda x, y, z: x[-1] == d.register_list and not 'POP' in y),
     armv7('BITREV', 'Bit reverse instructions',
           ['ins<c> <Rd>,<Rm>'],
           lambda x, y, z: x[-1] == d.Rm and x[-10] == d.Rd and
