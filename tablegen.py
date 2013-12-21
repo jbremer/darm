@@ -1,4 +1,8 @@
 
+SM_HLT = 0
+SM_STEP = 1
+SM_DUMP = 2
+
 
 class Instruction(object):
     def __init__(self, name, bits, **kwargs):
@@ -25,6 +29,9 @@ class Instruction(object):
 
     def __repr__(self):
         return '<Instruction %s, %r>' % (self.name, self.bits)
+
+    def create(self, sm, lut, bitsize):
+        return sm.insert(SM_DUMP)
 
 
 class BitPattern(object):
@@ -126,10 +133,65 @@ class Node(object):
         if self.leaf:
             print ' '*idx, '->', self.leaf.name
 
+    def create(self, sm, lut, bitsize):
+        if self.leaf:
+            return self.leaf.create(sm, lut, bitsize)
+
+        bit, (null, one) = self.lut.items()[0]
+
+        off = sm.alloc(4)
+        off2 = lut.alloc(2)
+
+        if not null.lut and not null.leaf:
+            off_null = sm.insert(SM_HLT)
+        else:
+            off_null = null.create(sm, lut, bitsize)
+
+        if not one.lut and not one.leaf:
+            off_one = sm.insert(SM_HLT)
+        else:
+            off_one = one.create(sm, lut, bitsize)
+
+        sm.update(off, SM_STEP, bitsize-1-bit, off2 % 256, off2 / 256)
+        lut.update(off2, off_null, off_one)
+        return off
+
+
+class LookupTable(object):
+    def __init__(self, bits):
+        self.table = []
+        self.bits = bits
+
+    def alloc(self, length):
+        ret = len(self.table)
+        self.table += [None for _ in xrange(length)]
+        return ret
+
+    def insert(self, value):
+        assert value >= 0 and value < 2**self.bits
+        if value in self.table:
+            return self.table.index(value)
+        ret = len(self.table)
+        self.table.append(value)
+        return ret
+
+    def update(self, offset, *args):
+        assert all(_ >= 0 and _ < 2**self.bits for _ in args)
+        tbl_begin = self.table[:offset]
+        tbl_end = self.table[offset+len(args):]
+        self.table = tbl_begin + list(args) + tbl_end
+
+    def append(self, *args):
+        assert all(_ >= 0 and _ < 2**self.bits for _ in args)
+        ret = len(self.table)
+        self.table += args
+        return ret
+
 
 class Table(object):
-    def __init__(self, insns):
+    def __init__(self, insns, bitsize):
         self.root = Node()
+        self.bitsize = bitsize
 
         for ins in insns:
             self.root.insert(ins)
@@ -141,3 +203,9 @@ class Table(object):
 
     def dump(self):
         self.root.dump()
+
+    def create(self):
+        sm = LookupTable(8)
+        lut = LookupTable(16)
+        self.root.create(sm, lut, self.bitsize)
+        return sm, lut

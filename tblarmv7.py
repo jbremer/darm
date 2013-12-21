@@ -1,3 +1,4 @@
+import sys
 from tablegen import Instruction, BitPattern, Immediate, Macro, Table
 
 
@@ -23,5 +24,21 @@ table = [
 ]
 
 if __name__ == '__main__':
-    t = Table(table)
-    t.dump()
+    t = Table(table, 32)
+    sm, lut = t.create()
+
+    sys.stdout = open('darm-tables.c', 'w')
+    print '#include <stdint.h>'
+    print 'uint8_t g_armv7_sm[%d] = {' % len(sm.table)
+    print '   ', ', '.join(str(_) for _ in sm.table)
+    print '};'
+    print 'uint16_t g_armv7_lut[%d] = {' % len(lut.table)
+    print '   ', ', '.join(str(_) for _ in lut.table)
+    print '};'
+
+    sys.stdout = open('darm-tables.h', 'w')
+    print '#ifndef __DARM_ARMV7_TBL__'
+    print '#define __DARM_ARMV7_TBL__'
+    print 'extern uint8_t g_armv7_sm[%d];' % len(sm.table)
+    print 'extern uint16_t g_armv7_lut[%d];' % len(lut.table)
+    print '#endif'
