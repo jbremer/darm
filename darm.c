@@ -20,7 +20,18 @@ typedef enum _darm_sm_opcode_t {
 
     // Extract various general purpose registers.
     SM_Rd, SM_Rn, SM_Rm, SM_Ra, SM_Rt, SM_Rt2, SM_RdHi, SM_RdLo, SM_Rs,
+
+    SM_ARMExpandImm,
+
+    SM_S,
 } darm_sm_opcode_t;
+
+#define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
+
+// the upper four bits define the rotation value, but we have to multiply the
+// rotation value by two, so instead of right shifting by eight, we do a
+// right shift of seven, effectively avoiding the left shift of one
+#define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & b11110)
 
 static inline uint32_t _extract_field(uint32_t insn,
     uint32_t idx, uint32_t bits)
@@ -36,31 +47,37 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
 {
     uint32_t off = 0, value;
     while (1) {
-        switch (sm[off]) {
+        switch (sm[off++]) {
         case SM_HLT:
             return -1;
 
         case SM_STEP:
-            value = (insn >> sm[off+1]) & 1;
-            off = lut[sm[off+2] + sm[off+3]*256 + value];
+            value = (insn >> sm[off]) & 1;
+            off = lut[sm[off+1] + sm[off+2]*256 + value];
             break;
 
         case SM_RETN:
             return 0;
 
         case SM_IMM:
-            d->imm = _extract_field(insn, 0, sm[off+1]);
-            off += 2;
+            d->imm = _extract_field(insn, 0, sm[off++]);
             break;
 
 #define SM_REG(name) \
         case SM_##name: \
-            d->name = _extract_field(insn, sm[off+1], 4); \
-            off += 2; \
+            d->name = _extract_field(insn, sm[off++], 4); \
             break;
 
         SM_REG(Rd); SM_REG(Rn); SM_REG(Rm); SM_REG(Ra); SM_REG(Rt);
         SM_REG(Rt2); SM_REG(RdHi); SM_REG(RdLo); SM_REG(Rs);
+
+        case SM_ARMExpandImm:
+            d->imm = ARMExpandImm(d->imm);
+            break;
+
+        case SM_S:
+            d->S = _extract_field(insn, 20, 1);
+            break;
         }
     }
     return 0;

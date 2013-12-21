@@ -1,11 +1,11 @@
 import sys
 from tablegen import Instruction, BitPattern, Macro, Table
-from tablegen import Register, Immediate
+from tablegen import Flag, Register, Immediate
 
 
 # TODO cond cannot be 0b1111
 cond = BitPattern(4, 'cond')
-S = BitPattern(1, 'S')
+S = Flag(1, 'S', False)
 Rn = Register(4, 'Rn')
 Rm = Register(4, 'Rm')
 Rd = Register(4, 'Rd')
@@ -30,10 +30,10 @@ if __name__ == '__main__':
 
     sys.stdout = open('darm-tables.c', 'w')
     print '#include <stdint.h>'
-    print 'uint8_t g_armv7_sm[%d] = {' % len(sm.table)
+    print 'const uint8_t g_armv7_sm[%d] = {' % len(sm.table)
     print '   ', ', '.join(str(_) for _ in sm.table)
     print '};'
-    print 'uint16_t g_armv7_lut[%d] = {' % len(lut.table)
+    print 'const uint16_t g_armv7_lut[%d] = {' % len(lut.table)
     print '   ', ', '.join(str(_) for _ in lut.table)
     print '};'
 
@@ -41,6 +41,6 @@ if __name__ == '__main__':
     print '#ifndef __DARM_ARMV7_TBL__'
     print '#define __DARM_ARMV7_TBL__'
     print '#include <stdint.h>'
-    print 'extern uint8_t g_armv7_sm[%d];' % len(sm.table)
-    print 'extern uint16_t g_armv7_lut[%d];' % len(lut.table)
+    print 'extern const uint8_t g_armv7_sm[%d];' % len(sm.table)
+    print 'extern const uint16_t g_armv7_lut[%d];' % len(lut.table)
     print '#endif'
