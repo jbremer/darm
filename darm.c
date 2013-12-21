@@ -37,17 +37,14 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
     while (1) {
         switch (sm[off]) {
         case SM_HLT:
-            printf("hlt..\n");
             return -1;
 
         case SM_STEP:
             value = (insn >> sm[off+1]) & 1;
-            printf("leaf.. bit %d -> %d\n", sm[off+1], value);
             off = lut[sm[off+2] + sm[off+3]*256 + value];
             break;
 
         case SM_RETN:
-            printf("dump.. :)\n");
             return 0;
 
         case SM_IMM:
