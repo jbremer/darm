@@ -1,15 +1,18 @@
 CC = gcc
 CFLAGS = -std=c99 -Wall -O2 -Wextra -s
 
-TABLES = darm-tables.c
+AUTOGEN = darm-internal.h darm-tables.c darm-tables.h
 OBJECTS = main.o darm.o darm-tables.o
 
-default: $(TABLES) main
+default: $(AUTOGEN) main
 
 main: $(OBJECTS)
 
-$(TABLES): tblarmv7.py tablegen.py
+darm-tables.c darm-tables.h: tblarmv7.py tablegen.py
 	python tblarmv7.py
+
+darm-internal.h:
+	python internal.py
 
 clean:
 	rm -f $(OBJECTS) $(TABLES)

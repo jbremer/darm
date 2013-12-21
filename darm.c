@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "darm.h"
+#include "darm-internal.h"
 #include "darm-tables.h"
 
 typedef enum _darm_sm_opcode_t {
