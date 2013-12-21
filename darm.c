@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
+#include "darm.h"
 #include "darm-tables.h"
-
-typedef struct _darm_t {
-} darm_t;
 
 typedef enum _darm_sm_opcode_t {
     // Halt execution, invalid instruction.
@@ -13,8 +11,21 @@ typedef enum _darm_sm_opcode_t {
     // in the instruction.
     SM_STEP,
 
-    SM_DUMP,
+    // This instruction has been disassembled correctly, return success.
+    SM_RETN,
+
+    // Extract an immediate.
+    SM_IMM,
+
+    // Extract various general purpose registers.
+    SM_Rd, SM_Rn, SM_Rm, SM_Ra, SM_Rt, SM_Rt2, SM_RdHi, SM_RdLo, SM_Rs,
 } darm_sm_opcode_t;
+
+static inline uint32_t _extract_field(uint32_t insn,
+    uint32_t idx, uint32_t bits)
+{
+    return (insn >> idx) & ((1 << bits) - 1);
+}
 
 // Disassembles any instruction according to the state machine and lookup
 // table. The input instruction can be either 16 or 32 bit, depending on
@@ -35,9 +46,23 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
             off = lut[sm[off+2] + sm[off+3]*256 + value];
             break;
 
-        case SM_DUMP:
+        case SM_RETN:
             printf("dump.. :)\n");
             return 0;
+
+        case SM_IMM:
+            d->imm = _extract_field(insn, 0, sm[off+1]);
+            off += 2;
+            break;
+
+#define SM_REG(name) \
+        case SM_##name: \
+            d->name = _extract_field(insn, sm[off+1], 4); \
+            off += 2; \
+            break;
+
+        SM_REG(Rd); SM_REG(Rn); SM_REG(Rm); SM_REG(Ra); SM_REG(Rt);
+        SM_REG(Rt2); SM_REG(RdHi); SM_REG(RdLo); SM_REG(Rs);
         }
     }
     return 0;

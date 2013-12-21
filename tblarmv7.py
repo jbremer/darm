@@ -1,14 +1,15 @@
 import sys
-from tablegen import Instruction, BitPattern, Immediate, Macro, Table
+from tablegen import Instruction, BitPattern, Macro, Table
+from tablegen import Register, Immediate
 
 
 # TODO cond cannot be 0b1111
 cond = BitPattern(4, 'cond')
 S = BitPattern(1, 'S')
-Rn = BitPattern(4, 'Rn')
-Rm = BitPattern(4, 'Rm')
-Rd = BitPattern(4, 'Rd')
-Rs = BitPattern(4, 'Rs')
+Rn = Register(4, 'Rn')
+Rm = Register(4, 'Rm')
+Rd = Register(4, 'Rd')
+Rs = Register(4, 'Rs')
 typ = BitPattern(2, 'type')
 
 imm5 = Immediate(5, 'imm5')

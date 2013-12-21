@@ -1,7 +1,26 @@
 
-SM_HLT = 0
-SM_STEP = 1
-SM_DUMP = 2
+_iota_value = None
+
+
+def iota(value=None):
+    global _iota_value
+    _iota_value = _iota_value + 1 if value is None else value
+    return _iota_value
+
+
+SM_HLT = iota(0)
+SM_STEP = iota()
+SM_RETN = iota()
+SM_IMM = iota()
+SM_Rd = iota()
+SM_Rn = iota()
+SM_Rm = iota()
+SM_Ra = iota()
+SM_Rt = iota()
+SM_Rt2 = iota()
+SM_RdHi = iota()
+SM_RdLo = iota()
+SM_Rs = iota()
 
 
 class Instruction(object):
@@ -31,7 +50,16 @@ class Instruction(object):
         return '<Instruction %s, %r>' % (self.name, self.bits)
 
     def create(self, sm, lut, bitsize):
-        return sm.insert(SM_DUMP)
+        idx, ret = 0, sm.offset()
+        for bit in self.bits:
+            if isinstance(bit, int):
+                idx += 1
+                continue
+
+            bit.create(idx, sm, lut, bitsize)
+            idx += bit.bitsize
+        sm.append(SM_RETN)
+        return ret
 
 
 class BitPattern(object):
@@ -43,9 +71,18 @@ class BitPattern(object):
         clz = self.__class__.__name__
         return '<%s %s, %d bits>' % (clz, self.name, self.bitsize)
 
+    def create(self, idx, sm, lut, bitsize):
+        pass
+
+
+class Register(BitPattern):
+    def create(self, idx, sm, lut, bitsize):
+        return sm.append(globals()['SM_' + self.name], bitsize-4-idx)
+
 
 class Immediate(BitPattern):
-    pass
+    def create(self, idx, sm, lut, bitsize):
+        return sm.append(SM_IMM, self.bitsize)
 
 
 class Macro(object):
@@ -161,6 +198,9 @@ class LookupTable(object):
     def __init__(self, bits):
         self.table = []
         self.bits = bits
+
+    def offset(self):
+        return len(self.table)
 
     def alloc(self, length):
         ret = len(self.table)

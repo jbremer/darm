@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-
-typedef struct _darm_t {
-} darm_t;
+#include "darm.h"
 
 int darm_armv7(darm_t *d, uint32_t insn);
 
