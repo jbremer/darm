@@ -183,7 +183,8 @@ class Node(object):
 
         self.lut[self.idx] = Node(self), Node(self)
         for ins in self.leaf:
-            self.lut[self.idx][ins.value[self.idx]].insert(ins)
+            if self.idx in ins.value:
+                self.lut[self.idx][ins.value[self.idx]].insert(ins)
 
         self.lut[self.idx][0].process()
         self.lut[self.idx][1].process()
