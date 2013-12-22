@@ -41,6 +41,12 @@ typedef enum _darm_sm_opcode_t {
     // in the instruction.
     SM_STEP,
 
+    // Some instructions are a more specific variant of another instruction.
+    // In these cases, the more specific instruction will have a couple of
+    // bits which are hardcoded and have to be checked in order to determine
+    // as which encoding we will disassemble this instruction.
+    SM_CMP4,
+
     // This instruction has been disassembled correctly, return success.
     SM_RETN,
 
@@ -85,6 +91,11 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
         case SM_STEP:
             value = (insn >> sm[off]) & 1;
             off = lut[sm[off+1] + sm[off+2]*256 + value];
+            break;
+
+        case SM_CMP4:
+            value = _extract_field(insn, sm[off], 4) == sm[off+1];
+            off = lut[sm[off+2] + sm[off+3]*256 + value];
             break;
 
         case SM_RETN:
