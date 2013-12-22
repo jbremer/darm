@@ -72,7 +72,7 @@ class Instruction(object):
             macro.create(sm, lut, bitsize)
 
         name = 'I_' + self.name.upper()
-        sm.append('SM_INSTR', '%s %% 256' % name, '%s / 256' % name)
+        sm.append('SM_INSTR', 'L(%s)' % name, 'H(%s)' % name)
         sm.append('SM_RETN')
         return ret
 
@@ -215,7 +215,8 @@ class Node(object):
         else:
             off_one = one.create(sm, lut, bitsize)
 
-        sm.update(off, 'SM_STEP', bitsize-1-bit, off2 % 256, off2 / 256)
+        sm.update(off, 'SM_STEP', bitsize-1-bit,
+                  'L(%d)' % off2, 'H(%d)' % off2)
         lut.update(off2, off_null, off_one)
         return off
 

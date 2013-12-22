@@ -267,6 +267,8 @@ if __name__ == '__main__':
     print('#include "darm-internal.h"')
     print('#define offsetof(st, m) ((uint32_t)(&((st *)0)->m))')
     print('#define O(m) offsetof(darm_t, m)')
+    print('#define L(x) (x) % 256')
+    print('#define H(x) (x) / 256')
     print('const uint8_t g_armv7_sm[%d] = {' % len(sm.table))
     print('    ' + generate_c_table(sm.table, 8))
     print('};')
