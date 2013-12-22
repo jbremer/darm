@@ -56,6 +56,7 @@ typedef struct _darm_t {
     uint32_t        insn;
 
     darm_instr_t    instr;
+    darm_cond_t     cond;
 
     darm_reg_t      Rd;
     darm_reg_t      Rn;
@@ -67,8 +68,12 @@ typedef struct _darm_t {
     darm_reg_t      RdLo;
     darm_reg_t      Rs;
 
-    uint32_t        S;
     uint32_t        imm;
+
+    uint32_t        S, E, P, U, W;
+    darm_option_t   option;
+    uint32_t        lsb, msb;
+    uint16_t        register_list;
 } darm_t;
 
 #endif

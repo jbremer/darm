@@ -54,6 +54,10 @@ typedef enum _darm_sm_opcode_t {
     // Assign the instruction index.
     SM_INSTR,
 
+    // Extracts a couple of bits from the instruction and stores them in
+    // the given field in the darm_t object.
+    SM_EXTR,
+
     // Extract an immediate.
     SM_IMM,
 
@@ -61,8 +65,6 @@ typedef enum _darm_sm_opcode_t {
     SM_Rd, SM_Rn, SM_Rm, SM_Ra, SM_Rt, SM_Rt2, SM_RdHi, SM_RdLo, SM_Rs,
 
     SM_ARMExpandImm,
-
-    SM_S,
 } darm_sm_opcode_t;
 
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
@@ -110,6 +112,12 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
             off += 2;
             break;
 
+        case SM_EXTR:
+            *(uint32_t *)((char *) d + sm[off]) =
+                _extract_field(insn, sm[off+1], sm[off+2]);
+            off += 3;
+            break;
+
         case SM_IMM:
             d->imm = _extract_field(insn, 0, sm[off++]);
             break;
@@ -125,14 +133,6 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
         case SM_ARMExpandImm:
             d->imm = ARMExpandImm(d->imm);
             break;
-
-#define SM_FLAG(name, idx, bitsize) \
-        case SM_##name: \
-            d->name = _extract_field(insn, idx, bitsize); \
-            break;
-
-        SM_FLAG(S, 20, 1);
-
         }
     }
     return 0;

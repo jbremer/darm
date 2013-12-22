@@ -31,7 +31,7 @@ import re
 
 
 SM = [
-    'hlt', 'step', 'cmp4', 'retn',
+    'hlt', 'step', 'cmp4', 'retn', 'instr', 'extr',
     'imm',
     'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'Rt2', 'RdHi', 'RdLo', 'Rs',
     'ARMExpandImm', 'cond', 'S', 'msb', 'lsb', 'E', 'P', 'U', 'W', 'option',
@@ -101,14 +101,9 @@ class BitPattern(object):
         pass
 
 
-class Flag(BitPattern):
-    def __init__(self, bitsize, name, pass_idx=False):
-        BitPattern.__init__(self, bitsize, name)
-        self.pass_idx = pass_idx
-
+class Field(BitPattern):
     def create(self, idx, sm, lut, bitsize):
-        args = [self.idx] if self.pass_idx else []
-        return sm.append(SM[self.name], *args)
+        return sm.append(SM['extr'], 'O(%s)' % self.name, idx, self.bitsize)
 
 
 class Register(BitPattern):

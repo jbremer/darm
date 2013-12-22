@@ -30,7 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import sys
 import textwrap
 from tablegen import Instruction, BitPattern, Macro, Table
-from tablegen import Flag, Register, Immediate
+from tablegen import Field, Register, Immediate
 
 
 Rd = Register(4, 'Rd')
@@ -46,18 +46,18 @@ typ = BitPattern(2, 'type')
 
 # TODO cond cannot be 0b1111
 # cond = BitPattern(4, 'cond')
-cond = Flag(4, 'cond', False)
-S = Flag(1, 'S', False)
-W = Flag(1, 'W', False)
-P = Flag(1, 'P', False)
-U = Flag(1, 'U', False)
+cond = Field(4, 'cond')
+S = Field(1, 'S')
+W = Field(1, 'W')
+P = Field(1, 'P')
+U = Field(1, 'U')
 
-msb = Flag(5, 'msb', False)
-lsb = Flag(5, 'msb', False)
-option = Flag(4, 'option', False)
-register_list = Flag(16, 'register_list', False)
-widthm1 = Flag(5, 'widthm1', False)
-E = Flag(1, 'E', False)
+msb = Field(5, 'msb')
+lsb = Field(5, 'msb')
+option = Field(4, 'option')
+register_list = Field(16, 'register_list')
+widthm1 = Field(5, 'widthm1')
+E = Field(1, 'E')
 
 imm1 = Immediate(1, 'imm1')
 imm4 = Immediate(4, 'imm4')
@@ -177,7 +177,7 @@ table = [
     Instruction('SBC{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 0, 1, 1, 0, S, Rn, Rd, imm12)),
     Instruction('SBC{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 0, 0, 0, 1, 1, 0, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('SBC{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 0, 1, 1, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
-    Instruction('SBFX<c> <Rd>,<Rn>,#<lsb>,#<width>', (cond, 0, 1, 1, 1, 1, 0, 1, widthm1, Rd, lsb, 1, 0, 1, Rn)),
+    # Instruction('SBFX<c> <Rd>,<Rn>,#<lsb>,#<width>', (cond, 0, 1, 1, 1, 1, 0, 1, widthm1, Rd, lsb, 1, 0, 1, Rn)),
     Instruction('SEL<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 1, 1, Rm)),
     Instruction('SETEND <endian_specifier>', (1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, (0), (0), (0), 1, (0), (0), (0), (0), (0), (0), E, (0), 0, 0, 0, 0, (0), (0), (0), (0))),
     Instruction('SEV<c>', (cond, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, 0, 1, 0, 0)),
@@ -217,7 +217,7 @@ table = [
     Instruction('UADD16<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 0, 0, 1, Rm)),
     Instruction('UADD8<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 0, 1, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rm)),
     Instruction('UASX<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 0, 1, 1, Rm)),
-    Instruction('UBFX<c> <Rd>,<Rn>,#<lsb>,#<width>', (cond, 0, 1, 1, 1, 1, 1, 1, widthm1, Rd, lsb, 1, 0, 1, Rn)),
+    # Instruction('UBFX<c> <Rd>,<Rn>,#<lsb>,#<width>', (cond, 0, 1, 1, 1, 1, 1, 1, widthm1, Rd, lsb, 1, 0, 1, Rn)),
     Instruction('UDF<c> #<imm12>', (cond, 0, 1, 1, 1, 1, 1, 1, 1, imm12, 1, 1, 1, 1, imm4)),
     Instruction('UHADD16<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 1, 1, Rn, Rd, (1), (1), (1), (1), 0, 0, 0, 1, Rm)),
     Instruction('UHADD8<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 1, 1, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rm)),
@@ -262,7 +262,10 @@ if __name__ == '__main__':
 
     magic_open('darm-tables.c')
     print('#include <stdint.h>')
+    print('#include "darm.h"')
     print('#include "darm-instr.h"')
+    print('#define offsetof(st, m) ((uint32_t)(&((st *)0)->m))')
+    print('#define O(m) offsetof(darm_t, m)')
     print('const uint8_t g_armv7_sm[%d] = {' % len(sm.table))
     print('    ' + generate_c_table(sm.table, 8))
     print('};')
