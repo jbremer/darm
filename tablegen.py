@@ -82,6 +82,8 @@ class Instruction(object):
         for macro in self.macros.values():
             macro.create(sm, lut, bitsize)
 
+        name = 'I_' + self.name.upper()
+        sm.append(SM['instr'], '%s %% 256' % name, '%s / 256' % name)
         sm.append(SM['retn'])
         return ret
 

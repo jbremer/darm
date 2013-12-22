@@ -262,6 +262,7 @@ if __name__ == '__main__':
 
     magic_open('darm-tables.c')
     print('#include <stdint.h>')
+    print('#include "darm-instr.h"')
     print('const uint8_t g_armv7_sm[%d] = {' % len(sm.table))
     print('    ' + generate_c_table(sm.table, 8))
     print('};')
@@ -275,4 +276,14 @@ if __name__ == '__main__':
     print('#include <stdint.h>')
     print('extern const uint8_t g_armv7_sm[%d];' % len(sm.table))
     print('extern const uint16_t g_armv7_lut[%d];' % len(lut.table))
+    print('#endif')
+
+    magic_open('darm-instr.h')
+    print('#ifndef __DARM_INSTR__')
+    print('#define __DARM_INSTR__')
+    print('typedef enum _darm_instr_t {')
+    l = ['INVLD'] + sorted(set(_.name.upper() for _ in table)) + ['INSTRCNT']
+    lines = textwrap.wrap(', '.join('I_%s' % _ for _ in l), 74)
+    print('    ' + '\n    '.join(lines))
+    print('} darm_instr_t;')
     print('#endif')

@@ -30,6 +30,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef __DARM__
 #define __DARM__
 
+#include "darm-instr.h"
+
 #define B_UNSET 0
 #define B_SET   1
 #define B_INVLD 2
@@ -52,6 +54,8 @@ typedef enum _darm_option_t {
 
 typedef struct _darm_t {
     uint32_t        insn;
+
+    darm_instr_t    instr;
 
     darm_reg_t      Rd;
     darm_reg_t      Rn;

@@ -30,6 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdint.h>
 #include "darm.h"
+#include "darm-instr.h"
 #include "darm-internal.h"
 #include "darm-tables.h"
 
@@ -49,6 +50,9 @@ typedef enum _darm_sm_opcode_t {
 
     // This instruction has been disassembled correctly, return success.
     SM_RETN,
+
+    // Assign the instruction index.
+    SM_INSTR,
 
     // Extract an immediate.
     SM_IMM,
@@ -100,6 +104,11 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
 
         case SM_RETN:
             return 0;
+
+        case SM_INSTR:
+            d->instr = sm[off] + sm[off+1]*256;
+            off += 2;
+            break;
 
         case SM_IMM:
             d->imm = _extract_field(insn, 0, sm[off++]);
