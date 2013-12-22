@@ -27,6 +27,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+import re
+
+
 SM = [
     'hlt', 'step', 'cmp4', 'retn',
     'imm',
@@ -42,6 +45,8 @@ class Instruction(object):
         self.fmt = fmt
         self.bits = bits
         self.macros = macros
+
+        self.name = re.split(r'\W', fmt)[0].lower()
 
         # A mapping of bit index to its integer value.
         self.value, off = {}, 0
@@ -61,7 +66,7 @@ class Instruction(object):
         return sum(getattr(_, 'bitsize', 1) for _ in self.bits[:off])
 
     def __repr__(self):
-        return '<Instruction %s, %r>' % (self.fmt, self.bits)
+        return '<Instruction %s, %r>' % (self.name, self.bits)
 
     def create(self, sm, lut, bitsize):
         idx, ret = 0, sm.offset()
