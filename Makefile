@@ -15,4 +15,4 @@ darm-internal.h:
 	python internal.py
 
 clean:
-	rm -f $(OBJECTS) $(TABLES)
+	rm -f $(OBJECTS) $(AUTOGEN)
