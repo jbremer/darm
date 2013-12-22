@@ -1,33 +1,18 @@
 
-_iota_value = None
 
+SM = [
+    'hlt', 'step', 'cmp4', 'retn',
+    'imm',
+    'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'Rt2', 'RdHi', 'RdLo', 'Rs',
+    'ARMExpandImm', 'cond', 'S', 'msb', 'lsb',
+]
 
-def iota(value=None):
-    global _iota_value
-    _iota_value = _iota_value + 1 if value is None else value
-    return _iota_value
-
-
-SM_HLT = iota(0)
-SM_STEP = iota()
-SM_RETN = iota()
-SM_IMM = iota()
-SM_Rd = iota()
-SM_Rn = iota()
-SM_Rm = iota()
-SM_Ra = iota()
-SM_Rt = iota()
-SM_Rt2 = iota()
-SM_RdHi = iota()
-SM_RdLo = iota()
-SM_Rs = iota()
-SM_ARMExpandImm = iota()
-SM_S = iota()
+SM = dict((SM[_], _) for _ in xrange(len(SM)))
 
 
 class Instruction(object):
-    def __init__(self, name, bits, **macros):
-        self.name = name
+    def __init__(self, fmt, bits, **macros):
+        self.fmt = fmt
         self.bits = bits
         self.macros = macros
 
@@ -49,7 +34,7 @@ class Instruction(object):
         return sum(getattr(_, 'bitsize', 1) for _ in self.bits[:off])
 
     def __repr__(self):
-        return '<Instruction %s, %r>' % (self.name, self.bits)
+        return '<Instruction %s, %r>' % (self.fmt, self.bits)
 
     def create(self, sm, lut, bitsize):
         idx, ret = 0, sm.offset()
@@ -64,7 +49,7 @@ class Instruction(object):
         for macro in self.macros.values():
             macro.create(sm, lut, bitsize)
 
-        sm.append(SM_RETN)
+        sm.append(SM['retn'])
         return ret
 
 
@@ -72,8 +57,6 @@ class BitPattern(object):
     def __init__(self, bitsize, name):
         self.bitsize = bitsize
         self.name = name
-
-        self.sm_name = globals().get('SM_' + name)
 
     def __repr__(self):
         clz = self.__class__.__name__
@@ -90,24 +73,22 @@ class Flag(BitPattern):
 
     def create(self, idx, sm, lut, bitsize):
         args = [self.idx] if self.pass_idx else []
-        return sm.append(self.sm_name, *args)
+        return sm.append(SM[self.name], *args)
 
 
 class Register(BitPattern):
     def create(self, idx, sm, lut, bitsize):
-        return sm.append(self.sm_name, bitsize-4-idx)
+        return sm.append(SM[self.name], bitsize-4-idx)
 
 
 class Immediate(BitPattern):
     def create(self, idx, sm, lut, bitsize):
-        return sm.append(SM_IMM, self.bitsize)
+        return sm.append(SM['imm'], self.bitsize)
 
 
 class Macro(object):
     def __init__(self, name):
         self.name = name
-
-        self.sm_name = globals().get('SM_' + name)
 
     def __call__(self, *args, **kwargs):
         self.args = args
@@ -119,7 +100,7 @@ class Macro(object):
 
     def create(self, sm, lut, bitsize):
         assert not self.kwargs
-        return sm.append(self.sm_name)
+        return sm.append(SM[self.name])
 
 
 class Node(object):
@@ -204,16 +185,16 @@ class Node(object):
         off2 = lut.alloc(2)
 
         if not null.lut and not null.leaf:
-            off_null = sm.insert(SM_HLT)
+            off_null = sm.insert(SM['hlt'])
         else:
             off_null = null.create(sm, lut, bitsize)
 
         if not one.lut and not one.leaf:
-            off_one = sm.insert(SM_HLT)
+            off_one = sm.insert(SM['hlt'])
         else:
             off_one = one.create(sm, lut, bitsize)
 
-        sm.update(off, SM_STEP, bitsize-1-bit, off2 % 256, off2 / 256)
+        sm.update(off, SM['step'], bitsize-1-bit, off2 % 256, off2 / 256)
         lut.update(off2, off_null, off_one)
         return off
 

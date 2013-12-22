@@ -51,7 +51,7 @@ typedef enum _darm_option_t {
 } darm_option_t;
 
 typedef struct _darm_t {
-    uint32_t        imm;
+    uint32_t        insn;
 
     darm_reg_t      Rd;
     darm_reg_t      Rn;
@@ -64,6 +64,7 @@ typedef struct _darm_t {
     darm_reg_t      Rs;
 
     uint32_t        S;
+    uint32_t        imm;
 } darm_t;
 
 #endif

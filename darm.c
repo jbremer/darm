@@ -28,9 +28,9 @@ typedef enum _darm_sm_opcode_t {
 
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
 
-// the upper four bits define the rotation value, but we have to multiply the
+// The upper four bits define the rotation value, but we have to multiply the
 // rotation value by two, so instead of right shifting by eight, we do a
-// right shift of seven, effectively avoiding the left shift of one
+// right shift of seven, effectively avoiding the left shift of one.
 #define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & b11110)
 
 static inline uint32_t _extract_field(uint32_t insn,
@@ -45,9 +45,11 @@ static inline uint32_t _extract_field(uint32_t insn,
 static int darm_disassemble(darm_t *d, uint32_t insn,
     const uint8_t *sm, const uint16_t *lut)
 {
+    d->insn = insn;
+
     uint32_t off = 0, value;
     while (1) {
-        switch (sm[off++]) {
+        switch ((darm_sm_opcode_t) sm[off++]) {
         case SM_HLT:
             return -1;
 
@@ -75,9 +77,13 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
             d->imm = ARMExpandImm(d->imm);
             break;
 
-        case SM_S:
-            d->S = _extract_field(insn, 20, 1);
+#define SM_FLAG(name, idx, bitsize) \
+        case SM_##name: \
+            d->name = _extract_field(insn, idx, bitsize); \
             break;
+
+        SM_FLAG(S, 20, 1);
+
         }
     }
     return 0;
