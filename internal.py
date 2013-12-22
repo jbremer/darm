@@ -41,6 +41,36 @@ if __name__ == '__main__':
     print('#ifndef __DARM_INTERNAL__')
     print('#define __DARM_INTERNAL__')
 
+    print("""typedef enum _darm_sm_opcode_t {
+    // Halt execution, invalid instruction.
+    SM_HLT,
+
+    // Follow either branch of a node, depending on the particular bit
+    // in the instruction.
+    SM_STEP,
+
+    // Some instructions are a more specific variant of another instruction.
+    // In these cases, the more specific instruction will have a couple of
+    // bits which are hardcoded and have to be checked in order to determine
+    // as which encoding we will disassemble this instruction.
+    SM_CMP4,
+
+    // This instruction has been disassembled correctly, return success.
+    SM_RETN,
+
+    // Assign the instruction index.
+    SM_INSTR,
+
+    // Extracts a couple of bits from the instruction and stores them in
+    // the given field in the darm_t object.
+    SM_EXTR,
+
+    // Extract an immediate.
+    SM_IMM,
+
+    SM_ARMExpandImm,
+} darm_sm_opcode_t;""")
+
     # define constants 0b0 up upto 0b11111111
     for x in range(256):
         print('#define %s %d' % (bin(x)[1:], x))

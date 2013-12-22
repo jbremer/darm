@@ -30,17 +30,6 @@ POSSIBILITY OF SUCH DAMAGE.
 import re
 
 
-SM = [
-    'hlt', 'step', 'cmp4', 'retn', 'instr', 'extr',
-    'imm',
-    'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'Rt2', 'RdHi', 'RdLo', 'Rs',
-    'ARMExpandImm', 'cond', 'S', 'msb', 'lsb', 'E', 'P', 'U', 'W', 'option',
-    'widthm1', 'register_list',
-]
-
-SM = dict((SM[_], _) for _ in xrange(len(SM)))
-
-
 class Instruction(object):
     def __init__(self, fmt, bits, **macros):
         self.fmt = fmt
@@ -83,8 +72,8 @@ class Instruction(object):
             macro.create(sm, lut, bitsize)
 
         name = 'I_' + self.name.upper()
-        sm.append(SM['instr'], '%s %% 256' % name, '%s / 256' % name)
-        sm.append(SM['retn'])
+        sm.append('SM_INSTR', '%s %% 256' % name, '%s / 256' % name)
+        sm.append('SM_RETN')
         return ret
 
 
@@ -103,17 +92,18 @@ class BitPattern(object):
 
 class Field(BitPattern):
     def create(self, idx, sm, lut, bitsize):
-        return sm.append(SM['extr'], 'O(%s)' % self.name, idx, self.bitsize)
+        return sm.append('SM_EXTR', 'O(%s)' % self.name, idx, self.bitsize)
 
 
 class Register(BitPattern):
     def create(self, idx, sm, lut, bitsize):
-        return sm.append(SM[self.name], bitsize-4-idx)
+        return sm.append('SM_EXTR', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.bitsize)
 
 
 class Immediate(BitPattern):
     def create(self, idx, sm, lut, bitsize):
-        return sm.append(SM['imm'], self.bitsize)
+        return sm.append('SM_IMM', self.bitsize)
 
 
 class Macro(object):
@@ -130,7 +120,7 @@ class Macro(object):
 
     def create(self, sm, lut, bitsize):
         assert not self.kwargs
-        return sm.append(SM[self.name])
+        return sm.append('SM_' + self.name)
 
 
 class Node(object):
@@ -216,16 +206,16 @@ class Node(object):
         off2 = lut.alloc(2)
 
         if not null.lut and not null.leaf:
-            off_null = sm.insert(SM['hlt'])
+            off_null = sm.insert('SM_HLT')
         else:
             off_null = null.create(sm, lut, bitsize)
 
         if not one.lut and not one.leaf:
-            off_one = sm.insert(SM['hlt'])
+            off_one = sm.insert('SM_HLT')
         else:
             off_one = one.create(sm, lut, bitsize)
 
-        sm.update(off, SM['step'], bitsize-1-bit, off2 % 256, off2 / 256)
+        sm.update(off, 'SM_STEP', bitsize-1-bit, off2 % 256, off2 / 256)
         lut.update(off2, off_null, off_one)
         return off
 

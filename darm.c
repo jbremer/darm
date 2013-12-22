@@ -34,39 +34,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "darm-internal.h"
 #include "darm-tables.h"
 
-typedef enum _darm_sm_opcode_t {
-    // Halt execution, invalid instruction.
-    SM_HLT,
-
-    // Follow either branch of a node, depending on the particular bit
-    // in the instruction.
-    SM_STEP,
-
-    // Some instructions are a more specific variant of another instruction.
-    // In these cases, the more specific instruction will have a couple of
-    // bits which are hardcoded and have to be checked in order to determine
-    // as which encoding we will disassemble this instruction.
-    SM_CMP4,
-
-    // This instruction has been disassembled correctly, return success.
-    SM_RETN,
-
-    // Assign the instruction index.
-    SM_INSTR,
-
-    // Extracts a couple of bits from the instruction and stores them in
-    // the given field in the darm_t object.
-    SM_EXTR,
-
-    // Extract an immediate.
-    SM_IMM,
-
-    // Extract various general purpose registers.
-    SM_Rd, SM_Rn, SM_Rm, SM_Ra, SM_Rt, SM_Rt2, SM_RdHi, SM_RdLo, SM_Rs,
-
-    SM_ARMExpandImm,
-} darm_sm_opcode_t;
-
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
 
 // The upper four bits define the rotation value, but we have to multiply the
@@ -121,14 +88,6 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
         case SM_IMM:
             d->imm = _extract_field(insn, 0, sm[off++]);
             break;
-
-#define SM_REG(name) \
-        case SM_##name: \
-            d->name = _extract_field(insn, sm[off++], 4); \
-            break;
-
-        SM_REG(Rd); SM_REG(Rn); SM_REG(Rm); SM_REG(Ra); SM_REG(Rt);
-        SM_REG(Rt2); SM_REG(RdHi); SM_REG(RdLo); SM_REG(Rs);
 
         case SM_ARMExpandImm:
             d->imm = ARMExpandImm(d->imm);
