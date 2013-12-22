@@ -34,7 +34,8 @@ SM = [
     'hlt', 'step', 'cmp4', 'retn',
     'imm',
     'Rd', 'Rn', 'Rm', 'Ra', 'Rt', 'Rt2', 'RdHi', 'RdLo', 'Rs',
-    'ARMExpandImm', 'cond', 'S', 'msb', 'lsb',
+    'ARMExpandImm', 'cond', 'S', 'msb', 'lsb', 'E', 'P', 'U', 'W', 'option',
+    'widthm1', 'register_list',
 ]
 
 SM = dict((SM[_], _) for _ in xrange(len(SM)))
