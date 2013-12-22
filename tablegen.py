@@ -241,13 +241,16 @@ class LookupTable(object):
     def offset(self):
         return len(self.table)
 
+    def check(self, value):
+        return isinstance(value, str) or value >= 0 and value < 2**self.bits
+
     def alloc(self, length):
         ret = len(self.table)
         self.table += [None for _ in xrange(length)]
         return ret
 
     def insert(self, value):
-        assert value >= 0 and value < 2**self.bits
+        assert self.check(value)
         if value in self.table:
             return self.table.index(value)
         ret = len(self.table)
@@ -255,13 +258,13 @@ class LookupTable(object):
         return ret
 
     def update(self, offset, *args):
-        assert all(_ >= 0 and _ < 2**self.bits for _ in args)
+        assert all(self.check(_) for _ in args)
         tbl_begin = self.table[:offset]
         tbl_end = self.table[offset+len(args):]
         self.table = tbl_begin + list(args) + tbl_end
 
     def append(self, *args):
-        assert all(_ >= 0 and _ < 2**self.bits for _ in args)
+        assert all(self.check(_) for _ in args)
         ret = len(self.table)
         self.table += args
         return ret

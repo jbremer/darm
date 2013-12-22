@@ -246,18 +246,21 @@ table = [
 ]
 
 def generate_c_table(l, bitsize):
-    fmt = '0x%%0%dx' % (bitsize / 4)
-    return '\n    '.join(textwrap.wrap(', '.join(fmt % _ for _ in l), 74))
+    return '\n    '.join(textwrap.wrap(', '.join('%s' % _ for _ in l), 74))
+
+
+def magic_open(fname):
+    sys.stdout = open(fname, 'w')
+    print('/*')
+    print(__doc__.strip())
+    print('*/')
 
 
 if __name__ == '__main__':
     t = Table(table, 32)
     sm, lut = t.create()
 
-    sys.stdout = open('darm-tables.c', 'w')
-    print('/*')
-    print(__doc__.strip())
-    print('*/')
+    magic_open('darm-tables.c')
     print('#include <stdint.h>')
     print('const uint8_t g_armv7_sm[%d] = {' % len(sm.table))
     print('    ' + generate_c_table(sm.table, 8))
@@ -266,12 +269,9 @@ if __name__ == '__main__':
     print('    ' + generate_c_table(lut.table, 16))
     print('};')
 
-    sys.stdout = open('darm-tables.h', 'w')
-    print('/*')
-    print(__doc__.strip())
-    print('*/')
-    print('#ifndef __DARM_ARMV7_TBL__')
-    print('#define __DARM_ARMV7_TBL__')
+    magic_open('darm-tables.h')
+    print('#ifndef __DARM_TABLES__')
+    print('#define __DARM_TABLES__')
     print('#include <stdint.h>')
     print('extern const uint8_t g_armv7_sm[%d];' % len(sm.table))
     print('extern const uint16_t g_armv7_lut[%d];' % len(lut.table))
