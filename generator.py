@@ -30,7 +30,6 @@ POSSIBILITY OF SUCH DAMAGE.
 import itertools
 import sys
 import textwrap
-from tablegen import Table
 from tables import armv7
 
 
@@ -46,10 +45,10 @@ def magic_open(fname):
 
 
 if __name__ == '__main__':
-    t = Table(armv7.table, 32)
-    sm, lut = t.create()
 
-    insns = sorted(set(_.name for _ in armv7.table))
+    sm, lut = armv7.table.create()
+
+    insns = sorted(set(_.name for _ in armv7.table.insns))
 
     magic_open('darm-tables.c')
     print('#include <stdint.h>')

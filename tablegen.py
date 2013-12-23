@@ -343,11 +343,12 @@ class Table(object):
     def __init__(self, insns, bitsize):
         self.root = Node()
         self.bitsize = bitsize
+        self.insns = insns
 
-        for ins in insns:
-            self.root.insert(ins)
+        for ins in self.insns:
+            self._insert(ins)
 
-        self.root.process()
+        self._process()
 
     def __repr__(self):
         return '<Table %r>' % self.root
@@ -355,8 +356,17 @@ class Table(object):
     def dump(self):
         self.root.dump()
 
+    def _insert(self, ins):
+        self.root.insert(ins)
+
+    def _process(self):
+        self.root.process()
+
+    def _create(self, sm, lut, bitsize):
+        self.root.create(sm, lut, bitsize)
+
     def create(self):
         sm = LookupTable(8)
         lut = LookupTable(16)
-        self.root.create(sm, lut, self.bitsize)
+        self._create(sm, lut, self.bitsize)
         return sm, lut

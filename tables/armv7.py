@@ -27,8 +27,36 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tablegen import Instruction, Macro
+from tablegen import Instruction, Macro, Table, Node
 from tablegen import Field, Register, Immediate
+
+
+class ARMv7Table(Table):
+    def __init__(self, *args):
+        self.cond = Node()
+        self.uncond = Node()
+        Table.__init__(self, *args)
+
+    def _insert(self, ins):
+        if ins.bits[0] == cond:
+            self.cond.insert(ins)
+        else:
+            self.uncond.insert(ins)
+
+    def _process(self):
+        self.cond.process()
+        self.uncond.process()
+
+    def _create(self, sm, lut, bitsize):
+        off = sm.alloc(5)
+        off2 = lut.alloc(2)
+
+        sm.update(off, 'SM_CMP4', bitsize-4, 0b1111,
+                  'L(%d)' % off2, 'H(%d)' % off2)
+
+        cond = self.cond.create(sm, lut, bitsize)
+        uncond = self.uncond.create(sm, lut, bitsize)
+        lut.update(off2, cond, uncond)
 
 
 Rd = Register(4, 'Rd')
@@ -66,7 +94,8 @@ imm24 = Immediate(24, 'imm24')
 
 ARMExpandImm = Macro('ARMExpandImm')
 
-table = [
+
+_table = [
     Instruction('ADC{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 0, 1, 0, 1, S, Rn, Rd, imm12)),
     Instruction('ADC{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 0, 0, 0, 1, 0, 1, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('ADC{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 0, 1, 0, 1, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
@@ -267,3 +296,5 @@ table = [
     Instruction('YIELD<c>', (cond, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, 0, 0, 0, 1)),
     Instruction('SMC<c> #<imm4>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), 0, 1, 1, 1, imm4)),
 ]
+
+table = ARMv7Table(_table, 32)
