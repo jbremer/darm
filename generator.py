@@ -127,9 +127,8 @@ if __name__ == '__main__':
 } darm_sm_opcode_t;
 
 typedef enum _darm_string_opcode_t {
-    STR_RETN,
-
-    STR_S, STR_cond, STR_REG, STR_REG_CONST, STR_SHIFT, STR_IMM,
+    STR_RETN, STR_S, STR_cond, STR_REG, STR_REG_CONST, STR_SHIFT, STR_IMM,
+    STR_REGLIST,
 } darm_string_opcode_t;""")
 
     # define constants 0b0 up upto 0b11111111

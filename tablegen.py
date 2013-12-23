@@ -71,6 +71,10 @@ class InstructionFormat(object):
                 self.sm += ['STR_REG_CONST', 'SP']
                 continue
 
+            if arg == '<registers>':
+                self.sm.append('STR_REGLIST')
+                continue
+
             if arg == '<type> <Rs>':
                 self.sm.append('STR_SHIFT')
                 continue

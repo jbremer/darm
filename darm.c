@@ -163,6 +163,40 @@ static int _append_imm(char *out, uint32_t imm)
     return out - base;
 }
 
+int darm_reglist(uint16_t reglist, char *out)
+{
+    char *base = out;
+
+    *out++ = '{';
+
+    // Support for empty register lists.
+    if(reglist == 0) out++;
+
+    while (reglist != 0) {
+        // Count trailing zeros.
+        int32_t reg, start = __builtin_ctz(reglist);
+
+        APPEND(out, g_darm_registers[start]);
+
+        for (reg = start; reg == __builtin_ctz(reglist); reg++) {
+            reglist &= ~(1 << reg);
+        }
+
+        // If reg is not start + 1, then we have a series of consecutive
+        // registers.
+        if(reg != start + 1) {
+            // If reg is start + 2, then we have two consecutive registers,
+            // but we prefer the notation {r0,r1} over {r0-r1} in that case.
+            *out++ = reg == start + 2 ? ',' : '-';
+            APPEND(out, g_darm_registers[reg-1]);
+        }
+        *out++ = ',';
+    }
+
+    out[-1] = '}', *out = 0;
+    return out - base;
+}
+
 int darm_string(const darm_t *d, char *out)
 {
     const uint8_t *fmt = d->format; uint32_t value; darm_reg_t reg;
@@ -220,6 +254,10 @@ int darm_string(const darm_t *d, char *out)
 
         case STR_IMM:
             out += _append_imm(out, d->imm);
+            break;
+
+        case STR_REGLIST:
+            out += darm_reglist(d->register_list, out);
             break;
         }
     }
