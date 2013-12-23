@@ -27,6 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+import itertools
 import sys
 import textwrap
 from tablegen import Instruction, BitPattern, Macro, Table
@@ -321,4 +322,54 @@ if __name__ == '__main__':
     lines = textwrap.wrap(', '.join('I_%s' % _ for _ in l), 74)
     print('    ' + '\n    '.join(lines))
     print('} darm_instr_t;')
+    print('#endif')
+
+    magic_open('darm-internal.h')
+    print('#ifndef __DARM_INTERNAL__')
+    print('#define __DARM_INTERNAL__')
+
+    print("""typedef enum _darm_sm_opcode_t {
+    // Halt execution, invalid instruction.
+    SM_HLT,
+
+    // Follow either branch of a node, depending on the particular bit
+    // in the instruction.
+    SM_STEP,
+
+    // Some instructions are a more specific variant of another instruction.
+    // In these cases, the more specific instruction will have a couple of
+    // bits which are hardcoded and have to be checked in order to determine
+    // as which encoding we will disassemble this instruction.
+    SM_CMP4,
+
+    // This instruction has been disassembled correctly, return success.
+    SM_RETN,
+
+    // Assign the instruction index.
+    SM_INSTR,
+
+    // Extracts a couple of bits from the instruction and stores them in
+    // the given field in the darm_t object.
+    SM_EXTR,
+
+    // Extract an immediate.
+    SM_IMM,
+
+    SM_ARMExpandImm,
+} darm_sm_opcode_t;
+
+typedef enum _darm_string_opcode_t {
+    STR_HLT, STR_RETN,
+} darm_string_opcode_t;""")
+
+    # define constants 0b0 up upto 0b11111111
+    for x in range(256):
+        print('#define %s %d' % (bin(x)[1:], x))
+
+    # define partial constants with leading zeroes, such as 0b0001
+    for x in range(2, 7):
+        for y in itertools.product('01', repeat=x):
+            num = ''.join(y)
+            print('#define b%s %d' % (num, int(num, 2)))
+
     print('#endif')
