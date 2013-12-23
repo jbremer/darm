@@ -8,8 +8,8 @@ default: $(AUTOGEN) main
 
 main: $(OBJECTS)
 
-$(AUTOGEN): tblarmv7.py tablegen.py
-	python tblarmv7.py
+$(AUTOGEN): generator.py tablegen.py tables
+	python generator.py
 
 clean:
 	rm -f $(OBJECTS) $(AUTOGEN)
