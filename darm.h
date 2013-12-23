@@ -30,6 +30,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef __DARM__
 #define __DARM__
 
+// If the debug level has not been set, which is the default, then we set it
+// to release mode (i.e., no debug statements.) In case you're debugging
+// something, you'll likely want to set it to 1 or 2.
+// Either set it manually, or give -DDARM_DBGLVL=2 on the commandline.
+#ifndef DARM_DBGLVL
+#define DARM_DBGLVL 0
+#endif
+
 #include "darm-instr.h"
 
 #define B_UNSET 0

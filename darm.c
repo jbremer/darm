@@ -34,6 +34,13 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "darm-internal.h"
 #include "darm-tables.h"
 
+#if DARM_DBGLVL >= 1
+#define DPRINT(fmt, ...) \
+    fprintf(stderr, "%s:%d " fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#else
+#define DPRINT(fmt, ...) (void)0
+#endif
+
 #define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
 
 // The upper four bits define the rotation value, but we have to multiply the
@@ -202,8 +209,11 @@ int darm_string(const darm_t *d, char *out)
     const uint8_t *fmt = d->format; uint32_t value; darm_reg_t reg;
     int first = 1;
 
-    if(d->instr == I_INVLD || d->instr >= I_INSTRCNT) return -1;
-    APPEND(out, g_darm_instr[d->instr]);
+    if(d->instr == I_INVLD || d->instr >= I_INSTRCNT) {
+        DPRINT("Invalid instr: %d [%d, %d]", d->instr, I_INVLD, I_INSTRCNT);
+        return -1;
+    }
+    APPEND(out, g_darm_instr[d->instr - 1]);
 
     while (1) {
         switch ((darm_string_opcode_t) *fmt) {
@@ -226,14 +236,20 @@ int darm_string(const darm_t *d, char *out)
             return 0;
 
         case STR_S:
-            if(d->S == B_INVLD) return -1;
+            if(d->S == B_INVLD) {
+                DPRINT("S flag has not been set");
+                return -1;
+            }
             if(d->S == B_SET) {
                 *out++ = 's';
             }
             break;
 
         case STR_cond:
-            if(d->cond < C_BASE || d->cond > C_AL) return -1;
+            if(d->cond < C_BASE || d->cond > C_AL) {
+                DPRINT("Invalid conditional state: %d", d->cond);
+                return -1;
+            }
             if(d->cond != C_AL) {
                 APPEND(out, g_darm_conditionals[d->cond]);
             }
