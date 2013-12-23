@@ -92,10 +92,15 @@ typedef struct _darm_t {
 
     uint32_t        imm;
 
-    uint32_t        S, E, P, U, W;
+    uint32_t        S, E, P, U, W, D, R, N, M;
     darm_option_t   option;
     uint32_t        type, lsb, msb;
     uint32_t        register_list;
+
+    uint32_t        opc1, opc2, coproc;
+    uint32_t        CRd, CRn, CRm;
+
+    uint32_t        mask, tb, rotate, sh, widthm1;
 
     // Internal format for generation of human-readable strings.
     const uint8_t   *format;
