@@ -139,6 +139,7 @@ class Node(object):
 
         self.lut = {}
         self.leaf = []
+        self.hlt = None
 
     def insert(self, ins):
         """Insert a subnode somewhere down this node. """
@@ -146,6 +147,10 @@ class Node(object):
 
     def process(self):
         """Processes this node and creates subnodes as required."""
+        # Inherit the hlt handler from our parent, if available.
+        if self.parent and self.parent.hlt:
+            self.hlt = self.parent.hlt
+
         bits = dict((idx, []) for idx in xrange(32))
 
         for ins in self.leaf:
@@ -157,11 +162,11 @@ class Node(object):
                 if not bit_idx in self.indices:
                     bits[bit_idx].append(ins)
 
-        def _compare(a, b):
+        def _sort_offsets(a, b):
             ret = len(bits[b]) - len(bits[a])
             return ret if ret else a - b
 
-        offs = sorted(bits, cmp=_compare)
+        offs = sorted(bits, cmp=_sort_offsets)
         if not offs or not bits[offs[0]]:
             assert len(self.leaf) < 2
             self.leaf = self.leaf[0] if self.leaf else None
@@ -169,10 +174,22 @@ class Node(object):
 
         self.idx = offs[0]
 
+        # Currently we only support one specific instruction per set of
+        # instructions.
+        assert sum(not self.idx in _.value for _ in self.leaf) < 2
+
+        def _specific_first(a, b):
+            return (self.idx in a.value) - (self.idx in b.value)
+
         self.lut[self.idx] = Node(self), Node(self)
-        for ins in self.leaf:
+        for ins in sorted(self.leaf, cmp=_specific_first):
             if self.idx in ins.value:
                 self.lut[self.idx][ins.value[self.idx]].insert(ins)
+            else:
+                assert self.hlt is None
+                self.hlt = Node(self)
+                self.hlt.insert(ins)
+                self.hlt.process()
 
         self.lut[self.idx][0].process()
         self.lut[self.idx][1].process()
@@ -206,12 +223,18 @@ class Node(object):
         off2 = lut.alloc(2)
 
         if not null.lut and not null.leaf:
-            off_null = sm.insert('SM_HLT')
+            if self.hlt:
+                off_null = self.hlt.create(sm, lut, bitsize)
+            else:
+                off_null = sm.insert('SM_HLT')
         else:
             off_null = null.create(sm, lut, bitsize)
 
         if not one.lut and not one.leaf:
-            off_one = sm.insert('SM_HLT')
+            if self.hlt:
+                off_one = self.hlt.create(sm, lut, bitsize)
+            else:
+                off_one = sm.insert('SM_HLT')
         else:
             off_one = one.create(sm, lut, bitsize)
 
