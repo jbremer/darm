@@ -30,9 +30,23 @@ POSSIBILITY OF SUCH DAMAGE.
 import re
 
 
+class InstructionFormat(object):
+    def __init__(self, fmt):
+        self.fmt = fmt
+        self.sm = []
+
+        self.process()
+
+    def process(self):
+        pass
+
+    def create(self):
+        return self.sm
+
+
 class Instruction(object):
     def __init__(self, fmt, bits, **macros):
-        self.fmt = fmt
+        self.fmt = InstructionFormat(fmt)
         self.bits = bits
         self.macros = macros
 
@@ -73,6 +87,8 @@ class Instruction(object):
 
         name = 'I_' + self.name.upper()
         sm.append('SM_INSTR', 'L(%s)' % name, 'H(%s)' % name)
+        fmt = self.fmt.create()
+        sm.append('SM_STR', len(fmt)+1, *fmt)
         sm.append('SM_RETN')
         return ret
 

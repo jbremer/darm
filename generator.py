@@ -34,7 +34,7 @@ from tablegen import Table
 from tables import armv7
 
 
-def generate_c_table(l, bitsize):
+def generate_c_table(l):
     return '\n    '.join(textwrap.wrap(', '.join('%s' % _ for _ in l), 74))
 
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     t = Table(armv7.table, 32)
     sm, lut = t.create()
 
-    insns = armv7.table
+    insns = sorted(set(_.name for _ in armv7.table))
 
     magic_open('darm-tables.c')
     print('#include <stdint.h>')
@@ -61,10 +61,13 @@ if __name__ == '__main__':
     print('#define L(x) (x) % 256')
     print('#define H(x) (x) / 256')
     print('const uint8_t g_armv7_sm[%d] = {' % len(sm.table))
-    print('    ' + generate_c_table(sm.table, 8))
+    print('    ' + generate_c_table(sm.table))
     print('};')
     print('const uint16_t g_armv7_lut[%d] = {' % len(lut.table))
-    print('    ' + generate_c_table(lut.table, 16))
+    print('    ' + generate_c_table(lut.table))
+    print('};')
+    print('const char *g_darm_instr[%d] = {' % len(insns))
+    print('    ' + generate_c_table('"%s"' % _ for _ in insns))
     print('};')
 
     magic_open('darm-tables.h')
@@ -73,13 +76,14 @@ if __name__ == '__main__':
     print('#include <stdint.h>')
     print('extern const uint8_t g_armv7_sm[%d];' % len(sm.table))
     print('extern const uint16_t g_armv7_lut[%d];' % len(lut.table))
+    print('extern const char *g_darm_instr[%d];' % len(insns))
     print('#endif')
 
     magic_open('darm-instr.h')
     print('#ifndef __DARM_INSTR__')
     print('#define __DARM_INSTR__')
     print('typedef enum _darm_instr_t {')
-    l = ['INVLD'] + sorted(set(_.name.upper() for _ in insns)) + ['INSTRCNT']
+    l = ['INVLD'] + [_.upper() for _ in insns] + ['INSTRCNT']
     lines = textwrap.wrap(', '.join('I_%s' % _ for _ in l), 74)
     print('    ' + '\n    '.join(lines))
     print('} darm_instr_t;')
@@ -115,6 +119,9 @@ if __name__ == '__main__':
 
     // Extract an immediate.
     SM_IMM,
+
+    // Extra information for generating a human-readable string.
+    SM_STR,
 
     SM_ARMExpandImm,
 } darm_sm_opcode_t;

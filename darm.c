@@ -50,7 +50,7 @@ static inline uint32_t _extract_field(uint32_t insn,
 // Disassembles any instruction according to the state machine and lookup
 // table. The input instruction can be either 16 or 32 bit, depending on
 // the target state machine (which will have been created accordingly.)
-static int darm_disassemble(darm_t *d, uint32_t insn,
+static int _darm_disassemble(darm_t *d, uint32_t insn,
     const uint8_t *sm, const uint16_t *lut)
 {
     d->insn = insn;
@@ -89,6 +89,11 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
             d->imm = _extract_field(insn, 0, sm[off++]);
             break;
 
+        case SM_STR:
+            d->format = &sm[off+1];
+            off += sm[off];
+            break;
+
         case SM_ARMExpandImm:
             d->imm = ARMExpandImm(d->imm);
             break;
@@ -99,5 +104,30 @@ static int darm_disassemble(darm_t *d, uint32_t insn,
 
 int darm_armv7(darm_t *d, uint32_t insn)
 {
-    return darm_disassemble(d, insn, g_armv7_sm, g_armv7_lut);
+    return _darm_disassemble(d, insn, g_armv7_sm, g_armv7_lut);
+}
+
+#define APPEND(out, ptr) \
+    do { \
+        const char *p = ptr; \
+        if(p != NULL) while (*p != 0) *out++ = *p++; \
+    } while (0);
+
+int darm_string(const darm_t *d, char *out)
+{
+    const uint8_t *fmt = d->format; uint32_t value; darm_reg_t reg;
+
+    if(d->instr == I_INVLD || d->instr >= I_INSTRCNT) return -1;
+    APPEND(out, g_darm_instr[d->instr]);
+
+    while (1) {
+        switch ((darm_string_opcode_t) *fmt++) {
+        case STR_HLT:
+            return -1;
+
+        case STR_RETN:
+            *out = 0;
+            return 0;
+        }
+    }
 }

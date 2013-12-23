@@ -74,6 +74,15 @@ typedef struct _darm_t {
     darm_option_t   option;
     uint32_t        lsb, msb;
     uint16_t        register_list;
+
+    // Internal format for generation of human-readable strings.
+    const uint8_t   *format;
 } darm_t;
+
+// Suggested size for a buffer when representing an instruction as string.
+#define DARM_BUFLEN 64
+
+int darm_armv7(darm_t *d, uint32_t insn);
+int darm_string(const darm_t *d, char *out);
 
 #endif
