@@ -37,11 +37,25 @@ POSSIBILITY OF SUCH DAMAGE.
 #define B_INVLD 2
 
 typedef enum _darm_reg_t {
-    R_INVLD,
+    r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
+
+    cr0, cr1, cr2, cr3, cr4, cr5, cr6, cr7, cr8,
+    cr9, cr10, cr11, cr12, cr13, cr14, cr15,
+
+    R_REGCNT, R_INVLD = -1,
+
+    FP = r11, IP = r12, SP = r13, LR = r14, PC = r15, R_BASE = r0,
+    CR_BASE = cr0,
 } darm_reg_t;
 
 typedef enum _darm_cond_t {
-    C_INVLD,
+    C_EQ = 0, C_NE = 1, C_CS = 2, C_CC = 3, C_MI = 4,
+    C_PL = 5, C_VS = 6, C_VC = 7, C_HI = 8, C_LS = 9,
+    C_GE = 10, C_LT = 11, C_GT = 12, C_LE = 13, C_AL = 14,
+
+    C_HS = C_CS, C_LO = C_CC, C_UNCOND = 15,
+
+    C_INVLD = -1, C_BASE = C_EQ,
 } darm_cond_t;
 
 typedef enum _darm_shift_type_t {

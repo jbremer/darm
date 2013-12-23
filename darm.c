@@ -41,6 +41,19 @@ POSSIBILITY OF SUCH DAMAGE.
 // right shift of seven, effectively avoiding the left shift of one.
 #define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & b11110)
 
+static const char *g_darm_registers[]  = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10",
+    "r11", "r12", "SP", "LR", "PC",
+
+    "cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7", "cr8",
+    "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
+};
+
+static const char *g_darm_conditionals[] = {
+    "eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
+    "hi", "ls", "ge", "lt", "gt", "le", "al", "al",
+};
+
 static inline uint32_t _extract_field(uint32_t insn,
     uint32_t idx, uint32_t bits)
 {
@@ -113,21 +126,101 @@ int darm_armv7(darm_t *d, uint32_t insn)
         if(p != NULL) while (*p != 0) *out++ = *p++; \
     } while (0);
 
+#define APPEND_REGISTER(reg) \
+    if(reg < R_BASE || reg >= R_REGCNT) return -1; \
+    APPEND(out, g_darm_registers[reg]);
+
+static int _utoa(unsigned int value, char *out, int base)
+{
+    char buf[30]; unsigned int i, counter = 0;
+
+    if(value == 0) {
+        buf[counter++] = '0';
+    }
+
+    for (; value != 0; value /= base) {
+        buf[counter++] = "0123456789abcdef"[value % base];
+    }
+
+    for (i = 0; i < counter; i++) {
+        out[i] = buf[counter - i - 1];
+    }
+
+    return counter;
+}
+
+static int _append_imm(char *out, uint32_t imm)
+{
+    const char *base = out;
+    if(imm > 0x400) {
+        *out++ = '0';
+        *out++ = 'x';
+        out += _utoa(imm, out, 16);
+    }
+    else {
+        out += _utoa(imm, out, 10);
+    }
+    return out - base;
+}
+
 int darm_string(const darm_t *d, char *out)
 {
     const uint8_t *fmt = d->format; uint32_t value; darm_reg_t reg;
+    int first = 1;
 
     if(d->instr == I_INVLD || d->instr >= I_INSTRCNT) return -1;
     APPEND(out, g_darm_instr[d->instr]);
 
     while (1) {
-        switch ((darm_string_opcode_t) *fmt++) {
-        case STR_HLT:
-            return -1;
+        switch ((darm_string_opcode_t) *fmt) {
+        case STR_RETN: case STR_S: case STR_cond:
+            break;
 
+        default:
+            if(first != 0) {
+                first = 0;
+            }
+            else {
+                *out++ = ',';
+            }
+            *out++ = ' ';
+        }
+
+        switch ((darm_string_opcode_t) *fmt++) {
         case STR_RETN:
             *out = 0;
             return 0;
+
+        case STR_S:
+            if(d->S == B_INVLD) return -1;
+            if(d->S == B_SET) {
+                *out++ = 's';
+            }
+            break;
+
+        case STR_cond:
+            if(d->cond < C_BASE || d->cond > C_AL) return -1;
+            if(d->cond != C_AL) {
+                APPEND(out, g_darm_conditionals[d->cond]);
+            }
+            break;
+
+        case STR_REG:
+            reg = *(darm_reg_t *)((char *) d + *fmt++);
+            APPEND_REGISTER(reg);
+            break;
+
+        case STR_REG_CONST:
+            reg = *fmt++;
+            APPEND_REGISTER(reg);
+            break;
+
+        case STR_SHIFT:
+            break;
+
+        case STR_IMM:
+            out += _append_imm(out, d->imm);
+            break;
         }
     }
 }

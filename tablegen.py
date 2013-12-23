@@ -38,7 +38,44 @@ class InstructionFormat(object):
         self.process()
 
     def process(self):
-        pass
+        fmt = self.fmt
+
+        if '{S}' in fmt:
+            self.sm.append('STR_S')
+
+        if '<c>' in fmt:
+            self.sm.append('STR_cond')
+
+        args = fmt.split(' ', 1)[1].split(',') if ' ' in fmt else []
+
+        # Special case for {,<shift>}.
+        if len(args) == 4 and args[2][-1] == '{' and args[3][0] == '<':
+            args = args[:2] + [args[2] + ',' + args[3]]
+
+        regs = '<Rd>', '<Rn>', '<Rm>', '<Rt>', '<Rt2>', \
+               '<RdHi>', '<RdLo>', '<Ra>',
+
+        imms = '#<const>', '#<imm>', '#<imm4>', '#<imm5>', \
+               '#<imm16>', '#<imm24>'
+
+        for arg in args:
+            if arg in regs:
+                self.sm += ['STR_REG', 'O(%s)' % arg[1:-1]]
+                continue
+
+            if arg in imms:
+                self.sm.append('STR_IMM')
+                continue
+
+            if arg == 'SP':
+                self.sm += ['STR_REG_CONST', 'SP']
+                continue
+
+            if arg == '<type> <Rs>':
+                self.sm.append('STR_SHIFT')
+                continue
+
+        self.sm.append('STR_RETN')
 
     def create(self):
         return self.sm
@@ -108,7 +145,8 @@ class BitPattern(object):
 
 class Field(BitPattern):
     def create(self, idx, sm, lut, bitsize):
-        return sm.append('SM_EXTR', 'O(%s)' % self.name, idx, self.bitsize)
+        return sm.append('SM_EXTR', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.bitsize)
 
 
 class Register(BitPattern):
