@@ -27,9 +27,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tablegen import Instruction, Table, Node
-from tablegen import Field, Immediate
-from tablegen import CoprocessorRegister, DoubleRegister, Register
+from tablegen import Instruction, Table, Node, Immediate
+from tablegen import ScatteredImmediate, ScatteredSignExtendImmediate
+from tablegen import DoubleRegister, Register, Field
 
 
 class ThumbTable(Table):
@@ -76,11 +76,8 @@ Rt3 = Register(3, 'Rt')
 Rt2 = Register(4, 'Rt2')
 RdHi = Register(4, 'RdHi')
 RdLo = Register(4, 'RdLo')
-Rs = Register(4, 'Rs')
-Rdn = DoubleRegister(4, 'Rd', 'Rn')
 Rdn3 = DoubleRegister(3, 'Rd', 'Rn')
 DN = DoubleRegister(1, 'Rd', 'Rn')
-Rdm = DoubleRegister(4, 'Rd', 'Rm')
 Rdm3 = DoubleRegister(3, 'Rd', 'Rm')
 DM = DoubleRegister(1, 'Rd', 'Rm')
 
@@ -94,109 +91,108 @@ D = Field(1, 'D')
 R = Field(1, 'R')
 M = Field(1, 'M')
 N = Field(1, 'N')
-tb = Field(1, 'tb')
 sh = Field(1, 'sh')
 
 msb = Field(5, 'msb')
-lsb = Field(5, 'msb')
 option = Field(4, 'option')
 register_list = Field(16, 'register_list')
 register_list8 = Field(8, 'register_list')
 widthm1 = Field(5, 'widthm1')
 E = Field(1, 'E')
-op = Field(1, 'op')
 
 firstcond = Field(4, 'first_cond')
 it_mask = Field(4, 'it_mask')
 
-opc1 = Field(4, 'opc1')
-opc1_3 = Field(3, 'opc1')
-opc2 = Field(3, 'opc2')
-CRd = CoprocessorRegister(4, 'CRd')
-CRn = CoprocessorRegister(4, 'CRn')
-CRm = CoprocessorRegister(4, 'CRm')
-coproc = Field(4, 'coproc')
 msr_mask = Field(2, 'msr_mask')
 
-imm1 = Immediate(1, 'imm1')
+imm1_6 = ScatteredImmediate(1, 'imm1', 6)
+imm1_11 = ScatteredImmediate(1, 'imm1', 11)
+imm1_18 = ScatteredImmediate(1, 'imm1', 18)
+imm1_19 = ScatteredImmediate(1, 'imm1', 19)
+imm1_22 = ScatteredImmediate(1, 'imm1', 22)
+imm1_23 = ScatteredImmediate(1, 'imm1', 23)
+imm1_20_sign = ScatteredSignExtendImmediate(1, 'imm1', 20)
 imm2 = Immediate(2, 'imm2')
 imm3 = Immediate(3, 'imm3')
-imm4 = Immediate(4, 'imm4')
-imm4L = Immediate(4, 'imm4L')
-imm4H = Immediate(4, 'imm4H')
+imm3_2 = ScatteredImmediate(3, 'imm3', 2)
+imm3_8 = ScatteredImmediate(3, 'imm3', 8)
+imm4_12 = ScatteredImmediate(4, 'imm4', 12)
 imm5 = Immediate(5, 'imm5')
-imm6 = Immediate(6, 'imm6')
+imm5_1 = ScatteredImmediate(5, 'imm5', 1)
+imm6_12 = ScatteredImmediate(6, 'imm6', 12)
 imm7 = Immediate(7, 'imm7')
 imm8 = Immediate(8, 'imm8')
-imm10 = Immediate(10, 'imm10')
+imm10_2 = ScatteredImmediate(10, 'imm10', 2)
+imm10_12 = ScatteredImmediate(10, 'imm10', 12)
 imm11 = Immediate(11, 'imm11')
+imm11_1 = ScatteredImmediate(11, 'imm11', 1)
 imm12 = Immediate(12, 'imm12')
-imm24 = Immediate(24, 'imm24')
 
 sat_imm5 = Immediate(5, 'sat_imm')
 sat_imm4 = Immediate(4, 'sat_imm')
 rotate = Field(2, 'rotate')
 
 _table = [
-    Instruction('ADC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 0, 1, 0, S, Rn, 0, imm3, Rd, imm8)),
+    Instruction('ADC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 1, 0, S, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('ADC{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 1, 0, 1, Rm3, Rdn3)),
-    Instruction('ADC{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
+    Instruction('ADC{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('ADD{S}<c> <Rd3>, <Rn3>, #<imm3>', (0, 0, 0, 1, 1, 1, 0, imm3, Rn3, Rd3)),
     Instruction('ADD{S}<c> <Rdn3>, #<imm8>', (0, 0, 1, 1, 0, Rdn3, imm8)),
-    Instruction('ADD{S}<c>.W <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 0, 0, 0, S, Rn, 0, imm3, Rd, imm8)),
-    Instruction('ADDW<c> <Rd>, <Rn>, #<imm12>', (1, 1, 1, 1, 0, imm1, 1, 0, 0, 0, 0, 0, Rn, 0, imm3, Rd, imm8)),
+    Instruction('ADD{S}<c>.W <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 0, 0, S, Rn, 0, imm3_8, Rd, imm8)),
+    Instruction('ADDW<c> <Rd>, <Rn>, #<imm12>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 0, 0, 0, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('ADD{S}<c> <Rd>, <Rn>, <Rm>', (0, 0, 0, 1, 1, 0, 0, Rm3, Rn3, Rd3)),
     Instruction('ADD<c> <Rdn>, <Rm>', (0, 1, 0, 0, 0, 1, 0, 0, DN, Rm, Rdn3)),
-    Instruction('ADD{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
+    Instruction('ADD{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('ADD<c> <Rd3>, SP, #<imm>', (1, 0, 1, 0, 1, Rd3, imm8)),
     Instruction('ADD<c> SP, SP, #<imm>', (1, 0, 1, 1, 0, 0, 0, 0, 0, imm7)),
-    # Instruction('ADD{S}<c>.W <Rd>, SP, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 0, 0, 0, S, 1, 1, 0, 1, 0, imm3, Rd, imm8)),
-    Instruction('ADDW<c> <Rd>, SP, #<imm12>', (1, 1, 1, 1, 0, imm1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, imm3, Rd, imm8)),
+    # Instruction('ADD{S}<c>.W <Rd>, SP, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 0, 0, S, 1, 1, 0, 1, 0, imm3_8, Rd, imm8)),
+    Instruction('ADDW<c> <Rd>, SP, #<imm12>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, imm3_8, Rd, imm8)),
     Instruction('ADD<c> <Rdm>, SP, <Rdm>', (0, 1, 0, 0, 0, 1, 0, 0, DM, 1, 1, 0, 1, Rdm3)),
     # Instruction('ADD<c> SP, <Rm>', (0, 1, 0, 0, 0, 1, 0, 0, 1, Rm, 1, 0, 1)),
     # Instruction('ADD{S}<c>.W <Rd>, SP, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, S, 1, 1, 0, 1, (0), imm3, Rd, imm2, typ, Rm)),
     Instruction('ADR<c> <Rd3>, <label>', (1, 0, 1, 0, 0, Rd3, imm8)),
-    Instruction('ADR<c>.W <Rd>, <label>', (1, 1, 1, 1, 0, imm1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, imm3, Rd, imm8)),
-    Instruction('ADR<c>.W <Rd>, <label>', (1, 1, 1, 1, 0, imm1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, imm3, Rd, imm8)),
-    Instruction('AND{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 0, 0, 0, S, Rn, 0, imm3, Rd, imm8)),
+    Instruction('ADR<c>.W <Rd>, <label>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, imm3_8, Rd, imm8)),
+    Instruction('ADR<c>.W <Rd>, <label>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, imm3_8, Rd, imm8)),
+    Instruction('AND{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 0, 0, S, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('AND{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 0, 0, 0, Rm3, Rdn3)),
-    Instruction('AND{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
+    Instruction('AND{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('ASR{S}<c> <Rd3>, <Rm3>, #<imm>', (0, 0, 0, 1, 0, imm5, Rm3, Rd3)),
-    Instruction('ASR{S}<c>.W <Rd>, <Rm>, #<imm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3, Rd, imm2, 1, 0, Rm)),
+    Instruction('ASR{S}<c>.W <Rd>, <Rm>, #<imm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3_2, Rd, imm2, 1, 0, Rm)),
     Instruction('ASR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 1, 0, 0, Rm3, Rdn3)),
     Instruction('ASR{S}<c>.W <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, S, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('B<c> <label>', (1, 1, 0, 1, cond, imm8)),
     Instruction('B<c> <label>', (1, 1, 1, 0, 0, imm11)),
-    # Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, S, cond, imm6, 1, 0, J1, 0, J2, imm11)),
-    # Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, S, imm10, 1, 0, J1, 1, J2, imm11)),
-    Instruction('BFC<c> <Rd>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, imm3, Rd, imm2, (0), msb)),
-    Instruction('BFI<c> <Rd>, <Rn>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 1, 0, Rn, 0, imm3, Rd, imm2, (0), msb)),
-    Instruction('BIC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 0, 0, 1, S, Rn, 0, imm3, Rd, imm8)),
+    Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, imm1_20_sign, cond, imm6_12, 1, 0, imm1_18, 0, imm1_19, imm11_1)),
+    Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 0, imm1_23, 1, imm1_22, imm11_1)),
+    Instruction('BFC<c> <Rd>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, imm3_2, Rd, imm2, (0), msb)),
+    Instruction('BFI<c> <Rd>, <Rn>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 1, 0, Rn, 0, imm3_2, Rd, imm2, (0), msb)),
+    Instruction('BIC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 0, 1, S, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('BIC{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 1, 1, 0, Rm3, Rdn3)),
-    Instruction('BIC{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
+    Instruction('BIC{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('BKPT #<imm8>', (1, 0, 1, 1, 1, 1, 1, 0, imm8)),
-    # Instruction('BL<c> <label>', (1, 1, 1, 1, 0, S, imm10, 1, 1, J1, 1, J2, imm11)),
-    # Instruction('BLX<c> <label>', (1, 1, 1, 1, 0, S, imm10H, 1, 1, J1, 0, J2, imm10L, H)),
+    Instruction('BL<c> <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 1, imm1_23, 1, imm1_22, imm11_1)),
+    Instruction('BLX<c> <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 1, imm1_23, 0, imm1_22, imm10_2, 0)),
     Instruction('BLX<c> <Rm>', (0, 1, 0, 0, 0, 1, 1, 1, 1, Rm, (0), (0), (0))),
     Instruction('BX<c> <Rm>', (0, 1, 0, 0, 0, 1, 1, 1, 0, Rm, (0), (0), (0))),
     Instruction('BXJ<c> <Rm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, Rm, 1, 0, (0), 0, (1), (1), (1), (1), (0), (0), (0), (0), (0), (0), (0), (0))),
-    Instruction('CBZ <Rn>, <label>', (1, 0, 1, 1, op, 0, imm1, 1, imm5, Rn3)),
+    Instruction('CBZ <Rn>, <label>', (1, 0, 1, 1, 0, 0, imm1_6, 1, imm5_1, Rn3)),
+    Instruction('CBNZ <Rn>, <label>', (1, 0, 1, 1, 1, 0, imm1_6, 1, imm5_1, Rn3)),
     Instruction('CLREX<c>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 0, 1, 0, (1), (1), (1), (1))),
     Instruction('CLZ<c> <Rd>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, Rm, 1, 1, 1, 1, Rd, 1, 0, 0, 0, Rm)),
-    Instruction('CMN<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 0, 0, 0, 1, Rn, 0, imm3, 1, 1, 1, 1, imm8)),
+    Instruction('CMN<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 0, 0, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8)),
     Instruction('CMN<c> <Rn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 0, 1, 1, Rm3, Rn3)),
-    Instruction('CMN<c>.W', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, Rn, (0), imm3, 1, 1, 1, 1, imm2, typ, Rm)),
+    Instruction('CMN<c>.W', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
     Instruction('CMP<c> <Rn3>, #<imm8>', (0, 0, 1, 0, 1, Rn3, imm8)),
-    Instruction('CMP<c>.W <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 1, 0, 1, 1, Rn, 0, imm3, 1, 1, 1, 1, imm8)),
+    Instruction('CMP<c>.W <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 1, 0, 1, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8)),
     Instruction('CMP<c> <Rn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 0, 1, 0, Rm3, Rn3)),
     Instruction('CMP<c> <Rn>, <Rm>', (0, 1, 0, 0, 0, 1, 0, 1, N, Rm, Rn3)),
-    Instruction('CMP<c>.W <Rn>, <Rm> {, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, Rn, (0), imm3, 1, 1, 1, 1, imm2, typ, Rm)),
+    Instruction('CMP<c>.W <Rn>, <Rm> {, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
     Instruction('DBG<c> #<option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, (1), (1), (1), (1), 1, 0, (0), 0, (0), 0, 0, 0, 1, 1, 1, 1, option)),
     Instruction('DMB<c> <option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 0, 1, option)),
     Instruction('DSB<c> <option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 0, 0, option)),
-    Instruction('EOR{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 1, 0, 0, S, Rn, 0, imm3, Rd, imm8)),
+    Instruction('EOR{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 1, 0, 0, S, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('EOR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 0, 0, 1, Rm3, Rdn3)),
-    Instruction('EOR{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
+    Instruction('EOR{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('ISB<c> <option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 1, 0, option)),
     Instruction('IT{<x>{<y>{<z>}}} <firstcond>', (1, 0, 1, 1, 1, 1, 1, 1, firstcond, it_mask)),
     Instruction('LDM<c> <Rn>{!}, <registers>', (1, 1, 0, 0, 1, Rn3, register_list8)),
@@ -244,37 +240,38 @@ _table = [
     Instruction('LDRSHT<c> <Rt>, [<Rn>, #<imm8>]', (1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, Rn, Rt, 1, 1, 1, 0, imm8)),
     Instruction('LDRT<c> <Rt>, [<Rn>, #<imm8>]', (1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, Rn, Rt, 1, 1, 1, 0, imm8)),
     Instruction('LSL{S}<c> <Rd3>, <Rm3>, #<imm5>', (0, 0, 0, 0, 0, imm5, Rm3, Rd3)),
-    Instruction('LSL{S}<c>.W <Rd>, <Rm>, #<imm5>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3, Rd, imm2, 0, 0, Rm)),
+    Instruction('LSL{S}<c>.W <Rd>, <Rm>, #<imm5>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3_2, Rd, imm2, 0, 0, Rm)),
     Instruction('LSL{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 0, 1, 0, Rm3, Rdn3)),
     Instruction('LSL{S}<c>.W <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, S, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('LSR{S}<c> <Rd3>, <Rm3>, #<imm>', (0, 0, 0, 0, 1, imm5, Rm3, Rd3)),
-    Instruction('LSR{S}<c>.W <Rd>, <Rm>, #<imm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3, Rd, imm2, 0, 1, Rm)),
+    Instruction('LSR{S}<c>.W <Rd>, <Rm>, #<imm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3_2, Rd, imm2, 0, 1, Rm)),
     Instruction('LSR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 0, 1, 1, Rm3, Rdn3)),
     Instruction('LSR{S}<c>.W <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, S, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('MLA<c> <Rd>, <Rn>, <Rm>, <Ra>', (1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, Rn, Ra, Rd, 0, 0, 0, 0, Rm)),
     Instruction('MLS<c> <Rd>, <Rn>, <Rm>, <Ra>', (1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, Rn, Ra, Rd, 0, 0, 0, 1, Rm)),
     Instruction('MOV{S}<c> <Rd3>, #<imm8>', (0, 0, 1, 0, 0, Rd3, imm8)),
-    Instruction('MOV{S}<c>.W <Rd>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 0, 1, 0, S, 1, 1, 1, 1, 0, imm3, Rd, imm8)),
-    Instruction('MOVW<c> <Rd>, #<imm16>', (1, 1, 1, 1, 0, imm1, 1, 0, 0, 1, 0, 0, imm4, 0, imm3, Rd, imm8)),
+    Instruction('MOV{S}<c>.W <Rd>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 1, 0, S, 1, 1, 1, 1, 0, imm3_8, Rd, imm8)),
+    Instruction('MOVW<c> <Rd>, #<imm16>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 1, 0, 0, imm4_12, 0, imm3_8, Rd, imm8)),
     Instruction('MOV<c> <Rd>, <Rm>', (0, 1, 0, 0, 0, 1, 1, 0, D, Rm, Rd3)),
     Instruction('MOV{S} <Rd3>, <Rm3>', (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Rm3, Rd3)),
     Instruction('MOV{S}<c>.W <Rd>, <Rm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), 0, 0, 0, Rd, 0, 0, 0, 0, Rm)),
-    Instruction('MOVT<c> <Rd>, #<imm16>', (1, 1, 1, 1, 0, imm1, 1, 0, 1, 1, 0, 0, imm4, 0, imm3, Rd, imm8)),
+    Instruction('MOVT<c> <Rd>, #<imm16>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 1, 1, 0, 0, imm4_12, 0, imm3_8, Rd, imm8)),
     Instruction('MRS<c> <Rd>, <spec_reg>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, (1), (1), (1), (1), 1, 0, (0), 0, Rd, (0), (0), 0, (0), (0), (0), (0), (0))),
     Instruction('MSR<c> <spec_reg>, <Rn>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, Rn, 1, 0, (0), 0, msr_mask, 0, 0, (0), (0), 0, (0), (0), (0), (0), (0))),
     Instruction('MUL{S}<c> <Rdm3>, <Rn3>, <Rdm3>', (0, 1, 0, 0, 0, 0, 1, 1, 0, 1, Rn3, Rdm3)),
     Instruction('MUL<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
-    Instruction('MVN{S}<c> <Rd>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 0, 1, 1, S, 1, 1, 1, 1, 0, imm3, Rd, imm8)),
+    Instruction('MVN{S}<c> <Rd>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 1, 1, S, 1, 1, 1, 1, 0, imm3_8, Rd, imm8)),
     Instruction('MVN{S}<c> <Rd3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 1, 1, 1, Rm3, Rd3)),
-    Instruction('MVN{S}<c>.W <Rd>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, S, 1, 1, 1, 1, (0), imm3, Rd, imm2, typ, Rm)),
+    Instruction('MVN{S}<c>.W <Rd>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, S, 1, 1, 1, 1, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('NOP<c>', (1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0)),
     Instruction('NOP<c>.W', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, (1), (1), (1), (1), 1, 0, (0), 0, (0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
-    Instruction('ORN{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 0, 1, 1, S, Rn, 0, imm3, Rd, imm8)),
-    Instruction('ORN{S}<c> <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
-    Instruction('ORR{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 0, 1, 0, S, Rn, 0, imm3, Rd, imm8)),
+    Instruction('ORN{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 1, 1, S, Rn, 0, imm3_8, Rd, imm8)),
+    Instruction('ORN{S}<c> <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
+    Instruction('ORR{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 1, 0, S, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('ORR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 1, 0, 0, Rm3, Rdn3)),
-    Instruction('ORR{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
-    # Instruction('PKHBT<c> <Rd>, <Rn>, <Rm>{, LSL #<imm>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, S, Rn, (0), imm3, Rd, imm2, tb, T, Rm)),
+    Instruction('ORR{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
+    Instruction('PKHBT<c> <Rd>, <Rn>, <Rm>{, LSL #<imm>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 0, 0, Rm)),
+    Instruction('PKHTB<c> <Rd>, <Rn>, <Rm>{, LSL #<imm>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 1, 0, Rm)),
     Instruction('PLD{W}<c> [<Rn>, #<imm12>]', (1, 1, 1, 1, 1, 0, 0, 0, 1, 0, W, 1, Rn, 1, 1, 1, 1, imm12)),
     Instruction('PLD{W}<c> [<Rn>, #-<imm8>]', (1, 1, 1, 1, 1, 0, 0, 0, 0, 0, W, 1, Rn, 1, 1, 1, 1, 1, 1, 0, 0, imm8)),
     Instruction('PLD<c> <label>', (1, 1, 1, 1, 1, 0, 0, 0, U, 0, (0), 1, 1, 1, 1, 1, 1, 1, 1, 1, imm12)),
@@ -306,20 +303,20 @@ _table = [
     Instruction('REV16<c>.W <Rd>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, Rm, 1, 1, 1, 1, Rd, 1, 0, 0, 1, Rm)),
     Instruction('REVSH<c> <Rd3>, <Rm3>', (1, 0, 1, 1, 1, 0, 1, 0, 1, 1, Rm3, Rd3)),
     Instruction('REVSH<c>.W <Rd>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, Rm, 1, 1, 1, 1, Rd, 1, 0, 1, 1, Rm)),
-    Instruction('ROR{S}<c> <Rd>, <Rm>, #<imm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3, Rd, imm2, 1, 1, Rm)),
+    Instruction('ROR{S}<c> <Rd>, <Rm>, #<imm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3_2, Rd, imm2, 1, 1, Rm)),
     Instruction('ROR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 1, 1, 1, Rm3, Rdn3)),
     Instruction('ROR{S}<c>.W <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, S, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('RRX{S}<c> <Rd>, <Rm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), 0, 0, 0, Rd, 0, 0, 1, 1, Rm)),
     Instruction('RSB{S} <Rd3>, <Rn3>, #0', (0, 1, 0, 0, 0, 0, 1, 0, 0, 1, Rn3, Rd3)),
-    Instruction('RSB{S}<c>.W <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 1, 1, 0, S, Rn, 0, imm3, Rd, imm8)),
-    Instruction('RSB{S}<c> <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
+    Instruction('RSB{S}<c>.W <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 1, 1, 0, S, Rn, 0, imm3_8, Rd, imm8)),
+    Instruction('RSB{S}<c> <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('SADD16<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('SADD8<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('SASX<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
-    Instruction('SBC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 0, 1, 1, S, Rn, 0, imm3, Rd, imm8)),
+    Instruction('SBC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 1, 1, S, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('SBC{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 1, 1, 0, Rm3, Rdn3)),
-    Instruction('SBC{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
-    Instruction('SBFX<c> <Rd>, <Rn>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 0, 0, Rn, 0, imm3, Rd, imm2, (0), widthm1)),
+    Instruction('SBC{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
+    Instruction('SBFX<c> <Rd>, <Rn>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 0, 0, Rn, 0, imm3_2, Rd, imm2, (0), widthm1)),
     Instruction('SDIV<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, Rn, (1), (1), (1), (1), Rd, 1, 1, 1, 1, Rm)),
     Instruction('SEL<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, Rn, 1, 1, 1, 1, Rd, 1, 0, 0, 0, Rm)),
     Instruction('SETEND <endian_specifier>', (1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, (1), E, (0), (0), (0))),
@@ -347,7 +344,7 @@ _table = [
     Instruction('SMULL<c> <RdLo>, <RdHi>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, Rn, RdLo, RdHi, 0, 0, 0, 0, Rm)),
     Instruction('SMULW<y><c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, M, Rm)),
     Instruction('SMUSD{X}<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, M, Rm)),
-    Instruction('SSAT<c> <Rd>, #<imm>, <Rn>{, <shift>}', (1, 1, 1, 1, 0, (0), 1, 1, 0, 0, sh, 0, Rn, 0, imm3, Rd, imm2, (0), sat_imm5)),
+    Instruction('SSAT<c> <Rd>, #<imm>, <Rn>{, <shift>}', (1, 1, 1, 1, 0, (0), 1, 1, 0, 0, sh, 0, Rn, 0, imm3_2, Rd, imm2, (0), sat_imm5)),
     Instruction('SSAT16<c> <Rd>, #<imm>, <Rn>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 0, 1, 0, Rn, 0, 0, 0, 0, Rd, 0, 0, (0), (0), sat_imm4)),
     Instruction('SSAX<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('SSUB16<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
@@ -381,13 +378,13 @@ _table = [
     Instruction('STRT<c> <Rt>, [<Rn>, #<imm8>]', (1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, Rn, Rt, 1, 1, 1, 0, imm8)),
     Instruction('SUB{S}<c> <Rd3>, <Rn3>, #<imm3>', (0, 0, 0, 1, 1, 1, 1, imm3, Rn3, Rd3)),
     Instruction('SUB{S}<c> <Rdn3>, #<imm8>', (0, 0, 1, 1, 1, Rdn3, imm8)),
-    Instruction('SUB{S}<c>.W <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 1, 0, 1, S, Rn, 0, imm3, Rd, imm8)),
-    Instruction('SUBW<c> <Rd>, <Rn>, #<imm12>', (1, 1, 1, 1, 0, imm1, 1, 0, 1, 0, 1, 0, Rn, 0, imm3, Rd, imm8)),
+    Instruction('SUB{S}<c>.W <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 1, 0, 1, S, Rn, 0, imm3_8, Rd, imm8)),
+    Instruction('SUBW<c> <Rd>, <Rn>, #<imm12>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 1, 0, 1, 0, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('SUB{S}<c> <Rd3>, <Rn3>, <Rm3>', (0, 0, 0, 1, 1, 0, 1, Rm3, Rn3, Rd3)),
-    Instruction('SUB{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, S, Rn, (0), imm3, Rd, imm2, typ, Rm)),
+    Instruction('SUB{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('SUB<c> SP, SP, #<imm>', (1, 0, 1, 1, 0, 0, 0, 0, 1, imm7)),
     # Instruction('SUB{S}<c>.W <Rd>, SP, #<const>', (1, 1, 1, 1, 0, imm1, 0, 1, 1, 0, 1, S, 1, 1, 0, 1, 0, imm3, Rd, imm8)),
-    Instruction('SUBW<c> <Rd>, SP, #<imm12>', (1, 1, 1, 1, 0, imm1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, imm3, Rd, imm8)),
+    Instruction('SUBW<c> <Rd>, SP, #<imm12>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, imm3_8, Rd, imm8)),
     # Instruction('SUB{S}<c> <Rd>, SP, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, S, 1, 1, 0, 1, (0), imm3, Rd, imm2, typ, Rm)),
     Instruction('SVC<c> #<imm8>', (1, 1, 0, 1, 1, 1, 1, 1, imm8)),
     Instruction('SXTAB<c> <Rd>, <Rn>, <Rm>{, <rotation>}', (1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, Rn, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm)),
@@ -399,17 +396,17 @@ _table = [
     Instruction('SXTH<c> <Rd3>, <Rm3>', (1, 0, 1, 1, 0, 0, 1, 0, 0, 0, Rm3, Rd3)),
     Instruction('SXTH<c>.W <Rd>, <Rm>{, <rotation>}', (1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm)),
     # Instruction('TBB<c> [<Rn>, <Rm>]', (1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, Rn, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, H, Rm)),
-    Instruction('TEQ<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 1, 0, 0, 1, Rn, 0, imm3, 1, 1, 1, 1, imm8)),
-    Instruction('TEQ<c> <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, Rn, (0), imm3, 1, 1, 1, 1, imm2, typ, Rm)),
-    Instruction('TST<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1, 0, 0, 0, 0, 0, 1, Rn, 0, imm3, 1, 1, 1, 1, imm8)),
+    Instruction('TEQ<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 1, 0, 0, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8)),
+    Instruction('TEQ<c> <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
+    Instruction('TST<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 0, 0, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8)),
     Instruction('TST<c> <Rn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 0, 0, 0, Rm3, Rn3)),
-    Instruction('TST<c>.W', (1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, Rn, (0), imm3, 1, 1, 1, 1, imm2, typ, Rm)),
+    Instruction('TST<c>.W', (1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
     Instruction('UADD16<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, Rn, 1, 1, 1, 1, Rd, 0, 1, 0, 0, Rm)),
     Instruction('UADD8<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 1, 0, 0, Rm)),
     Instruction('UASX<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, Rn, 1, 1, 1, 1, Rd, 0, 1, 0, 0, Rm)),
-    Instruction('UBFX<c> <Rd>, <Rn>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 1, 1, 0, 0, Rn, 0, imm3, Rd, imm2, (0), widthm1)),
+    Instruction('UBFX<c> <Rd>, <Rn>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 1, 1, 0, 0, Rn, 0, imm3_2, Rd, imm2, (0), widthm1)),
     Instruction('UDF<c> #<imm8>', (1, 1, 0, 1, 1, 1, 1, 0, imm8)),
-    Instruction('UDF<c>.W #<imm16>', (1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, imm4, 1, 0, 1, 0, imm12)),
+    Instruction('UDF<c>.W #<imm16>', (1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, imm4_12, 1, 0, 1, 0, imm12)),
     Instruction('UDIV<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, Rn, (1), (1), (1), (1), Rd, 1, 1, 1, 1, Rm)),
     Instruction('UHADD16<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, Rn, 1, 1, 1, 1, Rd, 0, 1, 1, 0, Rm)),
     Instruction('UHADD8<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 1, 1, 0, Rm)),
@@ -428,7 +425,7 @@ _table = [
     Instruction('UQSUB8<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 1, 0, 1, Rm)),
     Instruction('USAD8<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('USADA8<c> <Rd>, <Rn>, <Rm>, <Ra>', (1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, Rn, Ra, Rd, 0, 0, 0, 0, Rm)),
-    Instruction('USAT<c> <Rd>, #<imm5>, <Rn>{, <shift>}', (1, 1, 1, 1, 0, (0), 1, 1, 1, 0, sh, 0, Rn, 0, imm3, Rd, imm2, (0), sat_imm5)),
+    Instruction('USAT<c> <Rd>, #<imm5>, <Rn>{, <shift>}', (1, 1, 1, 1, 0, (0), 1, 1, 1, 0, sh, 0, Rn, 0, imm3_2, Rd, imm2, (0), sat_imm5)),
     Instruction('USAT16<c> <Rd>, #<imm4>, <Rn>', (1, 1, 1, 1, 0, (0), 1, 1, 1, 0, 1, 0, Rn, 0, 0, 0, 0, Rd, 0, 0, (0), (0), sat_imm4)),
     Instruction('USAX<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, Rn, 1, 1, 1, 1, Rd, 0, 1, 0, 0, Rm)),
     Instruction('USUB16<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, Rn, 1, 1, 1, 1, Rd, 0, 1, 0, 0, Rm)),

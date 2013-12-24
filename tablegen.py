@@ -185,7 +185,12 @@ class CoprocessorRegister(BitPattern):
 
 class Immediate(BitPattern):
     def create(self, idx, sm, lut, bitsize):
-        return sm.append('SM_IMM', self.bitsize)
+        # The immediate is located starting at the lowest significant bit.
+        if idx + self.bitsize == bitsize:
+            return sm.append('SM_IMM', self.bitsize)
+        else:
+            return sm.append('SM_IMM2', self.bitsize,
+                             bitsize-self.bitsize-idx, 0)
 
 
 class ScatteredImmediate(BitPattern):
@@ -196,6 +201,13 @@ class ScatteredImmediate(BitPattern):
     def create(self, idx, sm, lut, bitsize):
         return sm.append('SM_IMM2', self.bitsize,
                          bitsize-self.bitsize-idx, self.imm_idx)
+
+
+class ScatteredSignExtendImmediate(ScatteredImmediate):
+    def create(self, idx, sm, lut, bitsize):
+        ret = ScatteredImmediate.create(self, idx, sm, lut, bitsize)
+        sm.append('SM_SIGN', self.imm_idx)
+        return ret
 
 
 class Macro(object):

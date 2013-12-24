@@ -147,6 +147,13 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             off += 3;
             break;
 
+        case SM_SIGN:
+            // See the VariableSignExtend section at
+            // http://graphics.stanford.edu/~seander/bithacks.html
+            value = sizeof(uint32_t) * 8 - sm[off++];
+            d->imm = (int32_t)(d->imm << value) >> value;
+            break;
+
         case SM_STR:
             d->format = &sm[off+1];
             off += sm[off];

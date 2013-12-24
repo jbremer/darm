@@ -136,6 +136,9 @@ if __name__ == '__main__':
     // in the resulting immediate.
     SM_IMM, SM_IMM2,
 
+    // Sign extend the immediate.
+    SM_SIGN,
+
     // Extra information for generating a human-readable string.
     SM_STR,
 
