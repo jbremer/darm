@@ -107,6 +107,11 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             off = lut[sm[off+2] + sm[off+3]*256 + value];
             break;
 
+        case SM_TBL5:
+            value = _extract_field(insn, sm[off], 5);
+            off = lut[sm[off+1] + sm[off+2]*256 + value];
+            break;
+
         case SM_RETN:
             return 0;
 
@@ -147,6 +152,11 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
 int darm_armv7(darm_t *d, uint32_t insn)
 {
     return _darm_disassemble(d, insn, g_armv7_sm, g_armv7_lut);
+}
+
+int darm_thumb(darm_t *d, uint16_t w, uint16_t w2)
+{
+    return _darm_disassemble(d, (w << 16) | w2, g_thumb_sm, g_thumb_lut);
 }
 
 #define APPEND(out, ptr) \

@@ -115,7 +115,8 @@ typedef struct _darm_t {
     uint32_t        opc1, opc2;
     darm_reg_t      CRd, CRn, CRm;
 
-    uint32_t        mask, tb, rotate, sh, widthm1;
+    uint32_t        mask, tb, rotate, sh, widthm1, op;
+    uint32_t        msr_mask, it_mask, first_cond;
 
     // Internal format for generation of human-readable strings.
     const uint8_t   *format;
@@ -125,6 +126,8 @@ typedef struct _darm_t {
 #define DARM_BUFLEN 64
 
 int darm_armv7(darm_t *d, uint32_t insn);
+int darm_thumb(darm_t *d, uint16_t w, uint16_t w2);
+
 int darm_string(const darm_t *d, char *out);
 
 int darm_reglist(uint16_t reglist, char *out);

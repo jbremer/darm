@@ -165,6 +165,18 @@ class Register(BitPattern):
                          bitsize-self.bitsize-idx, self.bitsize)
 
 
+class DoubleRegister(BitPattern):
+    def __init__(self, bitsize, name, name2):
+        BitPattern.__init__(self, bitsize, name)
+        self.name2 = name2
+
+    def create(self, idx, sm, lut, bitsize):
+        return sm.append('SM_EXTR', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.bitsize,
+                         'SM_EXTR', 'O(%s)' % self.name2,
+                         bitsize-self.bitsize-idx, self.bitsize)
+
+
 class CoprocessorRegister(BitPattern):
     def create(self, idx, sm, lut, bitsize):
         return sm.append('SM_EXTR2', 'O(%s)' % self.name,
@@ -218,7 +230,7 @@ class Node(object):
     def process(self):
         """Processes this node and creates subnodes as required."""
         # Inherit the hlt handler from our parent, if available.
-        if self.parent and self.parent.hlt:
+        if self.parent and not self.parent.hlt is self:
             self.hlt = self.parent.hlt
 
         bits = dict((idx, []) for idx in xrange(32))
@@ -256,7 +268,6 @@ class Node(object):
             if self.idx in ins.value:
                 self.lut[self.idx][ins.value[self.idx]].insert(ins)
             else:
-                assert self.hlt is None
                 self.hlt = Node(self)
                 self.hlt.insert(ins)
                 self.hlt.process()

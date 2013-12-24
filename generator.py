@@ -30,7 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import itertools
 import sys
 import textwrap
-from tables import armv7
+from tables import armv7, thumb
 
 
 def generate_c_table(l):
@@ -45,11 +45,6 @@ def magic_open(fname):
 
 
 if __name__ == '__main__':
-
-    sm, lut = armv7.table.create()
-
-    insns = sorted(set(_.name for _ in armv7.table.insns))
-
     magic_open('darm-tables.c')
     print('#include <stdint.h>')
     print('#include "darm.h"')
@@ -59,12 +54,26 @@ if __name__ == '__main__':
     print('#define O(m) offsetof(darm_t, m)')
     print('#define L(x) (x) % 256')
     print('#define H(x) (x) / 256')
+
+    sm, lut = armv7.table.create()
+    armv7_sm_size, armv7_lut_size = len(sm.table), len(lut.table)
     print('const uint8_t g_armv7_sm[%d] = {' % len(sm.table))
     print('    ' + generate_c_table(sm.table))
     print('};')
     print('const uint16_t g_armv7_lut[%d] = {' % len(lut.table))
     print('    ' + generate_c_table(lut.table))
     print('};')
+
+    sm, lut = thumb.table.create()
+    thumb_sm_size, thumb_lut_size = len(sm.table), len(lut.table)
+    print('const uint8_t g_thumb_sm[%d] = {' % len(sm.table))
+    print('    ' + generate_c_table(sm.table))
+    print('};')
+    print('const uint16_t g_thumb_lut[%d] = {' % len(lut.table))
+    print('    ' + generate_c_table(lut.table))
+    print('};')
+
+    insns = sorted(set(_.name for _ in armv7.table.insns + thumb.table.insns))
     print('const char *g_darm_instr[%d] = {' % len(insns))
     print('    ' + generate_c_table('"%s"' % _ for _ in insns))
     print('};')
@@ -73,8 +82,10 @@ if __name__ == '__main__':
     print('#ifndef __DARM_TABLES__')
     print('#define __DARM_TABLES__')
     print('#include <stdint.h>')
-    print('extern const uint8_t g_armv7_sm[%d];' % len(sm.table))
-    print('extern const uint16_t g_armv7_lut[%d];' % len(lut.table))
+    print('extern const uint8_t g_armv7_sm[%d];' % armv7_sm_size)
+    print('extern const uint16_t g_armv7_lut[%d];' % armv7_lut_size)
+    print('extern const uint8_t g_thumb_sm[%d];' % thumb_sm_size)
+    print('extern const uint16_t g_thumb_lut[%d];' % thumb_lut_size)
     print('extern const char *g_darm_instr[%d];' % len(insns))
     print('#endif')
 
@@ -105,6 +116,9 @@ if __name__ == '__main__':
     // bits which are hardcoded and have to be checked in order to determine
     // as which encoding we will disassemble this instruction.
     SM_CMP4,
+
+    // Takes a 5-bit value and looks it up in a lookup table.
+    SM_TBL5,
 
     // This instruction has been disassembled correctly, return success.
     SM_RETN,
