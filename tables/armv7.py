@@ -28,7 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 from tablegen import Instruction, Macro, Table, Node
-from tablegen import Field, Register, Immediate
+from tablegen import Field, CoprocessorRegister, Register, Immediate
 
 
 class ARMv7Table(Table):
@@ -92,9 +92,9 @@ E = Field(1, 'E')
 opc1 = Field(4, 'opc1')
 opc1_3 = Field(3, 'opc1')
 opc2 = Field(3, 'opc2')
-CRd = Register(4, 'CRd')
-CRn = Register(4, 'CRn')
-CRm = Register(4, 'CRm')
+CRd = CoprocessorRegister(4, 'CRd')
+CRn = CoprocessorRegister(4, 'CRn')
+CRm = CoprocessorRegister(4, 'CRm')
 coproc = Field(4, 'coproc')
 mask = Field(2, 'mask')
 

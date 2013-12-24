@@ -61,6 +61,22 @@ static const char *g_darm_conditionals[] = {
     "hi", "ls", "ge", "lt", "gt", "le", "al", "al",
 };
 
+static const char *g_darm_option[] = {
+    [b0010] = "oshst",
+    [b0011] = "osh",
+    [b0110] = "nshst",
+    [b0111] = "nsh",
+    [b1010] = "ishst",
+    [b1011] = "ish",
+    [b1110] = "st",
+    [b1111] = "sy",
+};
+
+static const char *g_darm_coproc[] = {
+    "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8",
+    "p9", "p10", "p11", "p12", "p13", "p14", "p15",
+};
+
 static inline uint32_t _extract_field(uint32_t insn,
     uint32_t idx, uint32_t bits)
 {
@@ -103,6 +119,12 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             *(uint32_t *)((char *) d + sm[off]) =
                 _extract_field(insn, sm[off+1], sm[off+2]);
             off += 3;
+            break;
+
+        case SM_EXTR2:
+            *(uint32_t *)((char *) d + sm[off]) =
+                _extract_field(insn, sm[off+1], sm[off+2]) + sm[off+3];
+            off += 4;
             break;
 
         case SM_IMM:
@@ -272,8 +294,59 @@ int darm_string(const darm_t *d, char *out)
             out += _append_imm(out, d->imm);
             break;
 
+        case STR_INT:
+            value = *(uint32_t *)((char *) d + *fmt++);
+            out += _append_imm(out, value);
+            break;
+
         case STR_REGLIST:
             out += darm_reglist(d->register_list, out);
+            break;
+
+        case STR_OPTION:
+            if(d->option < O_BASE || d->option >= O_OPTIONCNT) {
+                DPRINT("Invalid option value: %d", d->option);
+                return -1;
+            }
+
+            if(g_darm_option[d->option] == NULL) {
+                out += _append_imm(out, d->option);
+            }
+            else {
+                APPEND(out, g_darm_option[d->option]);
+            }
+            break;
+
+        case STR_LABEL:
+            APPEND(out, "pc");
+            if((int32_t) d->imm < 0) {
+                *out++ = '-';
+                out += _append_imm(out, -d->imm);
+            }
+            else {
+                *out++ = '+';
+                out += _append_imm(out, d->imm);
+            }
+            break;
+
+        case STR_EXCL:
+            if(d->W == B_INVLD) {
+                DPRINT("W flag has not been set");
+                return -1;
+            }
+
+            if(d->W == B_SET) {
+                *out++ = '!';
+            }
+            break;
+
+        case STR_COPROC:
+            if(d->coproc < P_BASE || d->coproc >= P_PROCCNT) {
+                DPRINT("Invalid coproc value: %d", d->coproc);
+                return -1;
+            }
+
+            APPEND(out, g_darm_coproc[d->coproc]);
             break;
         }
     }

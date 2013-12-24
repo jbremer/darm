@@ -112,9 +112,10 @@ if __name__ == '__main__':
     // Assign the instruction index.
     SM_INSTR,
 
-    // Extracts a couple of bits from the instruction and stores them in
-    // the given field in the darm_t object.
-    SM_EXTR,
+    // Extracts a couple of bits from the instruction, optionally adds a
+    // value to the extracted bits, and stores them in the given field in
+    // the darm_t object.
+    SM_EXTR, SM_EXTR2,
 
     // Extract an immediate.
     SM_IMM,
@@ -127,7 +128,7 @@ if __name__ == '__main__':
 
 typedef enum _darm_string_opcode_t {
     STR_RETN, STR_S, STR_cond, STR_REG, STR_REG_CONST, STR_SHIFT, STR_IMM,
-    STR_REGLIST,
+    STR_INT, STR_REGLIST, STR_OPTION, STR_LABEL, STR_EXCL, STR_COPROC,
 } darm_string_opcode_t;""")
 
     # define constants 0b0 up upto 0b11111111

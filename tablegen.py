@@ -52,11 +52,24 @@ class InstructionFormat(object):
         if len(args) == 4 and args[2][-1] == '{' and args[3][0] == '<':
             args = args[:2] + [args[2] + ',' + args[3]]
 
-        regs = '<Rd>', '<Rn>', '<Rm>', '<Rt>', '<Rt2>', \
-               '<RdHi>', '<RdLo>', '<Ra>',
+        regs = '<Rd>', '<Rn>', '<Rm>', '<Rt>', '<Rt2>', '<RdHi>', \
+               '<RdLo>', '<Ra>', '<CRd>', '<CRn>', '<CRm>'
 
         imms = '#<const>', '#<imm>', '#<imm4>', '#<imm5>', \
-               '#<imm16>', '#<imm24>'
+               '#<imm12>', '#<imm16>', '#<imm24>'
+
+        t = {
+            '<registers>': ['STR_REGLIST'],
+            '<type> <Rs>': ['STR_SHIFT'],
+            '#<option>': ['STR_OPTION'],
+            '#<shift>': ['STR_SHIFT'],
+            '<label>': ['STR_LABEL'],
+            'SP': ['STR_REG_CONST', 'SP'],
+            '#<lsb>': ['STR_INT', 'O(lsb)'],
+            '#<width>': ['STR_INT', 'O(width)'],
+            '<Rn>{!}': ['STR_REG', 'O(Rn)', 'STR_EXCL'],
+            '<coproc>': ['STR_COPROC'],
+        }
 
         for arg in args:
             if arg in regs:
@@ -67,17 +80,10 @@ class InstructionFormat(object):
                 self.sm.append('STR_IMM')
                 continue
 
-            if arg == 'SP':
-                self.sm += ['STR_REG_CONST', 'SP']
+            if arg in t:
+                self.sm += t[arg]
                 continue
 
-            if arg == '<registers>':
-                self.sm.append('STR_REGLIST')
-                continue
-
-            if arg == '<type> <Rs>':
-                self.sm.append('STR_SHIFT')
-                continue
 
         self.sm.append('STR_RETN')
 
@@ -157,6 +163,12 @@ class Register(BitPattern):
     def create(self, idx, sm, lut, bitsize):
         return sm.append('SM_EXTR', 'O(%s)' % self.name,
                          bitsize-self.bitsize-idx, self.bitsize)
+
+
+class CoprocessorRegister(BitPattern):
+    def create(self, idx, sm, lut, bitsize):
+        return sm.append('SM_EXTR2', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.bitsize, 'CR_BASE')
 
 
 class Immediate(BitPattern):
