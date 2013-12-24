@@ -188,6 +188,16 @@ class Immediate(BitPattern):
         return sm.append('SM_IMM', self.bitsize)
 
 
+class ScatteredImmediate(BitPattern):
+    def __init__(self, bitsize, name, imm_idx):
+        BitPattern.__init__(self, bitsize, name)
+        self.imm_idx = imm_idx
+
+    def create(self, idx, sm, lut, bitsize):
+        return sm.append('SM_IMM2', self.bitsize,
+                         bitsize-self.bitsize-idx, self.imm_idx)
+
+
 class Macro(object):
     def __init__(self, name):
         self.name = name

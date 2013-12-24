@@ -28,7 +28,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 from tablegen import Instruction, Macro, Table, Node
-from tablegen import Field, CoprocessorRegister, Register, Immediate
+from tablegen import Field, CoprocessorRegister, Register
+from tablegen import Immediate, ScatteredImmediate
 
 
 class ARMv7Table(Table):
@@ -99,13 +100,16 @@ coproc = Field(4, 'coproc')
 mask = Field(2, 'mask')
 
 imm1 = Immediate(1, 'imm1')
+imm1_1 = ScatteredImmediate(1, 'imm1', 1)
 imm4 = Immediate(4, 'imm4')
-imm4L = Immediate(4, 'imm4L')
-imm4H = Immediate(4, 'imm4H')
+imm4_4 = ScatteredImmediate(4, 'imm4', 4)
+imm4_12 = ScatteredImmediate(4, 'imm4', 12)
 imm5 = Immediate(5, 'imm5')
 imm8 = Immediate(8, 'imm8')
 imm12 = Immediate(12, 'imm12')
+imm12_4 = ScatteredImmediate(12, 'imm12', 4)
 imm24 = Immediate(24, 'imm24')
+imm24_2 = ScatteredImmediate(24, 'imm24', 2)
 
 sat_imm5 = Immediate(5, 'sat_imm')
 sat_imm4 = Immediate(4, 'sat_imm')
@@ -136,9 +140,9 @@ _table = [
     Instruction('BIC{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 1, 1, 1, 0, S, Rn, Rd, imm12)),
     Instruction('BIC{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 0, 0, 1, 1, 1, 0, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('BIC{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 1, 1, 1, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
-    Instruction('BKPT #<imm16>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, imm12, 0, 1, 1, 1, imm4)),
+    Instruction('BKPT #<imm16>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, imm12_4, 0, 1, 1, 1, imm4)),
     Instruction('BL<c> <label>', (cond, 1, 0, 1, 1, imm24)),
-    Instruction('BLX <label>', (1, 1, 1, 1, 1, 0, 1, imm1, imm24)),
+    Instruction('BLX <label>', (1, 1, 1, 1, 1, 0, 1, imm1_1, imm24_2)),
     Instruction('BLX<c> <Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 1, 1, Rm)),
     Instruction('BX<c> <Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 0, 1, Rm)),
     Instruction('BXJ<c> <Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 1, 0, Rm)),
@@ -171,23 +175,23 @@ _table = [
     Instruction('LDRB<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}', (cond, 0, 1, 1, P, U, 1, W, 1, Rn, Rt, imm5, typ, 0, Rm)),
     Instruction('LDRBT<c> <Rt>,[<Rn>],#+/-<imm12>', (cond, 0, 1, 0, 0, U, 1, 1, 1, Rn, Rt, imm12)),
     Instruction('LDRBT<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}', (cond, 0, 1, 1, 0, U, 1, 1, 1, Rn, Rt, imm5, typ, 0, Rm)),
-    Instruction('LDRD<c> <Rt>,<Rt2>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 0, Rn, Rt, imm4H, 1, 1, 0, 1, imm4L)),
+    Instruction('LDRD<c> <Rt>,<Rt2>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 0, Rn, Rt, imm4_4, 1, 1, 0, 1, imm4)),
     Instruction('LDRD<c> <Rt>,<Rt2>,[<Rn>],+/-<Rm>', (cond, 0, 0, 0, P, U, 0, W, 0, Rn, Rt, (0), (0), (0), (0), 1, 1, 0, 1, Rm)),
     Instruction('LDREX<c> <Rt>,[<Rn>]', (cond, 0, 0, 0, 1, 1, 0, 0, 1, Rn, Rt, (1), (1), (1), (1), 1, 0, 0, 1, (1), (1), (1), (1))),
     Instruction('LDREXB<c> <Rt>, [<Rn>]', (cond, 0, 0, 0, 1, 1, 1, 0, 1, Rn, Rt, (1), (1), (1), (1), 1, 0, 0, 1, (1), (1), (1), (1))),
     Instruction('LDREXD<c> <Rt>,<Rt2>,[<Rn>]', (cond, 0, 0, 0, 1, 1, 0, 1, 1, Rn, Rt, (1), (1), (1), (1), 1, 0, 0, 1, (1), (1), (1), (1))),
     Instruction('LDREXH<c> <Rt>, [<Rn>]', (cond, 0, 0, 0, 1, 1, 1, 1, 1, Rn, Rt, (1), (1), (1), (1), 1, 0, 0, 1, (1), (1), (1), (1))),
-    Instruction('LDRH<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 1, Rn, Rt, imm4H, 1, 0, 1, 1, imm4L)),
+    Instruction('LDRH<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 1, Rn, Rt, imm4_4, 1, 0, 1, 1, imm4)),
     Instruction('LDRH<c> <Rt>,[<Rn>],+/-<Rm>', (cond, 0, 0, 0, P, U, 0, W, 1, Rn, Rt, (0), (0), (0), (0), 1, 0, 1, 1, Rm)),
-    Instruction('LDRHT<c> <Rt>, [<Rn>],#+/-<imm8>', (cond, 0, 0, 0, 0, U, 1, 1, 1, Rn, Rt, imm4H, 1, 0, 1, 1, imm4L)),
+    Instruction('LDRHT<c> <Rt>, [<Rn>],#+/-<imm8>', (cond, 0, 0, 0, 0, U, 1, 1, 1, Rn, Rt, imm4_4, 1, 0, 1, 1, imm4)),
     Instruction('LDRHT<c> <Rt>, [<Rn>], +/-<Rm>', (cond, 0, 0, 0, 0, U, 0, 1, 1, Rn, Rt, (0), (0), (0), (0), 1, 0, 1, 1, Rm)),
-    Instruction('LDRSB<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 1, Rn, Rt, imm4H, 1, 1, 0, 1, imm4L)),
+    Instruction('LDRSB<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 1, Rn, Rt, imm4_4, 1, 1, 0, 1, imm4)),
     Instruction('LDRSB<c> <Rt>,[<Rn>],+/-<Rm>', (cond, 0, 0, 0, P, U, 0, W, 1, Rn, Rt, (0), (0), (0), (0), 1, 1, 0, 1, Rm)),
-    Instruction('LDRSBT<c> <Rt>, [<Rn>],#+/-<imm8>', (cond, 0, 0, 0, 0, U, 1, 1, 1, Rn, Rt, imm4H, 1, 1, 0, 1, imm4L)),
+    Instruction('LDRSBT<c> <Rt>, [<Rn>],#+/-<imm8>', (cond, 0, 0, 0, 0, U, 1, 1, 1, Rn, Rt, imm4_4, 1, 1, 0, 1, imm4)),
     Instruction('LDRSBT<c> <Rt>, [<Rn>], +/-<Rm>', (cond, 0, 0, 0, 0, U, 0, 1, 1, Rn, Rt, (0), (0), (0), (0), 1, 1, 0, 1, Rm)),
-    Instruction('LDRSH<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 1, Rn, Rt, imm4H, 1, 1, 1, 1, imm4L)),
+    Instruction('LDRSH<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 1, Rn, Rt, imm4_4, 1, 1, 1, 1, imm4)),
     Instruction('LDRSH<c> <Rt>,[<Rn>],+/-<Rm>', (cond, 0, 0, 0, P, U, 0, W, 1, Rn, Rt, (0), (0), (0), (0), 1, 1, 1, 1, Rm)),
-    Instruction('LDRSHT<c> <Rt>, [<Rn>],#+/-<imm8>', (cond, 0, 0, 0, 0, U, 1, 1, 1, Rn, Rt, imm4H, 1, 1, 1, 1, imm4L)),
+    Instruction('LDRSHT<c> <Rt>, [<Rn>],#+/-<imm8>', (cond, 0, 0, 0, 0, U, 1, 1, 1, Rn, Rt, imm4_4, 1, 1, 1, 1, imm4)),
     Instruction('LDRSHT<c> <Rt>, [<Rn>], +/-<Rm>', (cond, 0, 0, 0, 0, U, 0, 1, 1, Rn, Rt, (0), (0), (0), (0), 1, 1, 1, 1, Rm)),
     Instruction('LDRT<c> <Rt>, [<Rn>],#+/-<imm12>', (cond, 0, 1, 0, 0, U, 0, 1, 1, Rn, Rt, imm12)),
     Instruction('LDRT<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}', (cond, 0, 1, 1, 0, U, 0, 1, 1, Rn, Rt, imm5, typ, 0, Rm)),
@@ -202,9 +206,9 @@ _table = [
     Instruction('MLA{S}<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 0, 0, 0, 1, S, Rd, Ra, Rm, 1, 0, 0, 1, Rn)),
     Instruction('MLS<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 0, 0, 1, 1, 0, Rd, Ra, Rm, 1, 0, 0, 1, Rn)),
     Instruction('MOV{S}<c> <Rd>,#<const>', (cond, 0, 0, 1, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, imm12)),
-    Instruction('MOVW<c> <Rd>,#<imm16>', (cond, 0, 0, 1, 1, 0, 0, 0, 0, imm4, Rd, imm12)),
+    Instruction('MOVW<c> <Rd>,#<imm16>', (cond, 0, 0, 1, 1, 0, 0, 0, 0, imm4_12, Rd, imm12)),
     Instruction('MOV{S}<c> <Rd>,<Rm>', (cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, 0, 0, 0, 0, 0, 0, 0, 0, Rm)),
-    Instruction('MOVT<c> <Rd>,#<imm16>', (cond, 0, 0, 1, 1, 0, 1, 0, 0, imm4, Rd, imm12)),
+    Instruction('MOVT<c> <Rd>,#<imm16>', (cond, 0, 0, 1, 1, 0, 1, 0, 0, imm4_12, Rd, imm12)),
     Instruction('MRC<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', (cond, 1, 1, 1, 0, opc1_3, 1, CRn, Rt, coproc, opc2, 1, CRm)),
     Instruction('MRC2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', (1, 1, 1, 1, 1, 1, 1, 0, opc1_3, 1, CRn, Rt, coproc, opc2, 1, CRm)),
     Instruction('MRRC<c> <coproc>,<opc>,<Rt>,<Rt2>,<CRm>', (cond, 1, 1, 0, 0, 0, 1, 0, 1, Rt2, Rt, coproc, opc1, CRm)),
@@ -301,15 +305,15 @@ _table = [
     Instruction('STRB<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}', (cond, 0, 1, 1, P, U, 1, W, 0, Rn, Rt, imm5, typ, 0, Rm)),
     Instruction('STRBT<c> <Rt>,[<Rn>],#+/-<imm12>', (cond, 0, 1, 0, 0, U, 1, 1, 0, Rn, Rt, imm12)),
     Instruction('STRBT<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}', (cond, 0, 1, 1, 0, U, 1, 1, 0, Rn, Rt, imm5, typ, 0, Rm)),
-    Instruction('STRD<c> <Rt>,<Rt2>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 0, Rn, Rt, imm4H, 1, 1, 1, 1, imm4L)),
+    Instruction('STRD<c> <Rt>,<Rt2>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 0, Rn, Rt, imm4_4, 1, 1, 1, 1, imm4)),
     Instruction('STRD<c> <Rt>,<Rt2>,[<Rn>],+/-<Rm>', (cond, 0, 0, 0, P, U, 0, W, 0, Rn, Rt, (0), (0), (0), (0), 1, 1, 1, 1, Rm)),
     Instruction('STREX<c> <Rd>,<Rt>,[<Rn>]', (cond, 0, 0, 0, 1, 1, 0, 0, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rt)),
     Instruction('STREXB<c> <Rd>,<Rt>,[<Rn>]', (cond, 0, 0, 0, 1, 1, 1, 0, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rt)),
     Instruction('STREXD<c> <Rd>,<Rt>,<Rt2>,[<Rn>]', (cond, 0, 0, 0, 1, 1, 0, 1, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rt)),
     Instruction('STREXH<c> <Rd>,<Rt>,[<Rn>]', (cond, 0, 0, 0, 1, 1, 1, 1, 0, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rt)),
-    Instruction('STRH<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 0, Rn, Rt, imm4H, 1, 0, 1, 1, imm4L)),
+    Instruction('STRH<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, P, U, 1, W, 0, Rn, Rt, imm4_4, 1, 0, 1, 1, imm4)),
     Instruction('STRH<c> <Rt>,[<Rn>],+/-<Rm>', (cond, 0, 0, 0, P, U, 0, W, 0, Rn, Rt, (0), (0), (0), (0), 1, 0, 1, 1, Rm)),
-    Instruction('STRHT<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, 0, U, 1, 1, 0, Rn, Rt, imm4H, 1, 0, 1, 1, imm4L)),
+    Instruction('STRHT<c> <Rt>,[<Rn>],#+/-<imm8>', (cond, 0, 0, 0, 0, U, 1, 1, 0, Rn, Rt, imm4_4, 1, 0, 1, 1, imm4)),
     Instruction('STRHT<c> <Rt>,[<Rn>],+/-<Rm>', (cond, 0, 0, 0, 0, U, 0, 1, 0, Rn, Rt, (0), (0), (0), (0), 1, 0, 1, 1, Rm)),
     Instruction('STRT<c> <Rt>,[<Rn>],#+/-<imm12>', (cond, 0, 1, 0, 0, U, 0, 1, 0, Rn, Rt, imm12)),
     Instruction('STRT<c> <Rt>,[<Rn>],+/-<Rm>{,<shift>}', (cond, 0, 1, 1, 0, U, 0, 1, 0, Rn, Rt, imm5, typ, 0, Rm)),
@@ -337,7 +341,7 @@ _table = [
     Instruction('UADD8<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 0, 1, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rm)),
     Instruction('UASX<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 0, 1, 1, Rm)),
     Instruction('UBFX<c> <Rd>,<Rn>,#<lsb>,#<width>', (cond, 0, 1, 1, 1, 1, 1, 1, widthm1, Rd, lsb, 1, 0, 1, Rn)),
-    Instruction('UDF<c> #<imm12>', (cond, 0, 1, 1, 1, 1, 1, 1, 1, imm12, 1, 1, 1, 1, imm4)),
+    Instruction('UDF<c> #<imm12>', (cond, 0, 1, 1, 1, 1, 1, 1, 1, imm12_4, 1, 1, 1, 1, imm4)),
     Instruction('UHADD16<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 1, 1, Rn, Rd, (1), (1), (1), (1), 0, 0, 0, 1, Rm)),
     Instruction('UHADD8<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 1, 1, Rn, Rd, (1), (1), (1), (1), 1, 0, 0, 1, Rm)),
     Instruction('UHASX<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 1, 1, 1, Rn, Rd, (1), (1), (1), (1), 0, 0, 1, 1, Rm)),

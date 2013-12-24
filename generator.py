@@ -131,8 +131,10 @@ if __name__ == '__main__':
     // the darm_t object.
     SM_EXTR, SM_EXTR2,
 
-    // Extract an immediate.
-    SM_IMM,
+    // Extract an immediate. In addition to the bitsize, the extended version
+    // also provides the bit index in the original encoding, and the bit index
+    // in the resulting immediate.
+    SM_IMM, SM_IMM2,
 
     // Extra information for generating a human-readable string.
     SM_STR,

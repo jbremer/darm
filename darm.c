@@ -83,13 +83,19 @@ static inline uint32_t _extract_field(uint32_t insn,
     return (insn >> idx) & ((1 << bits) - 1);
 }
 
+static inline void _darm_init(darm_t *d, uint32_t insn)
+{
+    d->insn = insn;
+    d->imm = 0;
+}
+
 // Disassembles any instruction according to the state machine and lookup
 // table. The input instruction can be either 16 or 32 bit, depending on
 // the target state machine (which will have been created accordingly.)
 static int _darm_disassemble(darm_t *d, uint32_t insn,
     const uint8_t *sm, const uint16_t *lut)
 {
-    d->insn = insn;
+    _darm_init(d, insn);
 
     uint32_t off = 0, value;
     while (1) {
@@ -133,7 +139,12 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             break;
 
         case SM_IMM:
-            d->imm = _extract_field(insn, 0, sm[off++]);
+            d->imm |= _extract_field(insn, 0, sm[off++]);
+            break;
+
+        case SM_IMM2:
+            d->imm |= _extract_field(insn, sm[off+1], sm[off]) << sm[off+2];
+            off += 3;
             break;
 
         case SM_STR:
