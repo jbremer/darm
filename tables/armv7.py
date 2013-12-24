@@ -32,10 +32,10 @@ from tablegen import Field, CoprocessorRegister, Register, Immediate
 
 
 class ARMv7Table(Table):
-    def __init__(self, *args):
+    def _init(self):
         self.cond = Node()
         self.uncond = Node()
-        Table.__init__(self, *args)
+        return self.cond, self.uncond
 
     def _insert(self, ins):
         if ins.bits[0] == cond:

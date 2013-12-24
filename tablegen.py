@@ -150,7 +150,7 @@ class BitPattern(object):
         return '<%s %s, %d bits>' % (clz, self.name, self.bitsize)
 
     def create(self, idx, sm, lut, bitsize):
-        pass
+        raise
 
 
 class Field(BitPattern):
@@ -353,10 +353,10 @@ class LookupTable(object):
 
 class Table(object):
     def __init__(self, insns, bitsize):
-        self.root = Node()
         self.bitsize = bitsize
         self.insns = insns
 
+        self.root = self._init()
         for ins in self.insns:
             self._insert(ins)
 
@@ -366,16 +366,20 @@ class Table(object):
         return '<Table %r>' % self.root
 
     def dump(self):
-        self.root.dump()
+        for tbl in self.root:
+            tbl.dump()
+
+    def _init(self):
+        raise
 
     def _insert(self, ins):
-        self.root.insert(ins)
+        raise
 
     def _process(self):
-        self.root.process()
+        raise
 
     def _create(self, sm, lut, bitsize):
-        self.root.create(sm, lut, bitsize)
+        raise
 
     def create(self):
         sm = LookupTable(8)
