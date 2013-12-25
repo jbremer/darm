@@ -114,23 +114,23 @@ class Instruction(object):
     def __repr__(self):
         return '<Instruction %s, %r>' % (self.name, self.bits)
 
-    def create(self, sm, lut, bitsize):
+    def create(self, sm, lut, fmt, bitsize):
         idx, ret = 0, sm.offset()
         for bit in self.bits:
             if isinstance(bit, int):
                 idx += 1
                 continue
 
-            bit.create(idx, sm, lut, bitsize)
+            bit.create(idx, sm, lut, fmt, bitsize)
             idx += bit.bitsize
 
         for macro in self.macros.values():
-            macro.create(sm, lut, bitsize)
+            macro.create(sm, lut, fmt, bitsize)
 
         name = 'I_' + self.name.upper()
         sm.append('SM_INSTR', 'L(%s)' % name, 'H(%s)' % name)
-        fmt = self.fmt.create()
-        sm.append('SM_STR', len(fmt)+1, *fmt)
+        off = fmt.append(*self.fmt.create())
+        sm.append('SM_STR', 'L(%d)' % off, 'H(%d)' % off)
         sm.append('SM_RETN')
         return ret
 
@@ -144,18 +144,18 @@ class BitPattern(object):
         clz = self.__class__.__name__
         return '<%s %s, %d bits>' % (clz, self.name, self.bitsize)
 
-    def create(self, idx, sm, lut, bitsize):
+    def create(self, idx, sm, lut, fmt, bitsize):
         raise
 
 
 class Field(BitPattern):
-    def create(self, idx, sm, lut, bitsize):
+    def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_EXTR', 'O(%s)' % self.name,
                          bitsize-self.bitsize-idx, self.bitsize)
 
 
 class Register(BitPattern):
-    def create(self, idx, sm, lut, bitsize):
+    def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_EXTR', 'O(%s)' % self.name,
                          bitsize-self.bitsize-idx, self.bitsize)
 
@@ -165,7 +165,7 @@ class DoubleRegister(BitPattern):
         BitPattern.__init__(self, bitsize, name)
         self.name2 = name2
 
-    def create(self, idx, sm, lut, bitsize):
+    def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_EXTR', 'O(%s)' % self.name,
                          bitsize-self.bitsize-idx, self.bitsize,
                          'SM_EXTR', 'O(%s)' % self.name2,
@@ -173,13 +173,13 @@ class DoubleRegister(BitPattern):
 
 
 class CoprocessorRegister(BitPattern):
-    def create(self, idx, sm, lut, bitsize):
+    def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_EXTR2', 'O(%s)' % self.name,
                          bitsize-self.bitsize-idx, self.bitsize, 'CR_BASE')
 
 
 class Immediate(BitPattern):
-    def create(self, idx, sm, lut, bitsize):
+    def create(self, idx, sm, lut, fmt, bitsize):
         # The immediate is located starting at the lowest significant bit.
         if idx + self.bitsize == bitsize:
             return sm.append('SM_IMM', self.bitsize)
@@ -193,14 +193,14 @@ class ScatteredImmediate(BitPattern):
         BitPattern.__init__(self, bitsize, name)
         self.imm_idx = imm_idx
 
-    def create(self, idx, sm, lut, bitsize):
+    def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_IMM2', self.bitsize,
                          bitsize-self.bitsize-idx, self.imm_idx)
 
 
 class ScatteredSignExtendImmediate(ScatteredImmediate):
-    def create(self, idx, sm, lut, bitsize):
-        ret = ScatteredImmediate.create(self, idx, sm, lut, bitsize)
+    def create(self, idx, sm, lut, fmt, bitsize):
+        ret = ScatteredImmediate.create(self, idx, sm, lut, fmt, bitsize)
         sm.append('SM_SIGN', self.imm_idx)
         return ret
 
@@ -217,7 +217,7 @@ class Macro(object):
     def __repr__(self):
         return '<Macro %s>' % self.name
 
-    def create(self, sm, lut, bitsize):
+    def create(self, sm, lut, fmt, bitsize):
         assert not self.kwargs
         return sm.append('SM_' + self.name)
 
@@ -311,9 +311,9 @@ class Node(object):
         if self.leaf:
             print ' '*idx, '->', self.leaf.name
 
-    def create(self, sm, lut, bitsize):
+    def create(self, sm, lut, fmt, bitsize):
         if self.leaf:
-            return self.leaf.create(sm, lut, bitsize)
+            return self.leaf.create(sm, lut, fmt, bitsize)
 
         bit, (null, one) = self.lut.items()[0]
 
@@ -322,19 +322,19 @@ class Node(object):
 
         if not null.lut and not null.leaf:
             if self.hlt:
-                off_null = self.hlt.create(sm, lut, bitsize)
+                off_null = self.hlt.create(sm, lut, fmt, bitsize)
             else:
                 off_null = sm.insert('SM_HLT')
         else:
-            off_null = null.create(sm, lut, bitsize)
+            off_null = null.create(sm, lut, fmt, bitsize)
 
         if not one.lut and not one.leaf:
             if self.hlt:
-                off_one = self.hlt.create(sm, lut, bitsize)
+                off_one = self.hlt.create(sm, lut, fmt, bitsize)
             else:
                 off_one = sm.insert('SM_HLT')
         else:
-            off_one = one.create(sm, lut, bitsize)
+            off_one = one.create(sm, lut, fmt, bitsize)
 
         sm.update(off, 'SM_STEP', bitsize-1-bit,
                   'L(%d)' % off2, 'H(%d)' % off2)
@@ -406,11 +406,10 @@ class Table(object):
     def _process(self):
         raise
 
-    def _create(self, sm, lut, bitsize):
+    def _create(self, sm, lut, fmt, bitsize):
         raise
 
     def create(self):
-        sm = LookupTable(8)
-        lut = LookupTable(16)
-        self._create(sm, lut, self.bitsize)
-        return sm, lut
+        sm, lut, fmt = LookupTable(8), LookupTable(16), LookupTable(8)
+        self._create(sm, lut, fmt, self.bitsize)
+        return sm, lut, fmt

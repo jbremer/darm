@@ -48,15 +48,15 @@ class ARMv7Table(Table):
         self.cond.process()
         self.uncond.process()
 
-    def _create(self, sm, lut, bitsize):
+    def _create(self, sm, lut, fmt, bitsize):
         off = sm.alloc(5)
         off2 = lut.alloc(2)
 
         sm.update(off, 'SM_CMP4', bitsize-4, 0b1111,
                   'L(%d)' % off2, 'H(%d)' % off2)
 
-        cond = self.cond.create(sm, lut, bitsize)
-        uncond = self.uncond.create(sm, lut, bitsize)
+        cond = self.cond.create(sm, lut, fmt, bitsize)
+        uncond = self.uncond.create(sm, lut, fmt, bitsize)
         lut.update(off2, cond, uncond)
 
 

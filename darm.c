@@ -87,7 +87,7 @@ static inline void _darm_init(darm_t *d, uint32_t insn)
 // table. The input instruction can be either 16 or 32 bit, depending on
 // the target state machine (which will have been created accordingly.)
 static int _darm_disassemble(darm_t *d, uint32_t insn,
-    const uint8_t *sm, const uint16_t *lut)
+    const uint8_t *sm, const uint16_t *lut, const uint8_t *fmt)
 {
     _darm_init(d, insn);
 
@@ -149,8 +149,8 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             break;
 
         case SM_STR:
-            d->format = &sm[off+1];
-            off += sm[off];
+            d->format = &fmt[sm[off] + sm[off+1]*256];
+            off += 2;
             break;
 
         case SM_ARMExpandImm:
@@ -163,12 +163,13 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
 
 int darm_armv7(darm_t *d, uint32_t insn)
 {
-    return _darm_disassemble(d, insn, g_armv7_sm, g_armv7_lut);
+    return _darm_disassemble(d, insn, g_armv7_sm, g_armv7_lut, g_armv7_fmt);
 }
 
 int darm_thumb(darm_t *d, uint16_t w, uint16_t w2)
 {
-    return _darm_disassemble(d, (w << 16) | w2, g_thumb_sm, g_thumb_lut);
+    return _darm_disassemble(d, (w << 16) | w2,
+        g_thumb_sm, g_thumb_lut, g_thumb_fmt);
 }
 
 #define APPEND(out, ptr) \

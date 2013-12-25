@@ -50,14 +50,14 @@ class ThumbTable(Table):
         self.thumb.process()
         self.thumb2.process()
 
-    def _create(self, sm, lut, bitsize):
+    def _create(self, sm, lut, fmt, bitsize):
         off = sm.alloc(4)
         off2 = lut.alloc(32)
 
         sm.update(off, 'SM_TBL5', bitsize-5, 'L(%d)' % off2, 'H(%d)' % off2)
 
-        thumb = self.thumb.create(sm, lut, bitsize)
-        thumb2 = self.thumb2.create(sm, lut, bitsize)
+        thumb = self.thumb.create(sm, lut, fmt, bitsize)
+        thumb2 = self.thumb2.create(sm, lut, fmt, bitsize)
 
         is_thumb2 = lambda _: _ in (0b11101, 0b11110, 0b11111)
         tbl = [thumb2 if is_thumb2(_) else thumb for _ in xrange(32)]
