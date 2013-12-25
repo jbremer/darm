@@ -62,14 +62,8 @@ static const char *g_darm_conditionals[] = {
 };
 
 static const char *g_darm_option[] = {
-    [2] = "oshst",
-    [3] = "osh",
-    [6] = "nshst",
-    [7] = "nsh",
-    [10] = "ishst",
-    [11] = "ish",
-    [14] = "st",
-    [15] = "sy",
+    NULL, NULL, "oshst", "osh", NULL, NULL, "nshst", "nsh",
+    NULL, NULL, "ishst", "ish", NULL, NULL, "st", "sy",
 };
 
 static const char *g_darm_coproc[] = {

@@ -55,7 +55,7 @@ class InstructionFormat(object):
         regs = '<Rd>', '<Rn>', '<Rm>', '<Rt>', '<Rt2>', '<RdHi>', \
                '<RdLo>', '<Ra>', '<CRd>', '<CRn>', '<CRm>'
 
-        imms = '#<const>', '#<imm>', '#<imm4>', '#<imm5>', \
+        imms = '#<const>', '#<imm>', '#<imm4>', '#<imm5>', '#<imm8>', \
                '#<imm12>', '#<imm16>', '#<imm24>'
 
         t = {
@@ -71,15 +71,10 @@ class InstructionFormat(object):
             '<coproc>': ['STR_COPROC'],
         }
 
-        for arg in args:
-            if arg in regs:
-                self.sm += ['STR_REG', 'O(%s)' % arg[1:-1]]
-                continue
+        t.update(dict((_, ['STR_IMM']) for _ in imms))
+        t.update(dict((_, ['STR_REG', 'O(%s)' % _[1:-1]]) for _ in regs))
 
-            if arg in imms:
-                self.sm.append('STR_IMM')
-                continue
-
+        for arg in (_.strip() for _ in args):
             if arg in t:
                 self.sm += t[arg]
                 continue
