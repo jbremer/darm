@@ -41,12 +41,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #define DPRINT(fmt, ...) (void)0
 #endif
 
-#define ROR(val, rotate) (((val) >> (rotate)) | ((val) << (32 - (rotate))))
-
-// The upper four bits define the rotation value, but we have to multiply the
-// rotation value by two, so instead of right shifting by eight, we do a
-// right shift of seven, effectively avoiding the left shift of one.
-#define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & 0x1e)
 
 static const char *g_darm_registers[]  = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10",
@@ -70,6 +64,19 @@ static const char *g_darm_coproc[] = {
     "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8",
     "p9", "p10", "p11", "p12", "p13", "p14", "p15",
 };
+
+static inline uint32_t _ror(uint32_t value, uint32_t rotate)
+{
+    return (value >> rotate) | (value << (32 - rotate));
+}
+
+// The upper four bits define the rotation value, but we have to multiply the
+// rotation value by two, so instead of right shifting by eight, we do a
+// right shift of seven, effectively avoiding the left shift of one.
+static inline uint32_t _arm_expand_imm(uint32_t value)
+{
+    return _ror(value & 0xff, (value >> 7) & 0x1e);
+}
 
 static inline uint32_t _extract_field(uint32_t insn,
     uint32_t idx, uint32_t bits)
@@ -160,7 +167,7 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             break;
 
         case SM_ARMExpandImm:
-            d->imm = ARMExpandImm(d->imm);
+            d->imm = _arm_expand_imm(d->imm);
             break;
         }
     }
