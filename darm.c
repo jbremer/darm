@@ -46,7 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
 // The upper four bits define the rotation value, but we have to multiply the
 // rotation value by two, so instead of right shifting by eight, we do a
 // right shift of seven, effectively avoiding the left shift of one.
-#define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & b11110)
+#define ARMExpandImm(imm12) ROR((imm12) & 0xff, ((imm12) >> 7) & 0x1e)
 
 static const char *g_darm_registers[]  = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10",
@@ -62,14 +62,14 @@ static const char *g_darm_conditionals[] = {
 };
 
 static const char *g_darm_option[] = {
-    [b0010] = "oshst",
-    [b0011] = "osh",
-    [b0110] = "nshst",
-    [b0111] = "nsh",
-    [b1010] = "ishst",
-    [b1011] = "ish",
-    [b1110] = "st",
-    [b1111] = "sy",
+    [2] = "oshst",
+    [3] = "osh",
+    [6] = "nshst",
+    [7] = "nsh",
+    [10] = "ishst",
+    [11] = "ish",
+    [14] = "st",
+    [15] = "sy",
 };
 
 static const char *g_darm_coproc[] = {

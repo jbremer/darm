@@ -19,7 +19,7 @@ ifneq ($(shell uname),Darwin)
 	CFLAGS += -s
 endif
 
-AUTO = darm-internal.h darm-tables.c darm-tables.h darm-instr.h
+AUTO = darm-tables.c darm-tables.h darm-instr.h
 OBJS = main.o darm.o darm-tables.o libdarm.a
 BINS = libdarm$(LIB_EXT) main$(BIN_EXT)
 

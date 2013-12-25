@@ -27,7 +27,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-import itertools
 import sys
 import textwrap
 from tables import armv7, thumb
@@ -97,67 +96,4 @@ if __name__ == '__main__':
     lines = textwrap.wrap(', '.join('I_%s' % _ for _ in l), 74)
     print('    ' + '\n    '.join(lines))
     print('} darm_instr_t;')
-    print('#endif')
-
-    magic_open('darm-internal.h')
-    print('#ifndef __DARM_INTERNAL__')
-    print('#define __DARM_INTERNAL__')
-
-    print("""typedef enum _darm_sm_opcode_t {
-    // Halt execution, invalid instruction.
-    SM_HLT,
-
-    // Follow either branch of a node, depending on the particular bit
-    // in the instruction.
-    SM_STEP,
-
-    // Some instructions are a more specific variant of another instruction.
-    // In these cases, the more specific instruction will have a couple of
-    // bits which are hardcoded and have to be checked in order to determine
-    // as which encoding we will disassemble this instruction.
-    SM_CMP4,
-
-    // Takes a 5-bit value and looks it up in a lookup table.
-    SM_TBL5,
-
-    // This instruction has been disassembled correctly, return success.
-    SM_RETN,
-
-    // Assign the instruction index.
-    SM_INSTR,
-
-    // Extracts a couple of bits from the instruction, optionally adds a
-    // value to the extracted bits, and stores them in the given field in
-    // the darm_t object.
-    SM_EXTR, SM_EXTR2,
-
-    // Extract an immediate. In addition to the bitsize, the extended version
-    // also provides the bit index in the original encoding, and the bit index
-    // in the resulting immediate.
-    SM_IMM, SM_IMM2,
-
-    // Sign extend the immediate.
-    SM_SIGN,
-
-    // Extra information for generating a human-readable string.
-    SM_STR,
-
-    SM_ARMExpandImm,
-} darm_sm_opcode_t;
-
-typedef enum _darm_string_opcode_t {
-    STR_RETN, STR_S, STR_cond, STR_REG, STR_REG_CONST, STR_SHIFT, STR_IMM,
-    STR_INT, STR_REGLIST, STR_OPTION, STR_LABEL, STR_EXCL, STR_COPROC,
-} darm_string_opcode_t;""")
-
-    # define constants 0b0 up upto 0b11111111
-    for x in range(256):
-        print('#define %s %d' % (bin(x)[1:], x))
-
-    # define partial constants with leading zeroes, such as 0b0001
-    for x in range(2, 7):
-        for y in itertools.product('01', repeat=x):
-            num = ''.join(y)
-            print('#define b%s %d' % (num, int(num, 2)))
-
     print('#endif')
