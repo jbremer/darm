@@ -148,6 +148,12 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             d->imm = (int32_t)(d->imm << value) >> value;
             break;
 
+        case SM_BNXOR:
+            value = (insn >> sm[off]) ^ (insn >> 26);
+            d->imm |= ((value & 1) == 0) << sm[off+1];
+            off += 2;
+            break;
+
         case SM_STR:
             d->format = &fmt[sm[off] + sm[off+1]*256];
             off += 2;

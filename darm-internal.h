@@ -66,6 +66,9 @@ typedef enum _darm_sm_opcode_t {
     // Sign extend the immediate.
     SM_SIGN,
 
+    // Special not-xor for various bits of branch offsets.
+    SM_BNXOR,
+
     // Extra information for generating a human-readable string.
     SM_STR,
 

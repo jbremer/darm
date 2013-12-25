@@ -205,6 +205,11 @@ class ScatteredSignExtendImmediate(ScatteredImmediate):
         return ret
 
 
+class BranchNotXorImmediate(ScatteredImmediate):
+    def create(self, idx, sm, lut, fmt, bitsize):
+        return sm.append('SM_BNXOR', bitsize-self.bitsize-idx, self.imm_idx)
+
+
 class Macro(object):
     def __init__(self, name):
         self.name = name

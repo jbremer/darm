@@ -29,7 +29,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 from tablegen import Instruction, Table, Node, Immediate
 from tablegen import ScatteredImmediate, ScatteredSignExtendImmediate
-from tablegen import DoubleRegister, Register, Field
+from tablegen import DoubleRegister, Register, Field, BranchNotXorImmediate
 
 
 class ThumbTable(Table):
@@ -109,8 +109,8 @@ imm1_6 = ScatteredImmediate(1, 'imm1', 6)
 imm1_11 = ScatteredImmediate(1, 'imm1', 11)
 imm1_18 = ScatteredImmediate(1, 'imm1', 18)
 imm1_19 = ScatteredImmediate(1, 'imm1', 19)
-imm1_22 = ScatteredImmediate(1, 'imm1', 22)
-imm1_23 = ScatteredImmediate(1, 'imm1', 23)
+imm1_22_bnxor = BranchNotXorImmediate(1, 'imm1', 22)
+imm1_23_bnxor = BranchNotXorImmediate(1, 'imm1', 23)
 imm1_20_sign = ScatteredSignExtendImmediate(1, 'imm1', 20)
 imm2 = Immediate(2, 'imm2')
 imm3 = Immediate(3, 'imm3')
@@ -163,15 +163,15 @@ _table = [
     Instruction('B<c> <label>', (1, 1, 0, 1, cond, imm8)),
     Instruction('B<c> <label>', (1, 1, 1, 0, 0, imm11)),
     Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, imm1_20_sign, cond, imm6_12, 1, 0, imm1_18, 0, imm1_19, imm11_1)),
-    Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 0, imm1_23, 1, imm1_22, imm11_1)),
+    Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 0, imm1_23_bnxor, 1, imm1_22_bnxor, imm11_1)),
     Instruction('BFC<c> <Rd>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, imm3_2, Rd, imm2, (0), msb)),
     Instruction('BFI<c> <Rd>, <Rn>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 1, 0, Rn, 0, imm3_2, Rd, imm2, (0), msb)),
     Instruction('BIC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 0, 1, S, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('BIC{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 1, 1, 0, Rm3, Rdn3)),
     Instruction('BIC{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('BKPT #<imm8>', (1, 0, 1, 1, 1, 1, 1, 0, imm8)),
-    Instruction('BL<c> <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 1, imm1_23, 1, imm1_22, imm11_1)),
-    Instruction('BLX<c> <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 1, imm1_23, 0, imm1_22, imm10_2, 0)),
+    Instruction('BL<c> <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 1, imm1_23_bnxor, 1, imm1_22_bnxor, imm11_1)),
+    Instruction('BLX<c> <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 1, imm1_23_bnxor, 0, imm1_22_bnxor, imm10_2, 0)),
     Instruction('BLX<c> <Rm>', (0, 1, 0, 0, 0, 1, 1, 1, 1, Rm, (0), (0), (0))),
     Instruction('BX<c> <Rm>', (0, 1, 0, 0, 0, 1, 1, 1, 0, Rm, (0), (0), (0))),
     Instruction('BXJ<c> <Rm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, Rm, 1, 0, (0), 0, (1), (1), (1), (1), (0), (0), (0), (0), (0), (0), (0), (0))),
