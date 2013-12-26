@@ -100,10 +100,15 @@ mask = Field(2, 'mask')
 
 imm1 = Immediate(1, 'imm1')
 imm1_1 = ScatteredImmediate(1, 'imm1', 1)
+imm1_4 = ScatteredImmediate(1, 'imm4', 4)
+imm1_7 = ScatteredImmediate(1, 'imm1', 7)
+imm3 = Immediate(3, 'imm3')
+imm3_4 = ScatteredImmediate(3, 'imm3', 4)
 imm4 = Immediate(4, 'imm4')
 imm4_4 = ScatteredImmediate(4, 'imm4', 4)
 imm4_12 = ScatteredImmediate(4, 'imm4', 12)
 imm5 = Immediate(5, 'imm5')
+imm6 = Immediate(6, 'imm6')
 imm8 = Immediate(8, 'imm8')
 imm12 = Immediate(12, 'imm12')
 imm12_4 = ScatteredImmediate(12, 'imm12', 4)
@@ -375,6 +380,212 @@ _table = [
     Instruction('YIELD<c>', (cond, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, 0, 0, 0, 1)),
     Instruction('MRS<c> <Rd>,<spec_reg>', (cond, 0, 0, 0, 1, 0, R, 0, 0, (1), (1), (1), (1), Rd, (0), (0), (0), (0), 0, 0, 0, 0, (0), (0), (0), (0))),
     Instruction('SMC<c> #<imm4>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), 0, 1, 1, 1, imm4)),
+]
+
+Vd = Field(4, 'Vd')
+Vn = Field(4, 'Vn')
+Vm = Field(4, 'Vm')
+
+Q = Field(1, 'Q')
+F = Field(1, 'F')
+T = Field(1, 'T')
+B = Field(1, 'B')
+L = Field(1, 'L')
+U = Field(1, 'U')
+E = Field(1, 'E')
+
+size = Field(2, 'size')
+sz = Field(1, 'sz')
+sf = Field(1, 'sf')
+sx = Field(1, 'sx')
+cmode = Field(4, 'cmode')
+align = Field(2, 'align')
+index_align = Field(4, 'index_align')
+a = Field(1, 'a')
+op = Field(2, 'op')
+op1 = Field(1, 'op1')
+op2 = Field(2, 'op2')
+type_ = Field(4, 'type')
+len_ = Field(2, 'len')
+opc1 = Field(2, 'opc1')
+opc2 = Field(3, 'opc2')
+opc2_2 = Field(2, 'opc2')
+
+
+_table2 = [
+    Instruction('VABA<c>.<dt>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 1, 1, N, Q, M, 1, Vm)),
+    Instruction('VABAL<c>.<dt>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 0, 1, 0, 1, N, 0, M, 0, Vm)),
+    Instruction('VABD<c>.<dt>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 1, 1, N, Q, M, 0, Vm)),
+    Instruction('VABDL<c>.<dt>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 0, 1, 1, 1, N, 0, M, 0, Vm)),
+    Instruction('VABD<c>.F32', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, 1, sz, Vn, Vd, 1, 1, 0, 1, N, Q, M, 0, Vm)),
+    Instruction('VABS<c>.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 1, 1, 0, Q, M, 0, Vm)),
+    Instruction('VABS<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 0, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm)),
+    # Instruction('V<op><c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, op, sz, Vn, Vd, 1, 1, 1, 0, N, Q, M, 1, Vm)),
+    Instruction('VADD<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 0, Vm)),
+    Instruction('VADD<c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, sz, Vn, Vd, 1, 1, 0, 1, N, Q, M, 0, Vm)),
+    Instruction('VADD<c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 0, D, 1, 1, Vn, Vd, 1, 0, 1, sz, N, 0, M, 0, Vm)),
+    Instruction('VADDHN<c>.<dt> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 0, 1, 0, 0, N, 0, M, 0, Vm)),
+    Instruction('VADDL<c>.<dt> <Qd>,<Dn>,<Dm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 0, 0, 0, op1, N, 0, M, 0, Vm)),
+    Instruction('VAND<c> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, 0, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm)),
+    Instruction('VBIC<c>.<dt> <Qd>,#<imm>', (1, 1, 1, 1, 0, 0, 1, imm1_7, 1, D, 0, 0, 0, imm3_4, Vd, cmode, 0, Q, 1, 1, imm4), cmode=[0b0001, 0b0011, 0b0101, 0b0111, 0b1001, 0b1011]),
+    Instruction('VBIC<c> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, 1, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm)),
+    # Instruction('V<op><c> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, op2, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm)),
+    Instruction('VCEQ<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 1, Vm)),
+    Instruction('VCEQ<c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, sz, Vn, Vd, 1, 1, 1, 0, N, Q, M, 0, Vm)),
+    Instruction('VCEQ<c>.<dt> <Qd>,<Qm>,#0', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 0, 1, 0, Q, M, 0, Vm)),
+    Instruction('VCGE<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 1, 1, N, Q, M, 1, Vm)),
+    Instruction('VCGE<c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, 0, sz, Vn, Vd, 1, 1, 1, 0, N, Q, M, 0, Vm)),
+    Instruction('VCGE<c>.<dt> <Qd>,<Qm>,#0', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 0, 0, 1, Q, M, 0, Vm)),
+    Instruction('VCGT<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 1, 1, N, Q, M, 0, Vm)),
+    Instruction('VCGT<c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, 1, sz, Vn, Vd, 1, 1, 1, 0, N, Q, M, 0, Vm)),
+    Instruction('VCGT<c>.<dt> <Qd>,<Qm>,#0', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 0, 0, 0, Q, M, 0, Vm)),
+    Instruction('VCLE<c>.<dt> <Qd>,<Qm>,#0', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 0, 1, 1, Q, M, 0, Vm)),
+    Instruction('VCLS<c>.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 0, 0, 0, Q, M, 0, Vm)),
+    Instruction('VCLT<c>.<dt> <Qd>,<Qm>,#0', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 1, 0, 0, Q, M, 0, Vm)),
+    Instruction('VCLZ<c>.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 0, 0, 1, Q, M, 0, Vm)),
+    Instruction('VCMP{E}<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 1, 0, 0, Vd, 1, 0, 1, sz, E, 1, M, 0, Vm)),
+    Instruction('VCMP{E}<c>.F64 <Dd>,#0.0', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 1, 0, 1, Vd, 1, 0, 1, sz, E, 1, (0), 0, (0), (0), (0), (0))),
+    Instruction('VCNT<c>.8 <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 0, 1, 0, Q, M, 0, Vm)),
+    Instruction('VCVT<c>.<Td>.<Tm> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 1, op2, Q, M, 0, Vm)),
+    Instruction('VCVT{R}<c>.S32.F64 <Sd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 1, opc2, Vd, 1, 0, 1, sz, op1, 1, M, 0, Vm)),
+    Instruction('VCVT<c>.<Td>.<Tm> <Qd>,<Qm>,#<fbits>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 1, 1, 1, op1, 0, Q, M, 1, Vm)),
+    Instruction('VCVT<c>.<Td>.F64 <Dd>,<Dd>,#<fbits>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 1, op1, 1, U, Vd, 1, 0, 1, sf, sx, 1, imm1_4, 0, imm4)),
+    Instruction('VCVT<c>.F64.F32 <Dd>,<Sm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 1, 1, 1, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm)),
+    Instruction('VCVT<c>.F32.F16 <Qd>,<Dm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 1, 1, op1, 0, 0, M, 0, Vm)),
+    Instruction('VCVT<y><c>.F32.F16 <Sd>,<Sm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 1, op1, Vd, 1, 0, 1, (0), T, 1, M, 0, Vm)),
+    Instruction('VDIV<c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 0, 0, Vn, Vd, 1, 0, 1, sz, N, 0, M, 0, Vm)),
+    Instruction('VDUP<c>.<size>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, imm4, Vd, 1, 1, 0, 0, 0, Q, M, 0, Vm)),
+    Instruction('VDUP<c>.<size>', (cond, 1, 1, 1, 0, 1, B, Q, 0, Vd, Rt, 1, 0, 1, 1, D, 0, E, 1, (0), (0), (0), (0))),
+    Instruction('VEOR<c> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, 0, 0, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm)),
+    Instruction('VEXT<c>.8 <Qd>,<Qn>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, 1, 1, Vn, Vd, imm4, N, Q, M, 0, Vm)),
+    Instruction('VFM<y><c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, op1, sz, Vn, Vd, 1, 1, 0, 0, N, Q, M, 1, Vm)),
+    Instruction('VFM<y><c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 0, Vn, Vd, 1, 0, 1, sz, N, op1, M, 0, Vm)),
+    Instruction('VFNM<y><c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 0, 1, Vn, Vd, 1, 0, 1, sz, N, op1, M, 0, Vm)),
+    Instruction('VH<op><c> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, op1, 0, N, Q, M, 0, Vm)),
+    Instruction('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm)),
+    Instruction('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 0, 0, index_align, Rm)),
+    Instruction('VLD1<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 0, 0, size, T, a, Rm)),
+    Instruction('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm)),
+    Instruction('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 0, 1, index_align, Rm)),
+    Instruction('VLD2<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 0, 1, size, T, a, Rm)),
+    Instruction('VLD3<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm)),
+    Instruction('VLD3<c>.<size> <list>,[<Rn>]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 1, 0, index_align, Rm)),
+    Instruction('VLD3<c>.<size> <list>,[<Rn>]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 1, 0, size, T, a, Rm)),
+    Instruction('VLD4<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm)),
+    Instruction('VLD4<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 1, 1, index_align, Rm)),
+    Instruction('VLD4<c>.<size> <list>,[<Rn>{ :<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 1, 1, size, T, a, Rm)),
+    Instruction('VLDM{mode}<c> <Rn>{!},<list>', (cond, 1, 1, 0, P, U, D, W, 1, Rn, Vd, 1, 0, 1, 1, imm8)),
+    Instruction('VLDM{mode}<c> <Rn>{!},<list>', (cond, 1, 1, 0, P, U, D, W, 1, Rn, Vd, 1, 0, 1, 0, imm8)),
+    Instruction('VLDR<c> <Dd>,[<Rn>{,#+/-<imm>}]', (cond, 1, 1, 0, 1, U, D, 0, 1, Rn, Vd, 1, 0, 1, 1, imm8)),
+    Instruction('VLDR<c> <Sd>,[<Rn>{,#+/-<imm>}]', (cond, 1, 1, 0, 1, U, D, 0, 1, Rn, Vd, 1, 0, 1, 0, imm8)),
+    # Instruction('V<op><c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 1, 0, N, Q, M, op, Vm)),
+    # Instruction('V<op><c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, op, sz, Vn, Vd, 1, 1, 1, 1, N, Q, M, 0, Vm)),
+    # Instruction('V<op><c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, op, 0, D, size, Vn, Vd, 1, 0, 0, 1, N, Q, M, 0, Vm)),
+    # Instruction('V<op>L<c>.<dt> <Qd>,<Dn>,<Dm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 1, 0, op, 0, N, 0, M, 0, Vm)),
+    # Instruction('V<op><c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, op, sz, Vn, Vd, 1, 1, 0, 1, N, Q, M, 1, Vm)),
+    # Instruction('V<op><c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 0, D, 0, 0, Vn, Vd, 1, 0, 1, sz, N, op, M, 0, Vm)),
+    # Instruction('V<op><c>.<dt> <Qd>,<Qn>,<Dm[x]>', (1, 1, 1, 1, 0, 0, 1, Q, 1, D, size, Vn, Vd, 0, op, 0, F, N, 1, M, 0, Vm)),
+    # Instruction('V<op>L<c>.<dt> <Qd>,<Dn>,<Dm[x]>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 0, op, 1, 0, N, 1, M, 0, Vm)),
+    Instruction('VMOV<c>.<dt> <Qd>,#<imm>', (1, 1, 1, 1, 0, 0, 1, imm1_7, 1, D, 0, 0, 0, imm3_4, Vd, cmode, 0, Q, 0, 1, imm4), cmode=[0b0000, 0b0010, 0b0100, 0b0110, 0b1000, 0b1010, 0b1100, 0b1101, 0b1110, 0b1111]),
+    Instruction('VMOV<c>.<dt> <Qd>,#<imm>', (1, 1, 1, 1, 0, 0, 1, imm1_7, 1, D, 0, 0, 0, imm3_4, Vd, cmode, 0, Q, 1, 1, imm4), cmode=[0b1110]),
+    Instruction('VMOV<c>.F64 <Dd>,#<imm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, imm4_4, Vd, 1, 0, 1, sz, (0), 0, (0), 0, imm4)),
+    # Instruction('VMOV<c> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 1, 0, Vm, Vd, 0, 0, 0, 1, M, Q, M, 1, Vm)),
+    Instruction('VMOV<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 0, Vd, 1, 0, 1, sz, 0, 1, M, 0, Vm)),
+    Instruction('VMOV<c>.<size> <Dd[x]>,<Rt>', (cond, 1, 1, 1, 0, 0, opc1, 0, Vd, Rt, 1, 0, 1, 1, D, opc2_2, 1, (0), (0), (0), (0))),
+    Instruction('VMOV<c>.<dt> <Rt>,<Dn[x]>', (cond, 1, 1, 1, 0, U, opc1, 1, Vn, Rt, 1, 0, 1, 1, N, opc2_2, 1, (0), (0), (0), (0))),
+    Instruction('VMOV<c> <Sn>,<Rt>', (cond, 1, 1, 1, 0, 0, 0, 0, op1, Vn, Rt, 1, 0, 1, 0, N, (0), (0), 1, (0), (0), (0), (0))),
+    Instruction('VMOV<c> <Sm>,<Sm1>,<Rt>,<Rt2>', (cond, 1, 1, 0, 0, 0, 1, 0, op1, Rt2, Rt, 1, 0, 1, 0, 0, 0, M, 1, Vm)),
+    # Instruction('VMOV<c> <Dm>,<Rt>,<Rt2>', (cond, 1, 1, 0, 0, 0, 1, 0, op1, Rt2, Rt, 1, 0, 1, 1, 0, 0, M, 1, Vm)),
+    Instruction('VMOVL<c>.<dt> <Qd>,<Dm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm3, 0, 0, 0, Vd, 1, 0, 1, 0, 0, 0, M, 1, Vm)),
+    Instruction('VMOVN<c>.<dt> <Dd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 1, 0, 0, 0, M, 0, Vm)),
+    Instruction('VMRS<c> <Rt>,FPSCR', (cond, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, Rt, 1, 0, 1, 0, (0), (0), (0), 1, (0), (0), (0), (0))),
+    Instruction('VMSR<c> FPSCR,<Rt>', (cond, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, Rt, 1, 0, 1, 0, (0), (0), (0), 1, (0), (0), (0), (0))),
+    Instruction('VMUL<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, op1, 0, D, size, Vn, Vd, 1, 0, 0, 1, N, Q, M, 1, Vm)),
+    Instruction('VMULL<c>.<dt> <Qd>,<Dn>,<Dm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 1, 1, op1, 0, N, 0, M, 0, Vm)),
+    Instruction('VMUL<c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, 0, sz, Vn, Vd, 1, 1, 0, 1, N, Q, M, 1, Vm)),
+    Instruction('VMUL<c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 0, D, 1, 0, Vn, Vd, 1, 0, 1, sz, N, 0, M, 0, Vm)),
+    Instruction('VMUL<c>.<dt> <Qd>,<Qn>,<Dm[x]>', (1, 1, 1, 1, 0, 0, 1, Q, 1, D, size, Vn, Vd, 1, 0, 0, F, N, 1, M, 0, Vm)),
+    Instruction('VMULL<c>.<dt> <Qd>,<Dn>,<Dm[x]>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 1, 0, 1, 0, N, 1, M, 0, Vm)),
+    Instruction('VMVN<c>.<dt> <Qd>,#<imm>', (1, 1, 1, 1, 0, 0, 1, imm1_7, 1, D, 0, 0, 0, imm3_4, Vd, cmode, 0, Q, 1, 1, imm4), cmode=[0b0000, 0b0010, 0b0100, 0b0110, 0b1000, 0b1010, 0b1100, 0b1101]),
+    Instruction('VMVN<c> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 0, 1, 1, Q, M, 0, Vm)),
+    Instruction('VNEG<c>.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 1, Vd, 0, F, 1, 1, 1, Q, M, 0, Vm)),
+    Instruction('VNEG<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 1, Vd, 1, 0, 1, sz, 0, 1, M, 0, Vm)),
+    Instruction('VNMLA<c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 0, D, 0, 1, Vn, Vd, 1, 0, 1, sz, N, op1, M, 0, Vm)),
+    Instruction('UInt(Vd:D);', (cond, 1, 1, 1, 0, 0, D, 1, 0, Vn, Vd, 1, 0, 1, sz, N, 1, M, 0, Vm)),
+    Instruction('VORN<c> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 1, 1, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm)),
+    Instruction('VORR<c>.<dt> <Qd>,#<imm>', (1, 1, 1, 1, 0, 0, 1, imm1_7, 1, D, 0, 0, 0, imm3_4, Vd, cmode, 0, Q, 0, 1, imm4), cmode=[0b0001, 0b0011, 0b0101, 0b0111, 0b1001, 0b1011]),
+    Instruction('VORR<c> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 1, 0, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm)),
+    Instruction('VPADAL<c>.<dt>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 1, 0, op1, Q, M, 0, Vm)),
+    Instruction('VPADD<c>.<dt>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, size, Vn, Vd, 1, 0, 1, 1, N, Q, M, 1, Vm)),
+    Instruction('VPADD<c>.F32', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, 0, sz, Vn, Vd, 1, 1, 0, 1, N, Q, M, 0, Vm)),
+    Instruction('VPADDL<c>.<dt>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 0, 1, 0, op1, Q, M, 0, Vm)),
+    Instruction('VP<op><c>.<dt>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 1, 0, 1, 0, N, Q, M, op1, Vm)),
+    Instruction('VP<op><c>.F32', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, op1, sz, Vn, Vd, 1, 1, 1, 1, N, Q, M, 0, Vm)),
+    Instruction('VPOP <list>', (cond, 1, 1, 0, 0, 1, D, 1, 1, 1, 1, 0, 1, Vd, 1, 0, 1, 1, imm8)),
+    Instruction('VPOP <list>', (cond, 1, 1, 0, 0, 1, D, 1, 1, 1, 1, 0, 1, Vd, 1, 0, 1, 0, imm8)),
+    Instruction('VPUSH<c> <list>', (cond, 1, 1, 0, 1, 0, D, 1, 0, 1, 1, 0, 1, Vd, 1, 0, 1, 1, imm8)),
+    Instruction('VPUSH<c> <list>', (cond, 1, 1, 0, 1, 0, D, 1, 0, 1, 1, 0, 1, Vd, 1, 0, 1, 0, imm8)),
+    Instruction('VQABS<c>.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 1, 1, 0, Q, M, 0, Vm)),
+    Instruction('VQADD<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 0, 0, N, Q, M, 1, Vm)),
+    Instruction('VQD<op><c>.<dt> <Qd>,<Dn>,<Dm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 1, 0, op1, 1, N, 0, M, 0, Vm)),
+    Instruction('VQD<op><c>.<dt> <Qd>,<Dn>,<Dm[x]>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 0, op1, 1, 1, N, 1, M, 0, Vm)),
+    Instruction('VQDMULH<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, size, Vn, Vd, 1, 0, 1, 1, N, Q, M, 0, Vm)),
+    Instruction('VQDMULH<c>.<dt> <Qd>,<Qn>,<Dm[x]>', (1, 1, 1, 1, 0, 0, 1, Q, 1, D, size, Vn, Vd, 1, 1, 0, 0, N, 1, M, 0, Vm)),
+    Instruction('VQDMULL<c>.<dt> <Qd>,<Dn>,<Dm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 1, 1, 0, 1, N, 0, M, 0, Vm)),
+    Instruction('VQDMULL<c>.<dt> <Qd>,<Dn>,<Dm[x]>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 1, 0, 1, 1, N, 1, M, 0, Vm)),
+    Instruction('VQMOV{U}N<c>.<type><size> <Dd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 1, 0, op2, M, 0, Vm)),
+    Instruction('VQNEG<c>.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 1, 1, 1, 1, Q, M, 0, Vm)),
+    Instruction('VQRDMULH<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, size, Vn, Vd, 1, 0, 1, 1, N, Q, M, 0, Vm)),
+    Instruction('VQRDMULH<c>.<dt> <Qd>,<Qn>,<Dm[x]>', (1, 1, 1, 1, 0, 0, 1, Q, 1, D, size, Vn, Vd, 1, 1, 0, 1, N, 1, M, 0, Vm)),
+    Instruction('VQRSHL<c>.<type><size> <Qd>,<Qm>,<Qn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 1, N, Q, M, 1, Vm)),
+    Instruction('VQRSHR{U}N<c>.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 1, M, 1, Vm)),
+    Instruction('VQSHL<c>.<type><size> <Qd>,<Qm>,<Qn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 0, N, Q, M, 1, Vm)),
+    Instruction('VQSHL{U}<c>.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 1, 1, op1, L, Q, M, 1, Vm)),
+    Instruction('VQSHR{U}N<c>.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 0, M, 1, Vm)),
+    Instruction('VQSUB<c>.<type><size> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 1, 0, N, Q, M, 1, Vm)),
+    Instruction('VRADDHN<c>.<dt> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, size, Vn, Vd, 0, 1, 0, 0, N, 0, M, 0, Vm)),
+    Instruction('VRECPE<c>.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 0, F, 0, Q, M, 0, Vm)),
+    Instruction('VRECPS<c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, sz, Vn, Vd, 1, 1, 1, 1, N, Q, M, 1, Vm)),
+    Instruction('VREV<n><c>.<size> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 0, 0, op2, Q, M, 0, Vm)),
+    Instruction('VRHADD<c> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 0, 1, N, Q, M, 0, Vm)),
+    Instruction('VRSHL<c>.<type><size> <Qd>,<Qm>,<Qn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 1, N, Q, M, 0, Vm)),
+    Instruction('VRSHR<c>.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 0, L, Q, M, 1, Vm)),
+    Instruction('VRSHRN<c>.I<size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, 0, 0, 1, M, 1, Vm)),
+    Instruction('VRSQRTE<c>.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 0, F, 1, Q, M, 0, Vm)),
+    Instruction('VRSQRTS<c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 1, sz, Vn, Vd, 1, 1, 1, 1, N, Q, M, 1, Vm)),
+    Instruction('VRSRA<c>.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 1, L, Q, M, 1, Vm)),
+    Instruction('VRSUBHN<c>.<dt> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, size, Vn, Vd, 0, 1, 1, 0, N, 0, M, 0, Vm)),
+    Instruction('VSHL<c>.I<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 0, 1, 0, 1, L, Q, M, 1, Vm)),
+    Instruction('VSHL<c>.<type><size> <Qd>,<Qm>,<Qn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 0, N, Q, M, 0, Vm)),
+    Instruction('VSHLL<c>.<type><size> <Qd>,<Dm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 1, 0, 1, 0, 0, 0, M, 1, Vm)),
+    Instruction('VSHLL<c>.<type><size> <Qd>,<Dm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 1, 1, 0, 0, M, 0, Vm)),
+    Instruction('VSHR<c>.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 0, L, Q, M, 1, Vm)),
+    Instruction('VSHRN<c>.I<size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, 0, 0, 0, M, 1, Vm)),
+    Instruction('VSLI<c>.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 1, L, Q, M, 1, Vm)),
+    Instruction('VSQRT<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 1, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm)),
+    Instruction('VSRA<c>.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 1, L, Q, M, 1, Vm)),
+    Instruction('VSRI<c>.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 0, L, Q, M, 1, Vm)),
+    Instruction('VST1<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm)),
+    Instruction('VST1<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 0, 0, index_align, Rm)),
+    Instruction('VST2<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm)),
+    Instruction('VST2<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 0, 1, index_align, Rm)),
+    Instruction('VST3<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm)),
+    Instruction('VST3<c>.<size> <list>,[<Rn>]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 1, 0, index_align, Rm)),
+    Instruction('VST4<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm)),
+    Instruction('VST4<c>.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 1, 1, index_align, Rm)),
+    Instruction('VSTM{mode}<c> <Rn>{!},<list>', (cond, 1, 1, 0, P, U, D, W, 0, Rn, Vd, 1, 0, 1, 1, imm8)),
+    Instruction('VSTM{mode}<c> <Rn>{!},<list>', (cond, 1, 1, 0, P, U, D, W, 0, Rn, Vd, 1, 0, 1, 0, imm8)),
+    Instruction('VSTR<c> <Dd>,[<Rn>{,#+/-<imm>}]', (cond, 1, 1, 0, 1, U, D, 0, 0, Rn, Vd, 1, 0, 1, 1, imm8)),
+    Instruction('VSTR<c> <Sd>,[<Rn>{,#+/-<imm>}]', (cond, 1, 1, 0, 1, U, D, 0, 0, Rn, Vd, 1, 0, 1, 0, imm8)),
+    Instruction('VSUB<c>.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 0, Vm)),
+    Instruction('VSUB<c>.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 1, sz, Vn, Vd, 1, 1, 0, 1, N, Q, M, 0, Vm)),
+    Instruction('VSUB<c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 0, D, 1, 1, Vn, Vd, 1, 0, 1, sz, N, 1, M, 0, Vm)),
+    Instruction('VSUBHN<c>.<dt> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 0, 1, 1, 0, N, 0, M, 0, Vm)),
+    Instruction('VSUBL<c>.<dt> <Qd>,<Dn>,<Dm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 0, 0, 1, op1, N, 0, M, 0, Vm)),
+    Instruction('VSWP<c> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 0, 0, 0, Q, M, 0, Vm)),
+    # Instruction('V<op><c>.8 <Dd>,<list>,<Dm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, Vn, Vd, 1, 0, len_, N, op, M, 0, Vm)),
+    Instruction('VTRN<c>.<size>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 0, 0, 1, Q, M, 0, Vm)),
+    Instruction('VTST<c>.<size> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 1, Vm)),
 ]
 
 table = ARMv7Table(_table, 32)
