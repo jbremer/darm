@@ -122,6 +122,21 @@ typedef struct _darm_t {
     const uint8_t   *format;
 } darm_t;
 
+typedef struct _darm_string_t {
+    // the full mnemonic, including extensions, flags, etc.
+    char mnemonic[12];
+
+    // a representation of each argument in a separate string
+    uint32_t argcnt;
+    char arg[6][32];
+
+    // representation of shifting, if present
+    char shift[12];
+
+    // the entire instruction
+    char total[64];
+} darm_string_t;
+
 // Suggested size for a buffer when representing an instruction as string.
 #define DARM_BUFLEN 64
 
@@ -129,6 +144,7 @@ int darm_armv7(darm_t *d, uint32_t insn);
 int darm_thumb(darm_t *d, uint16_t w, uint16_t w2);
 
 int darm_string(const darm_t *d, char *out);
+int darm_string2(const darm_t *d, darm_string_t *str);
 
 int darm_reglist(uint16_t reglist, char *out);
 

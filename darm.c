@@ -262,36 +262,32 @@ int darm_reglist(uint16_t reglist, char *out)
     return out - base;
 }
 
-int darm_string(const darm_t *d, char *out)
+int darm_string2(const darm_t *d, darm_string_t *str)
 {
     const uint8_t *fmt = d->format; uint32_t value; darm_reg_t reg;
-    int first = 1;
+    int next = 1; char *out;
 
     if(d->instr == I_INVLD || d->instr >= I_INSTRCNT) {
         DPRINT("Invalid instr: %d [%d, %d]", d->instr, I_INVLD, I_INSTRCNT);
         return -1;
     }
+
+    out = str->mnemonic, str->argcnt = 0, *str->shift = 0;
     APPEND(out, g_darm_instr[d->instr - 1]);
 
-    while (1) {
+    while (next) {
         switch ((darm_string_opcode_t) *fmt) {
-        case STR_RETN: case STR_S: case STR_cond:
+        case STR_RETN: case STR_S: case STR_cond: case STR_EXCL:
             break;
 
         default:
-            if(first != 0) {
-                first = 0;
-            }
-            else {
-                *out++ = ',';
-            }
-            *out++ = ' ';
+            *out = 0, out = str->arg[str->argcnt++];
         }
 
         switch ((darm_string_opcode_t) *fmt++) {
         case STR_RETN:
-            *out = 0;
-            return 0;
+            *out = next = 0;
+            break;
 
         case STR_S:
             if(d->S == B_INVLD) {
@@ -386,4 +382,28 @@ int darm_string(const darm_t *d, char *out)
             break;
         }
     }
+
+    out = str->total;
+    APPEND(out, str->mnemonic);
+    for (uint32_t idx = 0; idx < str->argcnt; idx++) {
+        if(idx != 0) *out++ = ',';
+        *out++ = ' ';
+        APPEND(out, str->arg[idx]);
+    }
+    if(str->shift[0] != 0) {
+        *out++ = ',', *out++ = ' ';
+        APPEND(out, str->shift);
+    }
+    *out = 0;
+    return 0;
+}
+
+int darm_string(const darm_t *d, char *out)
+{
+    darm_string_t str;
+    if(darm_string2(d, &str) == 0) {
+        APPEND(out, str.total);
+        return 0;
+    }
+    return -1;
 }
