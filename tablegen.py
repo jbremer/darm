@@ -129,7 +129,10 @@ class Instruction(object):
 
         name = 'I_' + self.name.upper()
         sm.append('SM_INSTR', 'L(%s)' % name, 'H(%s)' % name)
-        off = fmt.append(*self.fmt.create())
+        buf = self.fmt.create()
+        off = [_ for _ in xrange(len(fmt.table))
+               if fmt.table[_:_+len(buf)] == buf]
+        off = off[0] if off else fmt.append(*buf)
         sm.append('SM_STR', 'L(%d)' % off, 'H(%d)' % off)
         sm.append('SM_RETN')
         return ret
