@@ -80,7 +80,6 @@ D = Field(1, 'D')
 R = Field(1, 'R')
 M = Field(1, 'M')
 N = Field(1, 'N')
-tb = Field(1, 'tb')
 sh = Field(1, 'sh')
 
 msb = Field(5, 'msb')
@@ -224,7 +223,8 @@ _table = [
     Instruction('ORR{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 1, 1, 0, 0, S, Rn, Rd, imm12)),
     Instruction('ORR{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('ORR{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
-    Instruction('PKH<T><c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, tb, 0, 1, Rm)),
+    Instruction('PKHBT<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 0, 0, 1, Rm)),
+    Instruction('PKHTB<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 1, 0, 1, Rm)),
     Instruction('PLD{W}<c> [<Rn>,#+/-<imm12>]', (1, 1, 1, 1, 0, 1, 0, 1, U, R, 0, 1, Rn, (1), (1), (1), (1), imm12)),
     Instruction('PLD{W}<c> [<Rn>,+/-<Rm>{,<shift>}]', (1, 1, 1, 1, 0, 1, 1, 1, U, R, 0, 1, Rn, (1), (1), (1), (1), imm5, typ, 0, Rm)),
     Instruction('PLI [<Rn>,#+/-<imm12>]', (1, 1, 1, 1, 0, 1, 0, 0, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm12)),
