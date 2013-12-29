@@ -115,8 +115,8 @@ imm12_4 = ScatteredImmediate(12, 'imm12', 4)
 imm24 = Immediate(24, 'imm24')
 imm24_2 = ScatteredImmediate(24, 'imm24', 2)
 
-sat_imm5 = Immediate(5, 'sat_imm')
-sat_imm4 = Immediate(4, 'sat_imm')
+sat_imm5 = Field(5, 'sat_imm')
+sat_imm4 = Field(4, 'sat_imm')
 rotate = Field(2, 'rotate')
 
 ARMExpandImm = Macro('ARMExpandImm')
