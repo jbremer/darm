@@ -339,6 +339,9 @@ class Node(object):
         if self.leaf:
             return self.leaf.create(sm, lut, fmt, bitsize)
 
+        if not self.lut:
+            return sm.insert('SM_HLT')
+
         bit, (null, one) = self.lut.items()[0]
 
         off = sm.alloc(4)
