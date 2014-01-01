@@ -267,7 +267,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
     const uint8_t *fmt = d->format; uint32_t value; darm_reg_t reg;
     int next = 1; char *out;
 
-    if(d->instr == I_INVLD || d->instr >= I_INSTRCNT) {
+    if(d->instr <= I_INVLD || d->instr >= I_INSTRCNT) {
         DPRINT("Invalid instr: %d [%d, %d]", d->instr, I_INVLD, I_INSTRCNT);
         return -1;
     }
@@ -383,7 +383,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
         }
     }
 
-    out = str->total;
+    *out = 0, out = str->total;
     APPEND(out, str->mnemonic);
     for (uint32_t idx = 0; idx < str->argcnt; idx++) {
         if(idx != 0) *out++ = ',';
@@ -403,7 +403,7 @@ int darm_string(const darm_t *d, char *out)
     darm_string_t str;
     if(darm_string2(d, &str) == 0) {
         APPEND(out, str.total);
-        return 0;
+        return *out = 0;
     }
     return -1;
 }
