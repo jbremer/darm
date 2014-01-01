@@ -44,7 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 static const char *g_darm_registers[]  = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10",
-    "r11", "r12", "SP", "LR", "PC",
+    "r11", "r12", "sp", "lr", "pc",
 
     "cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7", "cr8",
     "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
