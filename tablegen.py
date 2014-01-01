@@ -87,22 +87,38 @@ class InstructionFormat(object):
 
 
 class Instruction(object):
-    def __init__(self, fmt, bits, **macros):
+    def __init__(self, fmt, bits, **kwargs):
         self.fmt = InstructionFormat(fmt)
         self.bits = bits
-        self.macros = macros
 
         self.name = re.split(r'\W', fmt)[0].lower()
 
-        # A mapping of bit index to its integer value.
-        self.value, off = {}, 0
+        # A mapping of bit indices to their integer value, and a mapping of
+        # field names to their bit index and value.
+        self.value, self.field, off = {}, {}, 0
         for bit in bits:
-            if not isinstance(bit, int):
+            if isinstance(bit, int):
+                self.value[off] = bit
+                off += 1
+            else:
+                self.field[bit.name] = off, bit
                 off += bit.bitsize
+
+        # Some instructions have bit patterns which are partially hardcoded.
+        self.hardcoded = {}
+        for k, v in kwargs.items():
+            if not k in self.field:
                 continue
 
-            self.value[off] = bit
-            off += 1
+            kwargs.pop(k)
+            self.hardcoded[k] = v
+
+        # The remainder of the keyword arguments are macro's.
+        self.macros = kwargs
+
+    def field_index(self, name):
+        assert name in self.field
+        return self.field[name][0]
 
     def bitsize(self, off):
         """Calculates the bitsize up to offset.
@@ -394,7 +410,23 @@ class Table(object):
 
         self.root = self._init()
         for ins in self.insns:
-            self._insert(ins)
+            if not ins.hardcoded:
+                self._insert(ins)
+                continue
+
+            # When an instruction has a hardcoded field, then we pretend like
+            # each combination is a unique instruction. (In order to satisfy
+            # the tree, which wouldn't be able to determine the correct
+            # instruction encoding otherwise.)
+            assert len(ins.hardcoded) == 1
+            k, v = ins.hardcoded.items()[0]
+            for bits in v:
+                off = ins.field_index(k)
+                new_bits = list(ins.bits[:off])
+                new_bits += [(bits >> _) & 1
+                             for _ in xrange(ins.bits[off].bitsize)][::-1]
+                new_bits += ins.bits[off+1:]
+                self._insert(Instruction(ins.fmt.fmt, new_bits))
 
         self._process()
 
