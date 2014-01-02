@@ -76,10 +76,6 @@ S = Field(1, 'S')
 W = Field(1, 'W')
 P = Field(1, 'P')
 U = Field(1, 'U')
-D = Field(1, 'D')
-R = Field(1, 'R')
-M = Field(1, 'M')
-N = Field(1, 'N')
 sh = Field(1, 'sh')
 
 msb = Field(5, 'msb')
@@ -167,8 +163,10 @@ _table = [
     Instruction('EOR{S}<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 0, 0, 0, 0, 0, 1, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('EOR{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 0, 0, 0, 1, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
     Instruction('ISB #<option>', (1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, (1), (1), (1), (1), (1), (1), (1), (1), (0), (0), (0), (0), 0, 1, 1, 0, option)),
-    Instruction('LDC{L}<c> <coproc>,<CRd>,[<Rn>],#+/-<imm>', (cond, 1, 1, 0, P, U, D, W, 1, Rn, CRd, coproc, imm8), coproc=[_ for _ in xrange(2**4) if not _ in (0b1010, 0b1011)]),
-    Instruction('LDC2{L} <coproc>,<CRd>,[<Rn>],#+/-<imm>', (1, 1, 1, 1, 1, 1, 0, P, U, D, W, 1, Rn, CRd, coproc, imm8)),
+    Instruction('LDC<c> <coproc>,<CRd>,[<Rn>],#+/-<imm>', (cond, 1, 1, 0, P, U, 0, W, 1, Rn, CRd, coproc, imm8), coproc=[_ for _ in xrange(2**4) if not _ in (0b1010, 0b1011)]),
+    Instruction('LDCL<c> <coproc>,<CRd>,[<Rn>],#+/-<imm>', (cond, 1, 1, 0, P, U, 1, W, 1, Rn, CRd, coproc, imm8), coproc=[_ for _ in xrange(2**4) if not _ in (0b1010, 0b1011)]),
+    Instruction('LDC2 <coproc>,<CRd>,[<Rn>],#+/-<imm>', (1, 1, 1, 1, 1, 1, 0, P, U, 0, W, 1, Rn, CRd, coproc, imm8)),
+    Instruction('LDC2L <coproc>,<CRd>,[<Rn>],#+/-<imm>', (1, 1, 1, 1, 1, 1, 0, P, U, 1, W, 1, Rn, CRd, coproc, imm8)),
     Instruction('LDM<c> <Rn>{!},<registers>', (cond, 1, 0, 0, 0, 1, 0, W, 1, Rn, register_list)),
     Instruction('LDMDA<c> <Rn>{!},<registers>', (cond, 1, 0, 0, 0, 0, 0, W, 1, Rn, register_list)),
     Instruction('LDMDB<c> <Rn>{!},<registers>', (cond, 1, 0, 0, 1, 0, 0, W, 1, Rn, register_list)),
@@ -230,8 +228,10 @@ _table = [
     Instruction('ORR{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
     Instruction('PKHBT<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 0, 0, 1, Rm)),
     Instruction('PKHTB<c> <Rd>,<Rn>,<Rm>{,<shift>}', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 1, 0, 1, Rm)),
-    Instruction('PLD{W} [<Rn>,#+/-<imm12>]', (1, 1, 1, 1, 0, 1, 0, 1, U, R, 0, 1, Rn, (1), (1), (1), (1), imm12)),
-    Instruction('PLD{W} [<Rn>,+/-<Rm>{,<shift>}]', (1, 1, 1, 1, 0, 1, 1, 1, U, R, 0, 1, Rn, (1), (1), (1), (1), imm5, typ, 0, Rm)),
+    Instruction('PLD [<Rn>,#+/-<imm12>]', (1, 1, 1, 1, 0, 1, 0, 1, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm12)),
+    Instruction('PLDW [<Rn>,#+/-<imm12>]', (1, 1, 1, 1, 0, 1, 0, 1, U, 0, 0, 1, Rn, (1), (1), (1), (1), imm12)),
+    Instruction('PLD [<Rn>,+/-<Rm>{,<shift>}]', (1, 1, 1, 1, 0, 1, 1, 1, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm5, typ, 0, Rm)),
+    Instruction('PLDW [<Rn>,+/-<Rm>{,<shift>}]', (1, 1, 1, 1, 0, 1, 1, 1, U, 0, 0, 1, Rn, (1), (1), (1), (1), imm5, typ, 0, Rm)),
     Instruction('PLI [<Rn>,#+/-<imm12>]', (1, 1, 1, 1, 0, 1, 0, 0, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm12)),
     Instruction('PLI [<Rn>,+/-<Rm>{,<shift>}]', (1, 1, 1, 1, 0, 1, 1, 0, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm5, typ, 0, Rm)),
     Instruction('POP<c> <registers>', (cond, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, register_list)),
@@ -277,29 +277,52 @@ _table = [
     Instruction('SHSAX<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 0, 1, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 0, 1, Rm)),
     Instruction('SHSUB16<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 0, 1, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 1, 1, Rm)),
     Instruction('SHSUB8<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 0, 1, 1, Rn, Rd, (1), (1), (1), (1), 1, 1, 1, 1, Rm)),
-    Instruction('SMLA<x><y><c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 1, 0, 0, 0, 0, Rd, Ra, Rm, 1, M, N, 0, Rn)),
-    Instruction('SMLAD{X}<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, Ra, Rm, 0, 0, M, 1, Rn)),
+    Instruction('SMC<c> #<imm4>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), 0, 1, 1, 1, imm4)),
+    Instruction('SMLABB<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 1, 0, 0, 0, 0, Rd, Ra, Rm, 1, 0, 0, 0, Rn)),
+    Instruction('SMLABT<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 1, 0, 0, 0, 0, Rd, Ra, Rm, 1, 1, 0, 0, Rn)),
+    Instruction('SMLATB<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 1, 0, 0, 0, 0, Rd, Ra, Rm, 1, 0, 1, 0, Rn)),
+    Instruction('SMLATT<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 1, 0, 0, 0, 0, Rd, Ra, Rm, 1, 1, 1, 0, Rn)),
+    Instruction('SMLAD<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, Ra, Rm, 0, 0, 0, 1, Rn)),
+    Instruction('SMLADX<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, Ra, Rm, 0, 0, 1, 1, Rn)),
     Instruction('SMLAL{S}<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 0, 0, 0, 1, 1, 1, S, RdHi, RdLo, Rm, 1, 0, 0, 1, Rn)),
-    Instruction('SMLAL<x><y><c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 1, M, N, 0, Rn)),
-    Instruction('SMLALD{X}<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 0, 0, M, 1, Rn)),
-    Instruction('SMLAW<y><c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, Rd, Ra, Rm, 1, M, 0, 0, Rn)),
-    Instruction('SMLSD{X}<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, Ra, Rm, 0, 1, M, 1, Rn)),
-    Instruction('SMLSLD{X}<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 0, 1, M, 1, Rn)),
-    Instruction('SMMLA{R}<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, Ra, Rm, 0, 0, R, 1, Rn)),
-    Instruction('SMMLS{R}<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, Ra, Rm, 1, 1, R, 1, Rn)),
-    Instruction('SMMUL{R}<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, 1, 1, 1, 1, Rm, 0, 0, R, 1, Rn)),
-    Instruction('SMUAD{X}<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, 1, 1, 1, 1, Rm, 0, 0, M, 1, Rn)),
-    Instruction('SMUL<x><y><c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, M, N, 0, Rn)),
+    Instruction('SMLALBB<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 1, 0, 0, 0, Rn)),
+    Instruction('SMLALBT<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 1, 1, 0, 0, Rn)),
+    Instruction('SMLALTB<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 1, 0, 1, 0, Rn)),
+    Instruction('SMLALTT<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 1, 1, 1, 0, Rn)),
+    Instruction('SMLALD<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 0, 0, 0, 1, Rn)),
+    Instruction('SMLALDX<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 0, 0, 1, 1, Rn)),
+    Instruction('SMLAWB<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, Rd, Ra, Rm, 1, 0, 0, 0, Rn)),
+    Instruction('SMLAWT<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, Rd, Ra, Rm, 1, 1, 0, 0, Rn)),
+    Instruction('SMLSD<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, Ra, Rm, 0, 1, 0, 1, Rn)),
+    Instruction('SMLSDX<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, Ra, Rm, 0, 1, 1, 1, Rn)),
+    Instruction('SMLSLD<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 0, 1, 0, 1, Rn)),
+    Instruction('SMLSLDX<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 0, RdHi, RdLo, Rm, 0, 1, 1, 1, Rn)),
+    Instruction('SMMLA<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, Ra, Rm, 0, 0, 0, 1, Rn)),
+    Instruction('SMMLAR<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, Ra, Rm, 0, 0, 1, 1, Rn)),
+    Instruction('SMMLS<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, Ra, Rm, 1, 1, 0, 1, Rn)),
+    Instruction('SMMLSR<c> <Rd>,<Rn>,<Rm>,<Ra>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, Ra, Rm, 1, 1, 1, 1, Rn)),
+    Instruction('SMMUL<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, 1, 1, 1, 1, Rm, 0, 0, 0, 1, Rn)),
+    Instruction('SMMULR<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 1, 0, 1, Rd, 1, 1, 1, 1, Rm, 0, 0, 1, 1, Rn)),
+    Instruction('SMUAD<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, 1, 1, 1, 1, Rm, 0, 0, 0, 1, Rn)),
+    Instruction('SMUADX<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, 1, 1, 1, 1, Rm, 0, 0, 1, 1, Rn)),
+    Instruction('SMULBB<c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, 0, 0, 0, Rn)),
+    Instruction('SMULBT<c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, 1, 0, 0, Rn)),
+    Instruction('SMULTB<c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, 0, 1, 0, Rn)),
+    Instruction('SMULTT<c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, 1, 1, 0, Rn)),
     Instruction('SMULL{S}<c> <RdLo>,<RdHi>,<Rn>,<Rm>', (cond, 0, 0, 0, 0, 1, 1, 0, S, RdHi, RdLo, Rm, 1, 0, 0, 1, Rn)),
-    Instruction('SMULW<y><c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, M, 1, 0, Rn)),
-    Instruction('SMUSD{X}<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, 1, 1, 1, 1, Rm, 0, 1, M, 1, Rn)),
+    Instruction('SMULWB<c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, 0, 1, 0, Rn)),
+    Instruction('SMULWT<c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, Rd, (0), (0), (0), (0), Rm, 1, 1, 1, 0, Rn)),
+    Instruction('SMUSD<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, 1, 1, 1, 1, Rm, 0, 1, 0, 1, Rn)),
+    Instruction('SMUSDX<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 1, 0, 0, 0, 0, Rd, 1, 1, 1, 1, Rm, 0, 1, 1, 1, Rn)),
     Instruction('SSAT<c> <Rd>,#<imm>,<Rn>{,<shift>}', (cond, 0, 1, 1, 0, 1, 0, 1, sat_imm5, Rd, imm5, sh, 0, 1, Rn)),
     Instruction('SSAT16<c> <Rd>,#<imm>,<Rn>', (cond, 0, 1, 1, 0, 1, 0, 1, 0, sat_imm4, Rd, (1), (1), (1), (1), 0, 0, 1, 1, Rn)),
     Instruction('SSAX<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 0, 1, Rm)),
     Instruction('SSUB16<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 0, 1, 1, 1, Rm)),
     Instruction('SSUB8<c> <Rd>,<Rn>,<Rm>', (cond, 0, 1, 1, 0, 0, 0, 0, 1, Rn, Rd, (1), (1), (1), (1), 1, 1, 1, 1, Rm)),
-    Instruction('STC{L}<c> <coproc>,<CRd>,[<Rn>],#+/-<imm>', (cond, 1, 1, 0, P, U, D, W, 0, Rn, CRd, coproc, imm8), coproc=[_ for _ in xrange(2**4) if not _ in (0b1010, 0b1011)]),
-    Instruction('STC2{L} <coproc>,<CRd>,[<Rn>],#+/-<imm>', (1, 1, 1, 1, 1, 1, 0, P, U, D, W, 0, Rn, CRd, coproc, imm8)),
+    Instruction('STC<c> <coproc>,<CRd>,[<Rn>],#+/-<imm>', (cond, 1, 1, 0, P, U, 0, W, 0, Rn, CRd, coproc, imm8), coproc=[_ for _ in xrange(2**4) if not _ in (0b1010, 0b1011)]),
+    Instruction('STCL<c> <coproc>,<CRd>,[<Rn>],#+/-<imm>', (cond, 1, 1, 0, P, U, 1, W, 0, Rn, CRd, coproc, imm8), coproc=[_ for _ in xrange(2**4) if not _ in (0b1010, 0b1011)]),
+    Instruction('STC2 <coproc>,<CRd>,[<Rn>],#+/-<imm>', (1, 1, 1, 1, 1, 1, 0, P, U, 0, W, 0, Rn, CRd, coproc, imm8)),
+    Instruction('STC2L <coproc>,<CRd>,[<Rn>],#+/-<imm>', (1, 1, 1, 1, 1, 1, 0, P, U, 1, W, 0, Rn, CRd, coproc, imm8)),
     Instruction('STM<c> <Rn>{!},<registers>', (cond, 1, 0, 0, 0, 1, 0, W, 0, Rn, register_list)),
     Instruction('STMDA<c> <Rn>{!},<registers>', (cond, 1, 0, 0, 0, 0, 0, W, 0, Rn, register_list)),
     Instruction('STMDB<c> <Rn>{!},<registers>', (cond, 1, 0, 0, 1, 0, 0, W, 0, Rn, register_list)),
@@ -378,14 +401,15 @@ _table = [
     Instruction('WFE<c>', (cond, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, 0, 0, 1, 0)),
     Instruction('WFI<c>', (cond, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, 0, 0, 1, 1)),
     Instruction('YIELD<c>', (cond, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, 0, 0, 0, 1)),
-    Instruction('MRS<c> <Rd>,<spec_reg>', (cond, 0, 0, 0, 1, 0, R, 0, 0, (1), (1), (1), (1), Rd, (0), (0), (0), (0), 0, 0, 0, 0, (0), (0), (0), (0))),
-    Instruction('SMC<c> #<imm4>', (cond, 0, 0, 0, 1, 0, 1, 1, 0, (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), (0), 0, 1, 1, 1, imm4)),
 ]
 
 Vd = Field(4, 'Vd')
 Vn = Field(4, 'Vn')
 Vm = Field(4, 'Vm')
 
+D = Field(1, 'D')
+M = Field(1, 'M')
+N = Field(1, 'N')
 Q = Field(1, 'Q')
 F = Field(1, 'F')
 T = Field(1, 'T')
