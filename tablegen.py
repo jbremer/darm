@@ -79,7 +79,6 @@ class InstructionFormat(object):
                 self.sm += t[arg]
                 continue
 
-
         self.sm.append('STR_RETN')
 
     def create(self):
@@ -94,14 +93,14 @@ class Instruction(object):
         self.name = re.split(r'\W', fmt)[0].lower()
 
         # A mapping of bit indices to their integer value, and a mapping of
-        # field names to their bit index and value.
+        # field names to their offset in bits and value.
         self.value, self.field, off = {}, {}, 0
-        for bit in bits:
+        for idx, bit in enumerate(bits):
             if isinstance(bit, int):
                 self.value[off] = bit
                 off += 1
             else:
-                self.field[bit.name] = off, bit
+                self.field[bit.name] = idx, bit
                 off += bit.bitsize
 
         # Some instructions have bit patterns which are partially hardcoded.
@@ -286,7 +285,14 @@ class Node(object):
                     bits[bit_idx].append(ins)
 
         def _sort_offsets(a, b):
+            # We sort by the amount of encodings per bit index. Naturally the
+            # bit index with the most associated encodings will become the
+            # next node in the lookup tree.
             ret = len(bits[b]) - len(bits[a])
+
+            # Assuming several bit indices occupy the same field, we sort by
+            # the bit index, in order to make sure we always get the lowest
+            # index first.
             return ret if ret else a - b
 
         offs = sorted(bits, cmp=_sort_offsets)
