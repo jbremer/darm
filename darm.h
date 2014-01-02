@@ -123,17 +123,17 @@ typedef struct _darm_t {
 } darm_t;
 
 typedef struct _darm_string_t {
-    // the full mnemonic, including extensions, flags, etc.
+    // Full mnemonic, including possible S flag, and condition.
     char mnemonic[12];
 
-    // a representation of each argument in a separate string
+    // Each operand.
     uint32_t argcnt;
     char arg[6][32];
 
-    // representation of shifting, if present
+    // Shift operand.
     char shift[12];
 
-    // the entire instruction
+    // Entire instruction.
     char total[64];
 } darm_string_t;
 
