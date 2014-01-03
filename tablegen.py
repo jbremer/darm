@@ -48,10 +48,6 @@ class InstructionFormat(object):
 
         args = fmt.split(' ', 1)[1].split(',') if ' ' in fmt else []
 
-        # Special case for {,<shift>}.
-        if len(args) == 4 and args[2][-1] == '{' and args[3][0] == '<':
-            args = args[:2] + [args[2] + ',' + args[3]]
-
         regs = '<Rd>', '<Rn>', '<Rm>', '<Rt>', '<Rt2>', '<RdHi>', \
                '<RdLo>', '<Ra>', '<CRd>', '<CRn>', '<CRm>'
 
@@ -69,6 +65,7 @@ class InstructionFormat(object):
             '#<width>': ['STR_INT', 'O(width)'],
             '<Rn>{!}': ['STR_REG', 'O(Rn)', 'STR_EXCL'],
             '<coproc>': ['STR_COPROC'],
+            '<shift>': ['STR_SHIFT'],
         }
 
         t.update(dict((_, ['STR_IMM']) for _ in imms))

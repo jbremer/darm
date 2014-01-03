@@ -73,7 +73,7 @@ typedef enum _darm_cond_t {
 } darm_cond_t;
 
 typedef enum _darm_shift_type_t {
-    S_LSL, S_LSR, S_ASR, S_ROR,
+    S_LSL, S_LSR, S_ASR, S_ROR, S_RRX,
 
     S_SHFTTYPCNT, S_BASE = S_LSL,
 } darm_shift_type_t;

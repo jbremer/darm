@@ -64,6 +64,10 @@ static const char *g_darm_conditionals[] = {
     "hi", "ls", "ge", "lt", "gt", "le", "al", "al",
 };
 
+static const char *g_darm_shifts[] = {
+    "lsl", "lsr", "asr", "ror", "rrx",
+};
+
 static const char *g_darm_option[] = {
     NULL, NULL, "oshst", "osh", NULL, NULL, "nshst", "nsh",
     NULL, NULL, "ishst", "ish", NULL, NULL, "st", "sy",
@@ -303,6 +307,10 @@ int darm_string2(const darm_t *d, darm_string_t *str)
         case STR_RETN: case STR_S: case STR_cond: case STR_EXCL:
             break;
 
+        case STR_SHIFT:
+            *out = 0, out = str->shift;
+            break;
+
         default:
             *out = 0, out = str->arg[str->argcnt++];
         }
@@ -343,14 +351,33 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             break;
 
         case STR_SHIFT:
+            if(d->shift_type == S_LSL && d->imm == 0) break;
+
+            if(d->shift_type == S_ROR && d->imm == 0) {
+                APPEND(out, g_darm_shifts[S_RRX]);
+                break;
+            }
+
+            APPEND(out, g_darm_shifts[d->shift_type]);
+            if(d->shift_type == S_LSR || d->shift_type == S_ASR) {
+                value = d->imm == 32 ? 0 : d->imm;
+            }
+            else {
+                value = d->imm;
+            }
+
+            *out++ = ' ', *out++ = '#';
+            out += _append_imm(out, value);
             break;
 
         case STR_IMM:
+            *out++ = '#';
             out += _append_imm(out, d->imm);
             break;
 
         case STR_INT:
             value = *(uint32_t *)((char *) d + *fmt++);
+            *out++ = '#';
             out += _append_imm(out, value);
             break;
 
