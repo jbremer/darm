@@ -58,6 +58,10 @@ typedef enum _darm_sm_opcode_t {
     // the darm_t object.
     SM_EXTR, SM_EXTR2,
 
+    // Scattered register - in Thumb mode, some registers may have their
+    // upper bit located at another bit index.
+    SM_SCREG,
+
     // Extract an immediate. In addition to the bitsize, the extended version
     // also provides the bit index in the original encoding, and the bit index
     // in the resulting immediate.

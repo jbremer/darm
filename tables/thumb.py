@@ -29,7 +29,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 from tablegen import Instruction, Table, Node, Immediate
 from tablegen import ScatteredImmediate, ScatteredSignExtendImmediate
-from tablegen import DoubleRegister, Register, Field, BranchNotXorImmediate
+from tablegen import DoubleRegister, Register, ScatteredRegister
+from tablegen import DoubleScatteredRegister, Field, BranchNotXorImmediate
 
 
 class ThumbTable(Table):
@@ -77,9 +78,11 @@ Rt2 = Register(4, 'Rt2')
 RdHi = Register(4, 'RdHi')
 RdLo = Register(4, 'RdLo')
 Rdn3 = DoubleRegister(3, 'Rd', 'Rn')
-DN = DoubleRegister(1, 'Rd', 'Rn')
+Rdn1_3 = DoubleScatteredRegister(1, 'Rd', 'Rn', 3)
 Rdm3 = DoubleRegister(3, 'Rd', 'Rm')
-DM = DoubleRegister(1, 'Rd', 'Rm')
+Rdm1_3 = DoubleScatteredRegister(1, 'Rd', 'Rm', 3)
+Rd1_3 = ScatteredRegister(1, 'Rd', 3)
+Rn1_3 = ScatteredRegister(1, 'Rn', 3)
 
 typ = Field(2, 'type')
 cond = Field(4, 'cond')
@@ -87,7 +90,6 @@ S = Field(1, 'S')
 W = Field(1, 'W')
 P = Field(1, 'P')
 U = Field(1, 'U')
-D = Field(1, 'D')
 R = Field(1, 'R')
 M = Field(1, 'M')
 N = Field(1, 'N')
@@ -141,13 +143,13 @@ _table = [
     Instruction('ADD{S}<c>.W <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 0, 0, S, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('ADDW<c> <Rd>, <Rn>, #<imm12>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 0, 0, 0, Rn, 0, imm3_8, Rd, imm8)),
     Instruction('ADD{S}<c> <Rd>, <Rn>, <Rm>', (0, 0, 0, 1, 1, 0, 0, Rm3, Rn3, Rd3)),
-    Instruction('ADD<c> <Rdn>, <Rm>', (0, 1, 0, 0, 0, 1, 0, 0, DN, Rm, Rdn3)),
+    Instruction('ADD<c> <Rdn>, <Rm>', (0, 1, 0, 0, 0, 1, 0, 0, Rdn1_3, Rm, Rdn3)),
     Instruction('ADD{S}<c>.W <Rd>, <Rn>, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('ADD<c> <Rd3>, SP, #<imm>', (1, 0, 1, 0, 1, Rd3, imm8)),
     Instruction('ADD<c> SP, SP, #<imm>', (1, 0, 1, 1, 0, 0, 0, 0, 0, imm7)),
     # Instruction('ADD{S}<c>.W <Rd>, SP, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 0, 0, S, 1, 1, 0, 1, 0, imm3_8, Rd, imm8)),
     Instruction('ADDW<c> <Rd>, SP, #<imm12>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, imm3_8, Rd, imm8)),
-    Instruction('ADD<c> <Rdm>, SP, <Rdm>', (0, 1, 0, 0, 0, 1, 0, 0, DM, 1, 1, 0, 1, Rdm3)),
+    Instruction('ADD<c> <Rdm>, SP, <Rdm>', (0, 1, 0, 0, 0, 1, 0, 0, Rdm1_3, 1, 1, 0, 1, Rdm3)),
     # Instruction('ADD<c> SP, <Rm>', (0, 1, 0, 0, 0, 1, 0, 0, 1, Rm, 1, 0, 1)),
     # Instruction('ADD{S}<c>.W <Rd>, SP, <Rm>{, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, S, 1, 1, 0, 1, (0), imm3, Rd, imm2, typ, Rm)),
     Instruction('ADR<c> <Rd3>, <label>', (1, 0, 1, 0, 0, Rd3, imm8)),
@@ -185,7 +187,7 @@ _table = [
     Instruction('CMP<c> <Rn3>, #<imm8>', (0, 0, 1, 0, 1, Rn3, imm8)),
     Instruction('CMP<c>.W <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 1, 0, 1, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8)),
     Instruction('CMP<c> <Rn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 0, 1, 0, Rm3, Rn3)),
-    Instruction('CMP<c> <Rn>, <Rm>', (0, 1, 0, 0, 0, 1, 0, 1, N, Rm, Rn3)),
+    Instruction('CMP<c> <Rn>, <Rm>', (0, 1, 0, 0, 0, 1, 0, 1, Rn1_3, Rm, Rn3)),
     Instruction('CMP<c>.W <Rn>, <Rm> {, <shift>}', (1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
     Instruction('DBG<c> #<option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, (1), (1), (1), (1), 1, 0, (0), 0, (0), 0, 0, 0, 1, 1, 1, 1, option)),
     Instruction('DMB<c> <option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 0, 1, option)),
@@ -252,7 +254,7 @@ _table = [
     Instruction('MOV{S}<c> <Rd3>, #<imm8>', (0, 0, 1, 0, 0, Rd3, imm8)),
     Instruction('MOV{S}<c>.W <Rd>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 1, 0, S, 1, 1, 1, 1, 0, imm3_8, Rd, imm8)),
     Instruction('MOVW<c> <Rd>, #<imm16>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 1, 0, 0, imm4_12, 0, imm3_8, Rd, imm8)),
-    Instruction('MOV<c> <Rd>, <Rm>', (0, 1, 0, 0, 0, 1, 1, 0, D, Rm, Rd3)),
+    Instruction('MOV<c> <Rd>, <Rm>', (0, 1, 0, 0, 0, 1, 1, 0, Rd1_3, Rm, Rd3)),
     Instruction('MOV{S} <Rd3>, <Rm3>', (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Rm3, Rd3)),
     Instruction('MOV{S}<c>.W <Rd>, <Rm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), 0, 0, 0, Rd, 0, 0, 0, 0, Rm)),
     Instruction('MOVT<c> <Rd>, #<imm16>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 1, 1, 0, 0, imm4_12, 0, imm3_8, Rd, imm8)),

@@ -196,6 +196,30 @@ class CoprocessorRegister(BitPattern):
                          bitsize-self.bitsize-idx, self.bitsize, 'CR_BASE')
 
 
+class ScatteredRegister(BitPattern):
+    def __init__(self, bitsize, name, offset):
+        BitPattern.__init__(self, bitsize, name)
+        self.offset = offset
+
+    def create(self, idx, sm, lut, fmt, bitsize):
+        assert self.offset == 3
+        return sm.append('SM_SCREG', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx)
+
+
+class DoubleScatteredRegister(BitPattern):
+    def __init__(self, bitsize, name, name2, offset):
+        BitPattern.__init__(self, bitsize, name)
+        self.name2 = name2
+        self.offset = offset
+
+    def create(self, idx, sm, lut, fmt, bitsize):
+        return sm.append('SM_SCREG', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx,
+                         'SM_SCREG', 'O(%s)' % self.name2,
+                         bitsize-self.bitsize-idx)
+
+
 class Immediate(BitPattern):
     def create(self, idx, sm, lut, fmt, bitsize):
         # The immediate is located starting at the lowest significant bit.
