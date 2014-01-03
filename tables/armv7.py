@@ -97,6 +97,7 @@ mask = Field(2, 'mask')
 imm1 = Immediate(1, 'imm1')
 imm1_1 = ScatteredImmediate(1, 'imm1', 1)
 imm1_4 = ScatteredImmediate(1, 'imm4', 4)
+imm1_6 = ScatteredImmediate(1, 'imm1', 1)
 imm1_7 = ScatteredImmediate(1, 'imm1', 7)
 imm3 = Immediate(3, 'imm3')
 imm3_4 = ScatteredImmediate(3, 'imm3', 4)
@@ -414,7 +415,6 @@ Q = Field(1, 'Q')
 F = Field(1, 'F')
 T = Field(1, 'T')
 B = Field(1, 'B')
-L = Field(1, 'L')
 U = Field(1, 'U')
 E = Field(1, 'E')
 
@@ -590,8 +590,8 @@ _table2 = [
     Instruction('VQRSHRUN.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 1, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VQRSHRN.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 1, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VQSHL.<type><size> <Qd>,<Qm>,<Qn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 0, N, Q, M, 1, Vm)),
-    # Instruction('VQSHL.<type><size> <Qd>,<Qm>,#<imm>',  (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 0, 1, 1, op1, L, Q, M, 1, Vm)),
-    # Instruction('VQSHLU.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 1, op1, L, Q, M, 1, Vm)),
+    # Instruction('VQSHL.<type><size> <Qd>,<Qm>,#<imm>',  (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 0, 1, 1, op1, imm1_6, Q, M, 1, Vm)),
+    # Instruction('VQSHLU.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 1, op1, imm1_6, Q, M, 1, Vm)),
     Instruction('VQSHRN.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 0, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VQSHRUN.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 0, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VQSUB.<type><size> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 1, 0, N, Q, M, 1, Vm)),
@@ -603,22 +603,22 @@ _table2 = [
     Instruction('VREV64.<size> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 0, 0, 0, 0, Q, M, 0, Vm)),
     Instruction('VRHADD <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 0, 1, N, Q, M, 0, Vm)),
     Instruction('VRSHL.<type><size> <Qd>,<Qm>,<Qn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 1, N, Q, M, 0, Vm)),
-    # Instruction('VRSHR.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 0, L, Q, M, 1, Vm)),
+    # Instruction('VRSHR.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 0, imm1_6, Q, M, 1, Vm)),
     Instruction('VRSHRN.I<size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, 0, 0, 1, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VRSQRTE.<dt> <Qd>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 0, F, 1, Q, M, 0, Vm)),
     Instruction('VRSQRTS.F32 <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 1, sz, Vn, Vd, 1, 1, 1, 1, N, Q, M, 1, Vm)),
-    Instruction('VRSRA.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 1, L, Q, M, 1, Vm)),
+    Instruction('VRSRA.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 1, imm1_6, Q, M, 1, Vm)),
     Instruction('VRSUBHN.<dt> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, size, Vn, Vd, 0, 1, 1, 0, N, 0, M, 0, Vm), size=[0b00, 0b01, 0b10]),
-    Instruction('VSHL.I<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 0, 1, 0, 1, L, Q, M, 1, Vm)),
+    Instruction('VSHL.I<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 0, 1, 0, 1, imm1_6, Q, M, 1, Vm)),
     Instruction('VSHL.<type><size> <Qd>,<Qm>,<Qn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 0, N, Q, M, 0, Vm)),
     Instruction('VSHLL.<type><size> <Qd>,<Dm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 1, 0, 1, 0, 0, 0, M, 1, Vm), imm6=[_ for _ in xrange(0b001000, 2**6) if not _ >> 3 in (0b001, 0b010, 0b100)]),
     Instruction('VSHLL.<type><size> <Qd>,<Dm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 0, Vd, 0, 0, 1, 1, 0, 0, M, 0, Vm)),
-    Instruction('VSHR.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 0, L, Q, M, 1, Vm)),
+    Instruction('VSHR.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 0, imm1_6, Q, M, 1, Vm)),
     Instruction('VSHRN.I<size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, 0, 0, 0, M, 1, Vm), imm6=range(0b001000, 2**6)),
-    Instruction('VSLI.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 1, L, Q, M, 1, Vm)),
+    Instruction('VSLI.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 1, imm1_6, Q, M, 1, Vm)),
     Instruction('VSQRT<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 1, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm)),
-    Instruction('VSRA.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 1, L, Q, M, 1, Vm)),
-    Instruction('VSRI.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 0, L, Q, M, 1, Vm)),
+    Instruction('VSRA.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 1, imm1_6, Q, M, 1, Vm)),
+    Instruction('VSRI.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 0, imm1_6, Q, M, 1, Vm)),
     Instruction('VST1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0010, 0b0110, 0b0111, 0b1010]),
     Instruction('VST1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 0, 0, index_align, Rm)),
     Instruction('VST2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0011, 0b1000, 0b1001]),
