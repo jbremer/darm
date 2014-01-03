@@ -73,7 +73,9 @@ typedef enum _darm_cond_t {
 } darm_cond_t;
 
 typedef enum _darm_shift_type_t {
-    S_INVLD,
+    S_LSL, S_LSR, S_ASR, S_ROR,
+
+    S_SHFTTYPCNT, S_BASE = S_LSL,
 } darm_shift_type_t;
 
 typedef enum _darm_option_t {
@@ -113,16 +115,17 @@ typedef struct _darm_t {
 
     uint32_t        imm;
 
+    darm_shift_type_t shift_type;
     uint32_t        S, E, P, U, W;
     darm_option_t   option;
-    uint32_t        type, lsb, msb, width;
+    uint32_t        lsb, msb, width;
     uint32_t        register_list;
 
     darm_coproc_t   coproc;
     uint32_t        opc1, opc2;
     darm_reg_t      CRd, CRn, CRm;
 
-    uint32_t        mask, rotate, sh, sat_imm;
+    uint32_t        mask, rotate, sat_imm;
     uint32_t        msr_mask, it_mask, first_cond;
 
     uint32_t        Vd, cmode, Q, size, align, index_align, T, a;

@@ -27,9 +27,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tablegen import Instruction, Macro, Table, Node, FieldPlus
+from tablegen import Instruction, Macro, Table, Node, ScatteredField
 from tablegen import Register, CoprocessorRegister, FloatingPointRegister
-from tablegen import Field, NopField, Immediate, ScatteredImmediate
+from tablegen import Field, NopField, Immediate, ScatteredImmediate, FieldPlus
 
 
 class ARMv7Table(Table):
@@ -69,14 +69,14 @@ Rt2 = Register(4, 'Rt2')
 RdHi = Register(4, 'RdHi')
 RdLo = Register(4, 'RdLo')
 Rs = Register(4, 'Rs')
-typ = Field(2, 'type')
+typ = Field(2, 'shift_type')
 
 cond = Field(4, 'cond')
 S = Field(1, 'S')
 W = Field(1, 'W')
 P = Field(1, 'P')
 U = Field(1, 'U')
-sh = Field(1, 'sh')
+sh = ScatteredField(1, 'shift_type', 1)
 
 msb = Field(5, 'msb')
 lsb = Field(5, 'msb')

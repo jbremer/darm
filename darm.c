@@ -97,6 +97,7 @@ static inline void _darm_init(darm_t *d, uint32_t insn)
 {
     d->insn = insn;
     d->imm = 0;
+    d->shift_type = 0;
 }
 
 // Disassembles any instruction according to the state machine and lookup
