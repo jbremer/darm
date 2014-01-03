@@ -28,8 +28,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 from tablegen import Instruction, Macro, Table, Node
-from tablegen import Field, CoprocessorRegister, Register
-from tablegen import Immediate, ScatteredImmediate
+from tablegen import Register, CoprocessorRegister, FloatingPointRegister
+from tablegen import Field, NopField, Immediate, ScatteredImmediate
 
 
 class ARMv7Table(Table):
@@ -403,13 +403,13 @@ _table = [
     Instruction('YIELD<c>', (cond, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, 0, 0, 0, 1)),
 ]
 
-Vd = Field(4, 'Vd')
-Vn = Field(4, 'Vn')
-Vm = Field(4, 'Vm')
+Vd = FloatingPointRegister(4, 'Vd', 22)
+Vn = FloatingPointRegister(4, 'Vn', 7)
+Vm = FloatingPointRegister(4, 'Vm', 5)
 
-D = Field(1, 'D')
-M = Field(1, 'M')
-N = Field(1, 'N')
+D = NopField(1, 'D')
+M = NopField(1, 'M')
+N = NopField(1, 'N')
 Q = Field(1, 'Q')
 F = Field(1, 'F')
 T = Field(1, 'T')
@@ -426,7 +426,6 @@ cmode = Field(4, 'cmode')
 align = Field(2, 'align')
 index_align = Field(4, 'index_align')
 a = Field(1, 'a')
-op = Field(2, 'op')
 op1 = Field(1, 'op1')
 op2 = Field(2, 'op2')
 type_ = Field(4, 'type_')

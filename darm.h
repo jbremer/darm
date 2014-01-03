@@ -113,7 +113,7 @@ typedef struct _darm_t {
 
     uint32_t        imm;
 
-    uint32_t        S, E, P, U, W, D, R, N, M;
+    uint32_t        S, E, P, U, W;
     darm_option_t   option;
     uint32_t        type, lsb, msb, width;
     uint32_t        register_list;

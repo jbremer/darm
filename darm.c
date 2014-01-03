@@ -48,6 +48,15 @@ static const char *g_darm_registers[]  = {
 
     "cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7", "cr8",
     "cr9", "cr10", "cr11", "cr12", "cr13", "cr14", "cr15",
+
+    "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11",
+    "d12", "d13", "d14", "d15", "d16", "d17", "d18", "d19", "d20", "d21",
+    "d22", "d23", "d24", "d25", "d26", "d27", "d28", "d29", "d30", "d31",
+};
+
+static const char *g_darm_fpreg2[] = {
+    "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8",
+    "q9", "q10", "q11", "q12", "q13", "q14", "q15",
 };
 
 static const char *g_darm_conditionals[] = {
@@ -143,6 +152,13 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             *(uint32_t *)((char *) d + sm[off]) |=
                 _extract_field(insn, sm[off+1], sm[off+2]) << sm[off+3];
             off += 4;
+            break;
+
+        case SM_FPREG:
+            *(uint32_t *)((char *) d + sm[off]) = FP_BASE +
+                _extract_field(insn, sm[off+1], 4) +
+                _extract_field(insn, sm[off+2], 1) * 16;
+            off += 3;
             break;
 
         case SM_IMM:

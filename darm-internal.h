@@ -58,6 +58,9 @@ typedef enum _darm_sm_opcode_t {
     // or sets the bits in the given field in the darm_t object.
     SM_EXTR, SM_EXTR2, SM_EXTR3,
 
+    // Extracts a Floating Point register, which consists of five bytes.
+    SM_FPREG,
+
     // Extract an immediate. In addition to the bitsize, the extended version
     // also provides the bit index in the original encoding, and the bit index
     // in the resulting immediate.

@@ -166,6 +166,11 @@ class BitPattern(object):
         raise
 
 
+class NopField(BitPattern):
+    def create(self, idx, sm, lut, fmt, bitsize):
+        return sm.offset()
+
+
 class Field(BitPattern):
     def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_EXTR', 'O(%s)' % self.name,
@@ -204,6 +209,16 @@ class CoprocessorRegister(BitPattern):
     def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_EXTR2', 'O(%s)' % self.name,
                          bitsize-self.bitsize-idx, self.bitsize, 'CR_BASE')
+
+
+class FloatingPointRegister(BitPattern):
+    def __init__(self, bitsize, name, msb):
+        BitPattern.__init__(self, bitsize, name)
+        self.msb = msb
+
+    def create(self, idx, sm, lut, fmt, bitsize):
+        return sm.append('SM_FPREG', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.msb)
 
 
 class ScatteredRegister(BitPattern):
