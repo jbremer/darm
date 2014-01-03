@@ -83,9 +83,12 @@ class InstructionFormat(object):
 
 
 class Instruction(object):
-    def __init__(self, fmt, bits, **kwargs):
+    def __init__(self, fmt, bits, macro=None, **kwargs):
         self.fmt = InstructionFormat(fmt)
         self.bits = bits
+
+        # Optionally a macro can be assigned.
+        self.macro = macro
 
         self.name = re.split(r'\W', fmt)[0].lower()
 
@@ -109,8 +112,8 @@ class Instruction(object):
             kwargs.pop(k)
             self.hardcoded[k] = v
 
-        # The remainder of the keyword arguments are macro's.
-        self.macros = kwargs
+        # At this point we expect kwargs to be empty.
+        assert not kwargs
 
     def field_index(self, name):
         assert name in self.field
@@ -142,8 +145,8 @@ class Instruction(object):
         for bit, idx in last:
             bit.create(idx, sm, lut, fmt, bitsize)
 
-        for macro in self.macros.values():
-            macro.create(sm, lut, fmt, bitsize)
+        if self.macro:
+            self.macro.create(sm, lut, fmt, bitsize)
 
         name = 'I_' + self.name.upper()
         sm.append('SM_INSTR', 'L(%s)' % name, 'H(%s)' % name)
@@ -294,16 +297,10 @@ class Macro(object):
     def __init__(self, name):
         self.name = name
 
-    def __call__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-        return self
-
     def __repr__(self):
         return '<Macro %s>' % self.name
 
     def create(self, sm, lut, fmt, bitsize):
-        assert not self.kwargs
         return sm.append('SM_' + self.name)
 
 

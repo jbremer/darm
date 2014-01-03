@@ -91,6 +91,27 @@ static inline uint32_t _arm_expand_imm(uint32_t value)
     return _ror(value & 0xff, (value >> 7) & 0x1e);
 }
 
+static inline uint32_t _thumb_expand_imm(uint32_t imm12)
+{
+    if((imm12 >> 10) == 0) {
+        uint32_t value = imm12 & 0xff;
+        switch ((imm12 >> 8) & 3) {
+        case 0:
+            return value;
+
+        case 1:
+            return (value << 16) | value;
+
+        case 2:
+            return (value << 24) | (value << 8);
+
+        case 3:
+            return (value << 24) | (value << 16) | (value << 8) | value;
+        }
+    }
+    return _ror(0x80 | (imm12 & 0x7f), imm12 >> 7);
+}
+
 static inline uint32_t _extract_field(uint32_t insn,
     uint32_t idx, uint32_t bits)
 {
@@ -195,6 +216,10 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
 
         case SM_ARMExpandImm:
             d->imm = _arm_expand_imm(d->imm);
+            break;
+
+        case SM_ThumbExpandImm:
+            d->imm = _thumb_expand_imm(d->imm);
             break;
         }
     }

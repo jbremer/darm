@@ -75,7 +75,7 @@ typedef enum _darm_sm_opcode_t {
     // Extra information for generating a human-readable string.
     SM_STR,
 
-    SM_ARMExpandImm,
+    SM_ARMExpandImm, SM_ThumbExpandImm,
 } darm_sm_opcode_t;
 
 typedef enum _darm_string_opcode_t {
