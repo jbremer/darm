@@ -29,7 +29,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 from tablegen import Instruction, Table, Node, Immediate, ShiftedField
 from tablegen import ScatteredImmediate, ScatteredSignExtendImmediate
-from tablegen import DoubleRegister, Register, ScatteredRegister
+from tablegen import DoubleRegister, Register, ScatteredRegister, FieldPlus
 from tablegen import DoubleScatteredRegister, Field, BranchNotXorImmediate
 
 
@@ -97,7 +97,7 @@ option = Field(4, 'option')
 register_list = Field(16, 'register_list')
 register_list8 = Field(8, 'register_list')
 register_list1_14 = ShiftedField(1, 'register_list', 14)
-widthm1 = Field(5, 'widthm1')
+widthm1 = FieldPlus(5, 'width', 1)
 E = Field(1, 'E')
 
 firstcond = Field(4, 'first_cond')

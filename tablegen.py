@@ -177,6 +177,16 @@ class Field(BitPattern):
                          bitsize-self.bitsize-idx, self.bitsize)
 
 
+class FieldPlus(BitPattern):
+    def __init__(self, bitsize, name, value):
+        BitPattern.__init__(self, bitsize, name)
+        self.value = value
+
+    def create(self, idx, sm, lut, fmt, bitsize):
+        return sm.append('SM_EXTR2', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.bitsize, self.value)
+
+
 class ShiftedField(BitPattern):
     def __init__(self, bitsize, name, offset):
         BitPattern.__init__(self, bitsize, name)

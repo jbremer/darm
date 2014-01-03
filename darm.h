@@ -122,7 +122,7 @@ typedef struct _darm_t {
     uint32_t        opc1, opc2;
     darm_reg_t      CRd, CRn, CRm;
 
-    uint32_t        mask, rotate, sh, widthm1, sat_imm;
+    uint32_t        mask, rotate, sh, sat_imm;
     uint32_t        msr_mask, it_mask, first_cond;
 
     uint32_t        Vd, cmode, Q, size, align, index_align, T, a;

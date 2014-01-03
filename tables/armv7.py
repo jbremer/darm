@@ -27,7 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tablegen import Instruction, Macro, Table, Node
+from tablegen import Instruction, Macro, Table, Node, FieldPlus
 from tablegen import Register, CoprocessorRegister, FloatingPointRegister
 from tablegen import Field, NopField, Immediate, ScatteredImmediate
 
@@ -82,7 +82,7 @@ msb = Field(5, 'msb')
 lsb = Field(5, 'msb')
 option = Field(4, 'option')
 register_list = Field(16, 'register_list')
-widthm1 = Field(5, 'widthm1')
+widthm1 = FieldPlus(5, 'width', 1)
 E = Field(1, 'E')
 
 opc1 = Field(4, 'opc1')
