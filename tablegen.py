@@ -172,6 +172,16 @@ class Field(BitPattern):
                          bitsize-self.bitsize-idx, self.bitsize)
 
 
+class ShiftedField(BitPattern):
+    def __init__(self, bitsize, name, offset):
+        BitPattern.__init__(self, bitsize, name)
+        self.offset = offset
+
+    def create(self, idx, sm, lut, fmt, bitsize):
+        return sm.append('SM_EXTR3', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.bitsize, self.offset)
+
+
 class Register(BitPattern):
     def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_EXTR', 'O(%s)' % self.name,
@@ -202,9 +212,8 @@ class ScatteredRegister(BitPattern):
         self.offset = offset
 
     def create(self, idx, sm, lut, fmt, bitsize):
-        assert self.offset == 3
-        return sm.append('SM_SCREG', 'O(%s)' % self.name,
-                         bitsize-self.bitsize-idx)
+        return sm.append('SM_EXTR3', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.bitsize, self.offset)
 
 
 class DoubleScatteredRegister(BitPattern):
@@ -214,10 +223,10 @@ class DoubleScatteredRegister(BitPattern):
         self.offset = offset
 
     def create(self, idx, sm, lut, fmt, bitsize):
-        return sm.append('SM_SCREG', 'O(%s)' % self.name,
-                         bitsize-self.bitsize-idx,
-                         'SM_SCREG', 'O(%s)' % self.name2,
-                         bitsize-self.bitsize-idx)
+        return sm.append('SM_EXTR3', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.bitsize, self.offset,
+                         'SM_EXTR3', 'O(%s)' % self.name2,
+                         bitsize-self.bitsize-idx, self.bitsize, self.offset)
 
 
 class Immediate(BitPattern):

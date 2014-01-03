@@ -139,10 +139,10 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             off += 4;
             break;
 
-        case SM_SCREG:
+        case SM_EXTR3:
             *(uint32_t *)((char *) d + sm[off]) |=
-                _extract_field(insn, sm[off+1], 1) << 3;
-            off += 2;
+                _extract_field(insn, sm[off+1], sm[off+2]) << sm[off+3];
+            off += 4;
             break;
 
         case SM_IMM:

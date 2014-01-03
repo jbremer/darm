@@ -27,7 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tablegen import Instruction, Table, Node, Immediate
+from tablegen import Instruction, Table, Node, Immediate, ShiftedField
 from tablegen import ScatteredImmediate, ScatteredSignExtendImmediate
 from tablegen import DoubleRegister, Register, ScatteredRegister
 from tablegen import DoubleScatteredRegister, Field, BranchNotXorImmediate
@@ -99,6 +99,7 @@ msb = Field(5, 'msb')
 option = Field(4, 'option')
 register_list = Field(16, 'register_list')
 register_list8 = Field(8, 'register_list')
+register_list1_14 = ShiftedField(1, 'register_list', 14)
 widthm1 = Field(5, 'widthm1')
 E = Field(1, 'E')
 
@@ -285,7 +286,7 @@ _table = [
     Instruction('POP<c> <registers>', (1, 0, 1, 1, 1, 1, 0, P, register_list8)),
     Instruction('POP<c>.W <registers>', (1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, register_list)),
     Instruction('POP<c>.W <registers>', (1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, Rt, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0)),
-    Instruction('PUSH<c> <registers>', (1, 0, 1, 1, 0, 1, 0, M, register_list8)),
+    Instruction('PUSH<c> <registers>', (1, 0, 1, 1, 0, 1, 0, register_list1_14, register_list8)),
     Instruction('PUSH<c>.W <registers>', (1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, register_list)),
     Instruction('PUSH<c>.W <registers>', (1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, Rt, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0)),
     Instruction('QADD<c> <Rd>, <Rm>, <Rn>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, Rn, 1, 1, 1, 1, Rd, 1, 0, 0, 0, Rm)),

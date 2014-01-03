@@ -54,13 +54,9 @@ typedef enum _darm_sm_opcode_t {
     SM_INSTR,
 
     // Extracts a couple of bits from the instruction, optionally adds a
-    // value to the extracted bits, and stores them in the given field in
-    // the darm_t object.
-    SM_EXTR, SM_EXTR2,
-
-    // Scattered register - in Thumb mode, some registers may have their
-    // upper bit located at another bit index.
-    SM_SCREG,
+    // value to the extracted bits or left shifts the value, and stores them
+    // or sets the bits in the given field in the darm_t object.
+    SM_EXTR, SM_EXTR2, SM_EXTR3,
 
     // Extract an immediate. In addition to the bitsize, the extended version
     // also provides the bit index in the original encoding, and the bit index
