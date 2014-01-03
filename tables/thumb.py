@@ -28,7 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 from tablegen import Instruction, Table, Node, Immediate, ScatteredField
-from tablegen import ScatteredImmediate, ScatteredSignExtendImmediate, Macro
+from tablegen import ScatteredImmediate, Macro
 from tablegen import DoubleRegister, Register, ScatteredRegister, FieldPlus
 from tablegen import DoubleScatteredRegister, Field, BranchNotXorImmediate
 
@@ -111,7 +111,8 @@ imm1_18 = ScatteredImmediate(1, 'imm1', 18)
 imm1_19 = ScatteredImmediate(1, 'imm1', 19)
 imm1_22_bnxor = BranchNotXorImmediate(1, 'imm1', 22)
 imm1_23_bnxor = BranchNotXorImmediate(1, 'imm1', 23)
-imm1_20_sign = ScatteredSignExtendImmediate(1, 'imm1', 20)
+imm1_20 = ScatteredImmediate(1, 'imm1', 20)
+imm1_24 = ScatteredImmediate(1, 'imm1', 24)
 imm2 = Immediate(2, 'imm2')
 imm3 = Immediate(3, 'imm3')
 imm3_2 = ScatteredImmediate(3, 'imm3', 2)
@@ -122,6 +123,7 @@ imm5_1 = ScatteredImmediate(5, 'imm5', 1)
 imm6_12 = ScatteredImmediate(6, 'imm6', 12)
 imm7 = Immediate(7, 'imm7')
 imm8 = Immediate(8, 'imm8')
+imm8_1 = ScatteredImmediate(8, 'imm8', 1)
 imm10_2 = ScatteredImmediate(10, 'imm10', 2)
 imm10_12 = ScatteredImmediate(10, 'imm10', 12)
 imm11 = Immediate(11, 'imm11')
@@ -133,6 +135,7 @@ sat_imm4 = Field(4, 'sat_imm')
 rotate = Field(2, 'rotate')
 
 ThumbExpandImm = Macro('ThumbExpandImm')
+SignExtend = Macro('SIGN')
 
 _table = [
     Instruction('ADC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 1, 0, S, Rn, 0, imm3_8, Rd, imm8), macro=ThumbExpandImm),
@@ -162,10 +165,10 @@ _table = [
     Instruction('ASR{S}<c>.W <Rd>, <Rm>, #<imm>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, 1, 1, 1, 1, (0), imm3_2, Rd, imm2, 1, 0, Rm)),
     Instruction('ASR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 1, 0, 0, Rm3, Rdn3)),
     Instruction('ASR{S}<c>.W <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, S, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
-    Instruction('B<c> <label>', (1, 1, 0, 1, cond, imm8)),
-    Instruction('B<c> <label>', (1, 1, 1, 0, 0, imm11)),
-    Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, imm1_20_sign, cond, imm6_12, 1, 0, imm1_18, 0, imm1_19, imm11_1)),
-    Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, S, imm10_12, 1, 0, imm1_23_bnxor, 1, imm1_22_bnxor, imm11_1)),
+    Instruction('B<c> <label>', (1, 1, 0, 1, cond, imm8_1), macro=SignExtend(8)),
+    Instruction('B<c> <label>', (1, 1, 1, 0, 0, imm11_1), macro=SignExtend(11)),
+    Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, imm1_20, cond, imm6_12, 1, 0, imm1_18, 0, imm1_19, imm11_1), macro=SignExtend(20)),
+    Instruction('B<c>.W <label>', (1, 1, 1, 1, 0, imm1_24, imm10_12, 1, 0, imm1_23_bnxor, 1, imm1_22_bnxor, imm11_1), macro=SignExtend(24)),
     Instruction('BFC<c> <Rd>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, imm3_2, Rd, imm2, (0), msb)),
     Instruction('BFI<c> <Rd>, <Rn>, #<lsb>, #<width>', (1, 1, 1, 1, 0, (0), 1, 1, 0, 1, 1, 0, Rn, 0, imm3_2, Rd, imm2, (0), msb)),
     Instruction('BIC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 0, 1, S, Rn, 0, imm3_8, Rd, imm8), macro=ThumbExpandImm),

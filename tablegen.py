@@ -281,27 +281,24 @@ class ScatteredImmediate(BitPattern):
                          bitsize-self.bitsize-idx, self.imm_idx)
 
 
-class ScatteredSignExtendImmediate(ScatteredImmediate):
-    def create(self, idx, sm, lut, fmt, bitsize):
-        ret = ScatteredImmediate.create(self, idx, sm, lut, fmt, bitsize)
-        sm.append('SM_SIGN', self.imm_idx)
-        return ret
-
-
 class BranchNotXorImmediate(ScatteredImmediate):
     def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_BNXOR', bitsize-self.bitsize-idx, self.imm_idx)
 
 
 class Macro(object):
-    def __init__(self, name):
+    def __init__(self, name, args=[]):
         self.name = name
+        self.args = args[:]
+
+    def __call__(self, *args):
+        return Macro(self.name, args)
 
     def __repr__(self):
-        return '<Macro %s>' % self.name
+        return '<Macro %s, %r>' % (self.name, self.args)
 
     def create(self, sm, lut, fmt, bitsize):
-        return sm.append('SM_' + self.name)
+        return sm.append('SM_' + self.name, *self.args)
 
 
 class Node(object):

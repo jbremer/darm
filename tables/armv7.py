@@ -118,6 +118,7 @@ rotate = Field(2, 'rotate')
 
 ARMExpandImm = Macro('ARMExpandImm')
 NegateImm = Macro('NEG')
+SignExtend = Macro('SIGN')
 
 _table = [
     Instruction('ADC{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 0, 1, 0, 1, S, Rn, Rd, imm12), macro=ARMExpandImm),
@@ -135,15 +136,15 @@ _table = [
     Instruction('AND{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 0, 0, 0, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
     Instruction('ASR{S}<c> <Rd>,<Rm>,#<shift>', (cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, imm5, 1, 0, 0, Rm)),
     Instruction('ASR{S}<c> <Rd>,<Rn>,<Rm>', (cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, Rm, 0, 1, 0, 1, Rn)),
-    Instruction('B<c> <label>', (cond, 1, 0, 1, 0, imm24)),
+    Instruction('B<c> <label>', (cond, 1, 0, 1, 0, imm24_2), macro=SignExtend(25)),
     Instruction('BFC<c> <Rd>,#<lsb>,#<width>', (cond, 0, 1, 1, 1, 1, 1, 0, msb, Rd, lsb, 0, 0, 1, 1, 1, 1, 1)),
     Instruction('BFI<c> <Rd>,<Rn>,#<lsb>,#<width>', (cond, 0, 1, 1, 1, 1, 1, 0, msb, Rd, lsb, 0, 0, 1, Rn)),
     Instruction('BIC{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 1, 1, 1, 0, S, Rn, Rd, imm12), macro=ARMExpandImm),
     Instruction('BIC{S}<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 0, 0, 1, 1, 1, 0, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('BIC{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 1, 1, 1, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
     Instruction('BKPT #<imm16>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, imm12_4, 0, 1, 1, 1, imm4)),
-    Instruction('BL<c> <label>', (cond, 1, 0, 1, 1, imm24)),
-    Instruction('BLX <label>', (1, 1, 1, 1, 1, 0, 1, imm1_1, imm24_2)),
+    Instruction('BL<c> <label>', (cond, 1, 0, 1, 1, imm24_2), macro=SignExtend(25)),
+    Instruction('BLX <label>', (1, 1, 1, 1, 1, 0, 1, imm1_1, imm24_2), macro=SignExtend(25)),
     Instruction('BLX<c> <Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 1, 1, Rm)),
     Instruction('BX<c> <Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 0, 1, Rm)),
     Instruction('BXJ<c> <Rm>', (cond, 0, 0, 0, 1, 0, 0, 1, 0, (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), (1), 0, 0, 1, 0, Rm)),
