@@ -130,14 +130,20 @@ class Instruction(object):
         return '<Instruction %s, %r>' % (self.name, self.bits)
 
     def create(self, sm, lut, fmt, bitsize):
-        idx, ret = 0, sm.offset()
+        idx, ret, last = 0, sm.offset(), []
         for bit in self.bits:
             if isinstance(bit, int):
                 idx += 1
                 continue
 
-            bit.create(idx, sm, lut, fmt, bitsize)
+            if bit.last:
+                last.append((bit, idx))
+            else:
+                bit.create(idx, sm, lut, fmt, bitsize)
             idx += bit.bitsize
+
+        for bit, idx in last:
+            bit.create(idx, sm, lut, fmt, bitsize)
 
         for macro in self.macros.values():
             macro.create(sm, lut, fmt, bitsize)
@@ -154,9 +160,10 @@ class Instruction(object):
 
 
 class BitPattern(object):
-    def __init__(self, bitsize, name):
+    def __init__(self, bitsize, name, last=False):
         self.bitsize = bitsize
         self.name = name
+        self.last = last
 
     def __repr__(self):
         clz = self.__class__.__name__
@@ -189,7 +196,7 @@ class FieldPlus(BitPattern):
 
 class ShiftedField(BitPattern):
     def __init__(self, bitsize, name, offset):
-        BitPattern.__init__(self, bitsize, name)
+        BitPattern.__init__(self, bitsize, name, last=True)
         self.offset = offset
 
     def create(self, idx, sm, lut, fmt, bitsize):
@@ -233,7 +240,7 @@ class FloatingPointRegister(BitPattern):
 
 class ScatteredRegister(BitPattern):
     def __init__(self, bitsize, name, offset):
-        BitPattern.__init__(self, bitsize, name)
+        BitPattern.__init__(self, bitsize, name, last=True)
         self.offset = offset
 
     def create(self, idx, sm, lut, fmt, bitsize):
@@ -243,7 +250,7 @@ class ScatteredRegister(BitPattern):
 
 class DoubleScatteredRegister(BitPattern):
     def __init__(self, bitsize, name, name2, offset):
-        BitPattern.__init__(self, bitsize, name)
+        BitPattern.__init__(self, bitsize, name, last=True)
         self.name2 = name2
         self.offset = offset
 
