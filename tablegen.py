@@ -194,7 +194,7 @@ class FieldPlus(BitPattern):
                          bitsize-self.bitsize-idx, self.bitsize, self.value)
 
 
-class ShiftedField(BitPattern):
+class ScatteredField(BitPattern):
     def __init__(self, bitsize, name, offset):
         BitPattern.__init__(self, bitsize, name, last=True)
         self.offset = offset

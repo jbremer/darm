@@ -27,7 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
-from tablegen import Instruction, Table, Node, Immediate, ShiftedField
+from tablegen import Instruction, Table, Node, Immediate, ScatteredField
 from tablegen import ScatteredImmediate, ScatteredSignExtendImmediate
 from tablegen import DoubleRegister, Register, ScatteredRegister, FieldPlus
 from tablegen import DoubleScatteredRegister, Field, BranchNotXorImmediate
@@ -96,7 +96,7 @@ msb = Field(5, 'msb')
 option = Field(4, 'option')
 register_list = Field(16, 'register_list')
 register_list8 = Field(8, 'register_list')
-register_list1_14 = ShiftedField(1, 'register_list', 14)
+register_list1_14 = ScatteredField(1, 'register_list', 14)
 widthm1 = FieldPlus(5, 'width', 1)
 E = Field(1, 'E')
 
