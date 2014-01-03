@@ -203,6 +203,10 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             d->imm = (int32_t)(d->imm << value) >> value;
             break;
 
+        case SM_NEG:
+            d->imm = -d->imm;
+            break;
+
         case SM_BNXOR:
             value = (insn >> sm[off]) ^ (insn >> 26);
             d->imm |= ((value & 1) == 0) << sm[off+1];
@@ -383,7 +387,20 @@ int darm_string2(const darm_t *d, darm_string_t *str)
                 break;
             }
 
-            APPEND(out, g_darm_shifts[d->shift_type]);
+            static darm_instr_t shift_lookup[4] = {
+                [S_LSL] = I_LSL,
+                [S_LSR] = I_LSR,
+                [S_ASR] = I_ASR,
+                [S_ROR] = I_ROR,
+            };
+
+            // Omit the shift type if the instruction itself is the
+            // shift type.
+            if(shift_lookup[d->shift_type] != d->instr) {
+                APPEND(out, g_darm_shifts[d->shift_type]);
+                *out++ = ' ';
+            }
+
             if(d->shift_type == S_LSR || d->shift_type == S_ASR) {
                 value = d->imm == 32 ? 0 : d->imm;
             }
@@ -391,7 +408,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
                 value = d->imm;
             }
 
-            *out++ = ' ', *out++ = '#';
+            *out++ = '#';
             out += _append_imm(out, value);
             break;
 

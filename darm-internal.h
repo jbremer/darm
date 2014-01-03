@@ -66,8 +66,8 @@ typedef enum _darm_sm_opcode_t {
     // in the resulting immediate.
     SM_IMM, SM_IMM2,
 
-    // Sign extend the immediate.
-    SM_SIGN,
+    // Sign extend or negate the immediate.
+    SM_SIGN, SM_NEG,
 
     // Special not-xor for various bits of branch offsets.
     SM_BNXOR,

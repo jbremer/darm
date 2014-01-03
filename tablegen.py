@@ -83,12 +83,12 @@ class InstructionFormat(object):
 
 
 class Instruction(object):
-    def __init__(self, fmt, bits, macro=None, **kwargs):
+    def __init__(self, fmt, bits, macro=None, macros=[], **kwargs):
         self.fmt = InstructionFormat(fmt)
         self.bits = bits
 
         # Optionally a macro can be assigned.
-        self.macro = macro
+        self.macros = [macro] if macro else macros[:]
 
         self.name = re.split(r'\W', fmt)[0].lower()
 
@@ -145,8 +145,8 @@ class Instruction(object):
         for bit, idx in last:
             bit.create(idx, sm, lut, fmt, bitsize)
 
-        if self.macro:
-            self.macro.create(sm, lut, fmt, bitsize)
+        for macro in self.macros:
+            macro.create(sm, lut, fmt, bitsize)
 
         name = 'I_' + self.name.upper()
         sm.append('SM_INSTR', 'L(%s)' % name, 'H(%s)' % name)

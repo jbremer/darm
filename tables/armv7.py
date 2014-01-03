@@ -117,6 +117,7 @@ sat_imm4 = Field(4, 'sat_imm')
 rotate = Field(2, 'rotate')
 
 ARMExpandImm = Macro('ARMExpandImm')
+NegateImm = Macro('NEG')
 
 _table = [
     Instruction('ADC{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 0, 1, 0, 1, S, Rn, Rd, imm12), macro=ARMExpandImm),
@@ -128,7 +129,7 @@ _table = [
     Instruction('ADD{S}<c> <Rd>,SP,#<const>', (cond, 0, 0, 1, 0, 1, 0, 0, S, 1, 1, 0, 1, Rd, imm12), macro=ARMExpandImm),
     Instruction('ADD{S}<c> <Rd>,SP,<Rm>,<shift>', (cond, 0, 0, 0, 0, 1, 0, 0, S, 1, 1, 0, 1, Rd, imm5, typ, 0, Rm)),
     Instruction('ADR<c> <Rd>,<label>', (cond, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, Rd, imm12), macro=ARMExpandImm),
-    Instruction('ADR<c> <Rd>,<label>', (cond, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, Rd, imm12), macro=ARMExpandImm),
+    Instruction('ADR<c> <Rd>,<label>', (cond, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, Rd, imm12), macros=[ARMExpandImm, NegateImm]),
     Instruction('AND{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 0, 0, 0, 0, S, Rn, Rd, imm12), macro=ARMExpandImm),
     Instruction('AND{S}<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 0, 0, 0, 0, 0, 0, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('AND{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 0, 0, 0, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
