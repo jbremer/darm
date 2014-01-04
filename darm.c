@@ -229,6 +229,10 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
         case SM_Rt2fromRt:
             d->Rt2 = d->Rt + 1;
             break;
+
+        case SM_RtReglist:
+            d->register_list = 1 << d->Rt;
+            break;
         }
     }
     return 0;
@@ -337,7 +341,8 @@ int darm_string2(const darm_t *d, darm_string_t *str)
 
     while (next) {
         switch ((darm_string_opcode_t) *fmt) {
-        case STR_RETN: case STR_S: case STR_cond: case STR_EXCL:
+        case STR_RETN: case STR_S: case STR_cond: case STR_wide:
+        case STR_EXCL:
             break;
 
         case STR_SHIFT: case STR_SHIFT2:
@@ -620,6 +625,10 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             out += _append_imm(out, value);
 
             *out++ = ']';
+            break;
+
+        case STR_wide:
+            *out++ = '.', *out++ = 'w';
             break;
         }
     }

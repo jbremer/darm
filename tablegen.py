@@ -46,13 +46,19 @@ class InstructionFormat(object):
         if '<c>' in fmt:
             self.sm.append('STR_cond')
 
+        if '.W' in fmt:
+            self.sm.append('STR_wide')
+
         args = fmt.split(' ', 1)[1].split(',') if ' ' in fmt else []
 
         regs = '<Rd>', '<Rn>', '<Rm>', '<Rt>', '<Rt2>', '<RdHi>', \
                '<RdLo>', '<Ra>', '<CRd>', '<CRn>', '<CRm>'
 
+        regs2 = '<Rd3>', '<Rn3>', '<Rt3>', '<Rdm>', '<Rdm3>', '<Rn3>', \
+                '<Rdn3>', '<Rm3>'
+
         imms = '#<const>', '#<imm>', '#<imm4>', '#<imm5>', '#<imm8>', \
-               '#<imm12>', '#<imm16>', '#<imm24>'
+               '#<imm12>', '#<imm16>', '#<imm24>', '#0'
 
         t = {
             '<registers>': ['STR_REGLIST'],
@@ -76,10 +82,12 @@ class InstructionFormat(object):
             '#+/-<imm8>': ['STR_IMM2'],
             '#+/-<imm12>': ['STR_IMM2'],
             '+/-<Rm>': ['STR_SIGNRM'],
+            '#<sat_imm>': ['STR_INT', 'O(sat_imm)'],
         }
 
         t.update(dict((_, ['STR_IMM']) for _ in imms))
         t.update(dict((_, ['STR_REG', 'O(%s)' % _[1:-1]]) for _ in regs))
+        t.update(dict((_, ['STR_REG', 'O(%s)' % _[1:3]]) for _ in regs2))
 
         for arg in (_.strip() for _ in args):
             if arg in t:
