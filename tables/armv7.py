@@ -94,7 +94,6 @@ CRm = CoprocessorRegister(4, 'CRm')
 coproc = Field(4, 'coproc')
 mask = Field(2, 'mask')
 
-imm1 = Immediate(1, 'imm1')
 imm1_1 = ScatteredImmediate(1, 'imm1', 1)
 imm1_4 = ScatteredImmediate(1, 'imm4', 4)
 imm1_6 = ScatteredImmediate(1, 'imm1', 1)
@@ -120,6 +119,7 @@ ARMExpandImm = Macro('ARMExpandImm')
 NegateImm = Macro('NEG')
 SignExtend = Macro('SIGN')
 AssignRt2fromRt = Macro('Rt2fromRt')
+Assign = Macro('Assign')
 RtReglist = Macro('RtReglist')
 
 _table = [
@@ -231,7 +231,7 @@ _table = [
     Instruction('ORR{S}<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('ORR{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
     Instruction('PKHBT<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 0, 0, 1, Rm)),
-    Instruction('PKHTB<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 1, 0, 1, Rm)),
+    Instruction('PKHTB<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 1, 0, 1, Rm), macro=Assign('O(shift_type)', 'S_ASR')),
     Instruction('PLD [<Rn>+/-#imm]', (1, 1, 1, 1, 0, 1, 0, 1, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm12)),
     Instruction('PLDW [<Rn>+/-#imm]', (1, 1, 1, 1, 0, 1, 0, 1, U, 0, 0, 1, Rn, (1), (1), (1), (1), imm12)),
     Instruction('PLD [<Rn>+/-<Rm><shift>]', (1, 1, 1, 1, 0, 1, 1, 1, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm5, typ, 0, Rm)),
@@ -435,7 +435,6 @@ type_ = Field(4, 'type_')
 len_ = Field(2, 'len')
 opc1 = Field(2, 'opc1')
 opc2 = Field(3, 'opc2')
-opc2_2 = Field(2, 'opc2')
 
 
 _table2 = [

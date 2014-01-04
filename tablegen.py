@@ -55,10 +55,10 @@ class InstructionFormat(object):
                '<RdLo>', '<Ra>', '<CRd>', '<CRn>', '<CRm>'
 
         regs2 = '<Rd3>', '<Rn3>', '<Rt3>', '<Rdm>', '<Rdm3>', '<Rn3>', \
-                '<Rdn3>', '<Rm3>'
+                '<Rdn>', '<Rdn3>', '<Rm3>'
 
-        imms = '#<const>', '#<imm>', '#<imm4>', '#<imm5>', '#<imm8>', \
-               '#<imm12>', '#<imm16>', '#<imm24>', '#0'
+        imms = '#<const>', '#<imm>', '#<imm3>', '#<imm4>', '#<imm5>', \
+               '#<imm8>', '#<imm12>', '#<imm16>', '#<imm24>', '#0'
 
         t = {
             '<registers>': ['STR_REGLIST'],

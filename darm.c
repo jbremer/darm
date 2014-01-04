@@ -372,7 +372,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
 
         case STR_S:
             if(d->S != B_UNSET && d->S != B_SET && d->S != B_IT) {
-                DPRINT("Invalid update value: %d\n", d->S);
+                DPRINT("Invalid update value: %d", d->S);
                 return -1;
             }
 

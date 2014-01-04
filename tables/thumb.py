@@ -97,6 +97,7 @@ option = Field(4, 'option')
 register_list = Field(16, 'register_list')
 register_list8 = Field(8, 'register_list')
 register_list1_14 = ScatteredField(1, 'register_list', 14)
+register_list1_15 = ScatteredField(1, 'register_list', 15)
 widthm1 = FieldPlus(5, 'width', 1)
 E = Field(1, 'E')
 
@@ -122,6 +123,7 @@ imm5 = Immediate(5, 'imm5')
 imm5_1 = ScatteredImmediate(5, 'imm5', 1)
 imm6_12 = ScatteredImmediate(6, 'imm6', 12)
 imm7 = Immediate(7, 'imm7')
+imm7_2 = ScatteredImmediate(7, 'imm7', 2)
 imm8 = Immediate(8, 'imm8')
 imm8_1 = ScatteredImmediate(8, 'imm8', 1)
 imm8_2 = ScatteredImmediate(8, 'imm8', 2)
@@ -137,6 +139,7 @@ rotate = Field(2, 'rotate')
 
 ThumbExpandImm = Macro('ThumbExpandImm')
 SignExtend = Macro('SIGN')
+RtReglist = Macro('RtReglist')
 Assign = Macro('Assign')
 AssignS_IT = Assign('O(S)', 'B_IT')
 
@@ -151,8 +154,8 @@ _table = [
     Instruction('ADD{S}<c> <Rd>, <Rn>, <Rm>', (0, 0, 0, 1, 1, 0, 0, Rm3, Rn3, Rd3), macro=AssignS_IT),
     Instruction('ADD<c> <Rdn>, <Rm>', (0, 1, 0, 0, 0, 1, 0, 0, Rdn1_3, Rm, Rdn3)),
     Instruction('ADD{S}<c>.W <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
-    Instruction('ADD<c> <Rd3>, SP, #<imm>', (1, 0, 1, 0, 1, Rd3, imm8)),
-    Instruction('ADD<c> SP, SP, #<imm>', (1, 0, 1, 1, 0, 0, 0, 0, 0, imm7)),
+    Instruction('ADD<c> <Rd3>, SP, #<imm>', (1, 0, 1, 0, 1, Rd3, imm8_2)),
+    Instruction('ADD<c> SP, #<imm>', (1, 0, 1, 1, 0, 0, 0, 0, 0, imm7_2)),
     # Instruction('ADD{S}<c>.W <Rd>, SP, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 0, 0, S, 1, 1, 0, 1, 0, imm3_8, Rd, imm8), macro=ThumbExpandImm),
     Instruction('ADDW<c> <Rd>, SP, #<imm12>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, imm3_8, Rd, imm8)),
     Instruction('ADD<c> <Rdm>, SP, <Rdm>', (0, 1, 0, 0, 0, 1, 0, 0, Rdm1_3, 1, 1, 0, 1, Rdm3)),
@@ -189,19 +192,19 @@ _table = [
     Instruction('CLZ<c> <Rd>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, Rm, 1, 1, 1, 1, Rd, 1, 0, 0, 0, Rm)),
     Instruction('CMN<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 0, 0, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8), macro=ThumbExpandImm),
     Instruction('CMN<c> <Rn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 0, 1, 1, Rm3, Rn3)),
-    Instruction('CMN<c>.W', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
+    Instruction('CMN<c>.W <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
     Instruction('CMP<c> <Rn3>, #<imm8>', (0, 0, 1, 0, 1, Rn3, imm8)),
     Instruction('CMP<c>.W <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 1, 0, 1, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8), macro=ThumbExpandImm),
     Instruction('CMP<c> <Rn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 0, 1, 0, Rm3, Rn3)),
     Instruction('CMP<c> <Rn>, <Rm>', (0, 1, 0, 0, 0, 1, 0, 1, Rn1_3, Rm, Rn3)),
     Instruction('CMP<c>.W <Rn>, <Rm> , <shift>', (1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
     Instruction('DBG<c> #<option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 0, (1), (1), (1), (1), 1, 0, (0), 0, (0), 0, 0, 0, 1, 1, 1, 1, option)),
-    Instruction('DMB<c> <option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 0, 1, option)),
-    Instruction('DSB<c> <option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 0, 0, option)),
+    Instruction('DMB<c> #<option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 0, 1, option)),
+    Instruction('DSB<c> #<option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 0, 0, option)),
     Instruction('EOR{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 1, 0, 0, S, Rn, 0, imm3_8, Rd, imm8), macro=ThumbExpandImm),
     Instruction('EOR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 0, 0, 0, 1, Rm3, Rdn3), macro=AssignS_IT),
     Instruction('EOR{S}<c>.W <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
-    Instruction('ISB<c> <option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 1, 0, option)),
+    Instruction('ISB<c> #<option>', (1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, (1), (1), (1), (1), 1, 0, (0), 0, (1), (1), (1), (1), 0, 1, 1, 0, option)),
     Instruction('IT{<x>{<y>{<z>}}} <firstcond>', (1, 0, 1, 1, 1, 1, 1, 1, firstcond, it_mask)),
     Instruction('LDM<c> <Rn>{!}, <registers>', (1, 1, 0, 0, 1, Rn3, register_list8)),
     Instruction('LDM<c>.W <Rn>{!}, <registers>', (1, 1, 1, 0, 1, 0, 0, 0, 1, 0, W, 1, Rn, register_list)),
@@ -278,8 +281,8 @@ _table = [
     Instruction('ORR{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 1, 0, S, Rn, 0, imm3_8, Rd, imm8), macro=ThumbExpandImm),
     Instruction('ORR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 1, 0, 0, Rm3, Rdn3), macro=AssignS_IT),
     Instruction('ORR{S}<c>.W <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
-    Instruction('PKHBT<c> <Rd>, <Rn>, <Rm>{, LSL #<imm>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 0, 0, Rm)),
-    Instruction('PKHTB<c> <Rd>, <Rn>, <Rm>{, LSL #<imm>}', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 1, 0, Rm)),
+    Instruction('PKHBT<c> <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 0, 0, Rm)),
+    Instruction('PKHTB<c> <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 1, 0, Rm), macro=Assign('O(shift_type)', 'S_ASR')),
     Instruction('PLD<c> [<Rn>, #<imm12>]', (1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, Rn, 1, 1, 1, 1, imm12)),
     Instruction('PLDW<c> [<Rn>, #<imm12>]', (1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, Rn, 1, 1, 1, 1, imm12)),
     Instruction('PLD<c> [<Rn>, #-<imm8>]', (1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, Rn, 1, 1, 1, 1, 1, 1, 0, 0, imm8)),
@@ -291,12 +294,12 @@ _table = [
     Instruction('PLI<c> [<Rn>, #-<imm8>]', (1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, Rn, 1, 1, 1, 1, 1, 1, 0, 0, imm8)),
     Instruction('PLI<c> <label>', (1, 1, 1, 1, 1, 0, 0, 1, U, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, imm12)),
     Instruction('PLI<c> [<Rn>, <Rm>{, LSL #<imm2>}]', (1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, Rn, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, imm2, Rm)),
-    Instruction('POP<c> <registers>', (1, 0, 1, 1, 1, 1, 0, P, register_list8)),
+    Instruction('POP<c> <registers>', (1, 0, 1, 1, 1, 1, 0, register_list1_15, register_list8)),
     Instruction('POP<c>.W <registers>', (1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, register_list)),
-    Instruction('POP<c>.W <registers>', (1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, Rt, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0)),
+    Instruction('POP<c>.W <registers>', (1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, Rt, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0), macro=RtReglist),
     Instruction('PUSH<c> <registers>', (1, 0, 1, 1, 0, 1, 0, register_list1_14, register_list8)),
     Instruction('PUSH<c>.W <registers>', (1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, register_list)),
-    Instruction('PUSH<c>.W <registers>', (1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, Rt, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0)),
+    Instruction('PUSH<c>.W <registers>', (1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, Rt, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0), macro=RtReglist),
     Instruction('QADD<c> <Rd>, <Rm>, <Rn>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, Rn, 1, 1, 1, 1, Rd, 1, 0, 0, 0, Rm)),
     Instruction('QADD16<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 1, Rm)),
     Instruction('QADD8<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 1, Rm)),
