@@ -332,6 +332,12 @@ int darm_reglist(uint16_t reglist, char *out)
     return out - base;
 }
 
+#define CHECK_FLAG(flag, name) \
+    if(d->flag != B_UNSET && d->flag != B_SET) { \
+        DPRINT("Invalid "#name" value: %d", d->flag); \
+        return -1; \
+    }
+
 int darm_string2(const darm_t *d, darm_string_t *str)
 {
     const uint8_t *fmt = d->format; uint32_t value; darm_reg_t reg;
@@ -365,11 +371,12 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             break;
 
         case STR_S:
-            if(d->S == B_INVLD) {
-                DPRINT("S flag has not been set");
+            if(d->S != B_UNSET && d->S != B_SET && d->S != B_IT) {
+                DPRINT("Invalid update value: %d\n", d->S);
                 return -1;
             }
-            if(d->S == B_SET) {
+
+            if(d->S != B_UNSET) {
                 *out++ = 's';
             }
             break;
@@ -492,10 +499,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             break;
 
         case STR_EXCL:
-            if(d->W != B_SET && d->W != B_UNSET) {
-                DPRINT("W flag has not been set");
-                return -1;
-            }
+            CHECK_FLAG(W, "write-back");
 
             if(d->W == B_SET) {
                 *out++ = '!';
@@ -512,10 +516,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             break;
 
         case STR_ENDIAN:
-            if(d->E > 1) {
-                DPRINT("Invalid Endian value: %d", d->E);
-                return -1;
-            }
+            CHECK_FLAG(E, "endian");
             APPEND(out, d->E ? "be" : "le");
             break;
 
@@ -528,6 +529,8 @@ int darm_string2(const darm_t *d, darm_string_t *str)
 
         // [Rn, #+/-imm]
         case STR_MEM2:
+            CHECK_FLAG(U, "add");
+
             *out++ = '[';
             APPEND_REGISTER(d->Rn);
             if(d->imm != 0) {
@@ -544,6 +547,10 @@ int darm_string2(const darm_t *d, darm_string_t *str)
         // [Rn, #+/-imm]{!}
         // [Rn], #+/-imm
         case STR_MEM2EX:
+            CHECK_FLAG(P, "index");
+            CHECK_FLAG(U, "add");
+            CHECK_FLAG(W, "write-back");
+
             *out++ = '[';
             APPEND_REGISTER(d->Rn);
             if(d->P == B_SET) {
@@ -570,6 +577,8 @@ int darm_string2(const darm_t *d, darm_string_t *str)
 
         // [Rn, +/-Rm]
         case STR_MEM3:
+            CHECK_FLAG(U, "add");
+
             *out++ = '[';
             APPEND_REGISTER(d->Rn);
             *out++ = ',', *out++ = ' ';
@@ -583,6 +592,10 @@ int darm_string2(const darm_t *d, darm_string_t *str)
         // [Rn, +/-Rm]{!}
         // [Rn], +/-Rm
         case STR_MEM3EX:
+            CHECK_FLAG(P, "index");
+            CHECK_FLAG(U, "add");
+            CHECK_FLAG(W, "write-back");
+
             *out++ = '[';
             APPEND_REGISTER(d->Rn);
             if(d->P == B_SET) {
@@ -607,6 +620,8 @@ int darm_string2(const darm_t *d, darm_string_t *str)
 
         // [Rn, +/-Rm, lsl #13]
         case STR_MEM4:
+            CHECK_FLAG(U, "add");
+
             *out++ = '[';
             APPEND_REGISTER(d->Rn);
             *out++ = ',', *out++ = ' ';
