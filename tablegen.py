@@ -78,11 +78,13 @@ class InstructionFormat(object):
             '[<Rn>+/-#imm]{!}': ['STR_MEM2EX'],
             '[<Rn>+/-<Rm>]': ['STR_MEM3'],
             '[<Rn>+/-<Rm>]{!}': ['STR_MEM3EX', 'STR_EXCL'],
+            '[<Rn>+/-<Rm><shift>]': ['STR_MEM4'],
             '[<Rn>+/-<Rm><shift>]{!}': ['STR_MEM4', 'STR_EXCL'],
             '#+/-<imm8>': ['STR_IMM2'],
             '#+/-<imm12>': ['STR_IMM2'],
             '+/-<Rm>': ['STR_SIGNRM'],
             '#<sat_imm>': ['STR_INT', 'O(sat_imm)'],
+            '<rotation>': ['STR_rotate'],
         }
 
         t.update(dict((_, ['STR_IMM']) for _ in imms))

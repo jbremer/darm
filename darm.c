@@ -234,6 +234,11 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
         case SM_RtReglist:
             d->register_list = 1 << d->Rt;
             break;
+
+        case SM_Assign:
+            *(uint32_t *)((char *) d + sm[off]) = sm[off+1];
+            off += 2;
+            break;
         }
     }
     return 0;
@@ -610,26 +615,35 @@ int darm_string2(const darm_t *d, darm_string_t *str)
                 *out++ = '-';
             }
             APPEND_REGISTER(d->Rm);
-            *out++ = ',', *out++ = ' ';
 
-            APPEND(out, g_darm_shifts[d->shift_type]);
-            *out++ = ' ';
+            if(d->shift_type != S_LSL || d->imm != 0) {
+                *out++ = ',', *out++ = ' ';
 
-            if(d->shift_type == S_LSR || d->shift_type == S_ASR) {
-                value = d->imm == 32 ? 0 : d->imm;
+                APPEND(out, g_darm_shifts[d->shift_type]);
+                *out++ = ' ';
+
+                if(d->shift_type == S_LSR || d->shift_type == S_ASR) {
+                    value = d->imm == 32 ? 0 : d->imm;
+                }
+                else {
+                    value = d->imm;
+                }
+
+                *out++ = '#';
+                out += _append_imm(out, value);
             }
-            else {
-                value = d->imm;
-            }
-
-            *out++ = '#';
-            out += _append_imm(out, value);
 
             *out++ = ']';
             break;
 
         case STR_wide:
             *out++ = '.', *out++ = 'w';
+            break;
+
+        case STR_rotate:
+            if(d->rotate == 0) break;
+            APPEND(out, "ror #");
+            out += _append_imm(out, d->rotate << 3);
             break;
         }
     }
