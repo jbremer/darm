@@ -124,6 +124,7 @@ imm6_12 = ScatteredImmediate(6, 'imm6', 12)
 imm7 = Immediate(7, 'imm7')
 imm8 = Immediate(8, 'imm8')
 imm8_1 = ScatteredImmediate(8, 'imm8', 1)
+imm8_2 = ScatteredImmediate(8, 'imm8', 2)
 imm10_2 = ScatteredImmediate(10, 'imm10', 2)
 imm10_12 = ScatteredImmediate(10, 'imm10', 12)
 imm11 = Immediate(11, 'imm11')
@@ -155,7 +156,7 @@ _table = [
     Instruction('ADD<c> <Rdm>, SP, <Rdm>', (0, 1, 0, 0, 0, 1, 0, 0, Rdm1_3, 1, 1, 0, 1, Rdm3)),
     # Instruction('ADD<c> SP, <Rm>', (0, 1, 0, 0, 0, 1, 0, 0, 1, Rm, 1, 0, 1)),
     # Instruction('ADD{S}<c>.W <Rd>, SP, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, S, 1, 1, 0, 1, (0), imm3, Rd, imm2, typ, Rm)),
-    Instruction('ADR<c> <Rd3>, <label>', (1, 0, 1, 0, 0, Rd3, imm8)),
+    Instruction('ADR<c> <Rd3>, <label>', (1, 0, 1, 0, 0, Rd3, imm8_2)),
     Instruction('ADR<c>.W <Rd>, <label>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, imm3_8, Rd, imm8)),
     Instruction('ADR<c>.W <Rd>, <label>', (1, 1, 1, 1, 0, imm1_11, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, imm3_8, Rd, imm8)),
     Instruction('AND{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 0, 0, S, Rn, 0, imm3_8, Rd, imm8), macro=ThumbExpandImm),

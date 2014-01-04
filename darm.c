@@ -120,6 +120,7 @@ static inline uint32_t _extract_field(uint32_t insn,
 
 static inline void _darm_init(darm_t *d, uint32_t insn)
 {
+    d->cond = C_AL;
     d->insn = insn;
     d->imm = 0;
     d->shift_type = 0;

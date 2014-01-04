@@ -136,7 +136,7 @@ typedef struct _darm_t {
 } darm_t;
 
 typedef struct _darm_string_t {
-    // Full mnemonic, including possible S flag, and condition.
+    // Full mnemonic, including possible S flag, condition, and wide postfix.
     char mnemonic[12];
 
     // Each operand.
