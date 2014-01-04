@@ -56,16 +56,26 @@ class InstructionFormat(object):
 
         t = {
             '<registers>': ['STR_REGLIST'],
-            '<type> <Rs>': ['STR_SHIFT'],
+            '<type> <Rs>': ['STR_SHIFT2'],
             '#<option>': ['STR_OPTION'],
             '#<shift>': ['STR_SHIFT'],
             '<label>': ['STR_LABEL'],
             'SP': ['STR_REG_CONST', 'SP'],
             '#<lsb>': ['STR_INT', 'O(lsb)'],
             '#<width>': ['STR_INT', 'O(width)'],
+            '<endian_specifier>': ['STR_ENDIAN'],
             '<Rn>{!}': ['STR_REG', 'O(Rn)', 'STR_EXCL'],
             '<coproc>': ['STR_COPROC'],
             '<shift>': ['STR_SHIFT'],
+            '[<Rn>]': ['STR_MEM'],
+            '[<Rn>+/-#imm]': ['STR_MEM2'],
+            '[<Rn>+/-#imm]{!}': ['STR_MEM2EX'],
+            '[<Rn>+/-<Rm>]': ['STR_MEM3'],
+            '[<Rn>+/-<Rm>]{!}': ['STR_MEM3EX', 'STR_EXCL'],
+            '[<Rn>+/-<Rm><shift>]{!}': ['STR_MEM4', 'STR_EXCL'],
+            '#+/-<imm8>': ['STR_IMM2'],
+            '#+/-<imm12>': ['STR_IMM2'],
+            '+/-<Rm>': ['STR_SIGNRM'],
         }
 
         t.update(dict((_, ['STR_IMM']) for _ in imms))

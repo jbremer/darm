@@ -225,6 +225,10 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
         case SM_ThumbExpandImm:
             d->imm = _thumb_expand_imm(d->imm);
             break;
+
+        case SM_Rt2fromRt:
+            d->Rt2 = d->Rt + 1;
+            break;
         }
     }
     return 0;
@@ -336,7 +340,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
         case STR_RETN: case STR_S: case STR_cond: case STR_EXCL:
             break;
 
-        case STR_SHIFT:
+        case STR_SHIFT: case STR_SHIFT2:
             *out = 0, out = str->shift;
             break;
 
@@ -372,6 +376,14 @@ int darm_string2(const darm_t *d, darm_string_t *str)
         case STR_REG:
             reg = *(darm_reg_t *)((char *) d + *fmt++);
             APPEND_REGISTER(reg);
+            break;
+
+        case STR_SIGNRM:
+            if(d->U == B_UNSET) {
+                *out++ = '-';
+            }
+
+            APPEND_REGISTER(d->Rm);
             break;
 
         case STR_REG_CONST:
@@ -412,8 +424,22 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             out += _append_imm(out, value);
             break;
 
+        case STR_SHIFT2:
+            APPEND(out, g_darm_shifts[d->shift_type]);
+            *out++ = ' ';
+            APPEND_REGISTER(d->Rs);
+            break;
+
         case STR_IMM:
             *out++ = '#';
+            out += _append_imm(out, d->imm);
+            break;
+
+        case STR_IMM2:
+            *out++ = '#';
+            if(d->U == B_UNSET) {
+                *out++ = '-';
+            }
             out += _append_imm(out, d->imm);
             break;
 
@@ -434,6 +460,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             }
 
             if(g_darm_option[d->option] == NULL) {
+                *out++ = '#';
                 out += _append_imm(out, d->option);
             }
             else {
@@ -454,7 +481,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             break;
 
         case STR_EXCL:
-            if(d->W == B_INVLD) {
+            if(d->W != B_SET && d->W != B_UNSET) {
                 DPRINT("W flag has not been set");
                 return -1;
             }
@@ -471,6 +498,128 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             }
 
             APPEND(out, g_darm_coproc[d->coproc]);
+            break;
+
+        case STR_ENDIAN:
+            if(d->E > 1) {
+                DPRINT("Invalid Endian value: %d", d->E);
+                return -1;
+            }
+            APPEND(out, d->E ? "be" : "le");
+            break;
+
+        // [Rn]
+        case STR_MEM:
+            *out++ = '[';
+            APPEND_REGISTER(d->Rn);
+            *out++ = ']';
+            break;
+
+        // [Rn, #+/-imm]
+        case STR_MEM2:
+            *out++ = '[';
+            APPEND_REGISTER(d->Rn);
+            if(d->imm != 0) {
+                *out++ = ',', *out++ = ' ';
+                if(d->U == B_UNSET) {
+                    *out++ = '-';
+                }
+                *out++ = '#';
+                out += _append_imm(out, d->imm);
+            }
+            *out++ = ']';
+            break;
+
+        // [Rn, #+/-imm]{!}
+        // [Rn], #+/-imm
+        case STR_MEM2EX:
+            *out++ = '[';
+            APPEND_REGISTER(d->Rn);
+            if(d->P == B_SET) {
+                if(d->imm != 0) {
+                    *out++ = ',', *out++ = ' ', *out++ = '#';
+                    if(d->U == B_UNSET) {
+                        *out++ = '-';
+                    }
+                    out += _append_imm(out, d->imm);
+                }
+                *out++ = ']';
+                if(d->W == B_SET) {
+                    *out++ = '!';
+                }
+            }
+            else {
+                APPEND(out, "], #");
+                if(d->U == B_UNSET) {
+                    *out++ = '-';
+                }
+                out += _append_imm(out, d->imm);
+            }
+            break;
+
+        // [Rn, +/-Rm]
+        case STR_MEM3:
+            *out++ = '[';
+            APPEND_REGISTER(d->Rn);
+            *out++ = ',', *out++ = ' ';
+            if(d->U == B_UNSET) {
+                *out++ = '-';
+            }
+            APPEND_REGISTER(d->Rm);
+            *out++ = ']';
+            break;
+
+        // [Rn, +/-Rm]{!}
+        // [Rn], +/-Rm
+        case STR_MEM3EX:
+            *out++ = '[';
+            APPEND_REGISTER(d->Rn);
+            if(d->P == B_SET) {
+                *out++ = ',', *out++ = ' ';
+                if(d->U == B_UNSET) {
+                    *out++ = '-';
+                }
+                APPEND_REGISTER(d->Rm);
+                *out++ = ']';
+                if(d->W == B_SET) {
+                    *out++ = '!';
+                }
+            }
+            else {
+                *out++ = ']', *out++ = ' ';
+                if(d->U == B_UNSET) {
+                    *out++ = '-';
+                }
+                APPEND_REGISTER(d->Rm);
+            }
+            break;
+
+        // [Rn, +/-Rm, lsl #13]
+        case STR_MEM4:
+            *out++ = '[';
+            APPEND_REGISTER(d->Rn);
+            *out++ = ',', *out++ = ' ';
+
+            if(d->U == B_UNSET) {
+                *out++ = '-';
+            }
+            APPEND_REGISTER(d->Rm);
+            *out++ = ',', *out++ = ' ';
+
+            APPEND(out, g_darm_shifts[d->shift_type]);
+            *out++ = ' ';
+
+            if(d->shift_type == S_LSR || d->shift_type == S_ASR) {
+                value = d->imm == 32 ? 0 : d->imm;
+            }
+            else {
+                value = d->imm;
+            }
+
+            *out++ = '#';
+            out += _append_imm(out, value);
+
+            *out++ = ']';
             break;
         }
     }
