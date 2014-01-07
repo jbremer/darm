@@ -30,6 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 from tablegen import Instruction, Macro, Table, Node, ScatteredField
 from tablegen import Register, CoprocessorRegister, FloatingPointRegister
 from tablegen import Field, NopField, Immediate, ScatteredImmediate, FieldPlus
+from tablegen import AssignMacro
 
 
 class ARMv7Table(Table):
@@ -119,7 +120,7 @@ ARMExpandImm = Macro('ARMExpandImm')
 NegateImm = Macro('NEG')
 SignExtend = Macro('SIGN')
 AssignRt2fromRt = Macro('Rt2fromRt')
-Assign = Macro('Assign')
+Assign = AssignMacro('Assign')
 RtReglist = Macro('RtReglist')
 
 _table = [
@@ -215,8 +216,8 @@ _table = [
     Instruction('MOVW<c> <Rd>,#<imm16>', (cond, 0, 0, 1, 1, 0, 0, 0, 0, imm4_12, Rd, imm12)),
     Instruction('MOV{S}<c> <Rd>,<Rm>', (cond, 0, 0, 0, 1, 1, 0, 1, S, (0), (0), (0), (0), Rd, 0, 0, 0, 0, 0, 0, 0, 0, Rm)),
     Instruction('MOVT<c> <Rd>,#<imm16>', (cond, 0, 0, 1, 1, 0, 1, 0, 0, imm4_12, Rd, imm12)),
-    Instruction('MRC<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', (cond, 1, 1, 1, 0, opc1_3, 1, CRn, Rt, coproc, opc2, 1, CRm)),
-    Instruction('MRC2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>{,<opc2>}', (1, 1, 1, 1, 1, 1, 1, 0, opc1_3, 1, CRn, Rt, coproc, opc2, 1, CRm)),
+    Instruction('MRC<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>,<opc2>', (cond, 1, 1, 1, 0, opc1_3, 1, CRn, Rt, coproc, opc2, 1, CRm)),
+    Instruction('MRC2<c> <coproc>,<opc1>,<Rt>,<CRn>,<CRm>,<opc2>', (1, 1, 1, 1, 1, 1, 1, 0, opc1_3, 1, CRn, Rt, coproc, opc2, 1, CRm)),
     Instruction('MRRC<c> <coproc>,<opc>,<Rt>,<Rt2>,<CRm>', (cond, 1, 1, 0, 0, 0, 1, 0, 1, Rt2, Rt, coproc, opc1, CRm)),
     Instruction('MRS<c> <Rd>,<spec_reg>', (cond, 0, 0, 0, 1, 0, 0, 0, 0, (1), (1), (1), (1), Rd, (0), (0), (0), (0), 0, 0, 0, 0, (0), (0), (0), (0))),
     Instruction('MRRC2<c> <coproc>,<opc>,<Rt>,<Rt2>,<CRm>', (1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, Rt2, Rt, coproc, opc1, CRm)),
@@ -231,7 +232,7 @@ _table = [
     Instruction('ORR{S}<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, imm5, typ, 0, Rm)),
     Instruction('ORR{S}<c> <Rd>,<Rn>,<Rm>,<type> <Rs>', (cond, 0, 0, 0, 1, 1, 0, 0, S, Rn, Rd, Rs, 0, typ, 1, Rm)),
     Instruction('PKHBT<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 0, 0, 1, Rm)),
-    Instruction('PKHTB<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 1, 0, 1, Rm), macro=Assign('O(shift_type)', 'S_ASR')),
+    Instruction('PKHTB<c> <Rd>,<Rn>,<Rm>,<shift>', (cond, 0, 1, 1, 0, 1, 0, 0, 0, Rn, Rd, imm5, 1, 0, 1, Rm), macro=Assign(shift_type='S_ASR')),
     Instruction('PLD [<Rn>+/-#imm]', (1, 1, 1, 1, 0, 1, 0, 1, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm12)),
     Instruction('PLDW [<Rn>+/-#imm]', (1, 1, 1, 1, 0, 1, 0, 1, U, 0, 0, 1, Rn, (1), (1), (1), (1), imm12)),
     Instruction('PLD [<Rn>+/-<Rm><shift>]', (1, 1, 1, 1, 0, 1, 1, 1, U, 1, 0, 1, Rn, (1), (1), (1), (1), imm5, typ, 0, Rm)),

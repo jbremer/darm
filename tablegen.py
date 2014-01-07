@@ -70,6 +70,7 @@ class InstructionFormat(object):
             '#<lsb>': ['STR_INT', 'O(lsb)'],
             '#<width>': ['STR_INT', 'O(width)'],
             '<endian_specifier>': ['STR_ENDIAN'],
+            '<Rn>!': ['STR_REG', 'O(Rn)', 'STR_EXCL'],
             '<Rn>{!}': ['STR_REG', 'O(Rn)', 'STR_EXCL'],
             '<coproc>': ['STR_COPROC'],
             '<shift>': ['STR_SHIFT'],
@@ -85,6 +86,8 @@ class InstructionFormat(object):
             '+/-<Rm>': ['STR_SIGNRM'],
             '#<sat_imm>': ['STR_INT', 'O(sat_imm)'],
             '<rotation>': ['STR_rotate'],
+            '<opc1>': ['STR_INT', 'O(opc1)'],
+            '<opc2>': ['STR_INT', 'O(opc2)'],
         }
 
         t.update(dict((_, ['STR_IMM']) for _ in imms))
@@ -107,7 +110,7 @@ class Instruction(object):
         self.fmt = InstructionFormat(fmt)
         self.bits = bits
 
-        # Optionally a macro can be assigned.
+        # Optionally one or more macro(s) can be assigned.
         self.macros = [macro] if macro else macros[:]
 
         self.name = re.split(r'\W', fmt)[0].lower()
@@ -319,6 +322,25 @@ class Macro(object):
 
     def create(self, sm, lut, fmt, bitsize):
         return sm.append('SM_' + self.name, *self.args)
+
+
+class AssignMacro(Macro):
+    def __init__(self, name, **kwargs):
+        Macro.__init__(self, name)
+        self.kwargs = kwargs
+
+    def __call__(self, **kwargs):
+        return AssignMacro(self.name, **kwargs)
+
+    def __repr__(self):
+        return '<AssignMacro %s, %r>' % (self.name, self.kwargs)
+
+    def create(self, sm, lut, fmt, bitsize):
+        ret = sm.offset()
+        lut = {False: 'B_UNSET', True: 'B_SET'}
+        for k, v in self.kwargs.items():
+            sm.append('SM_' + self.name, 'O(%s)' % k, lut.get(v, v))
+        return ret
 
 
 class Node(object):

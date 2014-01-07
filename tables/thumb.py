@@ -28,7 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 from tablegen import Instruction, Table, Node, Immediate, ScatteredField
-from tablegen import ScatteredImmediate, Macro
+from tablegen import ScatteredImmediate, Macro, AssignMacro
 from tablegen import DoubleRegister, Register, ScatteredRegister, FieldPlus
 from tablegen import DoubleScatteredRegister, Field, BranchNotXorImmediate
 
@@ -96,6 +96,7 @@ msb = Field(5, 'msb')
 option = Field(4, 'option')
 register_list = Field(16, 'register_list')
 register_list8 = Field(8, 'register_list')
+register_list13 = Field(13, 'register_list')
 register_list1_14 = ScatteredField(1, 'register_list', 14)
 register_list1_15 = ScatteredField(1, 'register_list', 15)
 widthm1 = FieldPlus(5, 'width', 1)
@@ -121,6 +122,7 @@ imm3_8 = ScatteredImmediate(3, 'imm3', 8)
 imm4_12 = ScatteredImmediate(4, 'imm4', 12)
 imm5 = Immediate(5, 'imm5')
 imm5_1 = ScatteredImmediate(5, 'imm5', 1)
+imm5_2 = ScatteredImmediate(5, 'imm5', 2)
 imm6_12 = ScatteredImmediate(6, 'imm6', 12)
 imm7 = Immediate(7, 'imm7')
 imm7_2 = ScatteredImmediate(7, 'imm7', 2)
@@ -140,8 +142,8 @@ rotate = Field(2, 'rotate')
 ThumbExpandImm = Macro('ThumbExpandImm')
 SignExtend = Macro('SIGN')
 RtReglist = Macro('RtReglist')
-Assign = Macro('Assign')
-AssignS_IT = Assign('O(S)', 'B_IT')
+Assign = AssignMacro('Assign')
+AssignS_IT = Assign(S='B_IT')
 
 _table = [
     Instruction('ADC{S}<c> <Rd>, <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 1, 0, 1, 0, S, Rn, 0, imm3_8, Rd, imm8), macro=ThumbExpandImm),
@@ -282,7 +284,7 @@ _table = [
     Instruction('ORR{S}<c> <Rdn3>, <Rm3>', (0, 1, 0, 0, 0, 0, 1, 1, 0, 0, Rm3, Rdn3), macro=AssignS_IT),
     Instruction('ORR{S}<c>.W <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, S, Rn, (0), imm3_2, Rd, imm2, typ, Rm)),
     Instruction('PKHBT<c> <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 0, 0, Rm)),
-    Instruction('PKHTB<c> <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 1, 0, Rm), macro=Assign('O(shift_type)', 'S_ASR')),
+    Instruction('PKHTB<c> <Rd>, <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, Rn, (0), imm3_2, Rd, imm2, 1, 0, Rm), macro=Assign(shift_type='S_ASR')),
     Instruction('PLD<c> [<Rn>, #<imm12>]', (1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, Rn, 1, 1, 1, 1, imm12)),
     Instruction('PLDW<c> [<Rn>, #<imm12>]', (1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, Rn, 1, 1, 1, 1, imm12)),
     Instruction('PLD<c> [<Rn>, #-<imm8>]', (1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, Rn, 1, 1, 1, 1, 1, 1, 0, 0, imm8)),
@@ -383,9 +385,9 @@ _table = [
     Instruction('SSAX<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('SSUB16<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
     Instruction('SSUB8<c> <Rd>, <Rn>, <Rm>', (1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, Rn, 1, 1, 1, 1, Rd, 0, 0, 0, 0, Rm)),
-    Instruction('STM<c> <Rn3>!, <registers>', (1, 1, 0, 0, 0, Rn3, register_list8)),
-    Instruction('STM<c>.W <Rn>{!}, <registers>', (1, 1, 1, 0, 1, 0, 0, 0, 1, 0, W, 0, Rn, register_list)),
-    Instruction('STMDB<c> <Rn>{!}, <registers>', (1, 1, 1, 0, 1, 0, 0, 1, 0, 0, W, 0, Rn, register_list)),
+    Instruction('STM<c> <Rn>!, <registers>', (1, 1, 0, 0, 0, Rn3, register_list8), macro=Assign(W=True)),
+    Instruction('STM<c>.W <Rn>{!}, <registers>', (1, 1, 1, 0, 1, 0, 0, 0, 1, 0, W, 0, Rn, (0), register_list1_14, (0), register_list13)),
+    Instruction('STMDB<c> <Rn>{!}, <registers>', (1, 1, 1, 0, 1, 0, 0, 1, 0, 0, W, 0, Rn, (0), register_list1_14, (0), register_list13)),
     Instruction('STR<c> <Rt3>, [<Rn3>{, #<imm>}]', (0, 1, 1, 0, 0, imm5, Rn3, Rt3)),
     Instruction('STR<c> <Rt3>, [SP, #<imm>]', (1, 0, 0, 1, 0, Rt3, imm8)),
     Instruction('STR<c>.W <Rt>, [<Rn>, #<imm12>]', (1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, Rn, Rt, imm12)),
@@ -429,8 +431,8 @@ _table = [
     Instruction('SXTB16<c> <Rd>, <Rm>, <rotation>', (1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm)),
     Instruction('SXTH<c> <Rd3>, <Rm3>', (1, 0, 1, 1, 0, 0, 1, 0, 0, 0, Rm3, Rd3)),
     Instruction('SXTH<c>.W <Rd>, <Rm>, <rotation>', (1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, Rd, 1, (0), rotate, Rm)),
-    Instruction('TBB<c> [<Rn>+/-<Rm><shift>]', (1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, Rn, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, Rm), macro=Assign('O(U)', 1)),
-    Instruction('TBH<c> [<Rn>+/-<Rm><shift>]', (1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, Rn, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 1, Rm), macros=[Assign('O(U)', 1), Assign('O(shift_type)', 'S_LSL'), Assign('O(imm)', 1)]),
+    Instruction('TBB<c> [<Rn>+/-<Rm><shift>]', (1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, Rn, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 0, Rm), macro=Assign(U=True)),
+    Instruction('TBH<c> [<Rn>+/-<Rm><shift>]', (1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, Rn, (1), (1), (1), (1), (0), (0), (0), (0), 0, 0, 0, 1, Rm), macro=Assign(U=True, shift_type='S_LSL', imm=1)),
     Instruction('TEQ<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 1, 0, 0, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8), macro=ThumbExpandImm),
     Instruction('TEQ<c> <Rn>, <Rm>, <shift>', (1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, Rn, (0), imm3_2, 1, 1, 1, 1, imm2, typ, Rm)),
     Instruction('TST<c> <Rn>, #<const>', (1, 1, 1, 1, 0, imm1_11, 0, 0, 0, 0, 0, 1, Rn, 0, imm3_8, 1, 1, 1, 1, imm8), macro=ThumbExpandImm),
