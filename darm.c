@@ -270,7 +270,10 @@ int darm_thumb(darm_t *d, uint16_t w, uint16_t w2)
     } while (0);
 
 #define APPEND_REGISTER(reg) \
-    if(reg < R_BASE || reg >= R_REGCNT) return -1; \
+    if(reg < R_BASE || reg >= R_REGCNT) { \
+        DPRINT("Invalid register value: %d", reg); \
+        return -1; \
+    } \
     APPEND(out, g_darm_registers[reg]);
 
 static int _utoa(unsigned int value, char *out, int base)
@@ -340,6 +343,12 @@ int darm_reglist(uint16_t reglist, char *out)
     return out - base;
 }
 
+#define CHECK_RANGE(field, name, max) \
+    if(d->field >= max) { \
+        DPRINT("Invalid "#name" value: %d", d->field); \
+        return -1; \
+    }
+
 #define CHECK_FLAG(flag, name) \
     if(d->flag != B_UNSET && d->flag != B_SET) { \
         DPRINT("Invalid "#name" value: %d", d->flag); \
@@ -390,10 +399,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             break;
 
         case STR_cond:
-            if(d->cond < C_BASE || d->cond > C_AL) {
-                DPRINT("Invalid conditional state: %d", d->cond);
-                return -1;
-            }
+            CHECK_RANGE(cond, "conditional state", C_AL+1);
             if(d->cond != C_AL) {
                 APPEND(out, g_darm_conditionals[d->cond]);
             }
@@ -418,6 +424,7 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             break;
 
         case STR_SHIFT:
+            CHECK_RANGE(shift_type, "shift type", S_SHFTTYPCNT);
             if(d->shift_type == S_LSL && d->imm == 0) break;
 
             if(d->shift_type == S_ROR && d->imm == 0) {

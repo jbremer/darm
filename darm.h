@@ -69,7 +69,7 @@ typedef enum _darm_cond_t {
 
     C_HS = C_CS, C_LO = C_CC, C_UNCOND = 15,
 
-    C_CONDCNT, C_INVLD = -1, C_BASE = C_EQ,
+    C_CONDCNT, C_BASE = C_EQ,
 } darm_cond_t;
 
 typedef enum _darm_shift_type_t {
