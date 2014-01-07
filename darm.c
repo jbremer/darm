@@ -202,10 +202,18 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             // http://graphics.stanford.edu/~seander/bithacks.html
             value = sizeof(uint32_t) * 8 - sm[off++];
             d->imm = (int32_t)(d->imm << value) >> value;
-            break;
 
-        case SM_NEG:
-            d->imm = -d->imm;
+            // Given sign extension is only requested for branch instructions,
+            // and their add (U) flag depends on the sign of this immediate,
+            // we make sure the immediate is a positive integer, and the add
+            // flag is set to add/sub accordingly.
+            if((int32_t) d->imm > 0) {
+                d->U = B_SET;
+            }
+            else {
+                d->U = B_UNSET;
+                d->imm = -d->imm;
+            }
             break;
 
         case SM_BNXOR:
@@ -486,18 +494,6 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             }
             break;
 
-        case STR_LABEL:
-            APPEND(out, "pc");
-            if((int32_t) d->imm < 0) {
-                *out++ = '-';
-                out += _append_imm(out, -d->imm);
-            }
-            else {
-                *out++ = '+';
-                out += _append_imm(out, d->imm);
-            }
-            break;
-
         case STR_EXCL:
             CHECK_FLAG(W, "write-back");
 
@@ -534,11 +530,10 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             *out++ = '[';
             APPEND_REGISTER(d->Rn);
             if(d->imm != 0) {
-                *out++ = ',', *out++ = ' ';
+                *out++ = ',', *out++ = ' ', *out++ = '#';
                 if(d->U == B_UNSET) {
                     *out++ = '-';
                 }
-                *out++ = '#';
                 out += _append_imm(out, d->imm);
             }
             *out++ = ']';

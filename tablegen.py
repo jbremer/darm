@@ -65,7 +65,7 @@ class InstructionFormat(object):
             '<type> <Rs>': ['STR_SHIFT2'],
             '#<option>': ['STR_OPTION'],
             '#<shift>': ['STR_SHIFT'],
-            '<label>': ['STR_LABEL'],
+            '<label>': ['STR_MEM2'],
             'SP': ['STR_REG_CONST', 'SP'],
             '#<lsb>': ['STR_INT', 'O(lsb)'],
             '#<width>': ['STR_INT', 'O(width)'],
