@@ -55,7 +55,7 @@ class InstructionFormat(object):
                '<RdLo>', '<Ra>', '<CRd>', '<CRn>', '<CRm>'
 
         regs2 = '<Rd3>', '<Rn3>', '<Rt3>', '<Rdm>', '<Rdm3>', '<Rn3>', \
-                '<Rdn>', '<Rdn3>', '<Rm3>'
+                '<Rdn>', '<Rdn3>', '<Rm3>', '<Rn=SP>', '<Rd=SP>', '<Rdn=SP>'
 
         imms = '#<const>', '#<imm>', '#<imm3>', '#<imm4>', '#<imm5>', \
                '#<imm8>', '#<imm12>', '#<imm16>', '#<imm24>', '#0'
@@ -66,7 +66,6 @@ class InstructionFormat(object):
             '#<option>': ['STR_OPTION'],
             '#<shift>': ['STR_SHIFT'],
             '<label>': ['STR_MEM2'],
-            'SP': ['STR_REG_CONST', 'SP'],
             '#<lsb>': ['STR_INT', 'O(lsb)'],
             '#<width>': ['STR_INT', 'O(width)'],
             '<endian_specifier>': ['STR_ENDIAN'],

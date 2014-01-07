@@ -418,11 +418,6 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             APPEND_REGISTER(d->Rm);
             break;
 
-        case STR_REG_CONST:
-            reg = *fmt++;
-            APPEND_REGISTER(reg);
-            break;
-
         case STR_SHIFT:
             CHECK_RANGE(shift_type, "shift type", S_SHFTTYPCNT);
             if(d->shift_type == S_LSL && d->imm == 0) break;
