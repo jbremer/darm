@@ -431,7 +431,7 @@ index_align = Field(4, 'index_align')
 a = Field(1, 'a')
 op1 = Field(1, 'op1')
 op2 = Field(2, 'op2')
-type_ = Field(4, 'type_')
+simd_type = Field(4, 'simd_type')
 len_ = Field(2, 'len')
 opc1 = Field(2, 'opc1')
 opc2 = Field(3, 'opc2')
@@ -498,16 +498,16 @@ _table2 = [
     Instruction('VFNMA<c>.<f> <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 0, 1, Vn, Vd, 1, 0, 1, sz, N, 1, M, 0, Vm)),
     Instruction('VHADD.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 0, 0, N, Q, M, 0, Vm)),
     Instruction('VHSUB.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 1, 0, N, Q, M, 0, Vm)),
-    Instruction('VLD1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0010, 0b0110, 0b0111, 0b1010]),
+    Instruction('VLD1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0010, 0b0110, 0b0111, 0b1010]),
     Instruction('VLD1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 0, 0, index_align, Rm)),
     Instruction('VLD1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 0, 0, size, T, a, Rm)),
-    Instruction('VLD2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0011, 0b1000, 0b1001]),
+    Instruction('VLD2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0011, 0b1000, 0b1001]),
     Instruction('VLD2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 0, 1, index_align, Rm)),
     Instruction('VLD2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 0, 1, size, T, a, Rm)),
-    Instruction('VLD3.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0100, 0b0101]),
+    Instruction('VLD3.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0100, 0b0101]),
     Instruction('VLD3.<size> <list>,[<Rn>]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 1, 0, index_align, Rm)),
     Instruction('VLD3.<size> <list>,[<Rn>]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 1, 0, size, T, a, Rm)),
-    Instruction('VLD4.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0000, 0b0001]),
+    Instruction('VLD4.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 1, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0000, 0b0001]),
     Instruction('VLD4.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, size, 1, 1, index_align, Rm)),
     Instruction('VLD4.<size> <list>,[<Rn>{ :<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 1, 0, Rn, Vd, 1, 1, 1, 1, size, T, a, Rm)),
     Instruction('VLDM{mode}<c> <Rn>{!},<list>', (cond, 1, 1, 0, P, U, D, W, 1, Rn, Vd, 1, 0, 1, 1, imm8)),
@@ -621,13 +621,13 @@ _table2 = [
     Instruction('VSQRT<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 1, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm)),
     Instruction('VSRA.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 1, imm1_6, Q, M, 1, Vm)),
     Instruction('VSRI.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 0, imm1_6, Q, M, 1, Vm)),
-    Instruction('VST1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0010, 0b0110, 0b0111, 0b1010]),
+    Instruction('VST1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0010, 0b0110, 0b0111, 0b1010]),
     Instruction('VST1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 0, 0, index_align, Rm)),
-    Instruction('VST2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0011, 0b1000, 0b1001]),
+    Instruction('VST2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0011, 0b1000, 0b1001]),
     Instruction('VST2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 0, 1, index_align, Rm)),
-    Instruction('VST3.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0100, 0b0101]),
+    Instruction('VST3.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0100, 0b0101]),
     Instruction('VST3.<size> <list>,[<Rn>]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 1, 0, index_align, Rm)),
-    Instruction('VST4.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, type_, size, align, Rm), type_=[0b0000, 0b0001]),
+    Instruction('VST4.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0000, 0b0001]),
     Instruction('VST4.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 1, 1, index_align, Rm)),
     Instruction('VSTM{mode}<c> <Rn>{!},<list>', (cond, 1, 1, 0, P, U, D, W, 0, Rn, Vd, 1, 0, 1, 1, imm8)),
     Instruction('VSTM{mode}<c> <Rn>{!},<list>', (cond, 1, 1, 0, P, U, D, W, 0, Rn, Vd, 1, 0, 1, 0, imm8)),
