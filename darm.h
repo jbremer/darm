@@ -113,6 +113,10 @@ typedef struct _darm_t {
     darm_reg_t      RdLo;
     darm_reg_t      Rs;
 
+    darm_reg_t      Vd;
+    darm_reg_t      Vn;
+    darm_reg_t      Vm;
+
     uint32_t        imm;
 
     darm_shift_type_t shift_type;
@@ -128,8 +132,8 @@ typedef struct _darm_t {
     uint32_t        mask, rotate, sat_imm;
     uint32_t        msr_mask, it_mask, first_cond;
 
-    uint32_t        Vd, cmode, Q, size, align, index_align, T, a;
-    uint32_t        Vm, Vn, F, len, op1, sz, B, op2;
+    uint32_t        cmode, Q, size, align, index_align, T, a;
+    uint32_t        F, len, op1, sz, B, op2;
 
     // Internal format for generation of human-readable strings.
     const uint8_t   *format;
