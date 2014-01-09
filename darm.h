@@ -50,12 +50,16 @@ typedef enum _darm_reg_t {
     cr0, cr1, cr2, cr3, cr4, cr5, cr6, cr7, cr8,
     cr9, cr10, cr11, cr12, cr13, cr14, cr15,
 
-    d0, d1, d2, d3, d4, d5, d6, d8, d9, d10, d11, d12, d13, d14, d15, d16,
+    d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16,
     d17, d18, d19, d20, d21, d22, d23, d24, d25, d26, d27, d28, d29, d30, d31,
 
     R_REGCNT, R_INVLD = -1, R_BASE = r0, CR_BASE = cr0, FP_BASE = d0,
 
     FP = r11, IP = r12, SP = r13, LR = r14, PC = r15,
+
+    s0 = d0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15,
+    s16, s17, s18, s19, s20, s21, s22, s23, s24, s25, s26, s27, s28, s29, s30,
+    s31,
 
     q0  =  d0, q1  =  d2, q2  =  d4, q3  =  d6, q4  =  d8, q5  = d10,
     q6  = d12, q7  = d14, q8  = d16, q9  = d18, q10 = d20, q11 = d22,
@@ -133,7 +137,8 @@ typedef struct _darm_t {
     uint32_t        msr_mask, it_mask, first_cond;
 
     uint32_t        cmode, Q, size, align, index_align, T, a;
-    uint32_t        F, len, op1, sz, B, op2, simd_type;
+    uint32_t        F, len, op, sz, B, simd_type, long_dest;
+    uint64_t        simd_imm;
 
     // Internal format for generation of human-readable strings.
     const uint8_t   *format;
@@ -141,7 +146,7 @@ typedef struct _darm_t {
 
 typedef struct _darm_string_t {
     // Full mnemonic, including possible S flag, condition, and wide postfix.
-    char mnemonic[12];
+    char mnemonic[16];
 
     // Each operand.
     uint32_t argcnt;

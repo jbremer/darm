@@ -54,7 +54,14 @@ static const char *g_darm_registers[]  = {
     "d22", "d23", "d24", "d25", "d26", "d27", "d28", "d29", "d30", "d31",
 };
 
-static const char *g_darm_fpreg2[] = {
+static const char *g_darm_vfp_reg[] = {
+    "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
+    "s8", "s9", "s10", "s11", "s12", "s13", "s14", "s15",
+    "s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23",
+    "s24", "s25", "s26", "s27", "s28", "s29", "s30", "s31",
+};
+
+static const char *g_darm_simd_reg[] = {
     "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8",
     "q9", "q10", "q11", "q12", "q13", "q14", "q15",
 };
@@ -112,6 +119,89 @@ static inline uint32_t _thumb_expand_imm(uint32_t imm12)
     return _ror(0x80 | (imm12 & 0x7f), imm12 >> 7);
 }
 
+static inline uint64_t _simd_expand_imm(uint32_t op,
+    uint32_t cmode, uint32_t imm)
+{
+    uint32_t testimm = 0; uint64_t result = imm;
+    switch (cmode >> 1) {
+    case 0:
+        result |= result << 32;
+        break;
+
+    case 1:
+        testimm = 1;
+        result <<= 8;
+        result |= result << 32;
+        break;
+
+    case 2:
+        testimm = 1;
+        result <<= 16;
+        result |= result << 32;
+        break;
+
+    case 3:
+        testimm = 1;
+        result <<= 24;
+        result |= result << 32;
+        break;
+
+    case 4:
+        result |= result << 32;
+        result |= result << 16;
+        break;
+
+    case 5:
+        testimm = 1;
+        result <<= 8;
+        result |= result << 32;
+        result |= result << 16;
+        break;
+
+    case 6:
+        testimm = 1;
+        result <<= cmode & 1 ? 16 : 8;
+        result |= result << 32;
+        break;
+
+    case 7:
+        if((cmode & 1) == 0) {
+            if(op == 0) {
+                result |= result << 32;
+                result |= result << 16;
+                result |= result << 8;
+            }
+            else {
+                result  = (uint64_t)((imm >> 0) & 1 ? 0xff : 0) << 0;
+                result |= (uint64_t)((imm >> 1) & 1 ? 0xff : 0) << 8;
+                result |= (uint64_t)((imm >> 2) & 1 ? 0xff : 0) << 16;
+                result |= (uint64_t)((imm >> 3) & 1 ? 0xff : 0) << 24;
+                result |= (uint64_t)((imm >> 4) & 1 ? 0xff : 0) << 32;
+                result |= (uint64_t)((imm >> 5) & 1 ? 0xff : 0) << 40;
+                result |= (uint64_t)((imm >> 6) & 1 ? 0xff : 0) << 48;
+                result |= (uint64_t)((imm >> 7) & 1 ? 0xff : 0) << 56;
+            }
+        }
+        else {
+            if(op == 0) {
+                result = (imm & 0x3f) << 19;
+                result |= ((imm >> 6) & 1 ? 0x1f : 0x20) << 25;
+                result |= (imm & 0x80) << 24;
+                result |= result << 32;
+            }
+            else {
+                // TODO undefined
+            }
+        }
+        break;
+    }
+
+    if(testimm != 0 && imm == 0) {
+        // TODO unpredictable
+    }
+    return result;
+}
+
 static inline uint32_t _extract_field(uint32_t insn,
     uint32_t idx, uint32_t bits)
 {
@@ -124,6 +214,7 @@ static inline void _darm_init(darm_t *d, uint32_t insn)
     d->insn = insn;
     d->imm = 0;
     d->shift_type = 0;
+    d->long_dest = B_UNSET;
 }
 
 // Disassembles any instruction according to the state machine and lookup
@@ -235,6 +326,10 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             d->imm = _thumb_expand_imm(d->imm);
             break;
 
+        case SM_AdvSIMDExpandImm:
+            d->simd_imm = _simd_expand_imm(d->op, d->cmode, d->imm);
+            break;
+
         case SM_Rt2fromRt:
             d->Rt2 = d->Rt + 1;
             break;
@@ -276,9 +371,9 @@ int darm_thumb(darm_t *d, uint16_t w, uint16_t w2)
     } \
     APPEND(out, g_darm_registers[reg]);
 
-static int _utoa(unsigned int value, char *out, int base)
+static int _utoa(uint64_t value, char *out, int base)
 {
-    char buf[30]; unsigned int i, counter = 0;
+    char buf[65]; unsigned int i, counter = 0;
 
     if(value == 0) {
         buf[counter++] = '0';
@@ -370,8 +465,9 @@ int darm_string2(const darm_t *d, darm_string_t *str)
 
     while (next) {
         switch ((darm_string_opcode_t) *fmt) {
-        case STR_RETN: case STR_S: case STR_cond: case STR_wide:
-        case STR_EXCL:
+        case STR_RETN: case STR_S: case STR_cond: case STR_wide: case STR_dt:
+        case STR_EXCL: case STR_dt2: case STR_dt2u: case STR_dt3:
+        case STR_dt4: case STR_size:
             break;
 
         case STR_SHIFT: case STR_SHIFT2:
@@ -396,6 +492,67 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             if(d->S != B_UNSET) {
                 *out++ = 's';
             }
+            break;
+
+        case STR_dt:
+            CHECK_FLAG(U, "unsigned");
+            CHECK_RANGE(size, "size", 4);
+
+            *out++ = '.';
+            *out++ = d->U == B_SET ? 'u' : 's';
+            out += _append_imm(out, 8 << d->size);
+            break;
+
+        case STR_dt2:
+            CHECK_FLAG(F, "floating point");
+            CHECK_RANGE(size, "size", 4);
+
+            *out++ = '.';
+            *out++ = d->F == B_SET ? 'f' : 's';
+            out += _append_imm(out, 8 << d->size);
+            break;
+
+        case STR_dt2u:
+            CHECK_FLAG(F, "floating point");
+            CHECK_RANGE(size, "size", 4);
+
+            *out++ = '.';
+            *out++ = d->F == B_SET ? 'f' : 'u';
+            out += _append_imm(out, 8 << d->size);
+            break;
+
+        case STR_dt3:
+            CHECK_FLAG(op, "operation");
+            CHECK_RANGE(cmode, "cmode", 16);
+
+            *out++ = '.';
+            if(d->cmode < 14) {
+                *out++ = 'i';
+                out += _append_imm(out,
+                    d->cmode == 8 || d->cmode == 9 ? 16 : 32);
+            }
+            else if(d->cmode == 14) {
+                *out++ = 'i';
+                out += _append_imm(out, d->op == 0 ? 8 : 64);
+            }
+            else {
+                if(d->op == 0) {
+                    APPEND(out, "f32");
+                }
+                else {
+                    // TODO undefined
+                }
+            }
+            break;
+
+        case STR_dt4:
+            *out++ = '.', *out++ = 'i';
+            out += _append_imm(out, 8 << d->size);
+            break;
+
+        case STR_size:
+            *out++ = '.';
+            out += _append_imm(out, 8 << d->size);
             break;
 
         case STR_cond:
@@ -656,6 +813,52 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             if(d->rotate == 0) break;
             APPEND(out, "ror #");
             out += _append_imm(out, d->rotate << 3);
+            break;
+
+        case STR_Vd:
+            CHECK_FLAG(Q, "register size");
+            CHECK_FLAG(long_dest, "long destination register");
+
+            if(d->Q == B_SET || d->long_dest == B_SET) {
+                APPEND(out, g_darm_simd_reg[(d->Vd - FP_BASE) >> 1]);
+            }
+            else {
+                APPEND(out, g_darm_registers[d->Vd]);
+            }
+            break;
+
+        case STR_Vn: case STR_Vm:
+            CHECK_FLAG(Q, "register size");
+
+            value = fmt[-1] == STR_Vn ? d->Vn : d->Vm;
+
+            APPEND(out, d->Q == B_SET ?
+                g_darm_simd_reg[(value - FP_BASE) >> 1] :
+                g_darm_registers[value]);
+            break;
+
+        case STR_FPREG_S:
+            value = *(uint32_t *)((char *) d + *fmt++);
+            APPEND(out, g_darm_vfp_reg[value - FP_BASE]);
+            break;
+
+        case STR_FPREG_D:
+            value = *(uint32_t *)((char *) d + *fmt++);
+            APPEND(out, g_darm_registers[value]);
+            break;
+
+        case STR_FPREG_Q:
+            value = *(uint32_t *)((char *) d + *fmt++);
+            APPEND(out, g_darm_simd_reg[(value - FP_BASE) >> 1]);
+            break;
+
+        case STR_SIMDIMM:
+            *out++ = '#', *out++ = '0', *out++ = 'x';
+            out += _utoa(d->simd_imm, out, 16);
+            break;
+
+        case STR_FPSCR:
+            APPEND(out, "fpscr");
             break;
         }
     }

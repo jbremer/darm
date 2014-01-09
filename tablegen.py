@@ -27,6 +27,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 """
 
+import itertools
 import re
 
 
@@ -49,6 +50,17 @@ class InstructionFormat(object):
         if '.W' in fmt:
             self.sm.append('STR_wide')
 
+        dts = {'<dt>': 'dt',
+               '<dt2>': 'dt2', 'F32': 'dt2', 'F64': 'dt2',
+               '<dt2u>': 'dt2u',
+               '<dt3>': 'dt3',
+               '<dt4>': 'dt4',
+               '<size>': 'size', '.8': 'size'}
+
+        for k, v in dts.items():
+            if k in fmt:
+                self.sm.append('STR_' + v)
+
         args = fmt.split(' ', 1)[1].split(',') if ' ' in fmt else []
 
         regs = '<Rd>', '<Rn>', '<Rm>', '<Rt>', '<Rt2>', '<RdHi>', \
@@ -56,6 +68,8 @@ class InstructionFormat(object):
 
         regs2 = '<Rd3>', '<Rn3>', '<Rt3>', '<Rdm>', '<Rdm3>', '<Rn3>', \
                 '<Rdn>', '<Rdn3>', '<Rm3>', '<Rn=SP>', '<Rd=SP>', '<Rdn=SP>'
+
+        regs3 = ['<%s%s>' % _ for _ in itertools.product('SDQ', 'dnm')]
 
         imms = '#<const>', '#<imm>', '#<imm3>', '#<imm4>', '#<imm5>', \
                '#<imm8>', '#<imm12>', '#<imm16>', '#<imm24>', '#0'
@@ -87,11 +101,18 @@ class InstructionFormat(object):
             '<rotation>': ['STR_rotate'],
             '<opc1>': ['STR_INT', 'O(opc1)'],
             '<opc2>': ['STR_INT', 'O(opc2)'],
+            '<Vd>': ['STR_Vd'],
+            '<Vn>': ['STR_Vn'],
+            '<Vm>': ['STR_Vm'],
+            '#<simd_imm>': ['STR_SIMDIMM'],
+            'FPSCR': ['STR_FPSCR'],
         }
 
         t.update(dict((_, ['STR_IMM']) for _ in imms))
         t.update(dict((_, ['STR_REG', 'O(%s)' % _[1:-1]]) for _ in regs))
         t.update(dict((_, ['STR_REG', 'O(%s)' % _[1:3]]) for _ in regs2))
+        t.update(dict((_, ['STR_FPREG_%s' % _[1], 'O(V%s)' % _[2]])
+                      for _ in regs3))
 
         for arg in (_.strip() for _ in args):
             if arg in t:
@@ -123,6 +144,7 @@ class Instruction(object):
                 off += 1
             else:
                 self.field[bit.name] = idx, bit
+                self.field[off] = bit
                 off += bit.bitsize
 
         # Some instructions have bit patterns which are partially hardcoded.

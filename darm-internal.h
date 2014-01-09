@@ -75,14 +75,17 @@ typedef enum _darm_sm_opcode_t {
     // Extra information for generating a human-readable string.
     SM_STR,
 
-    SM_ARMExpandImm, SM_ThumbExpandImm, SM_Rt2fromRt, SM_RtReglist, SM_Assign,
+    SM_ARMExpandImm, SM_ThumbExpandImm, SM_AdvSIMDExpandImm,
+    SM_Rt2fromRt, SM_RtReglist, SM_Assign,
 } darm_sm_opcode_t;
 
 typedef enum _darm_string_opcode_t {
-    STR_RETN, STR_S, STR_cond, STR_REG, STR_SHIFT, STR_IMM,
-    STR_INT, STR_REGLIST, STR_OPTION, STR_EXCL, STR_COPROC,
+    STR_RETN, STR_S, STR_cond, STR_REG, STR_SHIFT, STR_IMM, STR_dt, STR_dt2,
+    STR_INT, STR_REGLIST, STR_OPTION, STR_EXCL, STR_COPROC, STR_dt3, STR_dt4,
     STR_SHIFT2, STR_ENDIAN, STR_MEM, STR_MEM2, STR_MEM3, STR_MEM4, STR_IMM2,
-    STR_SIGNRM, STR_MEM2EX, STR_MEM3EX, STR_wide, STR_rotate,
+    STR_SIGNRM, STR_MEM2EX, STR_MEM3EX, STR_wide, STR_rotate, STR_size,
+    STR_Vd, STR_Vn, STR_Vm, STR_FPREG_S, STR_FPREG_D, STR_FPREG_Q, STR_dt2u,
+    STR_SIMDIMM, STR_FPSCR,
 } darm_string_opcode_t;
 
 #endif
