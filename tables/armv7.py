@@ -428,7 +428,7 @@ U = Field(1, 'U')
 E = Field(1, 'E')
 
 size = Field(2, 'size')
-sz = Field(1, 'sz')
+sz = Field(1, 'sz', first=True)
 sf = Field(1, 'sf')
 sx = Field(1, 'sx')
 cmode = Field(4, 'cmode')

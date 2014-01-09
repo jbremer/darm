@@ -174,17 +174,26 @@ class Instruction(object):
         return '<Instruction %s, %r>' % (self.name, self.bits)
 
     def create(self, sm, lut, fmt, bitsize):
-        idx, ret, last = 0, sm.offset(), []
+        idx, ret, first, middle, last = 0, sm.offset(), [], [], []
         for bit in self.bits:
             if isinstance(bit, int):
                 idx += 1
                 continue
 
-            if bit.last:
+            if bit.first:
+                first.append((bit, idx))
+            elif bit.last:
                 last.append((bit, idx))
             else:
-                bit.create(idx, sm, lut, fmt, bitsize)
+                middle.append((bit, idx))
+
             idx += bit.bitsize
+
+        for bit, idx in first:
+            bit.create(idx, sm, lut, fmt, bitsize)
+
+        for bit, idx in middle:
+            bit.create(idx, sm, lut, fmt, bitsize)
 
         for bit, idx in last:
             bit.create(idx, sm, lut, fmt, bitsize)
@@ -204,9 +213,10 @@ class Instruction(object):
 
 
 class BitPattern(object):
-    def __init__(self, bitsize, name, last=False):
+    def __init__(self, bitsize, name, first=False, last=False):
         self.bitsize = bitsize
         self.name = name
+        self.first = first
         self.last = last
 
     def __repr__(self):
