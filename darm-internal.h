@@ -76,7 +76,7 @@ typedef enum _darm_sm_opcode_t {
     SM_STR,
 
     SM_ARMExpandImm, SM_ThumbExpandImm, SM_AdvSIMDExpandImm,
-    SM_Rt2fromRt, SM_RtReglist, SM_Assign,
+    SM_Rt2fromRt, SM_RtReglist, SM_Assign, SM_Imm7Process, SM_Imm7Process2,
 } darm_sm_opcode_t;
 
 typedef enum _darm_string_opcode_t {

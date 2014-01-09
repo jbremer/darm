@@ -342,6 +342,17 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             *(uint32_t *)((char *) d + sm[off]) = sm[off+1];
             off += 2;
             break;
+
+        case SM_Imm7Process:
+            d->size = 28 - __builtin_clz(d->imm);
+            d->imm ^= 8 << d->size;
+            break;
+
+        case SM_Imm7Process2:
+            d->size = 28 - __builtin_clz(d->imm);
+            static uint32_t lut[4] = {16, 32, 64, 64};
+            d->imm = lut[d->size] - (d->imm & 0x3f);
+            break;
         }
     }
     return 0;

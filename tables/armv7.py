@@ -96,10 +96,11 @@ coproc = Field(4, 'coproc')
 mask = Field(2, 'mask')
 
 imm1_1 = ScatteredImmediate(1, 'imm1', 1)
-imm1_4 = ScatteredImmediate(1, 'imm4', 4)
+imm1_4 = ScatteredImmediate(1, 'imm1', 4)
 imm1_6 = ScatteredImmediate(1, 'imm1', 1)
 imm1_7 = ScatteredImmediate(1, 'imm1', 7)
 imm3 = Immediate(3, 'imm3')
+imm3_3 = ScatteredImmediate(3, 'imm3_3', 3)
 imm3_4 = ScatteredImmediate(3, 'imm3', 4)
 imm4 = Immediate(4, 'imm4')
 imm4_4 = ScatteredImmediate(4, 'imm4', 4)
@@ -123,6 +124,9 @@ SignExtend = Macro('SIGN')
 AssignRt2fromRt = Macro('Rt2fromRt')
 Assign = AssignMacro('Assign')
 RtReglist = Macro('RtReglist')
+Imm2Extract = Macro('IMM2')
+Imm7Process = Macro('Imm7Process')
+Imm7Process2 = Macro('Imm7Process2')
 
 _table = [
     Instruction('ADC{S}<c> <Rd>,<Rn>,#<const>', (cond, 0, 0, 1, 0, 1, 0, 1, S, Rn, Rd, imm12), macro=ARMExpandImm),
@@ -449,10 +453,12 @@ _table2 = [
     Instruction('VABS<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 0, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm)),
     Instruction('VACGE.<dt2> <Vd>,<Vn>,<Vm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, 0, 0, Vn, Vd, 1, 1, 1, 0, N, Q, M, 1, Vm), macro=Assign(size=0b10, F=True)),
     Instruction('VACGT.<dt2> <Vd>,<Vn>,<Vm>', (1, 1, 1, 1, 0, 0, 1, 1, 0, D, 1, 0, Vn, Vd, 1, 1, 1, 0, N, Q, M, 1, Vm), macro=Assign(size=0b10, F=True)),
-    Instruction('VADD.<dt> <Qd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 0, Vm)),
-    Instruction('VADD.F32 <Vd>,<Vn>,<Vm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, sz, Vn, Vd, 1, 1, 0, 1, N, Q, M, 0, Vm), macro=Assign(F=True, size=0b10)),
+    Instruction('VADD.<dt4> <Vd>,<Vn>,<Vm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, size, Vn, Vd, 1, 0, 0, 0, N, Q, M, 0, Vm)),
+    Instruction('VADD.F32 <Vd>, <Vn>, <Vm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, sz, Vn, Vd, 1, 1, 0, 1, N, Q, M, 0, Vm), macro=Assign(F=True, size=0b10)),
     Instruction('VADD<c>.F64 <Dd>,<Dn>,<Dm>', (cond, 1, 1, 1, 0, 0, D, 1, 1, Vn, Vd, 1, 0, 1, sz, N, 0, M, 0, Vm)),
-    Instruction('VADDHN.<dt> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, size, Vn, Vd, 0, 1, 0, 0, N, 0, M, 0, Vm), size=[0b00, 0b01, 0b10]),
+    Instruction('VADDHN.<dt4> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, 0, 0, Vn, Vd, 0, 1, 0, 0, N, 0, M, 0, Vm), macro=Assign(size=1)),
+    Instruction('VADDHN.<dt4> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, 0, 1, Vn, Vd, 0, 1, 0, 0, N, 0, M, 0, Vm), macro=Assign(size=2)),
+    Instruction('VADDHN.<dt4> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, 1, 0, Vn, Vd, 0, 1, 0, 0, N, 0, M, 0, Vm), macro=Assign(size=3)),
     Instruction('VADDL.<dt> <Qd>,<Dn>,<Dm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 0, 0, 0, 0, N, 0, M, 0, Vm), size=[0b00, 0b01, 0b10]),
     Instruction('VADDW.<dt> <Qd>,<Qn>,<Dm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, size, Vn, Vd, 0, 0, 0, 1, N, 0, M, 0, Vm), size=[0b00, 0b01, 0b10]),
     Instruction('VAND <Vd>,<Vn>,<Vm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 0, 0, Vn, Vd, 0, 0, 0, 1, N, Q, M, 1, Vm)),
@@ -598,8 +604,12 @@ _table2 = [
     Instruction('VQRSHRUN.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 1, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VQRSHRN.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 1, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VQSHL.<dt> <Vd>,<Vm>,<Vn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 0, N, Q, M, 1, Vm)),
-    # Instruction('VQSHL.<type><size> <Qd>,<Qm>,#<imm>',  (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 0, 1, 1, op1, imm1_6, Q, M, 1, Vm)),
-    # Instruction('VQSHLU.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 1, op1, imm1_6, Q, M, 1, Vm)),
+    Instruction('VQSHL.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm3_3, imm3, Vd, 0, 1, 1, 1, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macros=[Assign(U=False), Imm7Process]),
+    Instruction('VQSHL.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm3_3, imm3, Vd, 0, 1, 1, 1, 1, Q, M, 1, Vm), macros=[Assign(U=False), Imm2Extract(1, 7, 6), Imm7Process]),
+    Instruction('VQSHLU.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm3_3, imm3, Vd, 0, 1, 1, 0, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macros=[Assign(U=False), Imm7Process]),
+    Instruction('VQSHLU.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm3_3, imm3, Vd, 0, 1, 1, 1, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macros=[Assign(U=True), Imm7Process]),
+    Instruction('VQSHLU.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 1, 0, 1, Q, M, 1, Vm), macros=[Assign(U=False), Imm2Extract(1, 7, 6), Imm7Process]),
+    Instruction('VQSHLU.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 1, 1, 1, Q, M, 1, Vm), macros=[Assign(U=True), Imm2Extract(1, 7, 6), Imm7Process]),
     Instruction('VQSHRN.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 0, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VQSHRUN.<type><size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 1, 0, 0, op1, 0, 0, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VQSUB.<dt> <Vd>,<Vn>,<Vm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 1, 0, N, Q, M, 1, Vm)),
@@ -613,26 +623,33 @@ _table2 = [
     Instruction('VREV64.<size> <Vd>,<Vm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 0, 0, Vd, 0, 0, 0, 0, 0, Q, M, 0, Vm)),
     Instruction('VRHADD.<dt> <Vd>,<Vn>,<Vm>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 0, 0, 1, N, Q, M, 0, Vm)),
     Instruction('VRSHL.<dt> <Vd>,<Vm>,<Vn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 1, N, Q, M, 0, Vm)),
-    # Instruction('VRSHR.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 0, imm1_6, Q, M, 1, Vm)),
+    Instruction('VRSHR.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm3_3, imm3, Vd, 0, 0, 1, 0, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macro=Imm7Process2),
+    Instruction('VRSHR.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 0, 1, Q, M, 1, Vm), macros=[Imm2Extract(1, 7, 6), Imm7Process2]),
     Instruction('VRSHRN.I<size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, 0, 0, 1, M, 1, Vm), imm6=range(0b001000, 2**6)),
     Instruction('VRSQRTE.<dt2u> <Vd>,<Vm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, size, 1, 1, Vd, 0, 1, 0, F, 1, Q, M, 0, Vm)),
     Instruction('VRSQRTS.F32 <Vd>,<Vn>,<Vm>', (1, 1, 1, 1, 0, 0, 1, 0, 0, D, 1, sz, Vn, Vd, 1, 1, 1, 1, N, Q, M, 1, Vm), macro=Assign(size=2, F=True)),
-    Instruction('VRSRA.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 1, imm1_6, Q, M, 1, Vm)),
+    Instruction('VRSRA.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm3_3, imm3, Vd, 0, 0, 1, 1, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macro=Imm7Process2),
+    Instruction('VRSRA.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 1, 1, 1, Q, M, 1, Vm), macros=[Imm2Extract(1, 7, 6), Imm7Process2]),
     Instruction('VRSUBHN.<dt4> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 0, 0, Vn, Vd, 0, 1, 1, 0, N, 0, M, 0, Vm), macro=Assign(size=1)),
     Instruction('VRSUBHN.<dt4> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 0, 1, Vn, Vd, 0, 1, 1, 0, N, 0, M, 0, Vm), macro=Assign(size=2)),
     Instruction('VRSUBHN.<dt4> <Dd>,<Qn>,<Qm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 0, Vn, Vd, 0, 1, 1, 0, N, 0, M, 0, Vm), macro=Assign(size=3)),
-    Instruction('VSHL.I<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 0, 1, 0, 1, imm1_6, Q, M, 1, Vm)),
+    Instruction('VSHL.<dt4> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm3_3, imm3, Vd, 0, 1, 0, 1, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macro=Imm7Process),
+    Instruction('VSHL.<dt4> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 0, 1, 0, 1, 1, Q, M, 1, Vm), macros=[Imm2Extract(1, 7, 6), Imm7Process]),
     Instruction('VSHL.<dt> <Vd>,<Vm>,<Vn>', (1, 1, 1, 1, 0, 0, 1, U, 0, D, size, Vn, Vd, 0, 1, 0, 0, N, Q, M, 0, Vm)),
     Instruction('VSHLL.<type><size> <Qd>,<Dm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 1, 0, 1, 0, 0, 0, M, 1, Vm), imm6=[_ for _ in xrange(0b001000, 2**6) if not _ >> 3 in (0b001, 0b010, 0b100)]),
     Instruction('VSHLL.<dt4> <Qd>,<Dm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, 0, 0, 1, 0, Vd, 0, 0, 1, 1, 0, 0, M, 0, Vm), macro=Assign(size=0, imm=8)),
     Instruction('VSHLL.<dt4> <Qd>,<Dm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, 0, 1, 1, 0, Vd, 0, 0, 1, 1, 0, 0, M, 0, Vm), macro=Assign(size=1, imm=16)),
     Instruction('VSHLL.<dt4> <Qd>,<Dm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, 1, 1, 1, 0, 1, 0, Vd, 0, 0, 1, 1, 0, 0, M, 0, Vm), macro=Assign(size=2, imm=32)),
-    Instruction('VSHR.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 0, imm1_6, Q, M, 1, Vm)),
+    Instruction('VSHR.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm3_3, imm3, Vd, 0, 0, 0, 0, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macro=Imm7Process2),
+    Instruction('VSHR.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 0, 1, Q, M, 1, Vm), macros=[Imm2Extract(1, 7, 6), Imm7Process2]),
     Instruction('VSHRN.I<size> <Dd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 0, 1, D, imm6, Vd, 1, 0, 0, 0, 0, 0, M, 1, Vm), imm6=range(0b001000, 2**6)),
-    Instruction('VSLI.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 1, imm1_6, Q, M, 1, Vm)),
+    Instruction('VSLI.<size> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm3_3, imm3, Vd, 0, 1, 0, 1, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macro=Imm7Process),
+    Instruction('VSLI.<size> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 1, 1, Q, M, 1, Vm), macros=[Imm2Extract(1, 7, 6), Imm7Process]),
     Instruction('VSQRT<c>.F64 <Dd>,<Dm>', (cond, 1, 1, 1, 0, 1, D, 1, 1, 0, 0, 0, 1, Vd, 1, 0, 1, sz, 1, 1, M, 0, Vm)),
-    Instruction('VSRA.<type><size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 1, imm1_6, Q, M, 1, Vm)),
-    Instruction('VSRI.<size> <Qd>,<Qm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 0, imm1_6, Q, M, 1, Vm)),
+    Instruction('VSRA.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm3_3, imm3, Vd, 0, 0, 0, 1, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macro=Imm7Process2),
+    Instruction('VSRA.<dt> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, U, 1, D, imm6, Vd, 0, 0, 0, 1, 1, Q, M, 1, Vm), macros=[Imm2Extract(1, 7, 6), Imm7Process2]),
+    Instruction('VSRI.<size> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm3_3, imm3, Vd, 0, 1, 0, 0, 0, Q, M, 1, Vm), imm3_3=range(1, 2**3), macro=Imm7Process2),
+    Instruction('VSRI.<size> <Vd>,<Vm>,#<imm>', (1, 1, 1, 1, 0, 0, 1, 1, 1, D, imm6, Vd, 0, 1, 0, 0, 1, Q, M, 1, Vm), macros=[Imm2Extract(1, 7, 6), Imm7Process2]),
     Instruction('VST1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0010, 0b0110, 0b0111, 0b1010]),
     Instruction('VST1.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 1, D, 0, 0, Rn, Vd, size, 0, 0, index_align, Rm)),
     Instruction('VST2.<size> <list>,[<Rn>{:<align>}]{!}', (1, 1, 1, 1, 0, 1, 0, 0, 0, D, 0, 0, Rn, Vd, simd_type, size, align, Rm), simd_type=[0b0011, 0b1000, 0b1001]),
