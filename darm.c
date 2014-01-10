@@ -923,7 +923,34 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             break;
 
         case STR_SIMDLIST:
-            // TODO
+            CHECK_RANGE(Vd-FP_BASE, "list base register", 32);
+            CHECK_FLAG(sz, "register size");
+
+            if(d->sz == B_UNSET) {
+                CHECK_RANGE(imm+d->Vd-FP_BASE, "register count", 33);
+                value = (d->Vd - FP_BASE) << 1;
+            }
+            else {
+                CHECK_RANGE(imm, "register count", 33);
+                value = d->Vd;
+            }
+
+            *out++ = '{';
+            if(d->sz == B_UNSET) {
+                APPEND(out, g_darm_vfp_reg[value]);
+                if(d->imm != 1) {
+                    *out++ = d->imm == 2 ? ',' : '-';
+                    APPEND(out, g_darm_vfp_reg[value + d->imm - 1]);
+                }
+            }
+            else {
+                APPEND(out, g_darm_registers[d->Vd]);
+                if(d->imm != 2) {
+                    *out++ = d->imm == 4 ? ',' : '-';
+                    APPEND(out, g_darm_registers[value + d->imm / 2 - 1]);
+                }
+            }
+            *out++ = '}';
             break;
 
         case STR_SIMDFLT:
