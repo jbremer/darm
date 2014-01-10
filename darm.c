@@ -215,6 +215,7 @@ static inline void _darm_init(darm_t *d, uint32_t insn)
     d->imm = 0;
     d->shift_type = 0;
     d->long_dest = B_UNSET;
+    d->simd_flt = 0.0;
 }
 
 // Disassembles any instruction according to the state machine and lookup
@@ -276,6 +277,20 @@ static int _darm_disassemble(darm_t *d, uint32_t insn,
             *(uint32_t *)((char *) d + sm[off]) = FP_BASE +
                 _extract_field(insn, sm[off+1], 4) +
                 _extract_field(insn, sm[off+2], 1) * 16;
+            off += 3;
+            break;
+
+        case SM_FPREG2:
+            if(d->sz == B_SET) {
+                *(uint32_t *)((char *) d + sm[off]) = FP_BASE +
+                    _extract_field(insn, sm[off+1], 4) +
+                    _extract_field(insn, sm[off+2], 1) * 16;
+            }
+            else {
+                *(uint32_t *)((char *) d + sm[off]) = FP_BASE +
+                    _extract_field(insn, sm[off+1], 4) * 2 +
+                    _extract_field(insn, sm[off+2], 1);
+            }
             off += 3;
             break;
 
@@ -477,8 +492,8 @@ int darm_string2(const darm_t *d, darm_string_t *str)
     while (next) {
         switch ((darm_string_opcode_t) *fmt) {
         case STR_RETN: case STR_S: case STR_cond: case STR_wide: case STR_dt:
-        case STR_EXCL: case STR_dt2: case STR_dt2u: case STR_dt3:
-        case STR_dt4: case STR_size:
+        case STR_EXCL: case STR_dt2: case STR_dt2u: case STR_dt2i:
+        case STR_dt3: case STR_dt4: case STR_dt5: case STR_size:
             break;
 
         case STR_SHIFT: case STR_SHIFT2:
@@ -532,6 +547,15 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             out += _append_imm(out, 8 << d->size);
             break;
 
+        case STR_dt2i:
+            CHECK_FLAG(F, "floating point");
+            CHECK_RANGE(size, "size", 4);
+
+            *out++ = '.';
+            *out++ = d->F == B_SET ? 'f' : 'i';
+            out += _append_imm(out, 8 << d->size);
+            break;
+
         case STR_dt3:
             CHECK_FLAG(op, "operation");
             CHECK_RANGE(cmode, "cmode", 16);
@@ -559,6 +583,11 @@ int darm_string2(const darm_t *d, darm_string_t *str)
         case STR_dt4:
             *out++ = '.', *out++ = 'i';
             out += _append_imm(out, 8 << d->size);
+            break;
+
+        case STR_dt5:
+            *out++ = '.', *out++ = 'f';
+            out += _append_imm(out, d->sz == B_SET ? 64 : 32);
             break;
 
         case STR_size:
@@ -838,6 +867,17 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             }
             break;
 
+        case STR_Vd2:
+            CHECK_FLAG(sz, "register size");
+
+            if(d->sz == B_SET) {
+                APPEND(out, g_darm_registers[d->Vd]);
+            }
+            else {
+                APPEND(out, g_darm_vfp_reg[d->Vd - FP_BASE]);
+            }
+            break;
+
         case STR_Vn: case STR_Vm:
             CHECK_FLAG(Q, "register size");
 
@@ -846,6 +886,16 @@ int darm_string2(const darm_t *d, darm_string_t *str)
             APPEND(out, d->Q == B_SET ?
                 g_darm_simd_reg[(value - FP_BASE) >> 1] :
                 g_darm_registers[value]);
+            break;
+
+        case STR_Vn2: case STR_Vm2:
+            CHECK_FLAG(sz, "register size");
+
+            value = fmt[-1] == STR_Vn2 ? d->Vn : d->Vm;
+
+            APPEND(out, d->sz == B_SET ?
+                g_darm_registers[value] :
+                g_darm_vfp_reg[value - FP_BASE]);
             break;
 
         case STR_FPREG_S:
@@ -870,6 +920,16 @@ int darm_string2(const darm_t *d, darm_string_t *str)
 
         case STR_FPSCR:
             APPEND(out, "fpscr");
+            break;
+
+        case STR_SIMDLIST:
+            // TODO
+            break;
+
+        case STR_SIMDFLT:
+            *out++ = '#';
+            // TODO precision
+            out += sprintf(out, "%f", d->simd_flt);
             break;
         }
     }

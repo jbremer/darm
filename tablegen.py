@@ -52,9 +52,10 @@ class InstructionFormat(object):
 
         dts = {'<dt>': 'dt',
                '<dt2>': 'dt2', 'F32': 'dt2', 'F64': 'dt2',
-               '<dt2u>': 'dt2u',
+               '<dt2u>': 'dt2u', '<dt2i>': 'dt2i',
                '<dt3>': 'dt3',
                '<dt4>': 'dt4',
+               '<dt5>': 'dt5',
                '<size>': 'size', '.8': 'size'}
 
         for k, v in dts.items():
@@ -76,6 +77,7 @@ class InstructionFormat(object):
 
         t = {
             '<registers>': ['STR_REGLIST'],
+            '<simd_list>': ['STR_SIMDLIST'],
             '<type> <Rs>': ['STR_SHIFT2'],
             '#<option>': ['STR_OPTION'],
             '#<shift>': ['STR_SHIFT'],
@@ -101,11 +103,11 @@ class InstructionFormat(object):
             '<rotation>': ['STR_rotate'],
             '<opc1>': ['STR_INT', 'O(opc1)'],
             '<opc2>': ['STR_INT', 'O(opc2)'],
-            '<Vd>': ['STR_Vd'],
-            '<Vn>': ['STR_Vn'],
-            '<Vm>': ['STR_Vm'],
+            '<Vd>': ['STR_Vd'], '<Vn>': ['STR_Vn'], '<Vm>': ['STR_Vm'],
+            '<Vd2>': ['STR_Vd2'], '<Vn2>': ['STR_Vn2'], '<Vm2>': ['STR_Vm2'],
             '#<simd_imm>': ['STR_SIMDIMM'],
             'FPSCR': ['STR_FPSCR'],
+            '#0.0': ['STR_SIMDFLT'],
         }
 
         t.update(dict((_, ['STR_IMM']) for _ in imms))
@@ -289,6 +291,16 @@ class FloatingPointRegister(BitPattern):
 
     def create(self, idx, sm, lut, fmt, bitsize):
         return sm.append('SM_FPREG', 'O(%s)' % self.name,
+                         bitsize-self.bitsize-idx, self.msb)
+
+
+class FloatingPointRegister2(BitPattern):
+    def __init__(self, bitsize, name, msb):
+        BitPattern.__init__(self, bitsize, name)
+        self.msb = msb
+
+    def create(self, idx, sm, lut, fmt, bitsize):
+        return sm.append('SM_FPREG2', 'O(%s)' % self.name,
                          bitsize-self.bitsize-idx, self.msb)
 
 

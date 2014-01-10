@@ -59,7 +59,9 @@ typedef enum _darm_sm_opcode_t {
     SM_EXTR, SM_EXTR2, SM_EXTR3,
 
     // Extracts a Floating Point register, which consists of five bytes.
-    SM_FPREG,
+    // Optionally, SM_FPREG2 handles single registers, which have a different
+    // layout, bitwise speaking.)
+    SM_FPREG, SM_FPREG2,
 
     // Extract an immediate. In addition to the bitsize, the extended version
     // also provides the bit index in the original encoding, and the bit index
@@ -85,7 +87,8 @@ typedef enum _darm_string_opcode_t {
     STR_SHIFT2, STR_ENDIAN, STR_MEM, STR_MEM2, STR_MEM3, STR_MEM4, STR_IMM2,
     STR_SIGNRM, STR_MEM2EX, STR_MEM3EX, STR_wide, STR_rotate, STR_size,
     STR_Vd, STR_Vn, STR_Vm, STR_FPREG_S, STR_FPREG_D, STR_FPREG_Q, STR_dt2u,
-    STR_SIMDIMM, STR_FPSCR,
+    STR_SIMDIMM, STR_FPSCR, STR_SIMDLIST, STR_dt5, STR_Vd2, STR_Vn2, STR_Vm2,
+    STR_dt2i, STR_SIMDFLT,
 } darm_string_opcode_t;
 
 #endif

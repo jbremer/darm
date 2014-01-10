@@ -137,8 +137,9 @@ typedef struct _darm_t {
     uint32_t        msr_mask, it_mask, first_cond;
 
     uint32_t        cmode, Q, size, align, index_align, T, a;
-    uint32_t        F, len, op, sz, B, simd_type, long_dest;
+    uint32_t        F, len, op, sz, B, simd_type, long_dest, with_zero;
     uint64_t        simd_imm;
+    double          simd_flt;
 
     // Internal format for generation of human-readable strings.
     const uint8_t   *format;
