@@ -77,7 +77,7 @@ class InstructionFormat(object):
 
         t = {
             '<registers>': ['STR_REGLIST'],
-            '<simd_list>': ['STR_SIMDLIST'],
+            '<simd_reglist>': ['STR_SIMDLIST'],
             '<type> <Rs>': ['STR_SHIFT2'],
             '#<option>': ['STR_OPTION'],
             '#<shift>': ['STR_SHIFT'],

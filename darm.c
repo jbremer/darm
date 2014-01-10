@@ -466,13 +466,13 @@ int darm_reglist(uint16_t reglist, char *out)
 
 #define CHECK_RANGE(field, name, max) \
     if(d->field >= max) { \
-        DPRINT("Invalid "#name" value: %d", d->field); \
+        DPRINT("Invalid "name" value: %d", d->field); \
         return -1; \
     }
 
 #define CHECK_FLAG(flag, name) \
     if(d->flag != B_UNSET && d->flag != B_SET) { \
-        DPRINT("Invalid "#name" value: %d", d->flag); \
+        DPRINT("Invalid "name" value: %d", d->flag); \
         return -1; \
     }
 
