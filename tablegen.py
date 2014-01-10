@@ -337,7 +337,7 @@ class Immediate(BitPattern):
                              bitsize-self.bitsize-idx, 0)
 
 
-class ScatteredImmediate(BitPattern):
+class ScatteredImmediate(Immediate):
     def __init__(self, bitsize, name, imm_idx):
         BitPattern.__init__(self, bitsize, name)
         self.imm_idx = imm_idx
@@ -558,25 +558,68 @@ class Table(object):
         self.bitsize = bitsize
         self.insns = insns
 
+        Assign = AssignMacro('Assign')
+
         self.root = self._init()
         for ins in self.insns:
             if not ins.hardcoded:
                 self._insert(ins)
                 continue
 
-            # When an instruction has a hardcoded field, then we pretend like
-            # each combination is a unique instruction. (In order to satisfy
-            # the tree, which wouldn't be able to determine the correct
-            # instruction encoding otherwise.)
-            assert len(ins.hardcoded) == 1
-            k, v = ins.hardcoded.items()[0]
-            for bits in v:
-                off = ins.field_index(k)
-                new_bits = list(ins.bits[:off])
-                new_bits += [(bits >> _) & 1
-                             for _ in xrange(ins.bits[off].bitsize)][::-1]
-                new_bits += ins.bits[off+1:]
-                self._insert(Instruction(ins.fmt.fmt, new_bits))
+            # When an instruction has one or more hardcoded field(s), then we
+            # pretend like each combination is a unique instruction. In order
+            # to satisfy the tree, which wouldn't be able to determine the
+            # correct instruction encoding otherwise.
+
+            def _desc_bit_index(a, b):
+                return ins.field_index(b[0]) - ins.field_index(a[0])
+
+            hardcoded = sorted(ins.hardcoded.items(), cmp=_desc_bit_index)
+            keys = [_[0] for _ in hardcoded]
+            values = [_[1] for _ in hardcoded]
+
+            for bits in itertools.product(*values):
+                # Propagate the macros set for this instruction.
+                macros = ins.macros[:]
+
+                # Create the instruction representation including the bits
+                # that will now be hardcoded.
+                new_bits = list(ins.bits[:])
+                for idx, k in enumerate(keys):
+                    off = ins.field_index(k)
+                    tmp_bits = new_bits[:off]
+                    tmp_bits += [(bits[idx] >> _) & 1
+                                 for _ in xrange(new_bits[off].bitsize)][::-1]
+                    tmp_bits += new_bits[off+1:]
+                    new_bits = tmp_bits
+
+                    # Now this particular bit has been hardcoded, we have to
+                    # assign it through the Assign opcode.
+                    if not isinstance(ins.bits[off], Immediate):
+                        # We insert this macro at the first spot, as other
+                        # macros which have already been defined might rely
+                        # on this macro. (And this macro is constant anyway.)
+                        macros.insert(0, Assign(**{k: bits[idx]}))
+
+                    # We have a small exception for immediates, as bits of
+                    # them can be hardcoded as well, but if they are, then
+                    # they shouldn't be assigned like normal fields, as it
+                    # might destroy other bits of the immediate which have
+                    # already been set.
+                    else:
+                        # Can only have one hardcoded field when there's an
+                        # immediate involved, for now.
+                        assert len(keys) == 1
+
+                        # Yes, hacky. Should be generalized later on.
+                        bit = ins.bits[off]
+                        bit_index = bitsize-bit.bitsize-ins.bitsize(off)
+                        args = [bit.bitsize, bit_index,
+                                getattr(bit, 'imm_idx', 0)]
+                        macros.insert(0, Macro('IMM2', args=args))
+
+                self._insert(Instruction(ins.fmt.fmt, new_bits,
+                                         macros=macros))
 
         self._process()
 
