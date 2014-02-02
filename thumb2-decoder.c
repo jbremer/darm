@@ -977,7 +977,7 @@ darm_instr_t thumb2_load_halfword_hints(darm_t *d, uint16_t w, uint16_t w2)
 
 darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2)
 {
-    uint32_t op1 = (w >> 7) & b11;
+    uint32_t op1 = (w >> 7) & b111;
     uint32_t op2 = (w2 >> 6) & 0x3f;
     uint32_t Rn = w & b1111;
 
@@ -986,10 +986,13 @@ darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2)
     d->instr_flag_type = T_THUMB2_NO_FLAG;
 
     if((op1 & 2) == 0 && Rn == b1111) {
-        d->instr_type = T_THUMB2_RT_REG;
+        if ((op1 & 4) == 0)
+            d->instr_type = T_THUMB2_RN_RT_REG; // immediate
+        else
+            d->instr_type = T_THUMB2_RT_REG;    // literal
         d->instr_imm_type = T_THUMB2_IMM12;
         d->instr_flag_type = T_THUMB2_U_FLAG;
-        return I_LDR; // literal
+        return I_LDR;
     }
     else if(op1 == 1 && Rn != b1111) {
         d->instr_imm_type = T_THUMB2_IMM12;
