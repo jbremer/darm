@@ -320,7 +320,7 @@ static int thumb_disasm(darm_t *d, uint16_t w)
         d->Rm = PC;
         d->U = B_SET;
         d->I = B_SET;
-        d->imm = ((w >> 2) & (b11111 << 1)) | ((w >> 5) & (1 << 6));
+        d->imm = ((w >> 2) & (b11111 << 1)) | ((w >> 3) & (1 << 6));
         return 0;
     }
     return -1;
