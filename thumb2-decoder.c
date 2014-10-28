@@ -984,6 +984,7 @@ darm_instr_t thumb2_load_word(darm_t *d, uint16_t w, uint16_t w2)
     d->instr_type = T_THUMB2_RN_RT_REG;
     d->instr_imm_type = T_THUMB2_IMM8;
     d->instr_flag_type = T_THUMB2_NO_FLAG;
+    d->Rn = Rn;
 
     if((op1 & 2) == 0 && Rn == b1111) {
         d->instr_type = T_THUMB2_RT_REG;
