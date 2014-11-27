@@ -267,7 +267,7 @@ class Darm:
     def __str__(self):
         x = _DarmStr()
         if _lib.darm_str2(self.d, byref(x), True) == 0:
-            return x.total
+            return x.total.decode('ascii')
         return ''
 
 
