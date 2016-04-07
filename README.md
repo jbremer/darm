@@ -3,6 +3,8 @@
 A light-weight and efficient ARMv7/Thumb/Thumb2 disassembler written in C with
 Python bindings. VFP/Neon/SIMD (it's all the same) support is upcoming!
 
+**Warning:** project is no longer maintained, a better alternative might be [capstone](http://www.capstone-engine.org/).
+
 # Example code
 
 Using the *darm* library is fairly straightforward - just call the right
